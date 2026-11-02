@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Obsidian Luxury (Default Flagship) */
+    --background: #0A0A0C;
+    --foreground: #FAFAFA;
+    --card: #141418;
+    --card-foreground: #F4F4F5;
+    --popover: #141418;
+    --popover-foreground: #F4F4F5;
+    --primary: #D4AF37;
+    --primary-foreground: #0A0A0C;
+    --secondary: #1F2027;
+    --secondary-foreground: #FAFAFA;
+    --muted: #1A1B22;
+    --muted-foreground: #A1A1AA;
+    --accent: #26262F;
+    --accent-foreground: #D4AF37;
+    --destructive: #EF4444;
+    --destructive-foreground: #FFFFFF;
+    --border: #26262F;
+    --input: #26262F;
+    --ring: #D4AF37;
+    --radius: 0.5rem;
+  }
+
+  [data-theme="ivory"] {
+    --background: #FDFBF7;
+    --foreground: #18181B;
+    --card: #FFFFFF;
+    --card-foreground: #18181B;
+    --popover: #FFFFFF;
+    --popover-foreground: #18181B;
+    --primary: #8B4513;
+    --primary-foreground: #FFFFFF;
+    --secondary: #F4EFEA;
+    --secondary-foreground: #292524;
+    --muted: #F5F1EC;
+    --muted-foreground: #78716C;
+    --accent: #EFE8E0;
+    --accent-foreground: #8B4513;
+    --destructive: #DC2626;
+    --destructive-foreground: #FFFFFF;
+    --border: #E6DFD5;
+    --input: #E6DFD5;
+    --ring: #8B4513;
+  }
+
+  [data-theme="aurora"] {
+    --background: #080A12;
+    --foreground: #F8FAFC;
+    --card: #0F1322;
+    --card-foreground: #F8FAFC;
+    --popover: #0F1322;
+    --popover-foreground: #F8FAFC;
+    --primary: #0284C7;
+    --primary-foreground: #FFFFFF;
+    --secondary: #181F38;
+    --secondary-foreground: #F8FAFC;
+    --muted: #13192F;
+    --muted-foreground: #94A3B8;
+    --accent: #1E294B;
+    --accent-foreground: #38BDF8;
+    --destructive: #F43F5E;
+    --destructive-foreground: #FFFFFF;
+    --border: #1E2846;
+    --input: #1E2846;
+    --ring: #0284C7;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  ::selection {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+  }
+}

@@ -1,0 +1,111 @@
+services:
+  # 1. Primary PostgreSQL 16 Instance
+  postgres:
+    image: postgres:16-alpine
+    container_name: tapzio-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: tapzio_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_root_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/docker/postgres-init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d tapzio_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. PgBouncer Connection Pooler (Transaction Mode)
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    container_name: tapzio-pgbouncer
+    restart: unless-stopped
+    ports:
+      - "6432:6432"
+    environment:
+      DB_USER: tapzio_app
+      DB_PASSWORD: tapzio_app_pass
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: tapzio_db
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 5000
+      DEFAULT_POOL_SIZE: 25
+      RESERVE_POOL_SIZE: 5
+      SERVER_RESET_QUERY: "DISCARD ALL"
+      AUTH_TYPE: scram-sha-256
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # 3. Redis In-Memory Cache & Message Broker
+  redis:
+    image: redis:7.2-alpine
+    container_name: tapzio-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 4. MinIO S3-Compatible Local Object Storage
+  minio:
+    image: minio/minio:latest
+    container_name: tapzio-minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 5. MinIO Initialization (Create Public Media Bucket)
+  minio-init:
+    image: minio/mc:latest
+    container_name: tapzio-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add myminio http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc mb --ignore-existing myminio/tapzio-media;
+      /usr/bin/mc anonymous set download myminio/tapzio-media;
+      exit 0;
+      "
+
+  # 6. Mailpit Transactional Email Testing UI
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: tapzio-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025" # SMTP port
+      - "8025:8025" # Web UI
+    environment:
+      MP_MAX_MESSAGES: 500
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+

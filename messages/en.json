@@ -1,0 +1,50 @@
+{
+  "common": {
+    "saveContact": "Save Contact",
+    "exchangeContact": "Exchange Contact",
+    "connect": "Connect",
+    "share": "Share",
+    "login": "Sign In",
+    "register": "Create Account",
+    "logout": "Sign Out",
+    "cancel": "Cancel",
+    "save": "Save Changes",
+    "delete": "Delete",
+    "edit": "Edit",
+    "email": "Email Address",
+    "phone": "Phone Number",
+    "password": "Password",
+    "loading": "Loading...",
+    "poweredBy": "Powered by {brandName}"
+  },
+  "auth": {
+    "welcomeBack": "Welcome Back",
+    "signInSubtitle": "Access your digital identity and network cockpit",
+    "createAccount": "Create an Account",
+    "createAccountSubtitle": "Launch your executive digital presence in minutes",
+    "verifyOtp": "Verify Security Code",
+    "otpSubtitle": "Enter the 6-digit code sent to your device",
+    "sendOtp": "Send Code",
+    "resendOtp": "Resend Code",
+    "enterOtp": "6-digit OTP",
+    "verify": "Verify & Continue"
+  },
+  "nfc": {
+    "cardReady": "Card Ready for Activation",
+    "enterSecretCode": "Enter the 6-digit activation code printed on your welcome sleeve",
+    "activate": "Activate Card",
+    "activationSuccess": "Card linked successfully to your profile!",
+    "invalidCode": "Invalid or expired activation code",
+    "inactiveCard": "This card has not yet been activated or has been paused."
+  },
+  "profile": {
+    "directExchange": "Direct Exchange",
+    "addToContacts": "Add to Contacts",
+    "about": "About",
+    "contact": "Contact",
+    "socials": "Socials",
+    "company": "Company",
+    "location": "Location"
+  }
+}
+

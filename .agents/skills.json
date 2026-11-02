@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json.schemastore.org/skills.json",
+  "version": "1.0.0",
+  "skills": [
+    {
+      "id": "backend-development",
+      "name": "Backend Development",
+      "description": "Next.js App Router API design, domain service orchestration, Zod schema validation, server-side authorization, error handling, rate limiting, and BullMQ background workers. Activate when implementing API routes, domain services, or backend tasks.",
+      "path": ".agents/skills/backend-development/SKILL.md",
+      "type": "specialist"
+    },
+    {
+      "id": "composio",
+      "name": "Composio",
+      "description": "Build AI agent integrations with Composio (composio.dev). Use when the user wants to connect AI agents to third-party apps (GitHub, Gmail, Slack, Notion, Salesforce, etc.), set up OAuth authentication for tools, create Composio sessions, use Composio tools natively or via MCP, set up event triggers, or build multi-app agent workflows. Triggers on imports from composio or @composio or mentions of composio.",
+      "path": ".agents/skills/composio/SKILL.md",
+      "type": "specialist"
+    },
+    {
+      "id": "cost-reducer",
+      "name": "Cost Reducer",
+      "description": "Reduce cloud, infrastructure, and operational costs while maintaining performance. Use when writing database queries, configuring cloud resources, optimizing bundles, setting up caching, choosing between services, sizing instances, configuring CDN, managing storage, or reviewing code for cost inefficiencies. Covers AWS/GCP/Vercel pricing, database optimization, serverless tuning, image pipelines, observability costs, and FinOps practices.",
+      "path": ".agents/skills/cost-reducer/SKILL.md",
+      "type": "specialist"
+    },
+    {
+      "id": "create-skill",
+      "name": "Create Skill",
+      "description": "Create high-quality Antigravity and Claude Code custom skills and slash commands. Use when the user wants to create a new skill, build a custom command, make a slash command, or add a reusable workflow.",
+      "path": ".agents/skills/create-skill/SKILL.md",
+      "type": "specialist"
+    },
+    {
+      "id": "customer-support",
+      "name": "Customer Support",
+      "description": "Handle customer support tasks professionally. Use when drafting support responses, analyzing customer issues, triaging tickets, writing help articles, creating macros/templates, reviewing support conversations for quality, or building support workflows. Covers email replies, live chat, ticket management, escalation, tone calibration, and CSAT optimization.",
+      "path": ".agents/skills/customer-support/SKILL.md",
+      "type": "specialist"
+    },
+    {
+      "id": "database-engineering",
+      "name": "Database Engineering",
+      "description": "PostgreSQL 16, Drizzle ORM, schema design, RLS multi-tenant isolation, transaction-mode PgBouncer pooling safety, migrations, and query indexing. Activate when modifying schemas, migrations, or database queries.",
+      "path": ".agents/skills/database-engineering/SKILL.md",
+      "type": "specialist"
+    },
+    {
+      "id": "devops-and-deployment",
+      "name": "Devops And Deployment",
+      "description": "Containerization with Docker Compose, India VPS deployment via Coolify/Dokploy, GitHub Actions CI/CD, persistent worker orchestration, health probes, and backup strategies. Activate when managing infrastructure, containers, or CI pipelines.",
+      "path": ".agents/skills/devops-and-deployment/SKILL.md",
+      "type": "specialist"
+    },
+    {
+      "id": "frontend-design",
+      "name": "Frontend Design",
+      "description": "Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, or applications. Generates creative, polished code that avoids generic AI aesthetics.",
+      "path": ".agents/skills/frontend-design/SKILL.md",
+      "type": "specialist"
+    },
+    {
+      "id": "frontend-development",
+      "name": "Frontend Development",
+      "description": "Next.js App Router, React 19, Tailwind CSS, shadcn/ui (Radix), Obsidian Luxury design system, Zustand state management, dnd-kit builder, responsive mobile-first UI, and accessibility. Activate when developing UI components, pages, or client state.",
+      "path": ".agents/skills/frontend-development/SKILL.md",
+      "type": "specialist"
+    },
+    {
+      "id": "know-me",
+      "name": "Know Me",
+      "description": "Learn about the user across sessions. Observe preferences, habits, corrections, and context. Save to memory topic files. Reference stored knowledge to personalize responses. Auto-activates when the user shares personal info, corrects Claude, or expresses preferences.",
+      "path": ".agents/skills/know-me/SKILL.md",
+      "type": "specialist"
+    },
+    {
+      "id": "n8n",
+      "name": "N8n",
+      "description": "Build n8n workflow automations, custom nodes, and integrations. Use when the user wants to create n8n workflows, build custom n8n nodes, write n8n expressions, configure n8n triggers, handle n8n errors, set up webhook automations, or work with n8n's API. Triggers on mentions of n8n, workflow automation with n8n, or imports from n8n-workflow.",
+      "path": ".agents/skills/n8n/SKILL.md",
+      "type": "specialist"
+    },
+    {
+      "id": "nfc-and-qr-engineering",
+      "name": "Nfc And Qr Engineering",
+      "description": "NFC NDEF encoding, dynamic unguessable token redirects, card activation security, hardware materials (metal, wood, PVC), anti-metal ferrite shielding, QR code generation, and manufacturer pre-encoding pipelines. Activate when working on NFC or QR features.",
+      "path": ".agents/skills/nfc-and-qr-engineering/SKILL.md",
+      "type": "specialist"
+    },
+    {
+      "id": "performance-engineering",
+      "name": "Performance Engineering",
+      "description": "Performance optimization, k6 load testing, sub-50ms NFC redirect caching, Redis cache-aside patterns, Core Web Vitals, and database indexing. Activate when optimizing latency, conducting load tests, or debugging bottlenecks.",
+      "path": ".agents/skills/performance-engineering/SKILL.md",
+      "type": "specialist"
+    },
+    {
+      "id": "project-architecture",
+      "name": "Project Architecture",
+      "description": "Enterprise software architecture, domain boundary design, and folder structure governance for scaling from MVP to high-scale production systems. Always activate before modifying or creating application folder structures.",
+      "path": ".agents/skills/project-architecture/SKILL.md",
+      "type": "foundational"
+    },
+    {
+      "id": "researcher",
+      "name": "Researcher",
+      "description": "Deep research on any topic using web search, multiple sources, and synthesis. Use when the user wants to research a topic, investigate a question, compare technologies, understand a concept deeply, find best practices, or needs a well-sourced analysis. Triggers on \"research\", \"investigate\", \"deep dive\", \"compare\", \"what are the best\", \"pros and cons\", \"how does X work\".",
+      "path": ".agents/skills/researcher/SKILL.md",
+      "type": "specialist"
+    },
+    {
+      "id": "scalability",
+      "name": "Scalability",
+      "description": "Design and build scalable software systems. Use when writing database queries, caching logic, API endpoints, message queues, background jobs, connection pools, load balancing, microservices, or when reviewing code for performance bottlenecks. Covers database scaling, caching strategies, async processing, API design for scale, concurrency, frontend performance, observability, and infrastructure patterns.",
+      "path": ".agents/skills/scalability/SKILL.md",
+      "type": "specialist"
+    },
+    {
+      "id": "security",
+      "name": "Security",
+      "description": "Secure web and desktop application development. Use when writing authentication, authorization, API endpoints, form handling, database queries, file uploads, Electron apps, Tauri apps, IPC handlers, cryptography, secrets management, security headers, input validation, or when reviewing code for vulnerabilities. Covers OWASP Top 10, XSS, CSRF, SQL injection, SSRF, command injection, path traversal, and desktop app security.",
+      "path": ".agents/skills/security/SKILL.md",
+      "type": "specialist"
+    },
+    {
+      "id": "security-auditing",
+      "name": "Security Auditing",
+      "description": "OWASP Top 10 prevention, multi-tenant IDOR protection, Better Auth 2FA, session revocation, rate-limiting defenses, secret redaction, and DPDP privacy compliance. Activate when reviewing security-critical paths or conducting audits.",
+      "path": ".agents/skills/security-auditing/SKILL.md",
+      "type": "specialist"
+    },
+    {
+      "id": "self-healing",
+      "name": "Self Healing",
+      "description": "Continuously improve agent effectiveness by recognizing patterns, saving memory, creating skills, and refining project knowledge. Use when the agent notices repeated workflows, encounters a problem it solved before, wants to save something for future sessions, needs to create a reusable skill, or when the user asks Claude to improve itself, learn, remember, or get smarter over time.",
+      "path": ".agents/skills/self-healing/SKILL.md",
+      "type": "specialist"
+    },
+    {
+      "id": "software-engineering",
+      "name": "Software Engineering",
+      "description": "Principal engineering standards, Clean Code, SOLID, defensive error handling, testability, and code quality review. Always activate on every coding and refactoring task.",
+      "path": ".agents/skills/software-engineering/SKILL.md",
+      "type": "foundational"
+    },
+    {
+      "id": "testing-and-quality",
+      "name": "Testing And Quality",
+      "description": "Comprehensive test engineering using Vitest, Playwright, architecture assertion tests, and test fixture management. Activate when writing tests, fixing regressions, or verifying milestone acceptance criteria.",
+      "path": ".agents/skills/testing-and-quality/SKILL.md",
+      "type": "specialist"
+    },
+    {
+      "id": "trigger-dev",
+      "name": "Trigger Dev",
+      "description": "Build Trigger.dev background jobs, automations, and workflows in TypeScript. Use when the user wants to create tasks, scheduled jobs, AI agent workflows, queued background processing, cron jobs, or any long-running async work with Trigger.dev. Triggers on imports from @trigger.dev/sdk or mentions of trigger.dev.",
+      "path": ".agents/skills/trigger-dev/SKILL.md",
+      "type": "specialist"
+    }
+  ]
+}
