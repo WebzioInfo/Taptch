@@ -1,9 +1,9 @@
 import { NextRequest } from 'next/server';
-import { z } from 'zod';
 import { getActorFromRequest } from '@/lib/auth/session';
 import {
   getProfileWithDetails,
   updateProfile,
+  updateProfileSchema,
   ProfileNotFoundError,
   UnauthorizedProfileAccessError,
 } from '@/modules/profiles';
@@ -11,16 +11,6 @@ import { TemplatePlanRequirementError } from '@/modules/templates';
 import { apiSuccess, apiError, handleApiError } from '@/lib/api/response';
 
 export const dynamic = 'force-dynamic';
-
-const updateProfileSchema = z.object({
-  displayName: z.string().min(1).max(128).optional(),
-  headline: z.string().max(255).optional(),
-  bio: z.string().optional(),
-  avatarUrl: z.string().optional(),
-  coverUrl: z.string().optional(),
-  templateId: z.string().optional(),
-  themeConfig: z.record(z.unknown()).optional(),
-});
 
 export async function GET(
   request: NextRequest,

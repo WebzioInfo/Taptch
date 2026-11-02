@@ -59,7 +59,7 @@ describe('Profiles Domain Module', () => {
       expect(profile).toBeDefined();
       expect(profile.slug).toBe(slug);
       expect(profile.displayName).toBe('John Mathew');
-      expect(profile.status).toBe('draft');
+      expect(profile.status.toUpperCase()).toBe('DRAFT');
 
       const details = await getProfileWithDetails(actor, profile.id);
       expect(details.sections.length).toBeGreaterThanOrEqual(10);
@@ -112,15 +112,15 @@ describe('Profiles Domain Module', () => {
       expect(updated.headline).toBe('VP of Product Engineering');
 
       const published = await publishProfile(actor, profile.id);
-      expect(published.status).toBe('published');
+      expect(published.status.toLowerCase()).toBe('published');
       expect(published.publishedJson).toBeDefined();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((published.publishedJson as any).displayName).toBe('Jane Doe');
     });
   });
 
-  describe('Multi-Business and Catalogue Entitlement Enforcement', () => {
-    it('enforces max_businesses limit on free tier (max = 0)', async () => {
+  describe('Multi-Business and Catalogue Saving (Unrestricted Draft Mode)', () => {
+    it('allows saving multiple businesses in draft mode without plan blockage', async () => {
       const actor = await createTestActor(`user_biz_${Date.now()}`);
       const slug = `biz-limit-${Date.now()}`;
       const profile = await createProfile(actor, {
@@ -128,15 +128,14 @@ describe('Profiles Domain Module', () => {
         displayName: 'Biz Owner',
       });
 
-      // Free plan has max_businesses = 0
-      await expect(
-        addBusiness(actor, profile.id, {
-          name: 'First Company Ltd',
-        })
-      ).rejects.toThrow(EntitlementLimitExceededError);
+      const biz = await addBusiness(actor, profile.id, {
+        name: 'First Company Ltd',
+      });
+      expect(biz.name).toBe('First Company Ltd');
+      expect(biz.profileId).toBe(profile.id);
     });
 
-    it('enforces max_products limit on free tier (max = 0)', async () => {
+    it('allows saving catalogue items in draft mode without plan blockage', async () => {
       const actor = await createTestActor(`user_prod_${Date.now()}`);
       const slug = `prod-limit-${Date.now()}`;
       const profile = await createProfile(actor, {
@@ -144,13 +143,12 @@ describe('Profiles Domain Module', () => {
         displayName: 'Store Owner',
       });
 
-      // Free plan has max_products = 0
-      await expect(
-        addCatalogueItem(actor, profile.id, {
-          type: 'product',
-          title: 'Smart NFC Card',
-        })
-      ).rejects.toThrow(EntitlementLimitExceededError);
+      const item = await addCatalogueItem(actor, profile.id, {
+        type: 'product',
+        title: 'Smart NFC Card',
+      });
+      expect(item.title).toBe('Smart NFC Card');
+      expect(item.profileId).toBe(profile.id);
     });
   });
 });

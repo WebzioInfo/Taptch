@@ -15,6 +15,7 @@ export interface ApiEnvelope<T = unknown> {
     totalCount?: number;
     hasMore?: boolean;
     requestId?: string;
+    totalBytes?: number;
   };
 }
 
@@ -56,11 +57,19 @@ export function apiError(
 
 export function handleApiError(error: unknown, requestId?: string): NextResponse<ApiEnvelope<null>> {
   if (error instanceof ZodError) {
+    const fieldErrors = error.flatten().fieldErrors;
+    const formattedFields = Object.entries(fieldErrors)
+      .map(([field, msgs]) => `${field}: ${msgs?.join(', ')}`)
+      .join('; ');
+    const message = formattedFields
+      ? `Validation failed: ${formattedFields}`
+      : 'The submitted payload did not match the required schema';
+
     return apiError(
       'VALIDATION_FAILED',
-      'The submitted payload did not match the required schema',
+      message,
       400,
-      error.flatten().fieldErrors,
+      fieldErrors,
       requestId
     );
   }

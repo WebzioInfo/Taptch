@@ -8,3 +8,5 @@ export * from './profiles';
 export * from './cards';
 export * from './leads';
 export * from './orders';
+export * from './media';
+export * from './publishing';

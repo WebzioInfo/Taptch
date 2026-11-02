@@ -14,6 +14,13 @@ import {
   Loader2,
   RefreshCw,
   Palette,
+  FileCheck2,
+  Image as ImageIcon,
+  Phone,
+  MessageCircle,
+  ExternalLink,
+  Check,
+  X,
 } from 'lucide-react';
 
 interface AdminStats {
@@ -22,6 +29,27 @@ interface AdminStats {
   totalCards: number;
   totalLeads: number;
   totalOrders: number;
+}
+
+interface PublicationItem {
+  id: string;
+  profileId: string;
+  userId: string;
+  status: string;
+  requestedPlanId: string | null;
+  adminNotes: string | null;
+  rejectionReason: string | null;
+  correctionsRequested: string | null;
+  contactPhone: string | null;
+  contactWhatsapp: string | null;
+  createdAt: string;
+  profileName: string;
+  profileSlug: string;
+  profileType: string;
+  profileStatus: string;
+  templateId: string;
+  customerName: string;
+  customerEmail: string;
 }
 
 interface AdminOrder {
@@ -55,39 +83,105 @@ interface TemplateItem {
   isFeatured: boolean;
 }
 
+interface MediaItem {
+  id: string;
+  ownerName: string | null;
+  ownerEmail: string | null;
+  profileSlug: string | null;
+  resourceType: string;
+  mediaCategory: string;
+  cloudinaryPublicId: string;
+  secureUrl: string;
+  format: string | null;
+  fileSize: number | null;
+  width: number | null;
+  height: number | null;
+  createdAt: string;
+}
+
 export default function SuperAdminPage() {
   const { data: session, isPending: sessionLoading } = useSession();
   const [stats, setStats] = React.useState<AdminStats | null>(null);
+  const [publications, setPublications] = React.useState<PublicationItem[]>([]);
   const [orders, setOrders] = React.useState<AdminOrder[]>([]);
   const [templates, setTemplates] = React.useState<TemplateItem[]>([]);
+  const [mediaList, setMediaList] = React.useState<MediaItem[]>([]);
+  const [mediaStats, setMediaStats] = React.useState<{ totalCount: number; totalBytes: number }>({ totalCount: 0, totalBytes: 0 });
   const [loading, setLoading] = React.useState(true);
-  const [activeTab, setActiveTab] = React.useState<'orders' | 'templates' | 'system'>('orders');
+  const [activeTab, setActiveTab] = React.useState<'publications' | 'orders' | 'templates' | 'media'>('publications');
+  const [reviewingId, setReviewingId] = React.useState<string | null>(null);
   const [updatingOrderId, setUpdatingOrderId] = React.useState<string | null>(null);
+
+  // Form state for publication approval
+  const [planSelections, setPlanSelections] = React.useState<Record<string, string>>({});
+  const [validitySelections, setValiditySelections] = React.useState<Record<string, number>>({});
+  const [paymentSelections, setPaymentSelections] = React.useState<Record<string, string>>({});
 
   const isSuperAdmin = (session?.user as { role?: string } | undefined)?.role === 'super_admin';
 
   const loadAdminData = React.useCallback(async () => {
     try {
       setLoading(true);
-      const [statsRes, ordersRes, templatesRes] = await Promise.all([
+      const [statsRes, pubRes, ordersRes, templatesRes, mediaRes] = await Promise.all([
         fetch('/api/v1/admin/stats').then((r) => r.json()).catch(() => ({ data: null })),
+        fetch('/api/v1/admin/publications').then((r) => r.json()).catch(() => ({ data: [] })),
         fetch('/api/v1/admin/orders').then((r) => r.json()).catch(() => ({ data: [] })),
         fetch('/api/v1/templates?activeOnly=false').then((r) => r.json()).catch(() => ({ data: [] })),
+        fetch('/api/v1/admin/media').then((r) => r.json()).catch(() => ({ data: [], meta: { totalCount: 0, totalBytes: 0 } })),
       ]);
 
       if (statsRes.data) setStats(statsRes.data);
+      if (pubRes.data) setPublications(pubRes.data);
       if (ordersRes.data) setOrders(ordersRes.data);
       if (templatesRes.data) setTemplates(templatesRes.data);
+      if (mediaRes.data) setMediaList(mediaRes.data);
+      if (mediaRes.meta) setMediaStats({ totalCount: mediaRes.meta.totalCount, totalBytes: mediaRes.meta.totalBytes });
+    } catch (err) {
+      console.error('Failed to load admin data:', err);
     } finally {
       setLoading(false);
     }
   }, []);
 
   React.useEffect(() => {
-    if (session?.user) {
-      loadAdminData();
+    loadAdminData();
+  }, [loadAdminData]);
+
+  const handleReviewPublication = async (
+    requestId: string,
+    action: 'APPROVE' | 'REJECT' | 'REQUEST_CORRECTIONS' | 'SUSPEND' | 'UNPUBLISH'
+  ) => {
+    try {
+      setReviewingId(requestId);
+      const planId = planSelections[requestId] || 'nano';
+      const validDays = validitySelections[requestId] || 365;
+      const paymentStatus = paymentSelections[requestId] || 'NOT_RECORDED';
+
+      const res = await fetch(`/api/v1/admin/publications/${requestId}/review`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action,
+          planId,
+          validDays,
+          paymentStatus,
+          adminNotes: `Action ${action} executed by Super Admin`,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error?.message || 'Review failed');
+      }
+
+      await loadAdminData();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      alert(`Review action failed: ${msg}`);
+    } finally {
+      setReviewingId(null);
     }
-  }, [session, loadAdminData]);
+  };
 
   const handleUpdateOrder = async (orderId: string, updates: { orderStatus?: string; paymentStatus?: string; trackingNumber?: string }) => {
     try {
@@ -98,11 +192,10 @@ export default function SuperAdminPage() {
         body: JSON.stringify(updates),
       });
 
-      if (res.ok) {
-        setOrders((prev) =>
-          prev.map((o) => (o.id === orderId ? { ...o, ...updates } : o))
-        );
-      }
+      if (!res.ok) throw new Error('Failed to update order');
+      await loadAdminData();
+    } catch (err) {
+      console.error(err);
     } finally {
       setUpdatingOrderId(null);
     }
@@ -110,131 +203,354 @@ export default function SuperAdminPage() {
 
   if (sessionLoading) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
 
   if (!isSuperAdmin) {
     return (
-      <div className="max-w-md mx-auto my-16 p-6 rounded-2xl border border-destructive/30 bg-destructive/10 text-center space-y-4">
-        <ShieldAlert className="h-12 w-12 text-destructive mx-auto" />
-        <h2 className="text-xl font-bold text-foreground">Access Restricted</h2>
-        <p className="text-xs text-muted-foreground">
-          The Super Admin control portal requires authenticated system administrator privileges.
+      <div className="max-w-xl mx-auto my-16 p-8 text-center bg-card/60 border border-destructive/30 rounded-2xl">
+        <ShieldAlert className="w-12 h-12 text-destructive mx-auto mb-4" />
+        <h2 className="text-xl font-bold mb-2">Access Denied</h2>
+        <p className="text-muted-foreground text-sm mb-6">
+          This portal is restricted to authorized platform administrators.
         </p>
-        <Link href="/dashboard">
-          <Button variant="outline" size="sm">
-            Return to Dashboard
-          </Button>
-        </Link>
+        <Button asChild variant="outline">
+          <Link href="/dashboard">Return to Dashboard</Link>
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto pb-12">
-      {/* Admin Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-border/60">
+    <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+      {/* Top Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/40 pb-6">
         <div>
-          <div className="flex items-center gap-2.5">
-            <ShieldCheck className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-              Platform Super Admin Control
-            </h1>
-            <Badge variant="gold" className="text-xs">
-              Root Authority
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">{brandConfig.name} Executive Cockpit</h1>
+            <Badge variant="gold" className="uppercase text-[10px] tracking-wider">
+              <ShieldCheck className="w-3 h-3 mr-1 inline" /> Admin Control
             </Badge>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            Global management of {brandConfig.name} users, physical hardware fulfillment, and system settings.
+          <p className="text-sm text-muted-foreground mt-1">
+            Controlled publishing, commercial plan assignments, Cloudinary media, and physical card fulfillment.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm" onClick={loadAdminData} className="gap-2 text-xs">
-            <RefreshCw className="h-3.5 w-3.5" />
-            <span>Refresh</span>
-          </Button>
-        </div>
+        <Button onClick={loadAdminData} disabled={loading} variant="outline" size="sm" className="gap-2 self-start">
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          Refresh Data
+        </Button>
       </div>
 
-      {/* KPI Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card className="border-border/80 bg-card/60 p-4 space-y-1">
-          <div className="text-xs text-muted-foreground">Total Users</div>
-          <div className="text-2xl font-bold text-foreground">{stats?.totalUsers ?? '...'}</div>
+      {/* KPI Counters */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        <Card className="bg-card/40 border-border/60 p-4">
+          <div className="text-xs text-muted-foreground font-medium">Platform Users</div>
+          <div className="text-2xl font-bold text-foreground mt-1">{stats?.totalUsers ?? '—'}</div>
         </Card>
-        <Card className="border-border/80 bg-card/60 p-4 space-y-1">
-          <div className="text-xs text-muted-foreground">Profiles</div>
-          <div className="text-2xl font-bold text-foreground">{stats?.totalProfiles ?? '...'}</div>
+        <Card className="bg-card/40 border-border/60 p-4">
+          <div className="text-xs text-muted-foreground font-medium">Digital Profiles</div>
+          <div className="text-2xl font-bold text-foreground mt-1">{stats?.totalProfiles ?? '—'}</div>
         </Card>
-        <Card className="border-border/80 bg-card/60 p-4 space-y-1">
-          <div className="text-xs text-muted-foreground">Active NFC Cards</div>
-          <div className="text-2xl font-bold text-foreground">{stats?.totalCards ?? '...'}</div>
+        <Card className="bg-card/40 border-border/60 p-4">
+          <div className="text-xs text-muted-foreground font-medium">Pending Requests</div>
+          <div className="text-2xl font-bold text-primary mt-1">
+            {publications.filter((p) => p.status === 'PENDING_PUBLICATION').length}
+          </div>
         </Card>
-        <Card className="border-border/80 bg-card/60 p-4 space-y-1">
-          <div className="text-xs text-muted-foreground">Captured Leads</div>
-          <div className="text-2xl font-bold text-foreground">{stats?.totalLeads ?? '...'}</div>
+        <Card className="bg-card/40 border-border/60 p-4">
+          <div className="text-xs text-muted-foreground font-medium">Hardware Orders</div>
+          <div className="text-2xl font-bold text-foreground mt-1">{stats?.totalOrders ?? '—'}</div>
         </Card>
-        <Card className="border-border/80 bg-card/60 p-4 space-y-1">
-          <div className="text-xs text-muted-foreground">Hardware Orders</div>
-          <div className="text-2xl font-bold text-primary">{stats?.totalOrders ?? '...'}</div>
+        <Card className="bg-card/40 border-border/60 p-4">
+          <div className="text-xs text-muted-foreground font-medium">Cloudinary Storage</div>
+          <div className="text-2xl font-bold text-[#D4AF37] mt-1">
+            {Math.round((mediaStats.totalBytes / (1024 * 1024)) * 10) / 10} MB
+          </div>
         </Card>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="flex border-b border-border/60 gap-6 text-sm font-medium">
+      {/* Main Tabs */}
+      <div className="flex border-b border-border/60 gap-4">
         <button
-          type="button"
+          onClick={() => setActiveTab('publications')}
+          className={`pb-3 text-sm font-semibold transition-all relative ${
+            activeTab === 'publications' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <FileCheck2 className="w-4 h-4" />
+            Publication Requests ({publications.length})
+          </div>
+          {activeTab === 'publications' && (
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+          )}
+        </button>
+
+        <button
           onClick={() => setActiveTab('orders')}
-          className={`pb-2.5 transition-colors border-b-2 flex items-center gap-2 ${
-            activeTab === 'orders'
-              ? 'border-primary text-primary font-bold'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
+          className={`pb-3 text-sm font-semibold transition-all relative ${
+            activeTab === 'orders' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          <Truck className="h-4 w-4" />
-          <span>Hardware Orders ({orders.length})</span>
+          <div className="flex items-center gap-2">
+            <Truck className="w-4 h-4" />
+            Card Orders ({orders.length})
+          </div>
+          {activeTab === 'orders' && (
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+          )}
         </button>
 
         <button
-          type="button"
           onClick={() => setActiveTab('templates')}
-          className={`pb-2.5 transition-colors border-b-2 flex items-center gap-2 ${
-            activeTab === 'templates'
-              ? 'border-primary text-primary font-bold'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
+          className={`pb-3 text-sm font-semibold transition-all relative ${
+            activeTab === 'templates' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          <Palette className="h-4 w-4" />
-          <span>Templates ({templates.length})</span>
+          <div className="flex items-center gap-2">
+            <Palette className="w-4 h-4" />
+            Template Registry ({templates.length})
+          </div>
+          {activeTab === 'templates' && (
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+          )}
+        </button>
+
+        <button
+          onClick={() => setActiveTab('media')}
+          className={`pb-3 text-sm font-semibold transition-all relative ${
+            activeTab === 'media' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <ImageIcon className="w-4 h-4" />
+            Cloudinary Media ({mediaStats.totalCount})
+          </div>
+          {activeTab === 'media' && (
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+          )}
         </button>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center py-16">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      ) : activeTab === 'orders' ? (
+      {/* Publications Queue Tab */}
+      {activeTab === 'publications' && (
         <Card className="border-border/80 bg-card/60">
-          <CardHeader className="border-b border-border/40 pb-4">
-            <CardTitle className="text-lg">Physical Card Fulfillment Queue</CardTitle>
+          <CardHeader>
+            <CardTitle className="text-lg">Controlled Publication Requests</CardTitle>
             <CardDescription className="text-xs">
-              Manage production stages, courier tracking codes, and manual offline payment confirmations.
+              Every user collects full data. Review profile, conduct commercial discussion via WhatsApp/phone, assign plan, and approve publication.
             </CardDescription>
           </CardHeader>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-border/60 bg-muted/20 text-muted-foreground">
-                  <th className="p-3">Order / User</th>
-                  <th className="p-3">Material & Qty</th>
-                  <th className="p-3">Delivery Address</th>
-                  <th className="p-3">Order Status</th>
-                  <th className="p-3">Payment Status</th>
-                  <th className="p-3">Tracking #</th>
+              <thead className="bg-muted/30 text-muted-foreground uppercase text-[10px] tracking-wider border-y border-border/40">
+                <tr>
+                  <th className="p-3">Customer & Profile</th>
+                  <th className="p-3">Contact Links</th>
+                  <th className="p-3">Template</th>
+                  <th className="p-3">Plan Assignment</th>
+                  <th className="p-3">Validity & Payment</th>
+                  <th className="p-3">Status</th>
+                  <th className="p-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/40">
+                {publications.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="p-8 text-center text-muted-foreground">
+                      No publication requests submitted yet.
+                    </td>
+                  </tr>
+                ) : (
+                  publications.map((pub) => {
+                    const phoneClean = (pub.contactPhone || pub.contactWhatsapp || '').replace(/[^0-9]/g, '');
+                    const waLink = phoneClean ? `https://wa.me/${phoneClean}?text=Hi%20${encodeURIComponent(pub.customerName)},%20I%20am%20reviewing%20your%20${brandConfig.name}%20profile%20request.` : null;
+
+                    return (
+                      <tr key={pub.id} className="hover:bg-muted/10">
+                        <td className="p-3">
+                          <div className="font-semibold text-foreground text-sm">{pub.customerName}</div>
+                          <div className="text-[11px] text-muted-foreground">{pub.customerEmail}</div>
+                          <div className="mt-1 flex items-center gap-1.5">
+                            <span className="font-medium text-white/90">{pub.profileName}</span>
+                            <a
+                              href={`/p/${pub.profileSlug}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-primary hover:underline inline-flex items-center gap-0.5 text-[10px]"
+                            >
+                              Preview <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                          </div>
+                        </td>
+
+                        <td className="p-3">
+                          <div className="flex flex-col gap-1.5">
+                            {pub.contactPhone && (
+                              <a
+                                href={`tel:${pub.contactPhone}`}
+                                className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
+                              >
+                                <Phone className="w-3 h-3" /> {pub.contactPhone}
+                              </a>
+                            )}
+                            {waLink && (
+                              <a
+                                href={waLink}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1 text-[11px] text-emerald-400 hover:underline font-medium"
+                              >
+                                <MessageCircle className="w-3 h-3" /> WhatsApp Chat
+                              </a>
+                            )}
+                            {!pub.contactPhone && !pub.contactWhatsapp && (
+                              <span className="text-muted-foreground text-[10px]">No phone listed</span>
+                            )}
+                          </div>
+                        </td>
+
+                        <td className="p-3">
+                          <Badge variant="outline" className="capitalize text-[10px]">
+                            {pub.templateId}
+                          </Badge>
+                          <div className="text-[10px] text-muted-foreground mt-0.5 capitalize">{pub.profileType}</div>
+                        </td>
+
+                        <td className="p-3">
+                          <select
+                            value={planSelections[pub.id] || pub.requestedPlanId || 'nano'}
+                            onChange={(e) =>
+                              setPlanSelections((prev) => ({ ...prev, [pub.id]: e.target.value }))
+                            }
+                            className="px-2 py-1 rounded bg-background border border-border text-xs uppercase font-semibold text-foreground w-28"
+                          >
+                            <option value="nano">Nano</option>
+                            <option value="micro">Micro</option>
+                            <option value="mini">Mini</option>
+                            <option value="max">Max</option>
+                          </select>
+                        </td>
+
+                        <td className="p-3">
+                          <div className="space-y-1">
+                            <select
+                              value={validitySelections[pub.id] || 365}
+                              onChange={(e) =>
+                                setValiditySelections((prev) => ({ ...prev, [pub.id]: Number(e.target.value) }))
+                              }
+                              className="px-2 py-1 rounded bg-background border border-border text-[11px] text-foreground w-28"
+                            >
+                              <option value={30}>30 Days</option>
+                              <option value={90}>90 Days</option>
+                              <option value={365}>1 Year (365d)</option>
+                              <option value={1000}>3 Years</option>
+                            </select>
+
+                            <select
+                              value={paymentSelections[pub.id] || 'NOT_RECORDED'}
+                              onChange={(e) =>
+                                setPaymentSelections((prev) => ({ ...prev, [pub.id]: e.target.value }))
+                              }
+                              className="px-2 py-1 rounded bg-background border border-border text-[10px] uppercase text-foreground w-28"
+                            >
+                              <option value="NOT_RECORDED">Unpaid</option>
+                              <option value="PENDING_VERIFICATION">Verifying</option>
+                              <option value="PAID">Paid</option>
+                              <option value="WAIVED">Waived</option>
+                            </select>
+                          </div>
+                        </td>
+
+                        <td className="p-3">
+                          <Badge
+                            variant={
+                              pub.status === 'APPROVED' || pub.profileStatus === 'PUBLISHED'
+                                ? 'gold'
+                                : pub.status === 'PENDING_PUBLICATION'
+                                ? 'secondary'
+                                : pub.status === 'REJECTED'
+                                ? 'destructive'
+                                : 'outline'
+                            }
+                            className="text-[10px] uppercase tracking-wide"
+                          >
+                            {pub.profileStatus || pub.status}
+                          </Badge>
+                        </td>
+
+                        <td className="p-3 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            {pub.profileStatus !== 'PUBLISHED' ? (
+                              <Button
+                                size="sm"
+                                variant="gold"
+                                onClick={() => handleReviewPublication(pub.id, 'APPROVE')}
+                                disabled={reviewingId === pub.id}
+                                className="h-7 text-xs font-semibold px-2.5"
+                              >
+                                {reviewingId === pub.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3 mr-1" />}
+                                Approve & Publish
+                              </Button>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleReviewPublication(pub.id, 'SUSPEND')}
+                                disabled={reviewingId === pub.id}
+                                className="h-7 text-xs px-2"
+                              >
+                                Suspend
+                              </Button>
+                            )}
+
+                            {pub.status === 'PENDING_PUBLICATION' && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleReviewPublication(pub.id, 'REJECT')}
+                                disabled={reviewingId === pub.id}
+                                className="h-7 text-xs text-destructive hover:bg-destructive/10 px-2"
+                              >
+                                <X className="w-3 h-3 mr-0.5" /> Reject
+                              </Button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
+
+      {/* Orders Tab */}
+      {activeTab === 'orders' && (
+        <Card className="border-border/80 bg-card/60">
+          <CardHeader>
+            <CardTitle className="text-lg">Physical Card Order Kanban & Fulfillment</CardTitle>
+            <CardDescription className="text-xs">
+              Manage custom physical card production, shipping addresses, manual offline payment status, and courier tracking IDs.
+            </CardDescription>
+          </CardHeader>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-muted/30 text-muted-foreground uppercase text-[10px] tracking-wider border-y border-border/40">
+                <tr>
+                  <th className="p-3">Customer & Order ID</th>
+                  <th className="p-3">Hardware Spec</th>
+                  <th className="p-3">Shipping Address</th>
+                  <th className="p-3">Production Status</th>
+                  <th className="p-3">Payment Verification</th>
+                  <th className="p-3">Courier Tracking</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/40">
@@ -307,8 +623,10 @@ export default function SuperAdminPage() {
             </table>
           </div>
         </Card>
-      ) : (
-        /* Templates Tab */
+      )}
+
+      {/* Templates Tab */}
+      {activeTab === 'templates' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {templates.map((tpl) => (
             <Card key={tpl.id} className="border-border/80 bg-card/60">
@@ -330,6 +648,55 @@ export default function SuperAdminPage() {
             </Card>
           ))}
         </div>
+      )}
+
+      {/* Cloudinary Media Inspection Tab */}
+      {activeTab === 'media' && (
+        <Card className="border-border/80 bg-card/60">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-lg">Cloudinary Media Asset Registry</CardTitle>
+                <CardDescription className="text-xs">
+                  Centralized repository of all user avatars, logos, cover photos, gallery images, videos, and PDF brochures.
+                </CardDescription>
+              </div>
+              <Badge variant="outline" className="border-[#D4AF37]/40 text-[#D4AF37]">
+                Cloud: {process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dhydmxcq2'}
+              </Badge>
+            </div>
+          </CardHeader>
+          <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {mediaList.length === 0 ? (
+              <div className="col-span-full p-8 text-center text-muted-foreground text-xs">
+                No Cloudinary media assets registered yet.
+              </div>
+            ) : (
+              mediaList.map((m) => (
+                <div key={m.id} className="rounded-xl border border-white/10 overflow-hidden bg-black/40 group relative">
+                  <div className="aspect-square flex items-center justify-center bg-white/5 overflow-hidden">
+                    {m.resourceType === 'image' ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={m.secureUrl} alt={m.cloudinaryPublicId} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                    ) : m.resourceType === 'video' ? (
+                      <video src={m.secureUrl} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="text-center p-3">
+                        <FileCheck2 className="w-8 h-8 mx-auto text-[#D4AF37] mb-1" />
+                        <span className="text-[10px] text-white/70 uppercase font-mono">{m.format || 'PDF'}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-2 text-[10px]">
+                    <div className="font-semibold text-white/90 truncate">{m.ownerName || 'User'}</div>
+                    <div className="text-white/40 capitalize">{m.mediaCategory}</div>
+                    <div className="text-[9px] text-[#D4AF37] mt-0.5 truncate">{m.cloudinaryPublicId}</div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </Card>
       )}
     </div>
   );

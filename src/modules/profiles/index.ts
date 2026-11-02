@@ -7,10 +7,11 @@ import {
   profileSections,
 } from '@/db/schema/profiles';
 import { can } from '@/modules/authz';
-import { assertWithinLimit, getEntitlements } from '@/modules/entitlements';
+import { assertWithinLimit, getEntitlements, filterProfileForPublicDisplay } from '@/modules/entitlements';
 import { getTemplateById, canAccessTemplate, TemplatePlanRequirementError } from '@/modules/templates';
 import { redis } from '@/lib/redis';
 import { logger } from '@/lib/logger';
+export { updateProfileSchema, type UpdateProfileSchemaType } from './validation';
 
 // --- Domain Errors ---
 
@@ -59,6 +60,22 @@ export interface CreateProfileInput {
   bio?: string;
   avatarUrl?: string;
   coverUrl?: string;
+  phone?: string;
+  whatsapp?: string;
+  email?: string;
+  website?: string;
+  address?: string;
+  location?: string;
+  socialLinks?: { platform: string; url: string }[];
+  skills?: string[];
+  experience?: { company: string; role: string; period?: string; description?: string }[];
+  education?: { institution: string; degree: string; year?: string }[];
+  achievements?: { title: string; year?: string; description?: string }[];
+  portfolio?: { title: string; imageUrl?: string; linkUrl?: string; description?: string }[];
+  gallery?: { url: string; caption?: string }[];
+  videos?: { title: string; videoUrl: string; thumbnailUrl?: string }[];
+  brochures?: { title: string; fileUrl: string; fileSize?: string }[];
+  customFields?: Record<string, unknown>;
   templateId?: string;
   themeConfig?: Record<string, unknown>;
   organizationId?: string | null;
@@ -66,12 +83,29 @@ export interface CreateProfileInput {
 
 export interface UpdateProfileInput {
   displayName?: string;
-  headline?: string;
-  bio?: string;
-  avatarUrl?: string;
-  coverUrl?: string;
-  templateId?: string;
-  themeConfig?: Record<string, unknown>;
+  headline?: string | null;
+  bio?: string | null;
+  avatarUrl?: string | null;
+  coverUrl?: string | null;
+  phone?: string | null;
+  whatsapp?: string | null;
+  email?: string | null;
+  website?: string | null;
+  address?: string | null;
+  location?: string | null;
+  socialLinks?: Record<string, unknown> | { platform: string; url: string }[] | null;
+  skills?: string[] | null;
+  experience?: { company: string; role: string; period?: string; description?: string }[] | null;
+  education?: { institution: string; degree: string; year?: string }[] | null;
+  achievements?: { title: string; year?: string; description?: string }[] | null;
+  portfolio?: { title: string; imageUrl?: string; linkUrl?: string; description?: string }[] | null;
+  gallery?: { url: string; caption?: string }[] | null;
+  videos?: { title: string; videoUrl: string; thumbnailUrl?: string }[] | null;
+  brochures?: { title: string; fileUrl: string; fileSize?: string }[] | null;
+  customFields?: Record<string, unknown> | null;
+  templateId?: string | null;
+  themeConfig?: Record<string, unknown> | null;
+  status?: string;
 }
 
 export interface CreateBusinessInput {
@@ -311,10 +345,26 @@ export async function createProfile(actor: ActorContext, input: CreateProfileInp
     bio: input.bio || null,
     avatarUrl: input.avatarUrl || null,
     coverUrl: input.coverUrl || null,
+    phone: input.phone || null,
+    whatsapp: input.whatsapp || null,
+    email: input.email || null,
+    website: input.website || null,
+    address: input.address || null,
+    location: input.location || null,
+    socialLinks: input.socialLinks || [],
+    skills: input.skills || [],
+    experience: input.experience || [],
+    education: input.education || [],
+    achievements: input.achievements || [],
+    portfolio: input.portfolio || [],
+    gallery: input.gallery || [],
+    videos: input.videos || [],
+    brochures: input.brochures || [],
+    customFields: input.customFields || {},
     templateId: template.id,
     themeId: template.id,
     themeConfig: input.themeConfig || template.defaultThemeConfig || {},
-    status: 'draft',
+    status: 'DRAFT',
     version: 1,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -373,17 +423,26 @@ export async function updateProfile(
   if (input.bio !== undefined) updates.bio = input.bio;
   if (input.avatarUrl !== undefined) updates.avatarUrl = input.avatarUrl;
   if (input.coverUrl !== undefined) updates.coverUrl = input.coverUrl;
+  if (input.phone !== undefined) updates.phone = input.phone;
+  if (input.whatsapp !== undefined) updates.whatsapp = input.whatsapp;
+  if (input.email !== undefined) updates.email = input.email;
+  if (input.website !== undefined) updates.website = input.website;
+  if (input.address !== undefined) updates.address = input.address;
+  if (input.location !== undefined) updates.location = input.location;
+  if (input.socialLinks !== undefined) updates.socialLinks = input.socialLinks ?? [];
+  if (input.skills !== undefined) updates.skills = input.skills ?? [];
+  if (input.experience !== undefined) updates.experience = input.experience ?? [];
+  if (input.education !== undefined) updates.education = input.education ?? [];
+  if (input.achievements !== undefined) updates.achievements = input.achievements ?? [];
+  if (input.portfolio !== undefined) updates.portfolio = input.portfolio ?? [];
+  if (input.gallery !== undefined) updates.gallery = input.gallery ?? [];
+  if (input.videos !== undefined) updates.videos = input.videos ?? [];
+  if (input.brochures !== undefined) updates.brochures = input.brochures ?? [];
+  if (input.customFields !== undefined) updates.customFields = input.customFields ?? {};
+  if (input.status !== undefined) updates.status = input.status;
 
   if (input.templateId) {
     const template = await getTemplateById(input.templateId);
-    const target = actor.orgId
-      ? { organizationId: actor.orgId }
-      : { userId: actor.userId };
-    const { planId } = await getEntitlements(target);
-
-    if (!canAccessTemplate(template.requiredPlanId, planId)) {
-      throw new TemplatePlanRequirementError(template.name, template.requiredPlanId, planId);
-    }
     updates.templateId = template.id;
     updates.themeId = template.id;
   }
@@ -403,28 +462,14 @@ export async function updateProfile(
 export async function publishProfile(actor: ActorContext, profileId: string) {
   const fullProfile = await getProfileWithDetails(actor, profileId);
 
-  // Compile snapshot
-  const snapshot = {
-    id: fullProfile.id,
-    slug: fullProfile.slug,
-    profileType: fullProfile.profileType,
-    displayName: fullProfile.displayName,
-    headline: fullProfile.headline,
-    bio: fullProfile.bio,
-    avatarUrl: fullProfile.avatarUrl,
-    coverUrl: fullProfile.coverUrl,
-    templateId: fullProfile.templateId,
-    themeConfig: fullProfile.themeConfig,
-    businesses: fullProfile.businesses,
-    catalogue: fullProfile.catalogue,
-    sections: fullProfile.sections,
-    publishedAt: new Date().toISOString(),
-  };
+  // Compile plan-filtered public snapshot
+  const { planId, entitlements } = await getEntitlements({ userId: fullProfile.ownerId });
+  const snapshot = filterProfileForPublicDisplay(fullProfile, entitlements, planId);
 
   await db
     .update(profiles)
     .set({
-      status: 'published',
+      status: 'PUBLISHED',
       publishedJson: snapshot,
       publishedAt: new Date(),
       version: sql`${profiles.version} + 1`,
@@ -442,11 +487,12 @@ export async function publishProfile(actor: ActorContext, profileId: string) {
         86400 // 24h
       );
     }
-  } catch (err) {
-    logger.warn({ err }, 'Redis cache sync skipped');
+  } catch (err: unknown) {
+    const errMsg = err instanceof Error ? err.message : String(err);
+    logger.warn({ err: errMsg }, 'Redis cache sync skipped');
   }
 
-  return { ...fullProfile, status: 'published', publishedJson: snapshot };
+  return { ...fullProfile, status: 'PUBLISHED', publishedJson: snapshot };
 }
 
 // --- Multiple Business Support Operations ---
@@ -478,8 +524,10 @@ export async function addBusiness(
 
   const currentCount = Number(countRes[0]?.count || 0);
 
-  const target = actor.orgId ? { organizationId: actor.orgId } : { userId: actor.userId };
-  await assertWithinLimit(target, 'max_businesses', currentCount + 1);
+  // Platform abuse ceiling (entitlements govern public visibility, not data entry)
+  if (currentCount >= 50) {
+    throw new Error('Platform anti-abuse limit reached: Maximum 50 businesses per profile.');
+  }
 
   const businessId = `biz_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
@@ -612,8 +660,7 @@ export async function addCatalogueItem(
     throw new UnauthorizedProfileAccessError('add catalogue item to', profileId);
   }
 
-  // Check product or service entitlement
-  const limitKey = input.type === 'product' ? 'max_products' : 'max_services';
+  // Platform abuse ceiling (entitlements govern public visibility, not data entry)
   const countRes = await db
     .select({ count: sql<number>`count(*)` })
     .from(profileCatalogueItems)
@@ -625,8 +672,11 @@ export async function addCatalogueItem(
     );
 
   const currentCount = Number(countRes[0]?.count || 0);
-  const target = actor.orgId ? { organizationId: actor.orgId } : { userId: actor.userId };
-  await assertWithinLimit(target, limitKey, currentCount + 1);
+
+  // Platform abuse ceiling (entitlements govern public visibility, not data entry)
+  if (currentCount >= 100) {
+    throw new Error(`Platform anti-abuse limit reached: Maximum 100 ${input.type} items per profile.`);
+  }
 
   const itemId = `cat_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 

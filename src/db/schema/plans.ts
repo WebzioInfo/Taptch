@@ -29,7 +29,10 @@ export const tenantSubscriptions = pgTable('tenant_subscriptions', {
   assignedBy: text('assigned_by')
     .notNull()
     .references(() => users.id),
-  status: varchar('status', { length: 32 }).notNull().default('active'), // 'active' | 'suspended'
+  status: varchar('status', { length: 32 }).notNull().default('active'), // 'active' | 'suspended' | 'expired'
+  paymentStatus: varchar('payment_status', { length: 32 }).notNull().default('NOT_RECORDED'), // 'NOT_RECORDED' | 'PENDING_VERIFICATION' | 'PAID' | 'PARTIALLY_PAID' | 'WAIVED' | 'REFUNDED'
+  amountInr: text('amount_inr'),
+  validUntil: timestamp('valid_until'),
   notes: text('notes'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),

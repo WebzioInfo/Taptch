@@ -5,9 +5,12 @@
  * Production: Routes through Meta WhatsApp Cloud API (primary) or MSG91 DLT SMS (secondary).
  */
 
+import { sendEmail, renderOtpEmailTemplate } from '@/lib/email';
+import { brandConfig } from '@/config/brand';
+
 export interface OtpDeliveryResult {
   success: boolean;
-  channel: 'console' | 'mailpit' | 'whatsapp' | 'msg91';
+  channel: 'console' | 'mailpit' | 'whatsapp' | 'msg91' | 'smtp';
   messageId?: string;
   error?: string;
 }
@@ -50,19 +53,35 @@ export async function sendOtpSms(phoneNumber: string, code: string): Promise<Otp
 }
 
 export async function sendOtpEmail(email: string, otp: string, type: string): Promise<OtpDeliveryResult> {
-  const provider = process.env.EMAIL_PROVIDER || 'mailpit';
+  const provider = (process.env.EMAIL_PROVIDER || 'smtp').toLowerCase();
 
-  if (provider === 'console' || process.env.NODE_ENV !== 'production') {
-    // [MOCK] Console & Mailpit Log
-    console.log('\n========================================');
-    console.log(`[MOCK EMAIL OTP PROVIDER - ${type.toUpperCase()}]`);
-    console.log(`To Email:  ${email}`);
-    console.log(`OTP Code:  >>> ${otp} <<<`);
-    console.log('========================================\n');
-    return { success: true, channel: 'mailpit', messageId: `mock-email-${Date.now()}` };
+  // 1. SMTP Provider (Production or local Mailpit/MailHog)
+  if (provider === 'smtp' || provider === 'mailpit') {
+    const { html, text } = renderOtpEmailTemplate(otp, type);
+    const subject = `${brandConfig.name} - ${type === 'sign-in' ? 'Sign In' : type === 'two-factor' ? '2FA' : 'Verification'} Code`;
+
+    const result = await sendEmail({
+      to: email,
+      subject,
+      html,
+      text,
+    });
+
+    return {
+      success: result.success,
+      channel: result.channel === 'smtp' ? 'smtp' : 'mailpit',
+      messageId: result.messageId,
+      error: result.error,
+    };
   }
 
-  // Production: Resend / AWS SES integration
-  return { success: true, channel: 'console', messageId: `email-${Date.now()}` };
+  // 2. Console Provider (local stdout dry-run)
+  console.log('\n========================================');
+  console.log(`[EMAIL OTP PROVIDER - CONSOLE - ${type.toUpperCase()}]`);
+  console.log(`To Email:  ${email}`);
+  console.log(`OTP Code:  >>> ${otp} <<<`);
+  console.log('Validity:  10 minutes');
+  console.log('========================================\n');
+  return { success: true, channel: 'console', messageId: `mock-email-${Date.now()}` };
 }
 

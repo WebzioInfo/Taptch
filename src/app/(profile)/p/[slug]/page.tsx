@@ -33,10 +33,27 @@ export default async function PublicProfilePage({ params }: PageProps) {
     notFound();
   }
 
-  if (!profile || profile.status === 'draft') {
+  // Profile must be strictly PUBLISHED or APPROVED to be visible to public visitors
+  const isPublicStatus =
+    profile &&
+    (profile.status === 'PUBLISHED' ||
+      profile.status === 'published' ||
+      profile.status === 'APPROVED');
+
+  if (!profile || !isPublicStatus) {
     notFound();
   }
 
-  return <ProfileRenderer profile={profile} />;
+  // Use the pre-compiled, plan-filtered JSON snapshot if present
+  const publishedSnapshot =
+    profile.publishedJson &&
+    typeof profile.publishedJson === 'object' &&
+    'displayName' in profile.publishedJson
+      ? (profile.publishedJson as Record<string, unknown>)
+      : null;
+
+  const renderData = publishedSnapshot ? { ...profile, ...publishedSnapshot } : profile;
+
+  return <ProfileRenderer profile={renderData as Parameters<typeof ProfileRenderer>[0]['profile']} />;
 }
 

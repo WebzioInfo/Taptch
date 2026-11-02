@@ -100,6 +100,10 @@ class InMemoryRedisMock {
 
 export type RedisClient = Redis | InMemoryRedisMock;
 
+declare global {
+  var __tapzio_redis__: RedisClient | undefined;
+}
+
 function createRedisClient(): RedisClient {
   const redisUrl = process.env.REDIS_URL;
   const forceMock = process.env.USE_IN_MEMORY_REDIS === 'true';
@@ -122,12 +126,19 @@ function createRedisClient(): RedisClient {
     lazyConnect: true,
   });
 
-  client.on('error', (err) => {
-    logger.warn({ err: err.message }, 'Redis connection issue, continuing');
+  client.on('error', (err: Error) => {
+    try {
+      logger.warn({ err: err?.message || String(err) }, 'Redis connection issue, continuing');
+    } catch {
+      console.warn('[REDIS WARN FALLBACK]', err?.message || err);
+    }
   });
 
   return client;
 }
 
-export const redis = createRedisClient();
+export const redis: RedisClient =
+  globalThis.__tapzio_redis__ || (globalThis.__tapzio_redis__ = createRedisClient());
+
+export const redisClient = redis;
 

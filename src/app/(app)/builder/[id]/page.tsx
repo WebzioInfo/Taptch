@@ -19,6 +19,10 @@ import {
   Edit2,
   Smartphone,
   ChevronRight,
+  RotateCcw,
+  Mail,
+  Globe,
+  MapPin,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -66,6 +70,15 @@ interface ProfileSection {
   displayOrder: number;
 }
 
+interface SocialLinks {
+  linkedin?: string;
+  twitter?: string;
+  instagram?: string;
+  youtube?: string;
+  github?: string;
+  [key: string]: string | undefined;
+}
+
 interface ProfileData {
   id: string;
   slug: string;
@@ -75,6 +88,15 @@ interface ProfileData {
   bio: string | null;
   avatarUrl: string | null;
   coverUrl: string | null;
+  phone: string | null;
+  whatsapp: string | null;
+  email: string | null;
+  website: string | null;
+  address: string | null;
+  location: string | null;
+  socialLinks: SocialLinks;
+  googleReviewUrl?: string | null;
+  brochureUrl?: string | null;
   templateId: string;
   themeConfig: {
     primaryColor?: string;
@@ -107,9 +129,11 @@ export default function ProfileBuilderPage({
   const { id } = use(params);
 
   const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [originalProfile, setOriginalProfile] = useState<ProfileData | null>(null);
   const [activeTab, setActiveTab] = useState('identity');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [savingSection, setSavingSection] = useState<string | null>(null);
   const [isPublishing, setIsPublishing] = useState(false);
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -150,7 +174,20 @@ export default function ProfileBuilderPage({
         const res = await fetch(`/api/v1/profiles/${id}`);
         const json = await res.json();
         if (json.data) {
-          setProfile(json.data);
+          const loadedData: ProfileData = {
+            ...json.data,
+            phone: json.data.phone || '',
+            whatsapp: json.data.whatsapp || '',
+            email: json.data.email || '',
+            website: json.data.website || '',
+            address: json.data.address || '',
+            location: json.data.location || '',
+            socialLinks: json.data.socialLinks || {},
+            googleReviewUrl: json.data.customFields?.googleReviewUrl || '',
+            brochureUrl: json.data.customFields?.brochureUrl || '',
+          };
+          setProfile(loadedData);
+          setOriginalProfile(JSON.parse(JSON.stringify(loadedData)));
         } else {
           setErrorMessage(json.error?.message || 'Failed to load profile.');
         }
@@ -163,7 +200,50 @@ export default function ProfileBuilderPage({
     loadProfile();
   }, [id]);
 
-  // Save general profile draft
+  // Reset changes to last saved state
+  const handleResetChanges = () => {
+    if (originalProfile) {
+      setProfile(JSON.parse(JSON.stringify(originalProfile)));
+      setErrorMessage(null);
+      setSaveStatus('Changes reverted');
+      setTimeout(() => setSaveStatus(null), 2500);
+    }
+  };
+
+  // Save specific section partially
+  const handleSaveSection = async (sectionName: string, partialPayload: Record<string, unknown>) => {
+    if (!profile) return;
+    try {
+      setSavingSection(sectionName);
+      setSaveStatus(null);
+      setErrorMessage(null);
+
+      const res = await fetch(`/api/v1/profiles/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(partialPayload),
+      });
+
+      const json = await res.json();
+      if (!res.ok || json.error) {
+        throw new Error(json.error?.message || `Failed to save ${sectionName}`);
+      }
+
+      setOriginalProfile((prev) => (prev ? { ...prev, ...partialPayload } : null));
+      setSaveStatus(`${sectionName} saved successfully`);
+      setTimeout(() => setSaveStatus(null), 3000);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setErrorMessage(err.message);
+      } else {
+        setErrorMessage(`Failed to save ${sectionName}.`);
+      }
+    } finally {
+      setSavingSection(null);
+    }
+  };
+
+  // Save complete profile draft
   const handleSaveDraft = async () => {
     if (!profile) return;
     try {
@@ -171,18 +251,31 @@ export default function ProfileBuilderPage({
       setSaveStatus(null);
       setErrorMessage(null);
 
+      const payload = {
+        displayName: profile.displayName,
+        headline: profile.headline || null,
+        bio: profile.bio || null,
+        avatarUrl: profile.avatarUrl || null,
+        coverUrl: profile.coverUrl || null,
+        phone: profile.phone || null,
+        whatsapp: profile.whatsapp || null,
+        email: profile.email || null,
+        website: profile.website || null,
+        address: profile.address || null,
+        location: profile.location || null,
+        socialLinks: profile.socialLinks || {},
+        templateId: profile.templateId,
+        themeConfig: profile.themeConfig,
+        customFields: {
+          googleReviewUrl: profile.googleReviewUrl || null,
+          brochureUrl: profile.brochureUrl || null,
+        },
+      };
+
       const res = await fetch(`/api/v1/profiles/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          displayName: profile.displayName,
-          headline: profile.headline,
-          bio: profile.bio,
-          avatarUrl: profile.avatarUrl,
-          coverUrl: profile.coverUrl,
-          templateId: profile.templateId,
-          themeConfig: profile.themeConfig,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const json = await res.json();
@@ -190,7 +283,8 @@ export default function ProfileBuilderPage({
         throw new Error(json.error?.message || 'Save failed');
       }
 
-      setSaveStatus('Draft saved');
+      setOriginalProfile(JSON.parse(JSON.stringify(profile)));
+      setSaveStatus('Draft saved successfully');
       setTimeout(() => setSaveStatus(null), 3000);
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -439,6 +533,9 @@ export default function ProfileBuilderPage({
   }
 
   const primaryColor = profile.themeConfig?.primaryColor || '#D4AF37';
+  const hasChanges = Boolean(
+    profile && originalProfile && JSON.stringify(profile) !== JSON.stringify(originalProfile)
+  );
 
   return (
     <div className="h-screen flex flex-col bg-background text-foreground overflow-hidden">
@@ -468,6 +565,19 @@ export default function ProfileBuilderPage({
               <AlertCircle className="w-3.5 h-3.5" />
               {errorMessage}
             </span>
+          )}
+
+          {hasChanges && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleResetChanges}
+              className="text-xs h-8 text-muted-foreground hover:text-foreground"
+              title="Revert unsaved changes"
+            >
+              <RotateCcw className="w-3.5 h-3.5 mr-1" />
+              Reset
+            </Button>
           )}
 
           <Button
@@ -602,6 +712,26 @@ export default function ProfileBuilderPage({
                     />
                   </div>
                 </div>
+
+                <div className="pt-4 border-t border-border/60 flex justify-end">
+                  <Button
+                    size="sm"
+                    onClick={() =>
+                      handleSaveSection('Identity', {
+                        displayName: profile.displayName,
+                        headline: profile.headline || null,
+                        bio: profile.bio || null,
+                        avatarUrl: profile.avatarUrl || null,
+                        coverUrl: profile.coverUrl || null,
+                      })
+                    }
+                    disabled={savingSection === 'Identity'}
+                    className="text-xs h-8 bg-gold text-gold-foreground hover:bg-gold-light font-semibold"
+                  >
+                    <Save className="w-3.5 h-3.5 mr-1" />
+                    {savingSection === 'Identity' ? 'Saving Identity...' : 'Save Identity'}
+                  </Button>
+                </div>
               </div>
             </div>
           )}
@@ -655,6 +785,22 @@ export default function ProfileBuilderPage({
                     </Link>
                   </div>
                 </div>
+
+                <div className="pt-4 border-t border-border/60 flex justify-end">
+                  <Button
+                    size="sm"
+                    onClick={() =>
+                      handleSaveSection('Theme', {
+                        themeConfig: profile.themeConfig,
+                      })
+                    }
+                    disabled={savingSection === 'Theme'}
+                    className="text-xs h-8 bg-gold text-gold-foreground hover:bg-gold-light font-semibold"
+                  >
+                    <Save className="w-3.5 h-3.5 mr-1" />
+                    {savingSection === 'Theme' ? 'Saving Theme...' : 'Save Theme'}
+                  </Button>
+                </div>
               </div>
             </div>
           )}
@@ -672,23 +818,64 @@ export default function ProfileBuilderPage({
               <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-semibold mb-1">Phone Number</label>
-                  <Input placeholder="+91 98765 43210" />
+                  <Input
+                    value={profile.phone || ''}
+                    onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                    placeholder="+91 98765 43210"
+                  />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold mb-1">Email Address</label>
-                  <Input type="email" placeholder="contact@example.com" />
+                  <Input
+                    type="email"
+                    value={profile.email || ''}
+                    onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                    placeholder="contact@example.com"
+                  />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold mb-1">WhatsApp Number</label>
-                  <Input placeholder="+91 98765 43210" />
+                  <Input
+                    value={profile.whatsapp || ''}
+                    onChange={(e) => setProfile({ ...profile, whatsapp: e.target.value })}
+                    placeholder="+91 98765 43210"
+                  />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold mb-1">Primary Website</label>
-                  <Input placeholder="https://example.com" />
+                  <Input
+                    value={profile.website || ''}
+                    onChange={(e) => setProfile({ ...profile, website: e.target.value })}
+                    placeholder="https://example.com"
+                  />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold mb-1">Physical Address / City</label>
-                  <Input placeholder="Bengaluru, Karnataka, India" />
+                  <Input
+                    value={profile.address || ''}
+                    onChange={(e) => setProfile({ ...profile, address: e.target.value })}
+                    placeholder="Bengaluru, Karnataka, India"
+                  />
+                </div>
+
+                <div className="pt-4 border-t border-border/60 flex justify-end">
+                  <Button
+                    size="sm"
+                    onClick={() =>
+                      handleSaveSection('Contacts', {
+                        phone: profile.phone || null,
+                        email: profile.email || null,
+                        whatsapp: profile.whatsapp || null,
+                        website: profile.website || null,
+                        address: profile.address || null,
+                      })
+                    }
+                    disabled={savingSection === 'Contacts'}
+                    className="text-xs h-8 bg-gold text-gold-foreground hover:bg-gold-light font-semibold"
+                  >
+                    <Save className="w-3.5 h-3.5 mr-1" />
+                    {savingSection === 'Contacts' ? 'Saving Contacts...' : 'Save Contacts'}
+                  </Button>
                 </div>
               </div>
             </div>
@@ -862,23 +1049,84 @@ export default function ProfileBuilderPage({
               <div className="space-y-3">
                 <div>
                   <label className="block text-xs font-semibold mb-1">LinkedIn Profile</label>
-                  <Input placeholder="https://linkedin.com/in/username" />
+                  <Input
+                    value={profile.socialLinks?.linkedin || ''}
+                    onChange={(e) =>
+                      setProfile({
+                        ...profile,
+                        socialLinks: { ...profile.socialLinks, linkedin: e.target.value },
+                      })
+                    }
+                    placeholder="https://linkedin.com/in/username"
+                  />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold mb-1">X (Twitter)</label>
-                  <Input placeholder="https://x.com/username" />
+                  <Input
+                    value={profile.socialLinks?.twitter || ''}
+                    onChange={(e) =>
+                      setProfile({
+                        ...profile,
+                        socialLinks: { ...profile.socialLinks, twitter: e.target.value },
+                      })
+                    }
+                    placeholder="https://x.com/username"
+                  />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold mb-1">Instagram</label>
-                  <Input placeholder="https://instagram.com/username" />
+                  <Input
+                    value={profile.socialLinks?.instagram || ''}
+                    onChange={(e) =>
+                      setProfile({
+                        ...profile,
+                        socialLinks: { ...profile.socialLinks, instagram: e.target.value },
+                      })
+                    }
+                    placeholder="https://instagram.com/username"
+                  />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold mb-1">YouTube Channel</label>
-                  <Input placeholder="https://youtube.com/@channel" />
+                  <Input
+                    value={profile.socialLinks?.youtube || ''}
+                    onChange={(e) =>
+                      setProfile({
+                        ...profile,
+                        socialLinks: { ...profile.socialLinks, youtube: e.target.value },
+                      })
+                    }
+                    placeholder="https://youtube.com/@channel"
+                  />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold mb-1">GitHub</label>
-                  <Input placeholder="https://github.com/username" />
+                  <Input
+                    value={profile.socialLinks?.github || ''}
+                    onChange={(e) =>
+                      setProfile({
+                        ...profile,
+                        socialLinks: { ...profile.socialLinks, github: e.target.value },
+                      })
+                    }
+                    placeholder="https://github.com/username"
+                  />
+                </div>
+
+                <div className="pt-4 border-t border-border/60 flex justify-end">
+                  <Button
+                    size="sm"
+                    onClick={() =>
+                      handleSaveSection('Social Networks', {
+                        socialLinks: profile.socialLinks || {},
+                      })
+                    }
+                    disabled={savingSection === 'Social Networks'}
+                    className="text-xs h-8 bg-gold text-gold-foreground hover:bg-gold-light font-semibold"
+                  >
+                    <Save className="w-3.5 h-3.5 mr-1" />
+                    {savingSection === 'Social Networks' ? 'Saving Socials...' : 'Save Social Networks'}
+                  </Button>
                 </div>
               </div>
             </div>
@@ -897,11 +1145,38 @@ export default function ProfileBuilderPage({
               <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-semibold mb-1">Google Review Link</label>
-                  <Input placeholder="https://g.page/r/your-review-link/review" />
+                  <Input
+                    value={profile.googleReviewUrl || ''}
+                    onChange={(e) => setProfile({ ...profile, googleReviewUrl: e.target.value })}
+                    placeholder="https://g.page/r/your-review-link/review"
+                  />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold mb-1">Brochure PDF Download URL</label>
-                  <Input placeholder="https://..." />
+                  <Input
+                    value={profile.brochureUrl || ''}
+                    onChange={(e) => setProfile({ ...profile, brochureUrl: e.target.value })}
+                    placeholder="https://..."
+                  />
+                </div>
+
+                <div className="pt-4 border-t border-border/60 flex justify-end">
+                  <Button
+                    size="sm"
+                    onClick={() =>
+                      handleSaveSection('Reviews & Leads', {
+                        customFields: {
+                          googleReviewUrl: profile.googleReviewUrl || null,
+                          brochureUrl: profile.brochureUrl || null,
+                        },
+                      })
+                    }
+                    disabled={savingSection === 'Reviews & Leads'}
+                    className="text-xs h-8 bg-gold text-gold-foreground hover:bg-gold-light font-semibold"
+                  >
+                    <Save className="w-3.5 h-3.5 mr-1" />
+                    {savingSection === 'Reviews & Leads' ? 'Saving...' : 'Save Reviews & Leads'}
+                  </Button>
                 </div>
               </div>
             </div>
@@ -951,7 +1226,77 @@ export default function ProfileBuilderPage({
                 </div>
                 <h4 className="mt-2 text-sm font-bold truncate">{profile.displayName || 'Your Name'}</h4>
                 <p className="text-[11px] opacity-70 truncate">{profile.headline || 'Your Professional Title'}</p>
+
+                {/* Physical Location */}
+                {profile.address && (
+                  <div className="flex items-center justify-center gap-1 text-[10px] opacity-75 mt-1">
+                    <MapPin className="w-3 h-3 text-gold shrink-0" />
+                    <span className="truncate max-w-[220px]">{profile.address}</span>
+                  </div>
+                )}
               </div>
+
+              {/* Quick Communication Buttons */}
+              {(profile.phone || profile.email || profile.whatsapp || profile.website) && (
+                <div className="flex items-center justify-center gap-2 mt-3">
+                  {profile.phone && (
+                    <div
+                      className="w-7 h-7 rounded-full flex items-center justify-center border border-white/15 bg-white/10 text-white"
+                      title={profile.phone}
+                    >
+                      <Phone className="w-3.5 h-3.5" />
+                    </div>
+                  )}
+                  {profile.whatsapp && (
+                    <div
+                      className="w-7 h-7 rounded-full flex items-center justify-center border border-emerald-500/30 bg-emerald-500/20 text-emerald-400"
+                      title={profile.whatsapp}
+                    >
+                      <Phone className="w-3.5 h-3.5" />
+                    </div>
+                  )}
+                  {profile.email && (
+                    <div
+                      className="w-7 h-7 rounded-full flex items-center justify-center border border-white/15 bg-white/10 text-white"
+                      title={profile.email}
+                    >
+                      <Mail className="w-3.5 h-3.5" />
+                    </div>
+                  )}
+                  {profile.website && (
+                    <div
+                      className="w-7 h-7 rounded-full flex items-center justify-center border border-white/15 bg-white/10 text-white"
+                      title={profile.website}
+                    >
+                      <Globe className="w-3.5 h-3.5" />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Bio Narrative */}
+              {profile.bio && (
+                <p className="mt-3 p-2.5 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm text-[11px] leading-relaxed opacity-85 line-clamp-3">
+                  {profile.bio}
+                </p>
+              )}
+
+              {/* Social Networks Badges */}
+              {profile.socialLinks && Object.values(profile.socialLinks).some(Boolean) && (
+                <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5">
+                  {Object.entries(profile.socialLinks).map(([network, url]) => {
+                    if (!url) return null;
+                    return (
+                      <span
+                        key={network}
+                        className="text-[9px] uppercase font-semibold px-2 py-0.5 rounded-full border border-white/15 bg-white/10 text-white/90"
+                      >
+                        {network}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
 
               {/* Save Contact CTA */}
               <button

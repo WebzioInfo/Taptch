@@ -185,9 +185,6 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section className="container mx-auto max-w-7xl px-4 sm:px-6 pt-16 pb-20 z-10 flex flex-col items-center text-center">
-        <Badge variant="gold" className="px-3.5 py-1 text-xs tracking-wider uppercase mb-6 shadow-sm">
-          Self-Service Digital Identity & Smart NFC
-        </Badge>
 
         <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-foreground max-w-4xl leading-[1.1]">
           Craft Your Executive <br className="hidden sm:inline" />
@@ -267,9 +264,6 @@ export default function HomePage() {
 
               {/* Physical NFC Card Showcase */}
               <div className="md:col-span-5 text-left space-y-4 p-4">
-                <Badge variant="gold" className="text-[10px]">
-                  Physical Hardware
-                </Badge>
                 <h3 className="text-2xl font-bold tracking-tight text-foreground">
                   Paired with Smart NFC Cards
                 </h3>
@@ -502,11 +496,10 @@ export default function HomePage() {
           {plans.map((p) => (
             <Card
               key={p.id}
-              className={`border relative flex flex-col justify-between ${
-                p.highlighted
-                  ? 'border-primary bg-primary/5 shadow-2xl ring-1 ring-primary'
-                  : 'border-border/80 bg-card/60'
-              }`}
+              className={`border relative flex flex-col justify-between ${p.highlighted
+                ? 'border-primary bg-primary/5 shadow-2xl ring-1 ring-primary'
+                : 'border-border/80 bg-card/60'
+                }`}
             >
               <div>
                 <CardHeader className="pb-4">
