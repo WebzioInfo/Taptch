@@ -153,3 +153,69 @@
   7. **Documentation & Skills**: Synchronized `AGENTS.md`, `.agents/rules/`, and all 44 skills under `.agents/skills/` with the new Tappzio identity.
   8. **Workspace Relocation**: Migrated root workspace from `D:\Webzio\Tapzio` to `D:\Webzio\Tappzio`.
 - **Consequences**: Consistent, professional brand identity across the entire repository; full backward compatibility for existing profile URLs and migrations; zero hardcoded literals in presentation layers; 100% test pass rate across all 69 test suites.
+
+---
+
+## ADR 018: Zero-Vulnerability Security Remediation & Dependency Modernization
+
+- **Status**: Accepted & Implemented
+- **Date**: 2026-11-02
+- **Context**: An `npm audit` scan revealed 25 vulnerabilities (21 moderate, 2 high, 2 critical) across core and transitive dependencies:
+  1. `tinypool <=2.1.1` (Critical): Prototype pollution gadgets leading to RCE (`GHSA-5gmw-xhrv-c9v3`, `GHSA-85c8-ppgw-ccpr`).
+  2. `@vitest/mocker <=4.1.11` (Moderate): Path traversal and code injection (`GHSA-82fw-gwwq-j7x9`, `GHSA-qxg6-89mg-rqv8`).
+  3. `zod <4.6.6` (High): Memory exhaustion via oversized constrained collections (`GHSA-mrhx-c7xc-m3w5`).
+  4. `postcss <=8.5.22` (High): Path traversal in source map auto-loading and unescaped style outputs (`GHSA-qx2v-qp2m-jg93`, `GHSA-r28c-9q8g-f849`, etc.).
+  5. `esbuild <=0.24.2` (Moderate): Development server response access (`GHSA-67mh-4wv8-2f99`).
+  6. `minimatch <11.0.1` (Moderate): DoS via globparts amplification (`GHSA-g3hv-75wg-m249`).
+- **Decision**:
+  1. **NPM Overrides**: Enforced pinned secure resolutions using NPM's authoritative `"overrides"` feature:
+     - `"postcss": "$postcss"` (deduplicating to `8.5.32` across Next.js and Tailwind).
+     - `"esbuild": "^0.25.12"` (remediating transitive `drizzle-kit` dev server vulnerability).
+     - `"minimatch": "^11.0.4"` (remediating glob amplification DoS).
+  2. **Vitest Upgrade**: Upgraded `vitest` to `^4.1.12`, replacing `tinypool` with `tinyexec` and eliminating critical RCE vulnerabilities and `@vitest/mocker` advisories. Modernized `vitest.config.ts` with `pool: 'threads'` and `import.meta.dirname`.
+  3. **Zod 4 Upgrade**: Upgraded `zod` to `^4.6.7` (deduplicating with Better Auth) and modernized `z.record(z.string(), z.unknown())` schemas and error handling types.
+  4. **Minimatch ESM Patch**: Added lightweight `scripts/patch-minimatch.mjs` postinstall hook to provide `export default minimatch` in Minimatch 11's ESM distribution, maintaining 100% compatibility with `@eslint/eslintrc` and `next lint`.
+- **Consequences**:
+  - `npm audit` reports **0 vulnerabilities** (down from 25).
+  - All 69 Vitest tests pass cleanly.
+  - TypeScript typecheck (`tsc --noEmit`) passes with 0 errors.
+  - ESLint (`next lint`) passes with 0 warnings or errors.
+  - Next.js production build (`next build`) compiles and optimizes all 15 static and 33 dynamic routes with zero warnings.
+
+---
+
+## ADR 019: Mass Marketing Template Preview System with Centralized Mock Data & Dual Mode Architecture
+
+- **Status**: Accepted & Implemented
+- **Date**: 2026-11-02
+- **Context**: The Mass Marketing & Business Directory platform required a production-grade template exploration and preview system where potential and existing customers can:
+  1. Browse 8 distinct business layouts (Industrial & Manufacturing, Corporate Business, Modern Business, Premium Brand, Professional Services, Retail & Shopping, Food & Restaurant, Creative & Agency).
+  2. Experience interactive previews with realistic Indian commercial demo data across mobile, tablet, desktop, and fullscreen viewports without using static screenshots.
+  3. Preview how their own actual profile data renders before submitting for publication approval.
+  4. Understand plan tier feature differentiators (Nano, Micro, Mini, Max) with clear upgrade indicators on locked features without client-side permission leakage.
+  5. Select a preferred template non-destructively without overwriting existing customer information or automatically publishing unapproved profiles.
+  6. Enable Super Admins to preview the customer's selected template and submitted data prior to approving publication.
+- **Decision**:
+  1. **Centralized Demo Mock Data (`src/lib/mock-data/demo-businesses.ts`)**: Created 8 realistic sample businesses with Indian addresses, contact channels, catalogs, INR prices, working hours, and explicit `isDemo: true` badges. Strictly separated from database customer tables.
+  2. **8 Specialized Layout Renderers (`src/components/templates/layouts/`)**: Authored distinct layout components with specialized UX hierarchies:
+     - `IndustrialTemplate`: Heavy machinery catalogue, technical spec sheets, RFQ quote requests, plant shifts.
+     - `RetailTemplate`: Commercial storefront, WhatsApp quick ordering, store hours, collection cards.
+     - `FoodRestaurantTemplate`: Culinary menu cards, dietary tags, table reservations, kitchen hours.
+     - `CorporateBusinessTemplate`: Titanium enterprise header, subsidiary switcher, institutional advisory.
+     - `ModernBusinessTemplate`: High-contrast dual tabs, lead capture, verified trust channels.
+     - `PremiumBrandTemplate`: Obsidian luxury surface, brushed gold accents, VIP contact cards.
+     - `ProfessionalServicesTemplate`: Editorial paper styling, serif typography, counsel retainers.
+     - `CreativeAgencyTemplate`: Aurora neon glassmorphism, visual portfolio grid, studio commission CTA.
+  3. **Dual-Mode Interactive Preview Modal (`TemplatePreviewModal.tsx`)**:
+     - *Mode A (Demo Preview)*: Renders demo businesses with sample switcher.
+     - *Mode B (My Business Preview)*: Renders authenticated customer's actual data with graceful empty-state placeholders.
+     - *Viewport Toolbar*: Mobile (375px), Tablet (768px), Desktop (max-w-5xl browser frame), and Fullscreen.
+     - *Plan Simulator*: Dynamically toggles Nano, Micro, Mini, and Max tiers, displaying visual upgrade banners on plan-locked sections.
+  4. **Client/Server Boundary Separation (`src/modules/templates/constants.ts`)**: Decoupled template metadata and constants from `@/db` into a serverless constant file, eliminating webpack bundling of Node.js modules (`fs`, `tls`, `net`) into client components.
+  5. **Admin Pre-Publication Inspection (`src/app/(admin)/admin/page.tsx`)**: Upgraded Publications queue with in-modal customer profile preview, and added template management controls (active/disabled toggles, plan compatibility selector, adoption counts).
+  6. **Customer Dashboard Integration (`src/app/(app)/dashboard/page.tsx`)**: Added Selected Template overview box with "Preview (My Data)" and "Change Template" actions, coupled with publishing approval workflow triggers.
+- **Consequences**:
+  - Full adherence to the Zero Fabrication and Brand Config rules.
+  - Zero dynamic route pollution on public profile pages (`/p/[slug]`).
+  - 82/82 Vitest tests passing (including 13 dedicated unit/integration tests in `tests/unit/template-preview-mock.test.ts`).
+  - Next.js production build (`next build`) compiles and optimizes 15 static and 35 dynamic routes cleanly with 0 errors.

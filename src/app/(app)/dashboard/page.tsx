@@ -20,7 +20,11 @@ import {
   Loader2,
   Palette,
   CheckCircle,
+  FileCheck2,
+  Clock,
+  Send,
 } from 'lucide-react';
+import { TemplatePreviewModal } from '@/components/templates/TemplatePreviewModal';
 
 interface ProfileData {
   id: string;
@@ -60,6 +64,9 @@ export default function DashboardPage() {
   const [leads, setLeads] = React.useState<LeadData[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [copiedSlug, setCopiedSlug] = React.useState<string | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
+  const [isRequestingPublication, setIsRequestingPublication] = React.useState(false);
+  const [publicationStatusMsg, setPublicationStatusMsg] = React.useState<string | null>(null);
 
   const displayName = user?.name || user?.email?.split('@')[0] || 'Executive Member';
 
@@ -273,11 +280,120 @@ export default function DashboardPage() {
                       <span>Public Slug: <code className="text-primary font-mono">/p/{activeProfile.slug}</code></span>
                       <span>•</span>
                       <span className="capitalize">Type: {activeProfile.profileType}</span>
-                      <span>•</span>
-                      <span className="capitalize">Template: {activeProfile.templateId.replace('-', ' ')}</span>
                     </div>
                   </div>
                 </div>
+
+                {/* Selected Template & Publishing Action Bar */}
+                <div className="mt-6 pt-5 border-t border-border/60 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Template Overview Box */}
+                  <div className="p-4 rounded-2xl bg-card/80 border border-border/80 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="h-10 w-10 rounded-xl bg-gold/15 text-gold border border-gold/30 flex items-center justify-center shrink-0">
+                        <Palette className="h-5 w-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+                          Active Template
+                        </div>
+                        <div className="font-bold text-sm text-foreground truncate capitalize">
+                          {activeProfile.templateId.replace(/-/g, ' ')}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsPreviewOpen(true)}
+                        className="text-xs h-8 gap-1.5"
+                      >
+                        <Eye className="w-3.5 h-3.5 text-primary" />
+                        <span>Preview</span>
+                      </Button>
+                      <Link href="/templates">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-xs h-8 text-gold hover:text-gold-light"
+                        >
+                          Change
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+
+                  {/* Publishing Status Box */}
+                  <div className="p-4 rounded-2xl bg-card/80 border border-border/80 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="h-10 w-10 rounded-xl bg-primary/15 text-primary border border-primary/30 flex items-center justify-center shrink-0">
+                        {activeProfile.status === 'published' ? (
+                          <CheckCircle className="h-5 w-5 text-emerald-400" />
+                        ) : activeProfile.status === 'review_pending' ? (
+                          <Clock className="h-5 w-5 text-amber-400" />
+                        ) : (
+                          <FileCheck2 className="h-5 w-5 text-primary" />
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+                          Publishing Workflow
+                        </div>
+                        <div className="font-bold text-sm text-foreground truncate capitalize">
+                          {activeProfile.status === 'published'
+                            ? 'Approved & Published'
+                            : activeProfile.status === 'review_pending'
+                            ? 'Pending Admin Review'
+                            : 'Draft (Unpublished)'}
+                        </div>
+                      </div>
+                    </div>
+
+                    {activeProfile.status === 'draft' && (
+                      <Button
+                        size="sm"
+                        disabled={isRequestingPublication}
+                        onClick={async () => {
+                          try {
+                            setIsRequestingPublication(true);
+                            const res = await fetch(`/api/v1/profiles/${activeProfile.id}/request-publication`, {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({}),
+                            });
+                            if (!res.ok) {
+                              const err = await res.json();
+                              throw new Error(err.error?.message || 'Failed to submit publication request.');
+                            }
+                            setPublicationStatusMsg('Publication request submitted for admin review!');
+                            setProfiles((prev) =>
+                              prev.map((p) =>
+                                p.id === activeProfile.id ? { ...p, status: 'review_pending' } : p
+                              )
+                            );
+                            setTimeout(() => setPublicationStatusMsg(null), 4000);
+                          } catch (e: unknown) {
+                            alert(e instanceof Error ? e.message : 'Error submitting request');
+                          } finally {
+                            setIsRequestingPublication(false);
+                          }
+                        }}
+                        className="text-xs h-8 font-bold bg-gold text-neutral-950 hover:bg-gold-light gap-1.5 shrink-0 shadow-sm"
+                      >
+                        {isRequestingPublication ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3 h-3" />}
+                        <span>Submit for Publication</span>
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {publicationStatusMsg && (
+                  <div className="mt-4 p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-medium flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>{publicationStatusMsg}</span>
+                  </div>
+                )}
               </CardHeader>
             </Card>
           ) : (
@@ -370,6 +486,37 @@ export default function DashboardPage() {
             </Card>
           </div>
         </>
+      )}
+
+      {/* Interactive Template Preview Modal with Customer Data */}
+      {isPreviewOpen && activeProfile && (
+        <TemplatePreviewModal
+          isOpen={isPreviewOpen}
+          onClose={() => setIsPreviewOpen(false)}
+          initialTemplateId={activeProfile.templateId}
+          customerProfile={{
+            id: activeProfile.id,
+            slug: activeProfile.slug,
+            displayName: activeProfile.displayName,
+            headline: activeProfile.headline,
+            profileType: activeProfile.profileType,
+            templateId: activeProfile.templateId,
+            avatarUrl: activeProfile.avatarUrl,
+            publishedJson: activeProfile.publishedJson,
+          }}
+          onSelectTemplate={async (newTemplateId) => {
+            const res = await fetch(`/api/v1/profiles/${activeProfile.id}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ templateId: newTemplateId }),
+            });
+            if (res.ok) {
+              setProfiles((prev) =>
+                prev.map((p) => (p.id === activeProfile.id ? { ...p, templateId: newTemplateId } : p))
+              );
+            }
+          }}
+        />
       )}
     </div>
   );

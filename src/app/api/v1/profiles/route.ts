@@ -21,7 +21,7 @@ const createProfileSchema = z.object({
   avatarUrl: z.string().optional(),
   coverUrl: z.string().optional(),
   templateId: z.string().optional().default('obsidian-luxury'),
-  themeConfig: z.record(z.unknown()).optional(),
+  themeConfig: z.record(z.string(), z.unknown()).optional(),
   organizationId: z.string().optional().nullable(),
 });
 

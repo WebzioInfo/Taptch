@@ -94,7 +94,7 @@ describe('Save Draft, Partial Updates & Worker Resilience', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         const emailIssue = result.error.issues.find(
-          (issue: { path: (string | number)[]; message: string }) => issue.path.includes('email')
+          (issue) => issue.path.includes('email')
         );
         expect(emailIssue).toBeDefined();
         expect(emailIssue?.message).toContain('email');
@@ -110,7 +110,7 @@ describe('Save Draft, Partial Updates & Worker Resilience', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         const headlineIssue = result.error.issues.find(
-          (issue: { path: (string | number)[]; message: string }) => issue.path.includes('headline')
+          (issue) => issue.path.includes('headline')
         );
         expect(headlineIssue).toBeDefined();
         expect(headlineIssue?.message).toContain('255');

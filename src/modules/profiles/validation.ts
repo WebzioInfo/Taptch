@@ -12,7 +12,7 @@ export const updateProfileSchema = z.object({
   avatarUrl: z.string().nullish(),
   coverUrl: z.string().nullish(),
   templateId: z.string().nullish(),
-  themeConfig: z.record(z.unknown()).nullish(),
+  themeConfig: z.record(z.string(), z.unknown()).nullish(),
   phone: z.string().max(50, 'Phone cannot exceed 50 characters').nullish(),
   whatsapp: z.string().max(50, 'WhatsApp cannot exceed 50 characters').nullish(),
   email: z.string().email('Invalid email address format').or(z.literal('')).nullish(),
@@ -21,7 +21,7 @@ export const updateProfileSchema = z.object({
   location: z.string().max(255, 'Location cannot exceed 255 characters').nullish(),
   socialLinks: z
     .union([
-      z.record(z.unknown()),
+      z.record(z.string(), z.unknown()),
       z.array(
         z.object({
           platform: z.string().min(1, 'Social platform is required'),
@@ -95,7 +95,7 @@ export const updateProfileSchema = z.object({
       })
     )
     .nullish(),
-  customFields: z.record(z.unknown()).nullish(),
+  customFields: z.record(z.string(), z.unknown()).nullish(),
   status: z
     .enum([
       'DRAFT',

@@ -18,10 +18,13 @@ import {
   Image as ImageIcon,
   Phone,
   MessageCircle,
-  ExternalLink,
   Check,
   X,
+  Eye,
+  Power,
 } from 'lucide-react';
+import { TemplatePreviewModal } from '@/components/templates/TemplatePreviewModal';
+import type { ProfileRenderData } from '@/components/templates/ProfileRenderer';
 
 interface AdminStats {
   totalUsers: number;
@@ -81,6 +84,10 @@ interface TemplateItem {
   requiredPlanId: string;
   isActive: boolean;
   isFeatured: boolean;
+  thumbnailUrl?: string;
+  usageCount?: number;
+  features?: string[];
+  description?: string;
 }
 
 interface MediaItem {
@@ -117,6 +124,11 @@ export default function SuperAdminPage() {
   const [validitySelections, setValiditySelections] = React.useState<Record<string, number>>({});
   const [paymentSelections, setPaymentSelections] = React.useState<Record<string, string>>({});
 
+  // Template preview state for admin review
+  const [adminPreviewTemplateId, setAdminPreviewTemplateId] = React.useState<string | null>(null);
+  const [adminPreviewProfile, setAdminPreviewProfile] = React.useState<ProfileRenderData | null>(null);
+  const [loadingProfilePreview, setLoadingProfilePreview] = React.useState<string | null>(null);
+
   const isSuperAdmin = (session?.user as { role?: string } | undefined)?.role === 'super_admin';
 
   const loadAdminData = React.useCallback(async () => {
@@ -126,7 +138,7 @@ export default function SuperAdminPage() {
         fetch('/api/v1/admin/stats').then((r) => r.json()).catch(() => ({ data: null })),
         fetch('/api/v1/admin/publications').then((r) => r.json()).catch(() => ({ data: [] })),
         fetch('/api/v1/admin/orders').then((r) => r.json()).catch(() => ({ data: [] })),
-        fetch('/api/v1/templates?activeOnly=false').then((r) => r.json()).catch(() => ({ data: [] })),
+        fetch('/api/v1/admin/templates').then((r) => r.json()).catch(() => ({ data: [] })),
         fetch('/api/v1/admin/media').then((r) => r.json()).catch(() => ({ data: [], meta: { totalCount: 0, totalBytes: 0 } })),
       ]);
 
@@ -198,6 +210,50 @@ export default function SuperAdminPage() {
       console.error(err);
     } finally {
       setUpdatingOrderId(null);
+    }
+  };
+
+  const handlePreviewCustomerProfile = async (pub: PublicationItem) => {
+    try {
+      setLoadingProfilePreview(pub.id);
+      const res = await fetch(`/api/v1/profiles/${pub.profileId}`);
+      if (!res.ok) throw new Error('Failed to load profile details');
+      const json = await res.json();
+      const profile = json.data;
+      setAdminPreviewProfile({
+        id: profile.id,
+        slug: profile.slug,
+        displayName: profile.displayName,
+        headline: profile.headline,
+        bio: profile.bio,
+        avatarUrl: profile.avatarUrl,
+        coverUrl: profile.coverUrl,
+        profileType: profile.profileType,
+        templateId: pub.templateId || profile.templateId,
+        businesses: profile.businesses || [],
+        catalogue: profile.catalogue || [],
+      });
+      setAdminPreviewTemplateId(pub.templateId || profile.templateId);
+    } catch (err) {
+      console.error('Failed to preview customer profile:', err);
+      alert('Could not load profile preview for this customer.');
+    } finally {
+      setLoadingProfilePreview(null);
+    }
+  };
+
+  const handleUpdateTemplate = async (templateId: string, updates: Partial<TemplateItem>) => {
+    try {
+      const res = await fetch(`/api/v1/admin/templates/${templateId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      if (!res.ok) throw new Error('Failed to update template configuration');
+      await loadAdminData();
+    } catch (err) {
+      console.error('Error updating template:', err);
+      alert('Failed to update template configuration.');
     }
   };
 
@@ -378,14 +434,20 @@ export default function SuperAdminPage() {
                           <div className="text-[11px] text-muted-foreground">{pub.customerEmail}</div>
                           <div className="mt-1 flex items-center gap-1.5">
                             <span className="font-medium text-white/90">{pub.profileName}</span>
-                            <a
-                              href={`/p/${pub.profileSlug}`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-primary hover:underline inline-flex items-center gap-0.5 text-[10px]"
+                            <button
+                              type="button"
+                              onClick={() => handlePreviewCustomerProfile(pub)}
+                              disabled={loadingProfilePreview === pub.id}
+                              className="text-primary hover:underline inline-flex items-center gap-1 text-[11px] font-medium"
+                              title="Preview Customer Template with Real Data"
                             >
-                              Preview <ExternalLink className="w-2.5 h-2.5" />
-                            </a>
+                              {loadingProfilePreview === pub.id ? (
+                                <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                              ) : (
+                                <Eye className="w-2.5 h-2.5 text-primary" />
+                              )}
+                              <span>Preview Template</span>
+                            </button>
                           </div>
                         </td>
 
@@ -627,26 +689,104 @@ export default function SuperAdminPage() {
 
       {/* Templates Tab */}
       {activeTab === 'templates' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {templates.map((tpl) => (
-            <Card key={tpl.id} className="border-border/80 bg-card/60">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <Badge variant="gold" className="text-[10px] uppercase">
-                    Plan: {tpl.requiredPlanId}
-                  </Badge>
-                  <Badge variant={tpl.isActive ? 'outline' : 'secondary'} className="text-[10px]">
-                    {tpl.isActive ? 'Active' : 'Disabled'}
-                  </Badge>
-                </div>
-                <CardTitle className="text-base font-semibold pt-1">{tpl.name}</CardTitle>
-                <CardDescription className="text-xs capitalize">Category: {tpl.category}</CardDescription>
-              </CardHeader>
-              <CardContent className="text-xs text-muted-foreground">
-                <p>Built-in responsive template engine supporting personal & business profiles.</p>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-bold text-foreground">Template Directory Governance</h3>
+              <p className="text-xs text-muted-foreground">Manage active status, required plan tiers, and test realistic demo previews across all 8 business verticals.</p>
+            </div>
+            <Badge variant="outline" className="text-xs text-primary border-primary/30">
+              {templates.length} Authoritative Templates
+            </Badge>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {templates.map((tpl) => (
+              <Card key={tpl.id} className="border-border/80 bg-card/60 overflow-hidden flex flex-col justify-between">
+                {tpl.thumbnailUrl && (
+                  <div className="aspect-[16/9] w-full bg-neutral-900 relative overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={tpl.thumbnailUrl}
+                      alt={tpl.name}
+                      className="w-full h-full object-cover brightness-85"
+                    />
+                    <div className="absolute top-2 right-2 flex items-center gap-1.5">
+                      <Badge variant={tpl.isActive ? 'outline' : 'secondary'} className={`text-[10px] ${tpl.isActive ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-red-500/20 text-red-300 border-red-500/40'}`}>
+                        {tpl.isActive ? 'Active' : 'Disabled'}
+                      </Badge>
+                    </div>
+                    <div className="absolute bottom-2 left-2">
+                      <span className="text-[10px] uppercase font-bold text-white bg-black/60 px-2 py-0.5 rounded border border-white/10">
+                        {tpl.category}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <CardTitle className="text-base font-bold">{tpl.name}</CardTitle>
+                      <CardDescription className="text-xs mt-1 line-clamp-2">
+                        {tpl.description || 'Enterprise responsive template layout.'}
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+
+                <CardContent className="space-y-4 text-xs pt-0 flex-1 flex flex-col justify-between">
+                  <div className="space-y-2 pt-2 border-t border-border/40">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Adoption &amp; Usage:</span>
+                      <Badge variant="secondary" className="font-mono text-[11px]">
+                        {tpl.usageCount || 0} customer profiles
+                      </Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Required Plan:</span>
+                      <select
+                        value={tpl.requiredPlanId}
+                        onChange={(e) => handleUpdateTemplate(tpl.id, { requiredPlanId: e.target.value })}
+                        className="px-2 py-0.5 rounded bg-background border border-border text-xs uppercase font-semibold text-foreground"
+                      >
+                        <option value="nano">Nano (Base)</option>
+                        <option value="micro">Micro (Solo)</option>
+                        <option value="mini">Mini (Growth)</option>
+                        <option value="max">Max (Luxury)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-border/40 flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setAdminPreviewProfile(null);
+                        setAdminPreviewTemplateId(tpl.id);
+                      }}
+                      className="flex-1 text-xs gap-1.5 h-8"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-primary" />
+                      <span>Preview Demo</span>
+                    </Button>
+
+                    <Button
+                      variant={tpl.isActive ? 'outline' : 'gold'}
+                      size="sm"
+                      onClick={() => handleUpdateTemplate(tpl.id, { isActive: !tpl.isActive })}
+                      className="text-xs h-8 px-3 gap-1"
+                    >
+                      <Power className="w-3 h-3" />
+                      <span>{tpl.isActive ? 'Disable' : 'Enable'}</span>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       )}
 
@@ -697,6 +837,23 @@ export default function SuperAdminPage() {
             )}
           </div>
         </Card>
+      )}
+
+      {/* Admin Template Preview Modal (For Customer Profile Review or Demo Business Inspection) */}
+      {adminPreviewTemplateId && (
+        <TemplatePreviewModal
+          isOpen={!!adminPreviewTemplateId}
+          onClose={() => {
+            setAdminPreviewTemplateId(null);
+            setAdminPreviewProfile(null);
+          }}
+          initialTemplateId={adminPreviewTemplateId}
+          customerProfile={adminPreviewProfile}
+          onSelectTemplate={(tplId) => {
+            // Admin testing selection - updates local preview
+            setAdminPreviewTemplateId(tplId);
+          }}
+        />
       )}
     </div>
   );

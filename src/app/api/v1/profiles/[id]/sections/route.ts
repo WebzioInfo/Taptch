@@ -15,7 +15,7 @@ const sectionSchema = z.object({
   title: z.string().optional().nullable(),
   isEnabled: z.boolean(),
   displayOrder: z.number().int(),
-  configJson: z.record(z.unknown()).optional(),
+  configJson: z.record(z.string(), z.unknown()).optional(),
 });
 
 const updateSectionsBodySchema = z.object({

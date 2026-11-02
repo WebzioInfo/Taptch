@@ -57,7 +57,7 @@ export function apiError(
 
 export function handleApiError(error: unknown, requestId?: string): NextResponse<ApiEnvelope<null>> {
   if (error instanceof ZodError) {
-    const fieldErrors = error.flatten().fieldErrors;
+    const fieldErrors = error.flatten().fieldErrors as Record<string, string[] | undefined>;
     const formattedFields = Object.entries(fieldErrors)
       .map(([field, msgs]) => `${field}: ${msgs?.join(', ')}`)
       .join('; ');
