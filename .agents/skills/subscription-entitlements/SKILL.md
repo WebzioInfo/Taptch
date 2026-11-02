@@ -1,15 +1,15 @@
 ---
 name: subscription-entitlements
-description: "Master Tapzio's 4-tier plan matrix (nano, micro, mini, max), resource limits enforcement, server-side permission gates (can), and tenant subscription overrides."
+description: "Master Tappzio's 4-tier plan matrix (nano, micro, mini, max), resource limits enforcement, server-side permission gates (can), and tenant subscription overrides."
 risk: safe
-source: tapzio-core
+source: Tappzio-core
 date_added: "2026-11-02"
 version: "1.0.0"
 ---
 
-# Tapzio Subscription & Entitlements Engine Skill
+# Tappzio Subscription & Entitlements Engine Skill
 
-Engineering specification for Tapzio's data-driven subscription plans, resource limits enforcement (`assertWithinLimit`), and server-side authorization gates (`can()`).
+Engineering specification for Tappzio's data-driven subscription plans, resource limits enforcement (`assertWithinLimit`), and server-side authorization gates (`can()`).
 
 ---
 

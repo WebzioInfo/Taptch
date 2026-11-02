@@ -50,7 +50,7 @@ export function getDatabase() {
   const connectionString =
     process.env.DATABASE_URL ||
     process.env.DATABASE_URL_POOLED ||
-    'postgres://tapzio_app:tapzio_app_pass@localhost:6432/tapzio_db?sslmode=disable';
+    'postgres://tappzio_app:tappzio_app_pass@localhost:6432/tappzio_db?sslmode=disable';
 
   if (!rawPostgresClient) {
     // prepare: false is strictly MANDATORY behind PgBouncer transaction pooling

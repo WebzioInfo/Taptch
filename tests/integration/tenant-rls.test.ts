@@ -25,13 +25,13 @@ describe('Tenant-Scoped Data Layer & PostgreSQL Row-Level Security (RLS)', () =>
     await db.execute(sql`
       DO $$
       BEGIN
-        IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'tapzio_app') THEN
-          CREATE ROLE tapzio_app WITH LOGIN NOBYPASSRLS;
+        IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'tappzio_app') THEN
+          CREATE ROLE tappzio_app WITH LOGIN NOBYPASSRLS;
         END IF;
       END $$;
     `);
-    await db.execute(sql`GRANT USAGE ON SCHEMA public TO tapzio_app;`);
-    await db.execute(sql`GRANT ALL ON ALL TABLES IN SCHEMA public TO tapzio_app;`);
+    await db.execute(sql`GRANT USAGE ON SCHEMA public TO tappzio_app;`);
+    await db.execute(sql`GRANT ALL ON ALL TABLES IN SCHEMA public TO tappzio_app;`);
 
     // 2. Setup test organizations and users
     await db.insert(schema.organizations).values([
@@ -52,10 +52,10 @@ describe('Tenant-Scoped Data Layer & PostgreSQL Row-Level Security (RLS)', () =>
     ]).onConflictDoNothing();
   });
 
-  // Helper to run query as tapzio_app role (simulating PgBouncer connection)
+  // Helper to run query as tappzio_app role (simulating PgBouncer connection)
   async function runAsAppRole<T>(actor: ActorContext, fn: (tx: any) => Promise<T>): Promise<T> {
     return withActor(actor, async (tx) => {
-      await tx.execute(sql`SET ROLE tapzio_app;`);
+      await tx.execute(sql`SET ROLE tappzio_app;`);
       return fn(tx);
     });
   }
@@ -84,7 +84,7 @@ describe('Tenant-Scoped Data Layer & PostgreSQL Row-Level Security (RLS)', () =>
   it('Unset tenant context should return zero rows due to RLS filter', async () => {
     // Query without setting tenant organization ID
     const rawResults = await db.transaction(async (tx: any) => {
-      await tx.execute(sql`SET ROLE tapzio_app;`);
+      await tx.execute(sql`SET ROLE tappzio_app;`);
       await tx.execute(sql`SELECT set_config('app.is_admin', 'false', true);`);
       await tx.execute(sql`SELECT set_config('app.current_org_id', '', true);`);
       return tx.select().from(schema.departments);
@@ -109,7 +109,7 @@ describe('Tenant-Scoped Data Layer & PostgreSQL Row-Level Security (RLS)', () =>
 
     // Transaction 3: Unauthenticated query immediately following
     const t3 = await db.transaction(async (tx: any) => {
-      await tx.execute(sql`SET ROLE tapzio_app;`);
+      await tx.execute(sql`SET ROLE tappzio_app;`);
       await tx.execute(sql`SELECT set_config('app.is_admin', 'false', true);`);
       await tx.execute(sql`SELECT set_config('app.current_org_id', '', true);`);
       return tx.select().from(schema.departments);

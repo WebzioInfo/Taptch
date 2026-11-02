@@ -1,5 +1,5 @@
 /**
- * TAPZIO CLOUDINARY MEDIA MANAGEMENT ENGINE
+ * TAPPZIO CLOUDINARY MEDIA MANAGEMENT ENGINE
  *
  * Implements centralized media upload, signed direct upload generation,
  * responsive image transformation, document handling, and asset registry.
@@ -22,18 +22,18 @@ export interface CloudinaryConfig {
  * Standardized Cloudinary Folder Taxonomy
  */
 export const CLOUDINARY_FOLDERS = {
-  personalAvatars: 'tapzio/profiles/personal',
-  personalCovers: 'tapzio/profiles/covers',
-  personalGalleries: 'tapzio/profiles/galleries',
-  businessLogos: 'tapzio/businesses/logos',
-  businessCovers: 'tapzio/businesses/covers',
-  businessProducts: 'tapzio/businesses/products',
-  businessServices: 'tapzio/businesses/services',
-  businessGalleries: 'tapzio/businesses/galleries',
-  documents: 'tapzio/documents/brochures',
-  videos: 'tapzio/videos',
-  templates: 'tapzio/templates/previews',
-  nfcProducts: 'tapzio/nfc-products',
+  personalAvatars: 'tappzio/profiles/personal',
+  personalCovers: 'tappzio/profiles/covers',
+  personalGalleries: 'tappzio/profiles/galleries',
+  businessLogos: 'tappzio/businesses/logos',
+  businessCovers: 'tappzio/businesses/covers',
+  businessProducts: 'tappzio/businesses/products',
+  businessServices: 'tappzio/businesses/services',
+  businessGalleries: 'tappzio/businesses/galleries',
+  documents: 'tappzio/documents/brochures',
+  videos: 'tappzio/videos',
+  templates: 'tappzio/templates/previews',
+  nfcProducts: 'tappzio/nfc-products',
 } as const;
 
 export type CloudinaryFolderKey = keyof typeof CLOUDINARY_FOLDERS;
@@ -157,7 +157,7 @@ export async function uploadMediaBuffer(
     const uploadOptions: UploadApiOptions = {
       folder: options.folder,
       resource_type: options.resourceType || 'auto',
-      tags: options.tags || ['tapzio', options.mediaCategory],
+      tags: options.tags || ['tappzio', options.mediaCategory],
       unique_filename: true,
       overwrite: false,
     };
@@ -216,7 +216,7 @@ export async function uploadMediaBuffer(
  * Generates signed parameters for secure direct client-side uploads.
  * Prevents client-side exposure of CLOUDINARY_API_SECRET.
  */
-export function generateSignedUploadParams(folder: string, tags: string[] = ['tapzio']) {
+export function generateSignedUploadParams(folder: string, tags: string[] = ['tappzio']) {
   const config = getCloudinaryConfig();
   const cld = initCloudinary();
 

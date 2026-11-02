@@ -11,7 +11,7 @@ trigger: always_on
 - Low Coupling: Depend on abstractions and minimal interfaces. Avoid God classes, monolithic service files, and deep inheritance hierarchies.
 
 ## 2. Brand Only From Config (Zero Brand Literals)
-- Never hardcode "Tapzio" or any customer brand name in application components or UI templates.
+- Never hardcode "Tappzio" or any customer brand name in application components or UI templates.
 - All user-facing brand names, assets, logos, and theme colors must derive dynamically from `src/config/brand.ts` or database `system_settings`.
 - Enforced by automated architecture test `tests/architecture/brand-literal.test.ts`.
 

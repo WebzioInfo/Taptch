@@ -36,12 +36,12 @@ export interface BrandConfig {
 }
 
 export const defaultBrandConfig: BrandConfig = {
-  name: process.env.NEXT_PUBLIC_BRAND_NAME || 'Tapzio',
-  shortName: 'Tapzio',
+  name: process.env.NEXT_PUBLIC_BRAND_NAME || 'Tappzio',
+  shortName: 'Tappzio',
   tagline: 'Intelligent Digital Identity & Smart Networking',
   legalName: 'Webzio Technology Private Limited',
-  supportEmail: 'support@tapzio.com',
-  primaryDomain: 'tapzio.com',
+  supportEmail: 'support@tappzio.com',
+  primaryDomain: 'tappzio.com',
   appUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
   assets: {
     logoUrl: '/assets/brand/logo.svg',

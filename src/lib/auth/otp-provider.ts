@@ -1,5 +1,5 @@
 /**
- * TAPZIO OTP & TRANSACTIONAL COMMUNICATIONS PROVIDER INTERFACE
+ * TAPPZIO OTP & TRANSACTIONAL COMMUNICATIONS PROVIDER INTERFACE
  *
  * Dev/Local: Logs OTP to stdout console and dispatches to Mailpit (MOCK).
  * Production: Routes through Meta WhatsApp Cloud API (primary) or MSG91 DLT SMS (secondary).
@@ -34,7 +34,7 @@ export async function sendOtpSms(phoneNumber: string, code: string): Promise<Otp
     // PREREQUISITES:
     // 1. Meta Business Account registered & verified
     // 2. WhatsApp Business Phone Number ID in .env
-    // 3. Approved template: tapzio_login_otp (Authentication category)
+    // 3. Approved template: tappzio_login_otp (Authentication category)
     console.warn('[WHATSAPP OTP STUB] Production credentials required. Falling back to safe log.');
     return { success: true, channel: 'whatsapp', messageId: `wa-stub-${Date.now()}` };
   }
@@ -43,7 +43,7 @@ export async function sendOtpSms(phoneNumber: string, code: string): Promise<Otp
     // STUB: MSG91 India TRAI DLT SMS Integration
     // PREREQUISITES:
     // 1. TRAI DLT Entity Registration (Principal Entity ID)
-    // 2. Sender Header: TAPZIO
+    // 2. Sender Header: TAPPZIO
     // 3. Approved DLT Template ID injected in payload
     console.warn('[MSG91 DLT SMS STUB] DLT Entity approval required. Falling back to safe log.');
     return { success: true, channel: 'msg91', messageId: `msg91-stub-${Date.now()}` };

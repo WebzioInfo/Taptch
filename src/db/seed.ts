@@ -14,7 +14,7 @@ dotenv.config({ path: path.resolve('.env') });
 // Password hasher matching Better Auth standard scrypt / sha256 password hash format
 function hashPassword(password: string): string {
   // Better Auth stores passwords hashed; for testing we can generate a deterministic SHA-256 or bcrypt hash
-  const salt = 'tapzio_secure_salt_2026';
+  const salt = 'tappzio_secure_salt_2026';
   return crypto.createHash('sha256').update(password + salt).digest('hex');
 }
 
@@ -266,7 +266,7 @@ export async function seedDatabase() {
     {
       id: 'usr-superadmin-001',
       name: 'Aditya Vikram (Super Admin)',
-      email: 'superadmin@tapzio.com',
+      email: 'superadmin@tappzio.com',
       systemRole: 'super_admin',
       twoFactorEnabled: true,
       emailVerified: true,
@@ -275,7 +275,7 @@ export async function seedDatabase() {
     {
       id: 'usr-support-002',
       name: 'Kavita Menon (Support Admin)',
-      email: 'support@tapzio.com',
+      email: 'support@tappzio.com',
       systemRole: 'support_admin',
       twoFactorEnabled: true,
       emailVerified: true,
@@ -295,7 +295,7 @@ export async function seedDatabase() {
         accountId: u.id,
         providerId: 'credential',
         userId: u.id,
-        password: hashPassword('TapzioAdmin@2026!'),
+        password: hashPassword('TappzioAdmin@2026!'),
       })
       .onConflictDoNothing({ target: schema.accounts.id });
   }
@@ -410,7 +410,7 @@ export async function seedDatabase() {
         accountId: ind.id,
         providerId: 'credential',
         userId: ind.id,
-        password: hashPassword('TapzioDemo@2026!'),
+        password: hashPassword('TappzioDemo@2026!'),
       })
       .onConflictDoNothing({ target: schema.accounts.id });
 
@@ -438,10 +438,10 @@ export async function seedDatabase() {
   await db.insert(schema.systemSettings)
     .values({
       id: 'default',
-      brandName: 'Tapzio',
+      brandName: 'Tappzio',
       brandTagline: 'Intelligent Digital Identity & Smart Networking',
       brandLogoUrl: '/assets/brand/logo.svg',
-      contactEmail: 'support@tapzio.com',
+      contactEmail: 'support@tappzio.com',
     })
     .onConflictDoNothing({ target: schema.systemSettings.id });
 

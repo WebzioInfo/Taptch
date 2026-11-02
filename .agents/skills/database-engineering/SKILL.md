@@ -26,7 +26,7 @@ description: PostgreSQL 16, Drizzle ORM, schema design, RLS multi-tenant isolati
 
 ## 3. Migration Architecture & Idempotence
 - Migrations are versioned SQL files located in `src/db/migrations/`.
-- The migration runner `src/db/migrate.ts` tracks executed migrations in the `__tapzio_migrations` ledger table to guarantee strict idempotence.
+- The migration runner `src/db/migrate.ts` tracks executed migrations in the `__Tappzio_migrations` ledger table to guarantee strict idempotence.
 - Never manually edit applied migrations. Generate fresh migrations via `pnpm db:generate`.
 
 ## 4. Indexing & Query Performance

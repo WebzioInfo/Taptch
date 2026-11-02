@@ -2,7 +2,7 @@
 name: react-architecture
 description: "Master React 19 architecture, component design, composition patterns, custom hooks, and unidirectional data flow."
 risk: safe
-source: tapzio-core
+source: Tappzio-core
 date_added: "2026-11-02"
 version: "1.0.0"
 ---

@@ -2,7 +2,7 @@
 name: nextjs-api-routes
 description: "Master Next.js 15 Route Handlers (route.ts), HTTP method conventions, standardized API envelopes, rate limiting, and edge runtimes."
 risk: safe
-source: tapzio-core
+source: Tappzio-core
 date_added: "2026-11-02"
 version: "1.0.0"
 ---
@@ -25,7 +25,7 @@ Architectural standard for authoring RESTful API endpoints in Next.js 15 App Rou
 
 ## 2. Standardized API Envelope Structure
 
-All Tapzio REST APIs must respond with a consistent JSON envelope defined in `src/lib/api/response.ts`:
+All Tappzio REST APIs must respond with a consistent JSON envelope defined in `src/lib/api/response.ts`:
 
 ```json
 {

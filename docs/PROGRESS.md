@@ -1,4 +1,4 @@
-# Tapzio — Project Progress Tracking
+# Tappzio — Project Progress Tracking
 
 | Milestone | Title | Status | Verified Capabilities | Mocks / Stubs | Deferred Items |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -10,9 +10,10 @@
 | **M5** | Corporate & Organization Management | IN PROGRESS | Corporate org schema, departments, 12 seeded members, tenant subscriptions. | None | - |
 | **M6** | Commerce, Hardware Orders & Billing | **COMPLETE** | Physical hardware order requests (`POST /api/v1/orders`), material selection (Matte PVC vs Brushed Stainless Metal), shipping address capture, manual payment status tracking (`unpaid`, `paid_offline`, `waived`), order history. | None | Live checkout / Razorpay deferred to Phase 2. |
 | **M7** | Super Admin & Platform Control | **COMPLETE** | Super Admin control dashboard (`/admin`), platform metric counters (`/api/v1/admin/stats`), physical card production Kanban queue, courier tracking number injection, template status manager, Publication Requests review & plan assignment queue with WhatsApp & Phone commercial links, Cloudinary Media Asset Registry inspection. | None | Fully verified |
-| **M8** | Cloudinary Media & Controlled Publishing | **COMPLETE** | Official Cloudinary SDK (`cloudinary`) integration, signed client direct upload endpoints (`/api/v1/media/signature`), server-side streaming uploads (`/api/v1/media/upload`), strict folder taxonomy (`tapzio/profiles/`, `tapzio/businesses/`, etc.), `media_assets` registry, publication review workflow (`submitPublicationRequest`, `reviewPublicationRequest`, `assignUserPlan`), plan-filtered snapshot generator (`filterProfileForPublicDisplay`), Scenarios A-H verified in Vitest. | None | Fully verified |
+| **M8** | Cloudinary Media & Controlled Publishing | **COMPLETE** | Official Cloudinary SDK (`cloudinary`) integration, signed client direct upload endpoints (`/api/v1/media/signature`), server-side streaming uploads (`/api/v1/media/upload`), strict folder taxonomy (`tappzio/profiles/`, `tappzio/businesses/`, etc.), `media_assets` registry, publication review workflow (`submitPublicationRequest`, `reviewPublicationRequest`, `assignUserPlan`), plan-filtered snapshot generator (`filterProfileForPublicDisplay`), Scenarios A-H verified in Vitest. | None | Fully verified |
 | **M9** | Reseller Portal, Domains & White-Label | PENDING | - | - | - |
 | **M10** | Extras & Production Hardening | PENDING | - | - | - |
+| **M11** | Project Rebranding (Tapzio → Tappzio) | **COMPLETE** | Complete repository-wide rebranding to Tappzio. Migrated brand constants (`src/config/brand.ts`), database defaults, migration ledger (`__tappzio_migrations`), transactional email templates, Cloudinary taxonomies (`tappzio/*`), logger singletons (`service: 'tappzio-api'`), architectural brand guards, ADR 009, and all 44 Antigravity skills. Workspace relocated to `D:\Webzio\Tappzio`. 69/69 tests passing. | None | Fully verified |
 
 ## Credentials & External Service Status
 - **PostgreSQL / Supabase**: Successfully connected to hosted Supabase PostgreSQL 17 (`db.hwrgtzkhcdklizyfargh.supabase.co:5432/postgres`), all 6 migration batches (27 tables including `media_assets`, `publication_requests`, `plan_assignment_history`, RLS policies, Better Auth columns) applied via `npm run db:migrate`. Embedded PGlite fully migrated and synchronized for offline test isolation.

@@ -1,4 +1,4 @@
-# Tapzio — Permanent Agent & Engineering Working Rules
+# Tappzio — Permanent Agent & Engineering Working Rules
 
 @[Project Architecture Skill](.agents/skills/project-architecture/SKILL.md)
 @[Software Engineering Skill](.agents/skills/software-engineering/SKILL.md)
@@ -15,7 +15,7 @@ Every conversation and task in this workspace MUST adhere to both foundational s
 3. **Edit, Don't Regenerate**: Edit existing files surgically; never blindly overwrite full files unless explicitly requested.
 4. **No Fake Functionality**: Zero stubbed UI buttons, zero mock handlers masquerading as real code, zero silently swallowed errors. Mocks must be explicitly tagged `[MOCK]` in code, logs, and docs.
 5. **Never Claim Tests Passed Unless Run**: Execute the command, capture real CLI output, and inspect the exit code. Never simulate test results.
-6. **Brand Only From Config**: Never hardcode "Tapzio" or customer brands in components; all copy, assets, and colors must derive from `src/config/brand.ts` or database `system_settings`. Enforce via test.
+6. **Brand Only From Config**: Never hardcode "Tappzio" or customer brands in components; all copy, assets, and colors must derive from `src/config/brand.ts` or database `system_settings`. Enforce via test.
 7. **Backend Enforces Security**: Never rely on frontend UI hiding for authorization; every endpoint and query must enforce `can()` permissions and tenant isolation.
 8. **Separate Targets from Facts**: Never present an engineering goal (e.g. "<50ms redirect") as an achievement until empirically verified via test tools.
 9. **One Milestone at a Time**: Execute one milestone at a time with a strict verification gate before advancing.
@@ -28,5 +28,5 @@ Every conversation and task in this workspace MUST adhere to both foundational s
 16. **Mandatory Package Manager**: This project uses NPM exclusively. Always use npm commands. Never use pnpm, yarn, or bun. Before running package commands, inspect the existing `package.json` and `package-lock.json`.
 17. **MANDATORY ALL-SKILLS POLICY**: For every new user prompt and every task in this repository, inspect and read every available skill in `.agents/skills/` before starting work. Consider the instructions from the complete skill library. Apply all relevant engineering requirements. Never silently skip a skill. Re-read skills for every new task rather than assuming previous context remains valid. If a skill cannot be accessed, report it and do not falsely claim compliance.
 18. **Next.js 15 & React 19 Standards**: Default to Server Components, resolve async route parameters (`await params`), maintain Zero Dynamic Hot Path on public profiles (`/p/[slug]`), and validate all mutations with Zod.
-19. **Authoritative 44-Skills Catalog**: All 44 skills under `.agents/skills/` are authoritative. Consult specialist skills across Next.js, React, TypeScript, and Tapzio domain engines (`digital-profile-engine`, `template-rendering-engine`, `subscription-entitlements`, `public-profile-seo`) before implementing features.
+19. **Authoritative 44-Skills Catalog**: All 44 skills under `.agents/skills/` are authoritative. Consult specialist skills across Next.js, React, TypeScript, and Tappzio domain engines (`digital-profile-engine`, `template-rendering-engine`, `subscription-entitlements`, `public-profile-seo`) before implementing features.
 

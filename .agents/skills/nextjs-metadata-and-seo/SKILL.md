@@ -2,7 +2,7 @@
 name: nextjs-metadata-and-seo
 description: "Master Next.js 15 Metadata API, dynamic Open Graph generation, sitemap.ts, robots.ts, and Search Console indexing hygiene."
 risk: safe
-source: tapzio-core
+source: Tappzio-core
 date_added: "2026-11-02"
 version: "1.0.0"
 ---

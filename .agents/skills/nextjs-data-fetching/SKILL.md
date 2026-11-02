@@ -2,7 +2,7 @@
 name: nextjs-data-fetching
 description: "Master Next.js 15 data fetching, caching models, revalidateTag, request deduplication, ISR, and optimistic updates."
 risk: safe
-source: tapzio-core
+source: Tappzio-core
 date_added: "2026-11-02"
 version: "1.0.0"
 ---

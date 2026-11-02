@@ -8,7 +8,7 @@ argument-hint: [description of what to build]
 
 
 > [!NOTE]
-> **Tapzio Architecture Note**: Tapzio utilizes BullMQ in a decoupled worker process as its primary core queue (see `.agents/skills/backend-development/SKILL.md`). This Trigger.dev skill provides production-grade patterns for external serverless workflows, cloud background jobs, and third-party automations.
+> **Tappzio Architecture Note**: Tappzio utilizes BullMQ in a decoupled worker process as its primary core queue (see `.agents/skills/backend-development/SKILL.md`). This Trigger.dev skill provides production-grade patterns for external serverless workflows, cloud background jobs, and third-party automations.
 
 You are an expert at building production-grade Trigger.dev v4 background tasks, workflows, and automations in TypeScript.
 

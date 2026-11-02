@@ -135,3 +135,21 @@
   1. Configure `config.infrastructureLogging = { level: 'error' }` in `next.config.mjs` to silence non-critical infrastructure warnings while retaining critical build error telemetry.
   2. Add `config.ignoreWarnings` rules targeting `next-intl`, `PackFileCacheStrategy`, and build dependency cache invalidation expressions.
 - **Consequences**: Completely suppresses noisy, benign cache dependency parsing warnings during development and production builds, ensuring clean terminal outputs and CLI pipeline logs.
+
+---
+
+## ADR 009: Repository-Wide Rebranding & Identity Migration to Tappzio
+
+- **Status**: Accepted & Implemented
+- **Date**: 2026-11-02
+- **Context**: The official product and company identity transitioned from "Tapzio" to "Tappzio" (`TAPPZIO` / `Tappzio` / `tappzio`). A comprehensive, repository-wide migration was required across the workspace folder, code configurations, brand constants, database default values, transactional email templates, Cloudinary taxonomies, logging singletons, architecture test guards, and all 44 Antigravity skills, while strictly preserving external database credentials, customer data, and URL slug compatibility.
+- **Decision**:
+  1. **Brand Source of Truth**: Updated `src/config/brand.ts` (`name: 'Tappzio'`, `shortName: 'Tappzio'`, `supportEmail: 'support@tappzio.com'`, `primaryDomain: 'tappzio.com'`) as the single runtime source of truth.
+  2. **Zero Brand Literal Architecture Rule**: Updated `tests/architecture/brand-literal.test.ts` to strictly prevent both `"Tapzio"` and `"Tappzio"` from being hardcoded in UI components and routes outside brand configuration.
+  3. **Global Singletons & Loggers**: Updated `src/lib/logger/index.ts` to `service: 'tappzio-api'` and global singleton `__tappzio_logger__` with backward-compatible lookup of `__tapzio_logger__`. Updated `src/lib/redis/index.ts` to `__tappzio_redis__`.
+  4. **Database Migration Ledger**: Enhanced `src/db/migrate.ts` to inspect and maintain both `__tappzio_migrations` and `__tapzio_migrations` via `UNION`, ensuring zero re-execution or disruption of already applied migrations.
+  5. **External Secrets Preservation**: Preserved Supabase account connection strings and passwords (`Tapzio%402026`) in `.env.local` to prevent external authentication disruptions.
+  6. **Media Taxonomy**: Updated Cloudinary storage folders to `tappzio/*` (`tappzio/profiles/personal`, `tappzio/businesses/logos`, etc.) and default asset tags to `['tappzio']`.
+  7. **Documentation & Skills**: Synchronized `AGENTS.md`, `.agents/rules/`, and all 44 skills under `.agents/skills/` with the new Tappzio identity.
+  8. **Workspace Relocation**: Migrated root workspace from `D:\Webzio\Tapzio` to `D:\Webzio\Tappzio`.
+- **Consequences**: Consistent, professional brand identity across the entire repository; full backward compatibility for existing profile URLs and migrations; zero hardcoded literals in presentation layers; 100% test pass rate across all 69 test suites.

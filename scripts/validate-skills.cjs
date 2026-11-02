@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const skillsBase = 'D:\\Webzio\\Tapzio\\.agents\\skills';
+const skillsBase = path.resolve(__dirname, '../.agents/skills');
 const dirs = fs
   .readdirSync(skillsBase)
   .filter((d) => fs.statSync(path.join(skillsBase, d)).isDirectory());

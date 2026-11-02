@@ -19,7 +19,7 @@ import {
   getEntitlements,
 } from '@/modules/entitlements';
 
-describe('Tapzio Controlled Publishing & Plan Assignment System (Scenarios A - H)', () => {
+describe('Tappzio Controlled Publishing & Plan Assignment System (Scenarios A - H)', () => {
   const adminActor: ActorContext = {
     userId: 'usr_super_admin_test',
     orgId: null,
@@ -32,7 +32,7 @@ describe('Tapzio Controlled Publishing & Plan Assignment System (Scenarios A - H
     await db.insert(users).values({
       id: adminActor.userId,
       name: 'Super Admin',
-      email: 'admin@tapzio.test',
+      email: 'admin@tappzio.test',
       role: 'super_admin',
       systemRole: 'super_admin',
     }).onConflictDoNothing();
@@ -87,14 +87,14 @@ describe('Tapzio Controlled Publishing & Plan Assignment System (Scenarios A - H
         { platform: 'instagram', url: 'https://instagram.com/aarav' },
       ],
       gallery: [
-        { url: 'https://res.cloudinary.com/tapzio/image/upload/sample1.jpg', caption: 'Flagship Event 2025' },
-        { url: 'https://res.cloudinary.com/tapzio/image/upload/sample2.jpg', caption: 'Keynote Demo' },
+        { url: 'https://res.cloudinary.com/tappzio/image/upload/sample1.jpg', caption: 'Flagship Event 2025' },
+        { url: 'https://res.cloudinary.com/tappzio/image/upload/sample2.jpg', caption: 'Keynote Demo' },
       ],
       videos: [
         { videoUrl: 'https://youtube.com/watch?v=demo123', title: 'Product Launch 2026' },
       ],
       brochures: [
-        { title: 'Corporate Brochure 2026', fileUrl: 'https://res.cloudinary.com/tapzio/raw/upload/brochure.pdf', fileSize: '1MB' },
+        { title: 'Corporate Brochure 2026', fileUrl: 'https://res.cloudinary.com/tappzio/raw/upload/brochure.pdf', fileSize: '1MB' },
       ],
     });
 
@@ -201,7 +201,7 @@ describe('Tapzio Controlled Publishing & Plan Assignment System (Scenarios A - H
       headline: 'Independent Consultant',
       phone: '+919998887776',
       gallery: [
-        { url: 'https://res.cloudinary.com/tapzio/image/upload/consulting.jpg' },
+        { url: 'https://res.cloudinary.com/tappzio/image/upload/consulting.jpg' },
       ],
     });
 
@@ -265,14 +265,14 @@ describe('Tapzio Controlled Publishing & Plan Assignment System (Scenarios A - H
       displayName: 'Neha Singhal',
       headline: 'Jewelry Designer & Gemologist',
       gallery: [
-        { url: 'https://res.cloudinary.com/tapzio/image/upload/diamond1.jpg', caption: 'Solitaire Ring' },
-        { url: 'https://res.cloudinary.com/tapzio/image/upload/diamond2.jpg', caption: 'Emerald Necklace' },
+        { url: 'https://res.cloudinary.com/tappzio/image/upload/diamond1.jpg', caption: 'Solitaire Ring' },
+        { url: 'https://res.cloudinary.com/tappzio/image/upload/diamond2.jpg', caption: 'Emerald Necklace' },
       ],
       videos: [
         { videoUrl: 'https://youtube.com/watch?v=craftsmanship', title: 'Atelier Behind the Scenes' },
       ],
       brochures: [
-        { title: 'Bridal Collection 2026', fileUrl: 'https://res.cloudinary.com/tapzio/raw/upload/bridal.pdf' },
+        { title: 'Bridal Collection 2026', fileUrl: 'https://res.cloudinary.com/tappzio/raw/upload/bridal.pdf' },
       ],
     });
 
@@ -331,7 +331,7 @@ describe('Tapzio Controlled Publishing & Plan Assignment System (Scenarios A - H
     const profile = await createProfile(customer, {
       slug,
       displayName: 'Rohan Mehta',
-      gallery: [{ url: 'https://res.cloudinary.com/tapzio/image/upload/sample.jpg' }],
+      gallery: [{ url: 'https://res.cloudinary.com/tappzio/image/upload/sample.jpg' }],
     });
     await addBusiness(customer, profile.id, { name: 'Mehta Logistics' });
     await addBusiness(customer, profile.id, { name: 'Mehta Warehousing' });

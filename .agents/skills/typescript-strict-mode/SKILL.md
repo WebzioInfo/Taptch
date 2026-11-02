@@ -2,7 +2,7 @@
 name: typescript-strict-mode
 description: "Master TypeScript 5 strict engineering, branded types, discriminated unions, Zod schema type inference, and zero-any policy."
 risk: safe
-source: tapzio-core
+source: Tappzio-core
 date_added: "2026-11-02"
 version: "1.0.0"
 ---

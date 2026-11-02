@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const folder = FOLDER_MAP[mediaCategory] || 'tapzio/uploads';
+    const folder = FOLDER_MAP[mediaCategory] || 'tappzio/uploads';
     const resourceType: 'image' | 'video' | 'raw' = isVideo ? 'video' : isPdf ? 'raw' : 'image';
 
     const arrayBuffer = await file.arrayBuffer();

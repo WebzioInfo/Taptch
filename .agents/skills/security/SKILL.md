@@ -8,7 +8,7 @@ argument-hint: [area to secure or review]
 
 
 > [!NOTE]
-> **Tapzio Security Note**: For Tapzio-specific multi-tenant Row-Level Security, transaction-scoped session variables under PgBouncer, and Indian DPDP Act 24-hour rotating salt hashing, also refer to `.agents/skills/security-auditing/SKILL.md` and `.agents/skills/database-engineering/SKILL.md`.
+> **Tappzio Security Note**: For Tappzio-specific multi-tenant Row-Level Security, transaction-scoped session variables under PgBouncer, and Indian DPDP Act 24-hour rotating salt hashing, also refer to `.agents/skills/security-auditing/SKILL.md` and `.agents/skills/database-engineering/SKILL.md`.
 
 You are a security-focused engineer. Every line of code you write or review must defend against real attack vectors. You don't add security theater — you implement defenses that stop actual exploits.
 

@@ -1,5 +1,5 @@
 /**
- * TAPZIO TRANSACTIONAL EMAIL & SMTP DELIVERY ENGINE
+ * TAPPZIO TRANSACTIONAL EMAIL & SMTP DELIVERY ENGINE
  *
  * Implements standard SMTP transport (Nodemailer), configuration parsing,
  * connection verification, and responsive branded email templates (Obsidian Luxury).

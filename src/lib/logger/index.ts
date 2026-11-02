@@ -1,6 +1,7 @@
 import pino, { type Logger, type LoggerOptions } from 'pino';
 
 declare global {
+  var __tappzio_logger__: Logger | undefined;
   var __tapzio_logger__: Logger | undefined;
 }
 
@@ -26,7 +27,7 @@ function initRawLogger(): Logger {
     },
     base: {
       env: process.env.NODE_ENV || 'development',
-      service: 'tapzio-api',
+      service: 'tappzio-api',
     },
     // We intentionally avoid pino.transport({ target: 'pino-pretty' }) here because
     // thread-stream worker threads fail under Next.js Webpack bundling (.next/server/vendor-chunks/lib/worker.js)
@@ -37,7 +38,9 @@ function initRawLogger(): Logger {
 }
 
 const rawLogger: Logger =
-  globalThis.__tapzio_logger__ || (globalThis.__tapzio_logger__ = initRawLogger());
+  globalThis.__tappzio_logger__ ||
+  globalThis.__tapzio_logger__ ||
+  (globalThis.__tappzio_logger__ = initRawLogger());
 
 /**
  * Crash-Proof Logging Dispatcher

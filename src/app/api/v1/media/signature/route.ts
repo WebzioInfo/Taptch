@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
         ? CLOUDINARY_FOLDERS.documents
         : CLOUDINARY_FOLDERS.personalGalleries;
 
-    const signatureData = generateSignedUploadParams(folder, ['tapzio', `user_${actor.userId}`]);
+    const signatureData = generateSignedUploadParams(folder, ['tappzio', `user_${actor.userId}`]);
 
     return apiSuccess(signatureData);
   } catch (err: unknown) {

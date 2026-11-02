@@ -1,4 +1,4 @@
-# Practical SOLID Principles Guide for Tapzio
+# Practical SOLID Principles Guide for Tappzio
 
 ### 1. Single Responsibility Principle (SRP)
 - A class, service, or module should have one, and only one, reason to change.

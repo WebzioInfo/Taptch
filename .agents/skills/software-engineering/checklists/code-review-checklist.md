@@ -3,7 +3,7 @@
 Before marking any code change complete, systematically verify:
 
 - [ ] **Single Responsibility**: Does each function and module do exactly one cohesive thing?
-- [ ] **Brand Isolation**: Are there any hardcoded "Tapzio" brand strings in client components? (Must use `src/config/brand.ts`).
+- [ ] **Brand Isolation**: Are there any hardcoded "Tappzio" brand strings in client components? (Must use `src/config/brand.ts`).
 - [ ] **Error Handling**: Are all exceptions caught and handled with typed domain errors? Are there any empty `catch` blocks?
 - [ ] **Security & Authorization**: Is there a server-side authorization check (`can()`) and tenant isolation via `withActor()`?
 - [ ] **Sensitive Data**: Are secrets, tokens, passwords, or PII exposed in logs or network responses?

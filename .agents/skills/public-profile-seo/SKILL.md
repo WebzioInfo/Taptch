@@ -1,13 +1,13 @@
 ---
 name: public-profile-seo
-description: "Master Tapzio's public profile SEO indexing, Zero Dynamic Hot Path architecture on /p/[slug], Open Graph card generation, and Google Search Console indexing."
+description: "Master Tappzio's public profile SEO indexing, Zero Dynamic Hot Path architecture on /p/[slug], Open Graph card generation, and Google Search Console indexing."
 risk: safe
-source: tapzio-core
+source: Tappzio-core
 date_added: "2026-11-02"
 version: "1.0.0"
 ---
 
-# Tapzio Public Profile SEO & Edge Indexing Skill
+# Tappzio Public Profile SEO & Edge Indexing Skill
 
 Engineering standard for optimizing public digital business cards (`/p/[slug]`) for Google indexing, social media link previews, and sub-50ms edge response times.
 
@@ -24,7 +24,7 @@ Engineering standard for optimizing public digital business cards (`/p/[slug]`) 
 
 ## 2. Zero Dynamic Profile Hot Path Mandate
 
-Public profile pages represent the highest-traffic surface on the Tapzio platform, accessed continuously when users tap physical NFC cards or share QR codes.
+Public profile pages represent the highest-traffic surface on the Tappzio platform, accessed continuously when users tap physical NFC cards or share QR codes.
 
 ### Mandatory Rules
 1. **Never Import Dynamic Request APIs**: `src/app/(profile)/p/[slug]/page.tsx` must **NEVER** import `cookies()`, `headers()`, or `connection()`.

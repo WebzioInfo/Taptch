@@ -2,7 +2,7 @@
 name: nextjs-server-actions
 description: "Master Next.js 15 Server Actions, form handling with React 19 useActionState, optimistic updates, Zod validation, and CSRF protection."
 risk: safe
-source: tapzio-core
+source: Tappzio-core
 date_added: "2026-11-02"
 version: "1.0.0"
 ---

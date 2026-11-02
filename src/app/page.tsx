@@ -255,7 +255,7 @@ export default function HomePage() {
                     </div>
 
                     <div className="pt-2 flex justify-between items-center text-[10px] text-muted-foreground border-t border-white/5">
-                      <span className="font-mono">tapzio.com/p/aditya</span>
+                      <span className="font-mono">tappzio.com/p/aditya</span>
                       <span className="text-[#D4AF37] font-semibold">NFC Active</span>
                     </div>
                   </div>
