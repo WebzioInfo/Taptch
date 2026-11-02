@@ -5,8 +5,31 @@ import { getMessages } from 'next-intl/server';
 import './globals.css';
 
 export const metadata: Metadata = {
+  metadataBase: new URL(brandConfig.appUrl),
   title: `${brandConfig.name} — ${brandConfig.tagline}`,
   description: brandConfig.tagline,
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/branding/icons/favicon.svg', type: 'image/svg+xml' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
+  openGraph: {
+    title: `${brandConfig.name} — ${brandConfig.tagline}`,
+    description: brandConfig.tagline,
+    siteName: brandConfig.name,
+    images: [
+      {
+        url: '/branding/logo/tappzio-logo-stacked.svg',
+        width: 1200,
+        height: 630,
+        alt: brandConfig.name,
+      },
+    ],
+  },
 };
 
 export default async function RootLayout({

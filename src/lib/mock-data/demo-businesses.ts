@@ -11,7 +11,7 @@
  * 4. Never present fictional reviews, certifications, or business claims as verified facts.
  */
 
-import type { ProfileRenderData, BusinessItem, CatalogueItem } from '@/components/templates/ProfileRenderer';
+import type { ProfileRenderData } from '@/components/templates/ProfileRenderer';
 
 export interface DemoBusinessProfile extends ProfileRenderData {
   category: string;

@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useRouter } from 'next/navigation';
 import { brandConfig } from '@/config/brand';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,6 +28,7 @@ export interface TemplatePreviewModalProps {
   initialTemplateId: string;
   customerProfile?: ProfileRenderData | null;
   onSelectTemplate?: (templateId: string) => Promise<void> | void;
+  isAuthenticated?: boolean;
 }
 
 export function TemplatePreviewModal({
@@ -35,7 +37,9 @@ export function TemplatePreviewModal({
   initialTemplateId,
   customerProfile,
   onSelectTemplate,
+  isAuthenticated = false,
 }: TemplatePreviewModalProps) {
+  const router = useRouter();
   const [selectedTemplateId, setSelectedTemplateId] = React.useState<string>(initialTemplateId);
   const [previewDevice, setPreviewDevice] = React.useState<'mobile' | 'tablet' | 'desktop'>('mobile');
   const [previewMode, setPreviewMode] = React.useState<'demo' | 'customer'>(
@@ -117,6 +121,11 @@ export function TemplatePreviewModal({
   }
 
   const handleApplyTemplate = async () => {
+    if (!isAuthenticated && !customerProfile) {
+      router.push(`/register?template=${encodeURIComponent(selectedTemplateId)}`);
+      return;
+    }
+
     if (onSelectTemplate) {
       try {
         setIsSaving(true);
@@ -131,6 +140,8 @@ export function TemplatePreviewModal({
       } finally {
         setIsSaving(false);
       }
+    } else {
+      router.push(`/builder/new?template=${encodeURIComponent(selectedTemplateId)}`);
     }
   };
 
@@ -290,7 +301,13 @@ export function TemplatePreviewModal({
             ) : (
               <Sparkles className="w-3.5 h-3.5" />
             )}
-            <span>{saveSuccess ? 'Template Applied!' : 'Select Template'}</span>
+            <span>
+              {saveSuccess
+                ? 'Template Applied!'
+                : isAuthenticated || customerProfile
+                ? 'Select Template'
+                : 'Use This Template'}
+            </span>
           </Button>
         </div>
       </header>
@@ -314,6 +331,25 @@ export function TemplatePreviewModal({
                 {demo.displayName}
               </button>
             ))}
+          </div>
+        ) : !customerProfile && !isAuthenticated ? (
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2">
+              <User className="w-3.5 h-3.5 text-primary" />
+              <span className="text-white font-medium">
+                Previewing with sample customer layout
+              </span>
+              <span className="text-[11px] text-neutral-400">
+                &bull; Sign in to link your real business profile
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => router.push(`/login?template=${encodeURIComponent(selectedTemplateId)}`)}
+              className="text-xs text-primary hover:text-amber-300 font-semibold underline"
+            >
+              Sign In
+            </button>
           </div>
         ) : (
           <div className="flex items-center gap-2">

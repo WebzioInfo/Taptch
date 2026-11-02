@@ -15,6 +15,8 @@
 | **M9** | Reseller Portal, Domains & White-Label | PENDING | - | - | - |
 | **M10** | Extras & Production Hardening | PENDING | - | - | - |
 | **M11** | Project Rebranding (Tapzio → Tappzio) | **COMPLETE** | Complete repository-wide rebranding to Tappzio. Migrated brand constants (`src/config/brand.ts`), database defaults, migration ledger (`__tappzio_migrations`), transactional email templates, Cloudinary taxonomies (`tappzio/*`), logger singletons (`service: 'tappzio-api'`), architectural brand guards, ADR 009, and all 44 Antigravity skills. Workspace relocated to `D:\Webzio\Tappzio`. 69/69 tests passing. | None | Fully verified |
+| **M12** | Premium Brand Identity & Full Project Integration | **COMPLETE** | Created original "Harmonic Nexus T" brand identity, 7 vector SVG logo variants (`public/branding/logo/*`), vector favicons, high-res raster app icons (192, 512, apple-touch-icon, favicon.ico), comprehensive Brand Guidelines (`brand-guidelines.md`, `TAPPZIO_BRAND_IDENTITY.md`), centralized `<BrandLogo />` component, and complete UI integration across Landing Page, App Shell, Auth pages, Admin Cockpit, and Profile QR modal. 86/86 Vitest tests passing. | None | Fully verified |
+| **M13** | Public Template Gallery & Open-Redirect Safe Auth | **COMPLETE** | Decoupled template browsing from protected app layout. Relocated `/templates` and created `/templates/[id]` under `(marketing)` with non-blocking session detection, public marketing layout (`MarketingHeader` & `MarketingFooter`), responsive device frames (desktop, tablet, mobile), plan simulator, centralized mock data previews, and open-redirect protected auth routing (`getSafeRedirectUrl`). 95/95 Vitest tests passing across 15 suites. | None | Fully verified |
 
 ## Credentials & External Service Status
 - **PostgreSQL / Supabase**: Successfully connected to hosted Supabase PostgreSQL 17 (`db.hwrgtzkhcdklizyfargh.supabase.co:5432/postgres`), all 6 migration batches (27 tables including `media_assets`, `publication_requests`, `plan_assignment_history`, RLS policies, Better Auth columns) applied via `npm run db:migrate`. Embedded PGlite fully migrated and synchronized for offline test isolation.
@@ -35,9 +37,11 @@
   - *Permanent Governance*: Added mandatory NPM-exclusive rule to `AGENTS.md` and `.agents/rules/00-core-engineering.md`.
 
 ## Quality & Verification Benchmarks
-- **Vitest Test Suite**: **82/82 tests passing** across 13 test files (`template-preview-mock`, `save-draft-and-worker`, `publishing-scenarios`, `cloudinary`, `tenant-rls`, `entitlements`, `profiles`, `templates`, `cards-leads-orders`, `permissions`, `brand-literal`, `no-direct-db-in-pages`, `email-smtp`).
+- **Vitest Test Suite**: **95/95 tests passing** across 15 test files (`public-templates-auth`, `brand-assets`, `template-preview-mock`, `save-draft-and-worker`, `publishing-scenarios`, `cloudinary`, `tenant-rls`, `entitlements`, `profiles`, `templates`, `cards-leads-orders`, `permissions`, `brand-literal`, `no-direct-db-in-pages`, `email-smtp`).
 - **TypeScript Typecheck**: **0 errors** (`tsc --noEmit` clean exit code 0).
 - **ESLint**: **0 warnings, 0 errors** (`✔ No ESLint warnings or errors`).
+- **Brand Identity & Vector System (ADR 020)**: Complete original Tappzio brand identity ("Harmonic Nexus T"), 7 SVG variations, 3 high-res PNG icons, SVG favicon, and `.ico` generated and verified. Reusable `<BrandLogo />` component integrated across Landing, App, Auth, Admin, and Profiles. Verified via `tests/unit/brand-assets.test.ts`.
+- **Public Template Gallery & Open-Redirect Protection (ADR 021)**: Decoupled `/templates` from the protected `(app)` route group into `(marketing)`. Skeletons on loading, responsive device previews without authentication, and parameterized registration/login forwarding to profile builder with zero open-redirect vulnerabilities. Verified via `tests/unit/public-templates-auth.test.ts`.
 - **Next.js Production Build**: All 15 static and 35 dynamic routes compiled and optimized successfully (`next build` clean exit code 0).
 - **Brand Literal Rule**: Verified zero hardcoded brand strings across UI components and pages outside config.
 - **Zero Dynamic Hot Path**: Verified `/p/[slug]` imports zero dynamic request headers or cookies.

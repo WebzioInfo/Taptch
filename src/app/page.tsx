@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { brandConfig } from '@/config/brand';
+import { BrandLogo } from '@/components/brand';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -152,14 +153,7 @@ export default function HomePage() {
       {/* Navigation Header */}
       <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur-md">
         <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="flex items-center space-x-3 group">
-            <div className="h-9 w-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center font-bold text-primary group-hover:border-primary/40 transition-colors">
-              {brandConfig.name.charAt(0)}
-            </div>
-            <span className="font-semibold text-lg tracking-tight group-hover:text-primary transition-colors">
-              {brandConfig.name}
-            </span>
-          </Link>
+          <BrandLogo variant="horizontal" size="md" asLink href="/" />
 
           <nav className="hidden md:flex items-center space-x-6 text-xs font-medium text-muted-foreground">
             <Link href="#features" className="hover:text-foreground transition-colors">Features</Link>
@@ -640,9 +634,7 @@ export default function HomePage() {
       <footer className="w-full border-t border-border/50 py-12 bg-background/50">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-muted-foreground">
           <div className="flex items-center space-x-3">
-            <div className="h-7 w-7 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center font-bold text-primary">
-              {brandConfig.name.charAt(0)}
-            </div>
+            <BrandLogo variant="symbol" size="sm" />
             <span className="font-semibold text-sm text-foreground">{brandConfig.name}</span>
             <span>•</span>
             <span>{brandConfig.tagline}</span>

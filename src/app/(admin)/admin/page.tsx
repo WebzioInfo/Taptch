@@ -3,6 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { brandConfig } from '@/config/brand';
+import { BrandLogo } from '@/components/brand';
 import { useSession } from '@/lib/auth/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -286,6 +287,7 @@ export default function SuperAdminPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/40 pb-6">
         <div>
           <div className="flex items-center gap-3">
+            <BrandLogo variant="symbol" size="md" />
             <h1 className="text-2xl font-bold tracking-tight text-foreground">{brandConfig.name} Executive Cockpit</h1>
             <Badge variant="gold" className="uppercase text-[10px] tracking-wider">
               <ShieldCheck className="w-3 h-3 mr-1 inline" /> Admin Control

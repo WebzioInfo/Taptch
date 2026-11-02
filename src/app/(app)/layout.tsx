@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { brandConfig } from '@/config/brand';
+import { BrandLogo } from '@/components/brand';
 import { useSession, signOut } from '@/lib/auth/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -91,14 +91,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
         <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
           {/* Brand Logo & App Name */}
           <div className="flex items-center space-x-6">
-            <Link href="/dashboard" className="flex items-center space-x-3 group">
-              <div className="h-9 w-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center font-bold text-primary group-hover:border-primary/40 transition-colors">
-                {brandConfig.name.charAt(0)}
-              </div>
-              <span className="font-semibold text-lg tracking-tight group-hover:text-primary transition-colors">
-                {brandConfig.name}
-              </span>
-            </Link>
+            <BrandLogo variant="horizontal" size="md" asLink href="/dashboard" />
 
             {/* Desktop Navigation Links */}
             <nav className="hidden md:flex items-center space-x-1">

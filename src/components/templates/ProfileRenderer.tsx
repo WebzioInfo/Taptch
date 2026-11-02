@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { brandConfig } from '@/config/brand';
+import { BrandLogo } from '@/components/brand';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -252,8 +252,8 @@ export function ProfileRenderer({ profile }: { profile: ProfileRenderData }) {
               <div className="h-44 w-44 rounded-xl border-4 border-black flex items-center justify-center relative p-2">
                 <QrCode className="h-full w-full text-black" />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="h-8 w-8 rounded-lg bg-black text-white flex items-center justify-center font-bold text-xs">
-                    {brandConfig.name.charAt(0)}
+                  <div className="h-9 w-9 rounded-lg bg-black border border-black/40 shadow-md flex items-center justify-center p-1">
+                    <BrandLogo variant="symbol" size="sm" className="h-6 w-6" />
                   </div>
                 </div>
               </div>

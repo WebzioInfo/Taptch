@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Search,
   Sparkles,
@@ -14,10 +14,13 @@ import {
   Tablet,
   CheckCircle2,
   Loader2,
+  AlertCircle,
+  RefreshCw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { useSession } from '@/lib/auth/client';
 import type { Template } from '@/modules/templates';
 import { TemplatePreviewModal } from '@/components/templates/TemplatePreviewModal';
 import type { ProfileRenderData } from '@/components/templates/ProfileRenderer';
@@ -40,10 +43,17 @@ const PLAN_BADGES: Record<string, { label: string; variant: 'default' | 'seconda
   max: { label: 'Max Luxury', variant: 'gold' },
 };
 
-export default function TemplateMarketplacePage() {
+function TemplateMarketplaceContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialPreviewParam = searchParams.get('preview');
+
+  const { data: session } = useSession();
+  const isAuthenticated = Boolean(session?.user);
+
   const [templates, setTemplates] = React.useState<Template[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [loadError, setLoadError] = React.useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = React.useState('all');
   const [searchQuery, setSearchQuery] = React.useState('');
   const [previewTemplateId, setPreviewTemplateId] = React.useState<string | null>(null);
@@ -54,19 +64,46 @@ export default function TemplateMarketplacePage() {
   const [selectedSuccessMessage, setSelectedSuccessMessage] = React.useState<string | null>(null);
   const [isApplying, setIsApplying] = React.useState<string | null>(null);
 
-  // Load templates & customer profile
+  // Check URL query param for deep-linked preview
   React.useEffect(() => {
-    async function loadData() {
-      try {
-        setIsLoading(true);
-        // 1. Fetch templates
-        const tplRes = await fetch('/api/v1/templates');
-        const tplJson = await tplRes.json();
-        if (tplJson.data) {
-          setTemplates(tplJson.data);
-        }
+    if (initialPreviewParam) {
+      setPreviewTemplateId(initialPreviewParam);
+    }
+  }, [initialPreviewParam]);
 
-        // 2. Fetch customer profiles
+  // Load templates without requiring authentication
+  const fetchTemplates = React.useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setLoadError(null);
+
+      // Public API: Zero authentication required
+      const tplRes = await fetch('/api/v1/templates');
+      if (!tplRes.ok) {
+        throw new Error(`Failed to load templates (HTTP ${tplRes.status})`);
+      }
+      const tplJson = await tplRes.json();
+      if (tplJson.data) {
+        setTemplates(tplJson.data);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to load template directory.';
+      setLoadError(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    fetchTemplates();
+  }, [fetchTemplates]);
+
+  // If user is authenticated, silently load their profile in the background
+  React.useEffect(() => {
+    if (!isAuthenticated) return;
+
+    async function loadCustomerProfile() {
+      try {
         const profileRes = await fetch('/api/v1/profiles');
         if (profileRes.ok) {
           const profileJson = await profileRes.json();
@@ -89,14 +126,13 @@ export default function TemplateMarketplacePage() {
             });
           }
         }
-      } catch (err) {
-        console.error('Failed to load gallery data', err);
-      } finally {
-        setIsLoading(false);
+      } catch {
+        // Silently ignore background profile fetch failure
       }
     }
-    loadData();
-  }, []);
+
+    loadCustomerProfile();
+  }, [isAuthenticated]);
 
   const filteredTemplates = React.useMemo(() => {
     return templates.filter((t) => {
@@ -116,14 +152,21 @@ export default function TemplateMarketplacePage() {
     });
   }, [templates, selectedCategory, searchQuery]);
 
-  // Apply selected template to customer profile
+  // Apply or use selected template
   const handleSelectTemplate = async (templateId: string) => {
-    if (!activeProfileId) {
-      // If customer has no profile yet, route to builder with this template
-      router.push(`/builder/new?template=${templateId}`);
+    // 1. Unauthenticated visitor: redirect to registration preserving template
+    if (!isAuthenticated) {
+      router.push(`/register?template=${encodeURIComponent(templateId)}`);
       return;
     }
 
+    // 2. Authenticated user without a profile: redirect to builder with template
+    if (!activeProfileId) {
+      router.push(`/builder/new?template=${encodeURIComponent(templateId)}`);
+      return;
+    }
+
+    // 3. Authenticated user with active profile: apply to current profile
     try {
       setIsApplying(templateId);
       const res = await fetch(`/api/v1/profiles/${activeProfileId}`, {
@@ -180,7 +223,7 @@ export default function TemplateMarketplacePage() {
             Choose from 8 specialized layouts designed for industrial manufacturers, retail storefronts, restaurants, corporate advisory, and high-growth brands.
           </p>
 
-          {/* Search & Mode Toggles */}
+          {/* Search & Input */}
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 max-w-2xl mx-auto">
             <div className="relative w-full">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -214,13 +257,30 @@ export default function TemplateMarketplacePage() {
         </div>
       </section>
 
-      {/* Grid of 8 Templates */}
+      {/* Grid of Templates */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="h-96 rounded-3xl bg-card/40 animate-pulse border border-border/40" />
+              <div
+                key={i}
+                className="h-96 rounded-3xl bg-card/40 animate-pulse border border-border/40 flex flex-col justify-end p-6 space-y-3"
+              >
+                <div className="h-4 bg-muted/60 rounded w-1/3" />
+                <div className="h-6 bg-muted/60 rounded w-2/3" />
+                <div className="h-4 bg-muted/40 rounded w-full" />
+              </div>
             ))}
+          </div>
+        ) : loadError ? (
+          <div className="text-center py-16 bg-destructive/10 rounded-3xl border border-destructive/20 p-8 max-w-lg mx-auto">
+            <AlertCircle className="w-10 h-10 text-destructive mx-auto mb-3" />
+            <h3 className="text-lg font-bold text-foreground">Could not load templates</h3>
+            <p className="text-xs text-muted-foreground mt-1 mb-4">{loadError}</p>
+            <Button variant="outline" size="sm" onClick={fetchTemplates} className="gap-2">
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Retry Loading</span>
+            </Button>
           </div>
         ) : filteredTemplates.length === 0 ? (
           <div className="text-center py-20 bg-card/20 rounded-3xl border border-dashed border-border p-8">
@@ -243,13 +303,17 @@ export default function TemplateMarketplacePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredTemplates.map((template) => {
               const planBadge = PLAN_BADGES[template.requiredPlanId] || PLAN_BADGES.nano;
-              const isCurrentActive = customerProfile?.templateId === template.id || customerProfile?.templateId === template.slug;
+              const isCurrentActive =
+                isAuthenticated &&
+                (customerProfile?.templateId === template.id || customerProfile?.templateId === template.slug);
 
               return (
                 <div
                   key={template.id}
                   className={`group relative flex flex-col rounded-3xl border bg-card overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 ${
-                    isCurrentActive ? 'border-amber-400 ring-2 ring-amber-400/20' : 'border-border/80 hover:border-gold/50'
+                    isCurrentActive
+                      ? 'border-amber-400 ring-2 ring-amber-400/20'
+                      : 'border-border/80 hover:border-gold/50'
                   }`}
                 >
                   {/* Thumbnail Banner */}
@@ -356,7 +420,13 @@ export default function TemplateMarketplacePage() {
                         ) : (
                           <ArrowRight className="w-3.5 h-3.5" />
                         )}
-                        <span>{isCurrentActive ? 'Selected' : 'Select Template'}</span>
+                        <span>
+                          {isCurrentActive
+                            ? 'Selected'
+                            : isAuthenticated
+                            ? 'Select Template'
+                            : 'Use This Template'}
+                        </span>
                       </Button>
                     </div>
                   </div>
@@ -375,8 +445,24 @@ export default function TemplateMarketplacePage() {
           initialTemplateId={previewTemplateId}
           customerProfile={customerProfile}
           onSelectTemplate={handleSelectTemplate}
+          isAuthenticated={isAuthenticated}
         />
       )}
     </div>
   );
 }
+
+export default function TemplateMarketplacePage() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="min-h-screen bg-background flex items-center justify-center p-8">
+          <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+        </div>
+      }
+    >
+      <TemplateMarketplaceContent />
+    </React.Suspense>
+  );
+}
+

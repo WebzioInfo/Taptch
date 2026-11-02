@@ -97,6 +97,7 @@
   "overrides": {
     "postcss": "$postcss",
     "esbuild": "^0.25.12",
-    "minimatch": "^11.0.4"
+    "minimatch": "^11.0.4",
+    "@swc/helpers": "^0.5.17"
   }
 }

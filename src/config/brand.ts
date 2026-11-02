@@ -17,6 +17,11 @@ export interface BrandConfig {
   assets: {
     logoUrl: string;
     logoDarkUrl: string;
+    logoLightUrl: string;
+    logoHorizontalUrl: string;
+    logoStackedUrl: string;
+    symbolUrl: string;
+    monochromeUrl: string;
     faviconUrl: string;
     cardPlaceholderUrl: string;
   };
@@ -44,9 +49,14 @@ export const defaultBrandConfig: BrandConfig = {
   primaryDomain: 'tappzio.com',
   appUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
   assets: {
-    logoUrl: '/assets/brand/logo.svg',
-    logoDarkUrl: '/assets/brand/logo-dark.svg',
-    faviconUrl: '/favicon.ico',
+    logoUrl: '/branding/logo/tappzio-logo-primary.svg',
+    logoDarkUrl: '/branding/logo/tappzio-logo-dark.svg',
+    logoLightUrl: '/branding/logo/tappzio-logo-light.svg',
+    logoHorizontalUrl: '/branding/logo/tappzio-logo-horizontal.svg',
+    logoStackedUrl: '/branding/logo/tappzio-logo-stacked.svg',
+    symbolUrl: '/branding/logo/tappzio-symbol.svg',
+    monochromeUrl: '/branding/logo/tappzio-monochrome.svg',
+    faviconUrl: '/branding/icons/favicon.svg',
     cardPlaceholderUrl: '/assets/cards/matte-pvc-mockup.png',
   },
   theme: {

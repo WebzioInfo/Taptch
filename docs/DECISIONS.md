@@ -219,3 +219,53 @@
   - Zero dynamic route pollution on public profile pages (`/p/[slug]`).
   - 82/82 Vitest tests passing (including 13 dedicated unit/integration tests in `tests/unit/template-preview-mock.test.ts`).
   - Next.js production build (`next build`) compiles and optimizes 15 static and 35 dynamic routes cleanly with 0 errors.
+
+## ADR-020: Premium Brand Identity & Centralized Logo Architecture
+- **Date**: 2026-11-02
+- **Context**: The platform required a completely original, recognizable, and production-grade brand identity for **TAPPZIO**, communicating digital identity, smart NFC connectivity, and executive networking without relying on generic Wi-Fi icons, basic circled letters, or blurry raster images.
+- **Decision**:
+  1. **Visual Concept ("The Harmonic Nexus T")**:
+     - *Stem*: Solid architectural pillar representing foundational digital identity and enterprise reliability.
+     - *Crossbar / Wings*: Symmetrical curved wave chevrons representing 13.56 MHz NFC electromagnetic coupling and dual-directional reciprocal contact exchange.
+     - *Apex Core*: Diamond focal point symbolizing instantaneous contactless tap activation.
+     - *Palette*: Obsidian Luxury styling featuring Deep Obsidian (`#0A0A0C`), Matte Charcoal (`#121216`), Brushed Champagne Gold (`#D4AF37` to `#F3E5AB`), and Platinum Pure (`#FFFFFF`).
+  2. **Vector SVG & Icon System (`public/branding/`)**:
+     - Built 7 SVG logo variations: primary, light (dark backdrops), dark (light backdrops), horizontal (navbars), stacked (modals/cards), symbol (badges/icons), and monochrome (laser/CNC metal card engraving).
+     - Generated vector favicons, 192x192 & 512x512 high-res raster app icons, 180x180 Apple Touch Icon, and standard 32x32 `favicon.ico` using sharp rasterization.
+  3. **Centralized Brand Logo Component (`src/components/brand/BrandLogo.tsx`)**:
+     - Created unified `<BrandLogo />` supporting variants (`primary`, `horizontal`, `stacked`, `symbol`, `monochrome`), themes (`auto`, `dark`, `light`), sizes (`sm`, `md`, `lg`, `xl`, `2xl`), Next.js `<Link>` wrappers, and strict dynamic alt text derived from `brandConfig.name`.
+  4. **Full Application Integration**:
+     - Replaced letter-T placeholders in public Landing Page (`src/app/page.tsx`), App Shell navigation (`src/app/(app)/layout.tsx`), Auth pages (`login`, `register`, `verify`), Executive Admin Cockpit (`src/app/(admin)/admin/page.tsx`), and Public Profile QR modal (`ProfileRenderer.tsx`).
+     - Wired metadata icons and OpenGraph cards in `src/app/layout.tsx`.
+     - Authored official brand manuals: `public/branding/brand/brand-guidelines.md` and `docs/TAPPZIO_BRAND_IDENTITY.md`.
+- **Consequences**:
+  - 100% compliance with zero-hardcoded-brand-literals rule verified by `brand-literal.test.ts`.
+  - Added dedicated asset integrity test `tests/unit/brand-assets.test.ts` (86/86 total tests passing).
+  - Consistent visual identity across physical NFC cards, web applications, and mobile icons.
+
+## ADR-021: Public Template Gallery & Open-Redirect Safe Authentication
+- **Date**: 2026-11-02
+- **Context**: The template gallery (`/templates`) was displaying "Authenticating session..." and redirecting unauthenticated visitors to `/login`. Visitors must be able to explore templates, test responsive previews (desktop, tablet, mobile), and simulate plan tiers without logging in or creating an account.
+- **Root Cause**:
+  - `/templates` was previously placed under `src/app/(app)/templates/page.tsx` within the authenticated route group `(app)`.
+  - `src/app/(app)/layout.tsx` enforces mandatory user session validation, displaying an "Authenticating session..." spinner before redirecting unauthenticated requests.
+- **Decision**:
+  1. **Route Decoupling**:
+     - Removed `src/app/(app)/templates/page.tsx`.
+     - Relocated public template marketplace to `src/app/(marketing)/templates/page.tsx` and created individual template page at `src/app/(marketing)/templates/[id]/page.tsx`.
+     - Created `src/app/(marketing)/layout.tsx` featuring `MarketingHeader` and `MarketingFooter` with non-blocking session awareness.
+  2. **Non-Blocking Client Session Detection**:
+     - `useSession()` is used only to selectively enable Mode B ("My Business Preview") and "Apply to Profile" when an authenticated user visits `/templates`.
+     - Unauthenticated visitors immediately see all templates, category filters, and live previews with centrally managed demo businesses (`DEMO_BUSINESSES`).
+  3. **Open-Redirect Safe Auth Forwarding (`src/lib/auth/redirect.ts`)**:
+     - Created `getSafeRedirectUrl(templateParam, redirectParam)`.
+     - Validates template parameters against `^[a-zA-Z0-9_-]+$` and forwards authenticated users to `/builder/new?template={templateId}`.
+     - Enforces strict relative URL format (`/` prefix, rejecting `//` protocol-relative exploits, Windows backslashes, or external domains).
+     - Preserves template query string across login, register, and OTP verification flows.
+  4. **Responsive Preview Modal Integration (`TemplatePreviewModal.tsx`)**:
+     - Added `isAuthenticated` prop and intelligent CTA: displays "Use This Template" (redirecting to `/register?template=...`) for visitors, and "Select Template" for authenticated users.
+- **Consequences**:
+  - Unauthenticated visitors can freely browse, filter, search, and preview all 8 templates on desktop, tablet, and mobile.
+  - Protected routes (`/dashboard`, `/builder/*`, `/cards`, `/leads`, `/admin`) remain 100% secure.
+  - 95/95 Vitest tests passing (including 9 dedicated tests in `tests/unit/public-templates-auth.test.ts`).
+  - Next.js production build compiles cleanly with zero warnings or errors.
