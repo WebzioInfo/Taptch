@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { brandConfig } from '@/config/brand';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -173,10 +172,10 @@ export default function CardsPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-border/60">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Smart NFC Hardware
+            Smart Cards
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Manage your physical {brandConfig.name} cards, re-route taps, and request custom hardware.
+            Manage your physical NFC cards and orders.
           </p>
         </div>
 
@@ -187,7 +186,7 @@ export default function CardsPage() {
           </Button>
           <Button variant="gold" size="sm" onClick={() => setShowOrderModal(true)} className="gap-2">
             <ShoppingBag className="h-4 w-4" />
-            <span>Order Physical Card</span>
+            <span>Order Card</span>
           </Button>
         </div>
       </div>
@@ -203,9 +202,9 @@ export default function CardsPage() {
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold tracking-tight text-foreground flex items-center gap-2">
                 <CreditCard className="h-5 w-5 text-primary" />
-                <span>My Active Smart Cards</span>
+                <span>Active Cards</span>
               </h2>
-              <span className="text-xs text-muted-foreground">{cards.length} cards linked</span>
+              <span className="text-xs text-muted-foreground">{cards.length} linked</span>
             </div>
 
             {cards.length === 0 ? (
@@ -214,16 +213,16 @@ export default function CardsPage() {
                   <div className="mx-auto h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                     <CreditCard className="h-6 w-6" />
                   </div>
-                  <h3 className="font-semibold text-lg text-foreground">No physical cards active yet</h3>
+                  <h3 className="font-semibold text-lg text-foreground">No cards linked yet</h3>
                   <p className="text-xs text-muted-foreground">
-                    Link an existing card using the activation code inside your packaging, or request a custom executive smart card.
+                    Activate an existing card with your packaging code or order new custom hardware.
                   </p>
                   <div className="flex justify-center gap-3 pt-2">
                     <Button variant="outline" size="sm" onClick={() => setShowClaimModal(true)}>
-                      Activate Existing Card
+                      Activate Card
                     </Button>
                     <Button variant="gold" size="sm" onClick={() => setShowOrderModal(true)}>
-                      Order New Card
+                      Order Card
                     </Button>
                   </div>
                 </CardContent>

@@ -1,7 +1,6 @@
 'use client';
 
 import * as React from 'react';
-import { brandConfig } from '@/config/brand';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
@@ -89,10 +88,10 @@ export default function LeadsPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-border/60">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Captured Leads & Contacts
+            Leads
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Reciprocal contact exchanges from your {brandConfig.name} digital profiles and smart NFC taps.
+            Contacts exchanged through your profiles and smart card taps.
           </p>
         </div>
 
@@ -102,7 +101,7 @@ export default function LeadsPage() {
             size="sm"
             onClick={handleExportCsv}
             disabled={leads.length === 0}
-            className="gap-2"
+            className="gap-2 text-xs"
           >
             <Download className="h-4 w-4" />
             <span>Export CSV</span>
@@ -137,10 +136,10 @@ export default function LeadsPage() {
               <Users className="h-6 w-6" />
             </div>
             <h3 className="font-semibold text-lg text-foreground">
-              {search ? 'No contacts match your query' : 'No captured contacts yet'}
+              {search ? 'No contacts match your query' : 'No contacts captured yet'}
             </h3>
             <p className="text-xs text-muted-foreground">
-              When clients or prospects tap your NFC card and fill out the &quot;Exchange Contact&quot; form on your profile, their details appear here instantly.
+              When clients or prospects tap your card and exchange their contact details, they appear here instantly.
             </p>
           </CardContent>
         </Card>

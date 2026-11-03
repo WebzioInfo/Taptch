@@ -143,7 +143,7 @@ export default function DashboardPage() {
       ) : (
         <>
           {/* KPI Metrics Overview */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* Metric 1: Digital Profiles */}
             <Card className="border-border/80 bg-card/60 backdrop-blur-sm hover:border-primary/40 transition-colors">
               <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
@@ -194,24 +194,6 @@ export default function DashboardPage() {
                 <div className="text-2xl font-bold text-foreground">{leads.length}</div>
                 <p className="text-xs text-muted-foreground mt-1">
                   Reciprocal contacts saved
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Metric 4: Luxury Templates */}
-            <Card className="border-border/80 bg-card/60 backdrop-blur-sm hover:border-primary/40 transition-colors">
-              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Template Engine
-                </CardTitle>
-                <div className="h-8 w-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
-                  <Sparkles className="h-4 w-4" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-foreground">6</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Obsidian, Ivory, Aurora & more
                 </p>
               </CardContent>
             </Card>
@@ -420,71 +402,84 @@ export default function DashboardPage() {
             </Card>
           )}
 
-          {/* Quick Access Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Quick Card 1: Templates */}
-            <Card className="border-border/80 bg-card/60 hover:border-primary/40 transition-colors">
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-2 text-primary">
-                  <Palette className="h-5 w-5" />
-                  <CardTitle className="text-base font-semibold">Luxury Template Showcase</CardTitle>
+          {/* Recent Leads or Quick Action Shortcuts */}
+          {leads.length > 0 ? (
+            <Card className="border-border/80 bg-card/60 backdrop-blur-sm">
+              <CardHeader className="flex flex-row items-center justify-between pb-3">
+                <div>
+                  <CardTitle className="text-base font-semibold text-foreground">
+                    Recent Leads
+                  </CardTitle>
+                  <CardDescription className="text-xs">
+                    Latest contacts captured from your profile and card taps.
+                  </CardDescription>
                 </div>
-                <CardDescription className="text-xs">
-                  Browse modern luxury templates: Obsidian, Ivory, Aurora, Zenith, and Catalyst.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Link href="/templates">
-                  <Button variant="outline" size="sm" className="w-full gap-2 text-xs">
-                    <span>Explore Template Gallery</span>
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            {/* Quick Card 2: Smart Hardware */}
-            <Card className="border-border/80 bg-card/60 hover:border-primary/40 transition-colors">
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-2 text-primary">
-                  <CreditCard className="h-5 w-5" />
-                  <CardTitle className="text-base font-semibold">NFC Smart Cards</CardTitle>
-                </div>
-                <CardDescription className="text-xs">
-                  Link your physical cards or request custom matte PVC or laser-engraved metal hardware.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Link href="/cards">
-                  <Button variant="outline" size="sm" className="w-full gap-2 text-xs">
-                    <span>Manage NFC Cards</span>
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            {/* Quick Card 3: Captured Leads */}
-            <Card className="border-border/80 bg-card/60 hover:border-primary/40 transition-colors">
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-2 text-primary">
-                  <Users className="h-5 w-5" />
-                  <CardTitle className="text-base font-semibold">Reciprocal Networking Leads</CardTitle>
-                </div>
-                <CardDescription className="text-xs">
-                  Review and export contacts gathered through your profile contact exchange form.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
                 <Link href="/leads">
-                  <Button variant="outline" size="sm" className="w-full gap-2 text-xs">
-                    <span>View Contacts ({leads.length})</span>
+                  <Button variant="ghost" size="sm" className="text-xs gap-1 text-primary hover:text-primary/90">
+                    <span>View All ({leads.length})</span>
                     <ArrowRight className="h-3.5 w-3.5" />
                   </Button>
                 </Link>
+              </CardHeader>
+              <CardContent>
+                <div className="divide-y divide-border/40">
+                  {leads.slice(0, 4).map((lead) => (
+                    <div key={lead.id} className="py-2.5 flex items-center justify-between text-xs">
+                      <div>
+                        <span className="font-semibold text-foreground">{lead.name}</span>
+                        {lead.company && (
+                          <span className="text-muted-foreground ml-2">({lead.company})</span>
+                        )}
+                        {lead.email && (
+                          <span className="text-muted-foreground ml-2 font-mono text-[11px]">
+                            {lead.email}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-muted-foreground text-[11px]">
+                        {new Date(lead.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
-          </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Card className="border-border/80 bg-card/60 p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                    <Palette className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-foreground">Explore Templates</div>
+                    <div className="text-xs text-muted-foreground">Select and switch themes at any time</div>
+                  </div>
+                </div>
+                <Link href="/templates">
+                  <Button variant="outline" size="sm" className="text-xs h-8">
+                    Browse
+                  </Button>
+                </Link>
+              </Card>
+              <Card className="border-border/80 bg-card/60 p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                    <CreditCard className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-foreground">Physical NFC Cards</div>
+                    <div className="text-xs text-muted-foreground">Link existing card or order new hardware</div>
+                  </div>
+                </div>
+                <Link href="/cards">
+                  <Button variant="outline" size="sm" className="text-xs h-8">
+                    Manage
+                  </Button>
+                </Link>
+              </Card>
+            </div>
+          )}
         </>
       )}
 

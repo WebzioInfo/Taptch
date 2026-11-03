@@ -25,7 +25,6 @@ import {
   CreditCard,
   Users,
   Palette,
-  Plus,
 } from 'lucide-react';
 
 interface AppLayoutProps {
@@ -47,9 +46,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const navLinks = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/templates', label: 'Templates', icon: Palette },
-    { href: '/cards', label: 'Smart Cards', icon: CreditCard },
+    { href: '/cards', label: 'Cards', icon: CreditCard },
     { href: '/leads', label: 'Leads', icon: Users },
-    { href: '/dev/gallery', label: 'UI Studio', icon: Sparkles },
   ];
 
   const handleSignOut = async () => {
@@ -118,20 +116,6 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
           {/* Right Header: User Menu & Mobile Trigger */}
           <div className="flex items-center space-x-3">
-            <Link href="/builder/new" className="hidden sm:inline-flex">
-              <button
-                type="button"
-                className="inline-flex items-center gap-1.5 h-8 px-3 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors shadow-sm"
-              >
-                <Plus className="h-3.5 w-3.5" />
-                <span>New Profile</span>
-              </button>
-            </Link>
-
-            <Badge variant="gold" className="hidden md:inline-flex text-xs px-2.5 py-0.5">
-              Executive
-            </Badge>
-
             {/* User Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -150,9 +134,14 @@ export default function AppLayout({ children }: AppLayoutProps) {
               <DropdownMenuContent align="end" className="w-56 bg-card border-border shadow-xl">
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none text-foreground">
-                      {user.name || 'Executive User'}
-                    </p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium leading-none text-foreground">
+                        {user.name || 'Executive User'}
+                      </p>
+                      <Badge variant="gold" className="text-[10px] px-1.5 py-0 h-4">
+                        Executive
+                      </Badge>
+                    </div>
                     <p className="text-xs leading-none text-muted-foreground truncate">
                       {user.email}
                     </p>

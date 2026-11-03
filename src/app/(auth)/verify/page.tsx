@@ -156,7 +156,7 @@ function VerifyOtpInner() {
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : null}
-              Authenticate Session
+              Verify & Continue
             </Button>
           </form>
         </CardContent>
@@ -173,9 +173,9 @@ function VerifyOtpInner() {
               {resending ? 'Sending...' : 'Resend Code'}
             </button>
           </div>
-          <div className="flex items-center justify-center space-x-1.5 text-[10px] text-muted-foreground">
-            <Shield className="h-3 w-3 text-primary" />
-            <span>Time-based HMAC SHA-256 verified single-use authentication tokens</span>
+          <div className="flex items-center justify-center space-x-1.5 text-[11px] text-muted-foreground">
+            <Shield className="h-3.5 w-3.5 text-primary" />
+            <span>Secure one-time verification code</span>
           </div>
         </CardFooter>
       </Card>

@@ -213,9 +213,9 @@ function LoginContent() {
                 Create Account
               </Link>
             </div>
-            <div className="flex items-center justify-center space-x-1.5 text-[10px] text-muted-foreground">
-              <Shield className="h-3 w-3 text-primary" />
-              <span>Secured with end-to-end multi-tenant cryptographic isolation</span>
+            <div className="flex items-center justify-center space-x-1.5 text-[11px] text-muted-foreground">
+              <Shield className="h-3.5 w-3.5 text-primary" />
+              <span>Encrypted & secure</span>
             </div>
           </CardFooter>
         </Card>

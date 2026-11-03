@@ -269,3 +269,29 @@
   - Protected routes (`/dashboard`, `/builder/*`, `/cards`, `/leads`, `/admin`) remain 100% secure.
   - 95/95 Vitest tests passing (including 9 dedicated tests in `tests/unit/public-templates-auth.test.ts`).
   - Next.js production build compiles cleanly with zero warnings or errors.
+
+## ADR-022: Global UI/UX Simplification, Navigation Streamlining & Noise Elimination
+- **Date**: 2026-11-03
+- **Context**: The application accumulated redundant promotional cards, repetitive navigation items, developer links in customer-facing menus, and verbose technical jargon that increased cognitive load and distracted from core workflows.
+- **Decision**:
+  1. **Customer Shell Navigation (`src/app/(app)/layout.tsx`)**:
+     - Purged developer playground (`/dev/gallery`) from primary customer navigation tabs (accessible via user profile dropdown).
+     - Standardized primary customer navigation to 4 clean destinations: `Dashboard`, `Templates`, `Cards`, `Leads`.
+     - Removed redundant `New Profile` action button squeezed into the top navbar next to user avatar to eliminate button clutter.
+     - Integrated executive tier badge into the user dropdown card.
+  2. **Executive Dashboard Command Center (`src/app/(app)/dashboard/page.tsx`)**:
+     - Replaced 4-card KPI row with 3 authentic user metrics: `Digital Profiles` (total & published), `Linked NFC Cards` (active hardware tokens), and `Captured Leads` (reciprocal contacts). Removed artificial static `Template Engine: 6` KPI.
+     - Eliminated 3 redundant bottom promotional cards ("Luxury Template Showcase", "NFC Smart Cards", "Reciprocal Networking Leads") which duplicated top tabs.
+     - Implemented functional `Recent Leads` live feed showing real incoming networking contacts with direct links to `/leads`, and compact quick shortcuts when empty.
+  3. **Hardware & Leads Management (`/cards`, `/leads`)**:
+     - Renamed wordy page titles ("Smart NFC Hardware" -> "Smart Cards", "Captured Leads & Contacts" -> "Leads").
+     - Streamlined primary actions to a clear hierarchy (`Activate Card` and `Order Card`).
+     - Refactored empty state copy to be direct, helpful, and concise.
+  4. **Authentication & Public Pages (`/login`, `/register`, `/verify`, `src/app/page.tsx`)**:
+     - Replaced over-engineered technical jargon in auth footers ("Time-based HMAC SHA-256 verified single-use authentication tokens", "Secured with end-to-end multi-tenant cryptographic isolation") with human-centered, trustworthy guarantees ("Encrypted & secure", "Secure one-time verification code").
+     - Simplified CTA button text ("Authenticate Session" -> "Verify & Continue").
+     - Removed developer studio link from the public landing page header navigation.
+- **Consequences**:
+  - Dramatically improved usability, visual hierarchy, and professional polish.
+  - Zero loss of underlying domain logic, APIs, or database functionality.
+  - 95/95 tests passing across 15 test suites with 0 ESLint warnings, 0 typecheck errors, and clean Next.js build.

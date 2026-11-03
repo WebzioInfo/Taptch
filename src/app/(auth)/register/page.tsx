@@ -146,9 +146,9 @@ function RegisterContent() {
                 Sign In
               </Link>
             </div>
-            <div className="flex items-center justify-center space-x-1.5 text-[10px] text-muted-foreground">
-              <Shield className="h-3 w-3 text-primary" />
-              <span>Free forever tier includes 1 digital profile with zero credit card needed</span>
+            <div className="flex items-center justify-center space-x-1.5 text-[11px] text-muted-foreground">
+              <Shield className="h-3.5 w-3.5 text-primary" />
+              <span>Free forever • No credit card required</span>
             </div>
           </CardFooter>
         </Card>

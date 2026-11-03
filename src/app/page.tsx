@@ -160,7 +160,6 @@ export default function HomePage() {
             <Link href="/templates" className="hover:text-foreground transition-colors">Templates</Link>
             <Link href="#pricing" className="hover:text-foreground transition-colors">Pricing</Link>
             <Link href="#hardware" className="hover:text-foreground transition-colors">NFC Cards</Link>
-            <Link href="/dev/gallery" className="hover:text-foreground transition-colors">Studio</Link>
           </nav>
 
           <div className="flex items-center space-x-3">
