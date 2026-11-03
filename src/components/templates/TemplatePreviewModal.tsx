@@ -177,7 +177,7 @@ export function TemplatePreviewModal({
               className="bg-neutral-800 border border-white/15 rounded-xl px-3 py-1.5 text-xs font-semibold text-white focus:outline-none focus:border-amber-400 pr-8 cursor-pointer"
             >
               {STANDARD_TEMPLATES.map((tpl) => (
-                <option key={tpl.id} value={tpl.id}>
+                <option key={tpl.id} value={tpl.id} className="bg-neutral-900 text-white">
                   {tpl.name} ({tpl.category})
                 </option>
               ))}

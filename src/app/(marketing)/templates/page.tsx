@@ -232,7 +232,7 @@ function TemplateMarketplaceContent() {
                 placeholder="Search templates by industry, feature, or machinery..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-11 bg-card/60 border-border/80 rounded-xl text-xs sm:text-sm"
+                className="pl-10 h-11 bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary rounded-xl text-xs sm:text-sm"
               />
             </div>
           </div>

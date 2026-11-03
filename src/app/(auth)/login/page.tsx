@@ -143,7 +143,7 @@ function LoginContent() {
                     placeholder="aditya@enterprise.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="bg-background/50 border-border text-sm"
+                    className="bg-card border-border text-sm text-foreground placeholder:text-muted-foreground focus:border-primary"
                   />
                 </div>
 
@@ -172,7 +172,7 @@ function LoginContent() {
                     placeholder="aditya@enterprise.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="bg-background/50 border-border text-sm"
+                    className="bg-card border-border text-sm text-foreground placeholder:text-muted-foreground focus:border-primary"
                   />
                 </div>
 
@@ -186,7 +186,7 @@ function LoginContent() {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="bg-background/50 border-border text-sm"
+                    className="bg-card border-border text-sm text-foreground placeholder:text-muted-foreground focus:border-primary"
                   />
                 </div>
 

@@ -128,7 +128,7 @@ function VerifyOtpInner() {
                   placeholder="name@company.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-background/50 border-border text-sm"
+                  className="bg-card border-border text-sm text-foreground placeholder:text-muted-foreground focus:border-primary"
                 />
               </div>
             )}
@@ -144,7 +144,7 @@ function VerifyOtpInner() {
                 placeholder="123456"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value.trim())}
-                className="bg-background/50 border-border text-center text-2xl tracking-[0.5em] font-mono h-14"
+                className="bg-card border-border text-center text-2xl tracking-[0.5em] font-mono h-14 text-foreground placeholder:text-muted-foreground focus:border-primary"
               />
             </div>
 

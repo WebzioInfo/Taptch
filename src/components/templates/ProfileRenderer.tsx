@@ -322,7 +322,7 @@ export function ProfileRenderer({ profile }: { profile: ProfileRenderData }) {
                     onChange={(e) => setExchangeName(e.target.value)}
                     required
                     placeholder="e.g. Vikramaditya Rao"
-                    className="h-9 text-xs mt-1 bg-black/40 border-white/15 text-white"
+                    className="h-9 text-xs mt-1 bg-neutral-900 border-neutral-700 text-white placeholder:text-neutral-500 focus-visible:border-amber-400 caret-amber-400"
                   />
                 </div>
 
@@ -334,7 +334,7 @@ export function ProfileRenderer({ profile }: { profile: ProfileRenderData }) {
                       value={exchangeEmail}
                       onChange={(e) => setExchangeEmail(e.target.value)}
                       placeholder="vikram@example.com"
-                      className="h-9 text-xs mt-1 bg-black/40 border-white/15 text-white"
+                      className="h-9 text-xs mt-1 bg-neutral-900 border-neutral-700 text-white placeholder:text-neutral-500 focus-visible:border-amber-400 caret-amber-400"
                     />
                   </div>
                   <div>
@@ -344,7 +344,7 @@ export function ProfileRenderer({ profile }: { profile: ProfileRenderData }) {
                       value={exchangePhone}
                       onChange={(e) => setExchangePhone(e.target.value)}
                       placeholder="+91 98765 43210"
-                      className="h-9 text-xs mt-1 bg-black/40 border-white/15 text-white"
+                      className="h-9 text-xs mt-1 bg-neutral-900 border-neutral-700 text-white placeholder:text-neutral-500 focus-visible:border-amber-400 caret-amber-400"
                     />
                   </div>
                 </div>
@@ -356,7 +356,7 @@ export function ProfileRenderer({ profile }: { profile: ProfileRenderData }) {
                       value={exchangeCompany}
                       onChange={(e) => setExchangeCompany(e.target.value)}
                       placeholder="Apex Group"
-                      className="h-9 text-xs mt-1 bg-black/40 border-white/15 text-white"
+                      className="h-9 text-xs mt-1 bg-neutral-900 border-neutral-700 text-white placeholder:text-neutral-500 focus-visible:border-amber-400 caret-amber-400"
                     />
                   </div>
                   <div>
@@ -365,7 +365,7 @@ export function ProfileRenderer({ profile }: { profile: ProfileRenderData }) {
                       value={exchangeJobTitle}
                       onChange={(e) => setExchangeJobTitle(e.target.value)}
                       placeholder="Managing Director"
-                      className="h-9 text-xs mt-1 bg-black/40 border-white/15 text-white"
+                      className="h-9 text-xs mt-1 bg-neutral-900 border-neutral-700 text-white placeholder:text-neutral-500 focus-visible:border-amber-400 caret-amber-400"
                     />
                   </div>
                 </div>
@@ -376,7 +376,7 @@ export function ProfileRenderer({ profile }: { profile: ProfileRenderData }) {
                     value={exchangeNotes}
                     onChange={(e) => setExchangeNotes(e.target.value)}
                     placeholder="Requirement details or inquiry..."
-                    className="h-9 text-xs mt-1 bg-black/40 border-white/15 text-white"
+                    className="h-9 text-xs mt-1 bg-neutral-900 border-neutral-700 text-white placeholder:text-neutral-500 focus-visible:border-amber-400 caret-amber-400"
                   />
                 </div>
 

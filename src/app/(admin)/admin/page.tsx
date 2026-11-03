@@ -492,12 +492,12 @@ export default function SuperAdminPage() {
                             onChange={(e) =>
                               setPlanSelections((prev) => ({ ...prev, [pub.id]: e.target.value }))
                             }
-                            className="px-2 py-1 rounded bg-background border border-border text-xs uppercase font-semibold text-foreground w-28"
+                            className="px-2 py-1 rounded bg-card border border-border text-xs uppercase font-semibold text-foreground w-28 focus:outline-none focus:border-primary cursor-pointer"
                           >
-                            <option value="nano">Nano</option>
-                            <option value="micro">Micro</option>
-                            <option value="mini">Mini</option>
-                            <option value="max">Max</option>
+                            <option value="nano" className="bg-card text-foreground">Nano</option>
+                            <option value="micro" className="bg-card text-foreground">Micro</option>
+                            <option value="mini" className="bg-card text-foreground">Mini</option>
+                            <option value="max" className="bg-card text-foreground">Max</option>
                           </select>
                         </td>
 
@@ -508,12 +508,12 @@ export default function SuperAdminPage() {
                               onChange={(e) =>
                                 setValiditySelections((prev) => ({ ...prev, [pub.id]: Number(e.target.value) }))
                               }
-                              className="px-2 py-1 rounded bg-background border border-border text-[11px] text-foreground w-28"
+                              className="px-2 py-1 rounded bg-card border border-border text-[11px] text-foreground w-28 focus:outline-none focus:border-primary cursor-pointer"
                             >
-                              <option value={30}>30 Days</option>
-                              <option value={90}>90 Days</option>
-                              <option value={365}>1 Year (365d)</option>
-                              <option value={1000}>3 Years</option>
+                              <option value={30} className="bg-card text-foreground">30 Days</option>
+                              <option value={90} className="bg-card text-foreground">90 Days</option>
+                              <option value={365} className="bg-card text-foreground">1 Year (365d)</option>
+                              <option value={1000} className="bg-card text-foreground">3 Years</option>
                             </select>
 
                             <select
@@ -521,12 +521,12 @@ export default function SuperAdminPage() {
                               onChange={(e) =>
                                 setPaymentSelections((prev) => ({ ...prev, [pub.id]: e.target.value }))
                               }
-                              className="px-2 py-1 rounded bg-background border border-border text-[10px] uppercase text-foreground w-28"
+                              className="px-2 py-1 rounded bg-card border border-border text-[10px] uppercase text-foreground w-28 focus:outline-none focus:border-primary cursor-pointer"
                             >
-                              <option value="NOT_RECORDED">Unpaid</option>
-                              <option value="PENDING_VERIFICATION">Verifying</option>
-                              <option value="PAID">Paid</option>
-                              <option value="WAIVED">Waived</option>
+                              <option value="NOT_RECORDED" className="bg-card text-foreground">Unpaid</option>
+                              <option value="PENDING_VERIFICATION" className="bg-card text-foreground">Verifying</option>
+                              <option value="PAID" className="bg-card text-foreground">Paid</option>
+                              <option value="WAIVED" className="bg-card text-foreground">Waived</option>
                             </select>
                           </div>
                         </td>
@@ -646,14 +646,14 @@ export default function SuperAdminPage() {
                           value={ord.orderStatus}
                           onChange={(e) => handleUpdateOrder(ord.id, { orderStatus: e.target.value })}
                           disabled={updatingOrderId === ord.id}
-                          className="px-2 py-1 rounded bg-background border border-border text-xs capitalize text-foreground"
+                          className="px-2 py-1 rounded bg-card border border-border text-xs capitalize text-foreground focus:outline-none focus:border-primary cursor-pointer"
                         >
-                          <option value="requested">Requested</option>
-                          <option value="in_production">In Production</option>
-                          <option value="qc">Quality Check</option>
-                          <option value="shipped">Shipped</option>
-                          <option value="delivered">Delivered</option>
-                          <option value="cancelled">Cancelled</option>
+                          <option value="requested" className="bg-card text-foreground">Requested</option>
+                          <option value="in_production" className="bg-card text-foreground">In Production</option>
+                          <option value="qc" className="bg-card text-foreground">Quality Check</option>
+                          <option value="shipped" className="bg-card text-foreground">Shipped</option>
+                          <option value="delivered" className="bg-card text-foreground">Delivered</option>
+                          <option value="cancelled" className="bg-card text-foreground">Cancelled</option>
                         </select>
                       </td>
                       <td className="p-3">
@@ -661,11 +661,11 @@ export default function SuperAdminPage() {
                           value={ord.paymentStatus}
                           onChange={(e) => handleUpdateOrder(ord.id, { paymentStatus: e.target.value })}
                           disabled={updatingOrderId === ord.id}
-                          className="px-2 py-1 rounded bg-background border border-border text-xs capitalize text-foreground"
+                          className="px-2 py-1 rounded bg-card border border-border text-xs capitalize text-foreground focus:outline-none focus:border-primary cursor-pointer"
                         >
-                          <option value="unpaid">Unpaid</option>
-                          <option value="paid_offline">Paid Offline</option>
-                          <option value="waived">Waived / Entitled</option>
+                          <option value="unpaid" className="bg-card text-foreground">Unpaid</option>
+                          <option value="paid_offline" className="bg-card text-foreground">Paid Offline</option>
+                          <option value="waived" className="bg-card text-foreground">Waived / Entitled</option>
                         </select>
                       </td>
                       <td className="p-3">
@@ -677,7 +677,7 @@ export default function SuperAdminPage() {
                               handleUpdateOrder(ord.id, { trackingNumber: e.target.value });
                             }
                           }}
-                          className="px-2 py-1 rounded bg-background border border-border text-xs font-mono text-foreground w-36"
+                          className="px-2 py-1 rounded bg-card border border-border text-xs font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary w-36"
                         />
                       </td>
                     </tr>
@@ -751,12 +751,12 @@ export default function SuperAdminPage() {
                       <select
                         value={tpl.requiredPlanId}
                         onChange={(e) => handleUpdateTemplate(tpl.id, { requiredPlanId: e.target.value })}
-                        className="px-2 py-0.5 rounded bg-background border border-border text-xs uppercase font-semibold text-foreground"
+                        className="px-2 py-0.5 rounded bg-card border border-border text-xs uppercase font-semibold text-foreground focus:outline-none focus:border-primary cursor-pointer"
                       >
-                        <option value="nano">Nano (Base)</option>
-                        <option value="micro">Micro (Solo)</option>
-                        <option value="mini">Mini (Growth)</option>
-                        <option value="max">Max (Luxury)</option>
+                        <option value="nano" className="bg-card text-foreground">Nano (Base)</option>
+                        <option value="micro" className="bg-card text-foreground">Micro (Solo)</option>
+                        <option value="mini" className="bg-card text-foreground">Mini (Growth)</option>
+                        <option value="max" className="bg-card text-foreground">Max (Luxury)</option>
                       </select>
                     </div>
                   </div>

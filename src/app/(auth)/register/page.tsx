@@ -96,7 +96,7 @@ function RegisterContent() {
                   placeholder="Aditya Vikram"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="bg-background/50 border-border text-sm"
+                  className="bg-card border-border text-sm text-foreground placeholder:text-muted-foreground focus:border-primary"
                 />
               </div>
 
@@ -110,7 +110,7 @@ function RegisterContent() {
                   placeholder="aditya@enterprise.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-background/50 border-border text-sm"
+                  className="bg-card border-border text-sm text-foreground placeholder:text-muted-foreground focus:border-primary"
                 />
               </div>
 
@@ -124,7 +124,7 @@ function RegisterContent() {
                   placeholder="Minimum 8 characters"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="bg-background/50 border-border text-sm"
+                  className="bg-card border-border text-sm text-foreground placeholder:text-muted-foreground focus:border-primary"
                 />
               </div>
 

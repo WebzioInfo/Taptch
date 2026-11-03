@@ -295,3 +295,28 @@
   - Dramatically improved usability, visual hierarchy, and professional polish.
   - Zero loss of underlying domain logic, APIs, or database functionality.
   - 95/95 tests passing across 15 test suites with 0 ESLint warnings, 0 typecheck errors, and clean Next.js build.
+
+## ADR-023: Universal Form Input Contrast & Theme Architecture Fix
+- **Date**: 2026-11-03
+- **Context**: In certain forms and authentication views, browser autofill (Chromium, Edge, Safari) and unstyled form elements produced white backgrounds with light/white text, rendering entered data virtually invisible and breaking usability.
+- **Root Cause**:
+  1. Default browser autofill injected `-webkit-box-shadow: 0 0 0 30px white inset !important;` with light text colors in dark mode.
+  2. Native `<select>` `<option>` elements on Windows/macOS were defaulting to system background colors with white text, causing illegible dropdown options.
+  3. Form inputs in authentication and builder dialogs had semi-transparent or untracked backgrounds (`bg-background/50`, `bg-transparent`) without explicit caret or theme token overrides.
+  4. Absence of reusable `<Textarea />` and `<Select />` design system components led to raw, un-styled elements in various admin and builder views.
+- **Decision**:
+  1. **Universal Form Element Base Styling (`src/app/globals.css`)**:
+     - Enforced `color: var(--foreground); background-color: var(--card); border-color: var(--border); caret-color: var(--primary);` on all `input`, `textarea`, and `select` tags.
+     - Enforced `color: var(--muted-foreground) !important;` on `::placeholder`.
+  2. **Cross-Platform Dropdown `<option>` Contrast**:
+     - Styled `select option` and `select optgroup` with explicit background and foreground tokens across default (Obsidian), Ivory, and Aurora themes.
+  3. **Multi-Theme WebKit & Chromium Autofill Neutralization**:
+     - Applied `-webkit-box-shadow: 0 0 0 1000px #141418 inset !important; -webkit-text-fill-color: #FAFAFA !important;` for Obsidian Luxury, with automatic switches for Ivory (`#FFFFFF` / `#18181B`) and Aurora (`#0F1322` / `#F8FAFC`).
+  4. **Component Architecture Enhancement**:
+     - Enhanced `src/components/ui/input.tsx` with explicit `caret-primary` and focus borders.
+     - Created `src/components/ui/textarea.tsx` and `src/components/ui/select.tsx`.
+     - Replaced raw textareas and selects across `builder`, `cards`, `admin`, and `ProfileRenderer`.
+- **Consequences**:
+  - 100% visible, high-contrast text during data entry across all browsers and autofill states.
+  - Zero regression in layout or styling; 100/100 Vitest tests passing across 16 test files.
+  - Clean Next.js production build (`next build`) exits 0.

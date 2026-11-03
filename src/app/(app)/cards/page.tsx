@@ -375,10 +375,10 @@ export default function CardsPage() {
                       id="linkProfile"
                       value={claimProfileId}
                       onChange={(e) => setClaimProfileId(e.target.value)}
-                      className="w-full h-10 px-3 rounded-md bg-background border border-border text-xs text-foreground focus:outline-none"
+                      className="w-full h-10 px-3 rounded-md bg-card border border-border text-xs text-foreground focus:outline-none focus:border-primary cursor-pointer"
                     >
                       {profiles.map((p) => (
-                        <option key={p.id} value={p.id}>
+                        <option key={p.id} value={p.id} className="bg-card text-foreground">
                           {p.displayName} (/{p.slug})
                         </option>
                       ))}
@@ -478,10 +478,12 @@ export default function CardsPage() {
                       id="orderProfile"
                       value={orderProfileId}
                       onChange={(e) => setOrderProfileId(e.target.value)}
-                      className="w-full h-9 px-3 rounded-md bg-background border border-border text-xs text-foreground"
+                      className="w-full h-9 px-3 rounded-md bg-card border border-border text-xs text-foreground focus:outline-none focus:border-primary cursor-pointer"
                     >
                       {profiles.map((p) => (
-                        <option key={p.id} value={p.id}>{p.displayName} (/{p.slug})</option>
+                        <option key={p.id} value={p.id} className="bg-card text-foreground">
+                          {p.displayName} (/{p.slug})
+                        </option>
                       ))}
                     </select>
                   </div>

@@ -140,7 +140,7 @@ export default function ClaimCardPage() {
                   value={activationCode}
                   onChange={(e) => setActivationCode(e.target.value.toUpperCase())}
                   placeholder="e.g. TPZ-ACT-XXXX"
-                  className="font-mono text-center tracking-widest text-lg uppercase bg-background/50 border-border"
+                  className="font-mono text-center tracking-widest text-lg uppercase bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary"
                   autoFocus
                 />
                 <p className="text-xs text-muted-foreground">
@@ -157,10 +157,10 @@ export default function ClaimCardPage() {
                     id="profileSelect"
                     value={selectedProfileId}
                     onChange={(e) => setSelectedProfileId(e.target.value)}
-                    className="w-full h-10 px-3 rounded-md bg-background border border-border text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full h-10 px-3 rounded-md bg-card border border-border text-sm text-foreground focus:outline-none focus:border-primary cursor-pointer"
                   >
                     {profiles.map((p) => (
-                      <option key={p.id} value={p.id}>
+                      <option key={p.id} value={p.id} className="bg-card text-foreground">
                         {p.displayName} (/{p.slug})
                       </option>
                     ))}

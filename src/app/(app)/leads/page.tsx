@@ -117,7 +117,7 @@ export default function LeadsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name, company, or email..."
-            className="pl-9 h-10 bg-card/60 border-border text-xs"
+            className="pl-9 h-10 bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary text-xs"
           />
         </div>
         <div className="text-xs text-muted-foreground">

@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
@@ -685,11 +686,11 @@ export default function ProfileBuilderPage({
 
                 <div>
                   <label className="block text-xs font-semibold mb-1">About / Bio</label>
-                  <textarea
+                  <Textarea
                     rows={4}
                     value={profile.bio || ''}
                     onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-                    className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-xs shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    className="text-xs"
                     placeholder="Tell visitors about your background, career, and mission..."
                   />
                 </div>
@@ -1484,11 +1485,11 @@ export default function ProfileBuilderPage({
 
               <div>
                 <label className="block text-xs font-semibold mb-1">Description</label>
-                <textarea
+                <Textarea
                   rows={2}
                   value={catForm.description}
                   onChange={(e) => setCatForm({ ...catForm, description: e.target.value })}
-                  className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-xs"
+                  className="text-xs"
                   placeholder="Short description..."
                 />
               </div>

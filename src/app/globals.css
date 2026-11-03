@@ -84,4 +84,146 @@
     background-color: var(--primary);
     color: var(--primary-foreground);
   }
+
+  /* Universal Input, Textarea, and Select Theme & Contrast Architecture */
+  input,
+  textarea,
+  select {
+    color: var(--foreground);
+    background-color: var(--card);
+    border-color: var(--border);
+    caret-color: var(--primary);
+    accent-color: var(--primary);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--muted-foreground) !important;
+    opacity: 1 !important;
+  }
+
+  input:hover:not(:disabled),
+  textarea:hover:not(:disabled),
+  select:hover:not(:disabled) {
+    border-color: var(--border);
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    color: var(--foreground) !important;
+    background-color: var(--card) !important;
+    border-color: var(--ring) !important;
+    outline: none !important;
+  }
+
+  input:disabled,
+  textarea:disabled,
+  select:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    background-color: var(--muted);
+    color: var(--muted-foreground);
+  }
+
+  /* Specific Input Types */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"] {
+    color: var(--foreground);
+    background-color: var(--card);
+  }
+
+  /* Native Dropdown <option> Styling Across Windows, macOS, and Linux */
+  select option {
+    background-color: #141418 !important;
+    color: #FAFAFA !important;
+  }
+
+  select optgroup {
+    background-color: #141418 !important;
+    color: #A1A1AA !important;
+  }
+
+  [data-theme="ivory"] select option,
+  .light select option {
+    background-color: #FFFFFF !important;
+    color: #18181B !important;
+  }
+
+  [data-theme="ivory"] select optgroup,
+  .light select optgroup {
+    background-color: #F5F1EC !important;
+    color: #78716C !important;
+  }
+
+  [data-theme="aurora"] select option {
+    background-color: #0F1322 !important;
+    color: #F8FAFC !important;
+  }
+
+  /* WebKit / Chromium (Chrome, Edge, Brave, Opera) & Safari Autofill Protection */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  textarea:-webkit-autofill:active,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus,
+  select:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #141418 inset !important;
+    -webkit-text-fill-color: #FAFAFA !important;
+    caret-color: #D4AF37 !important;
+    border-color: #26262F !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  [data-theme="ivory"] input:-webkit-autofill,
+  [data-theme="ivory"] input:-webkit-autofill:hover,
+  [data-theme="ivory"] input:-webkit-autofill:focus,
+  [data-theme="ivory"] input:-webkit-autofill:active,
+  [data-theme="ivory"] textarea:-webkit-autofill,
+  [data-theme="ivory"] textarea:-webkit-autofill:hover,
+  [data-theme="ivory"] textarea:-webkit-autofill:focus,
+  [data-theme="ivory"] textarea:-webkit-autofill:active,
+  [data-theme="ivory"] select:-webkit-autofill,
+  [data-theme="ivory"] select:-webkit-autofill:hover,
+  [data-theme="ivory"] select:-webkit-autofill:focus,
+  [data-theme="ivory"] select:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #FFFFFF inset !important;
+    -webkit-text-fill-color: #18181B !important;
+    caret-color: #8B4513 !important;
+    border-color: #E6DFD5 !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  [data-theme="aurora"] input:-webkit-autofill,
+  [data-theme="aurora"] input:-webkit-autofill:hover,
+  [data-theme="aurora"] input:-webkit-autofill:focus,
+  [data-theme="aurora"] input:-webkit-autofill:active,
+  [data-theme="aurora"] textarea:-webkit-autofill,
+  [data-theme="aurora"] textarea:-webkit-autofill:hover,
+  [data-theme="aurora"] textarea:-webkit-autofill:focus,
+  [data-theme="aurora"] textarea:-webkit-autofill:active,
+  [data-theme="aurora"] select:-webkit-autofill,
+  [data-theme="aurora"] select:-webkit-autofill:hover,
+  [data-theme="aurora"] select:-webkit-autofill:focus,
+  [data-theme="aurora"] select:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #0F1322 inset !important;
+    -webkit-text-fill-color: #F8FAFC !important;
+    caret-color: #0284C7 !important;
+    border-color: #1E2846 !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
 }
