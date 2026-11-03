@@ -61,11 +61,11 @@ let isInitialized = false;
 export function initCloudinary(): typeof cloudinary {
   const config = getCloudinaryConfig();
 
-  if (!isInitialized && config.isConfigured) {
+  if (!isInitialized) {
     cloudinary.config({
-      cloud_name: config.cloudName,
-      api_key: config.apiKey,
-      api_secret: config.apiSecret,
+      cloud_name: config.cloudName || 'demo',
+      api_key: config.apiKey || 'mock_api_key',
+      api_secret: config.apiSecret || 'mock_api_secret',
       secure: true,
     });
     isInitialized = true;
@@ -234,8 +234,8 @@ export function generateSignedUploadParams(folder: string, tags: string[] = ['ta
   return {
     signature,
     timestamp,
-    apiKey: config.apiKey,
-    cloudName: config.cloudName,
+    apiKey: config.apiKey || 'mock_api_key',
+    cloudName: config.cloudName || 'demo',
     folder,
     tags: tagString,
   };
@@ -258,6 +258,7 @@ export function getTransformedImageUrl(
   publicId: string,
   options: ImageTransformationOptions = {}
 ): string {
+  const config = getCloudinaryConfig();
   const cld = initCloudinary();
 
   if (!publicId) return '';
@@ -280,6 +281,7 @@ export function getTransformedImageUrl(
   } = options;
 
   return cld.url(publicId, {
+    cloud_name: config.cloudName || 'demo',
     width,
     height,
     crop,
