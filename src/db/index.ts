@@ -53,6 +53,16 @@ export function getDatabase() {
     'postgres://tappzio_app:tappzio_app_pass@localhost:6432/tappzio_db?sslmode=disable';
 
   if (!rawPostgresClient) {
+    // Warn if IPv6-only direct Supabase endpoint is detected in connection string
+    if (connectionString.includes('db.') && connectionString.includes('.supabase.co')) {
+      console.warn(
+        '\n⚠️ [DATABASE CONFIG WARNING] Detected direct Supabase host ("db.*.supabase.co").\n' +
+        'Direct Supabase endpoints are IPv6-only. If running in an IPv4-only environment (such as Docker or VPS),\n' +
+        'queries will fail with "getaddrinfo ENOTFOUND".\n' +
+        'Please switch DATABASE_URL to the Supabase Connection Pooler host (aws-0-[region].pooler.supabase.com:6543).\n'
+      );
+    }
+
     // prepare: false is strictly MANDATORY behind PgBouncer transaction pooling
     rawPostgresClient = postgres(connectionString, {
       prepare: false,

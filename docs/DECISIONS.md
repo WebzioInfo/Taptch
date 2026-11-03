@@ -320,3 +320,34 @@
   - 100% visible, high-contrast text during data entry across all browsers and autofill states.
   - Zero regression in layout or styling; 100/100 Vitest tests passing across 16 test files.
   - Clean Next.js production build (`next build`) exits 0.
+
+## ADR-024: Supabase IPv4 Pooler Resolution & Production Authentication Restoration
+- **Date**: 2026-11-03
+- **Context**: In production at `https://tappzio.webziotech.in`, user authentication failed with HTTP 500 on `POST /api/auth/email-otp/send-verification-otp` and email/password login. Database error logs indicated:
+  `Failed query: insert into "verifications" ("id", "identifier", "value", "expires_at", "created_at", "updated_at") values ($1, $2, $3, $4, $5, $6)`
+  `[cause]: Error: getaddrinfo ENOTFOUND db.hwrgtzkhcdklizyfargh.supabase.co`
+  along with a warning:
+  `NODE_ENV was incorrectly set to "development", this value is being overridden to "production"`.
+- **Root Cause Analysis**:
+  1. **IPv6-Only Direct Supabase Endpoint**: Modern Supabase direct database hostnames (`db.<project-ref>.supabase.co`) publish only IPv6 `AAAA` records and zero IPv4 `A` records. VPS hosts, Linux containers, and Docker environments running in standard IPv4-only network topologies cannot resolve IPv6 hostnames, triggering fatal `getaddrinfo ENOTFOUND` exceptions on every Better Auth query.
+  2. **Supabase Pooler Has Dedicated IPv4 Support**: Supabase provides an AWS-based PgBouncer Connection Pooler (`aws-0-[region].pooler.supabase.com`) with 3 redundant IPv4 addresses and dual-mode operation (Transaction port `6543` and Session port `5432`).
+  3. **Better Auth CORS & Origin Whitelisting**: Reverse proxy environments behind custom subdomains require explicit `trustedOrigins` registration to guarantee CSRF and session cookie security.
+- **Decision**:
+  1. **Standardize on Supabase IPv4 Connection Pooler**:
+     - Host: `aws-0-eu-west-1.pooler.supabase.com`
+     - Port: `6543` (PgBouncer transaction mode for runtime queries with `prepare: false`) and `5432` (session mode for Drizzle migrations/direct connections)
+     - User: `postgres.hwrgtzkhcdklizyfargh`
+     - Database: `postgres`
+     - SSL: `sslmode=require`
+  2. **Add Defensive Startup Diagnostics (`src/db/index.ts`)**:
+     - Injected an automatic warning check that detects if `db.*.supabase.co` is configured in `DATABASE_URL` and informs operators to switch to the pooler.
+  3. **Explicit Better Auth Trusted Origins (`src/lib/auth/index.ts`)**:
+     - Configured `trustedOrigins: [process.env.BETTER_AUTH_URL, process.env.NEXT_PUBLIC_APP_URL, 'https://tappzio.webziotech.in'].filter(Boolean)` to prevent reverse proxy origin rejections.
+  4. **Production Runtime Environment Standard**:
+     - Instruct operators to set `NODE_ENV=production` in VPS environment to eliminate the development override warning and ensure `useSecureCookies: true`.
+- **Verification**:
+  - Live query verified through Supabase pooler: All 33 tables and 20 existing user records verified intact without data loss.
+  - Better Auth `insert into "verifications"` and `auth.api.sendVerificationOTP` tested and verified end-to-end with `{ success: true }`.
+  - 100/100 Vitest tests passing across 16 test files.
+  - `tsc --noEmit` and `next lint` pass with 0 warnings/errors.
+  - Production `next build` compiled all routes cleanly.

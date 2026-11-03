@@ -12,6 +12,11 @@ import { sendOtpEmail, sendOtpSms } from './otp-provider';
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET || 'tappzio-development-better-auth-secret-min-32-chars-long',
   baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3000',
+  trustedOrigins: [
+    process.env.BETTER_AUTH_URL,
+    process.env.NEXT_PUBLIC_APP_URL,
+    'https://tappzio.webziotech.in',
+  ].filter(Boolean) as string[],
   database: drizzleAdapter(db, {
     provider: 'pg',
     schema: {
