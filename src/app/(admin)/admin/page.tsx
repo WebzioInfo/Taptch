@@ -6,11 +6,10 @@ import { brandConfig } from '@/config/brand';
 import { BrandLogo } from '@/components/brand';
 import { useSession } from '@/lib/auth/client';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
   ShieldAlert,
-  ShieldCheck,
   Truck,
   Loader2,
   RefreshCw,
@@ -284,49 +283,44 @@ export default function SuperAdminPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/40 pb-6">
-        <div>
-          <div className="flex items-center gap-3">
-            <BrandLogo variant="symbol" size="md" />
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">{brandConfig.name} Executive Cockpit</h1>
-            <Badge variant="gold" className="uppercase text-[10px] tracking-wider">
-              <ShieldCheck className="w-3 h-3 mr-1 inline" /> Admin Control
-            </Badge>
-          </div>
-          <p className="text-sm text-muted-foreground mt-1">
-            Controlled publishing, commercial plan assignments, Cloudinary media, and physical card fulfillment.
-          </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/40 pb-5">
+        <div className="flex items-center gap-3">
+          <BrandLogo variant="symbol" size="md" />
+          <h1 className="text-xl font-bold tracking-tight text-foreground">{brandConfig.name} Admin</h1>
+          <Badge variant="gold" className="uppercase text-[10px] tracking-wider">
+            Admin
+          </Badge>
         </div>
 
-        <Button onClick={loadAdminData} disabled={loading} variant="outline" size="sm" className="gap-2 self-start">
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          Refresh Data
+        <Button onClick={loadAdminData} disabled={loading} variant="outline" size="sm" className="gap-2 self-start sm:self-auto text-xs h-8">
+          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+          Refresh
         </Button>
       </div>
 
       {/* KPI Counters */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        <Card className="bg-card/40 border-border/60 p-4">
-          <div className="text-xs text-muted-foreground font-medium">Platform Users</div>
-          <div className="text-2xl font-bold text-foreground mt-1">{stats?.totalUsers ?? '—'}</div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <Card className="bg-card border-border/60 p-3.5">
+          <div className="text-xs text-muted-foreground font-medium">Users</div>
+          <div className="text-xl font-bold text-foreground mt-0.5">{stats?.totalUsers ?? '—'}</div>
         </Card>
-        <Card className="bg-card/40 border-border/60 p-4">
-          <div className="text-xs text-muted-foreground font-medium">Digital Profiles</div>
-          <div className="text-2xl font-bold text-foreground mt-1">{stats?.totalProfiles ?? '—'}</div>
+        <Card className="bg-card border-border/60 p-3.5">
+          <div className="text-xs text-muted-foreground font-medium">Profiles</div>
+          <div className="text-xl font-bold text-foreground mt-0.5">{stats?.totalProfiles ?? '—'}</div>
         </Card>
-        <Card className="bg-card/40 border-border/60 p-4">
-          <div className="text-xs text-muted-foreground font-medium">Pending Requests</div>
-          <div className="text-2xl font-bold text-primary mt-1">
+        <Card className="bg-card border-border/60 p-3.5">
+          <div className="text-xs text-muted-foreground font-medium">Pending</div>
+          <div className="text-xl font-bold text-primary mt-0.5">
             {publications.filter((p) => p.status === 'PENDING_PUBLICATION').length}
           </div>
         </Card>
-        <Card className="bg-card/40 border-border/60 p-4">
-          <div className="text-xs text-muted-foreground font-medium">Hardware Orders</div>
-          <div className="text-2xl font-bold text-foreground mt-1">{stats?.totalOrders ?? '—'}</div>
+        <Card className="bg-card border-border/60 p-3.5">
+          <div className="text-xs text-muted-foreground font-medium">Orders</div>
+          <div className="text-xl font-bold text-foreground mt-0.5">{stats?.totalOrders ?? '—'}</div>
         </Card>
-        <Card className="bg-card/40 border-border/60 p-4">
-          <div className="text-xs text-muted-foreground font-medium">Cloudinary Storage</div>
-          <div className="text-2xl font-bold text-[#D4AF37] mt-1">
+        <Card className="bg-card border-border/60 p-3.5">
+          <div className="text-xs text-muted-foreground font-medium">Media</div>
+          <div className="text-xl font-bold text-[#D4AF37] mt-0.5">
             {Math.round((mediaStats.totalBytes / (1024 * 1024)) * 10) / 10} MB
           </div>
         </Card>
@@ -336,13 +330,13 @@ export default function SuperAdminPage() {
       <div className="flex border-b border-border/60 gap-4">
         <button
           onClick={() => setActiveTab('publications')}
-          className={`pb-3 text-sm font-semibold transition-all relative ${
+          className={`pb-2.5 text-xs font-semibold transition-all relative ${
             activeTab === 'publications' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          <div className="flex items-center gap-2">
-            <FileCheck2 className="w-4 h-4" />
-            Publication Requests ({publications.length})
+          <div className="flex items-center gap-1.5">
+            <FileCheck2 className="w-3.5 h-3.5" />
+            Publications ({publications.length})
           </div>
           {activeTab === 'publications' && (
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
@@ -351,13 +345,13 @@ export default function SuperAdminPage() {
 
         <button
           onClick={() => setActiveTab('orders')}
-          className={`pb-3 text-sm font-semibold transition-all relative ${
+          className={`pb-2.5 text-xs font-semibold transition-all relative ${
             activeTab === 'orders' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          <div className="flex items-center gap-2">
-            <Truck className="w-4 h-4" />
-            Card Orders ({orders.length})
+          <div className="flex items-center gap-1.5">
+            <Truck className="w-3.5 h-3.5" />
+            Orders ({orders.length})
           </div>
           {activeTab === 'orders' && (
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
@@ -366,13 +360,13 @@ export default function SuperAdminPage() {
 
         <button
           onClick={() => setActiveTab('templates')}
-          className={`pb-3 text-sm font-semibold transition-all relative ${
+          className={`pb-2.5 text-xs font-semibold transition-all relative ${
             activeTab === 'templates' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          <div className="flex items-center gap-2">
-            <Palette className="w-4 h-4" />
-            Template Registry ({templates.length})
+          <div className="flex items-center gap-1.5">
+            <Palette className="w-3.5 h-3.5" />
+            Templates ({templates.length})
           </div>
           {activeTab === 'templates' && (
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
@@ -381,13 +375,13 @@ export default function SuperAdminPage() {
 
         <button
           onClick={() => setActiveTab('media')}
-          className={`pb-3 text-sm font-semibold transition-all relative ${
+          className={`pb-2.5 text-xs font-semibold transition-all relative ${
             activeTab === 'media' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          <div className="flex items-center gap-2">
-            <ImageIcon className="w-4 h-4" />
-            Cloudinary Media ({mediaStats.totalCount})
+          <div className="flex items-center gap-1.5">
+            <ImageIcon className="w-3.5 h-3.5" />
+            Media ({mediaStats.totalCount})
           </div>
           {activeTab === 'media' && (
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
@@ -397,12 +391,9 @@ export default function SuperAdminPage() {
 
       {/* Publications Queue Tab */}
       {activeTab === 'publications' && (
-        <Card className="border-border/80 bg-card/60">
-          <CardHeader>
-            <CardTitle className="text-lg">Controlled Publication Requests</CardTitle>
-            <CardDescription className="text-xs">
-              Every user collects full data. Review profile, conduct commercial discussion via WhatsApp/phone, assign plan, and approve publication.
-            </CardDescription>
+        <Card className="border-border/80 bg-card">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-semibold">Publications</CardTitle>
           </CardHeader>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
@@ -598,23 +589,20 @@ export default function SuperAdminPage() {
 
       {/* Orders Tab */}
       {activeTab === 'orders' && (
-        <Card className="border-border/80 bg-card/60">
-          <CardHeader>
-            <CardTitle className="text-lg">Physical Card Order Kanban & Fulfillment</CardTitle>
-            <CardDescription className="text-xs">
-              Manage custom physical card production, shipping addresses, manual offline payment status, and courier tracking IDs.
-            </CardDescription>
+        <Card className="border-border/80 bg-card">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-semibold">Orders</CardTitle>
           </CardHeader>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-muted/30 text-muted-foreground uppercase text-[10px] tracking-wider border-y border-border/40">
                 <tr>
-                  <th className="p-3">Customer & Order ID</th>
-                  <th className="p-3">Hardware Spec</th>
-                  <th className="p-3">Shipping Address</th>
-                  <th className="p-3">Production Status</th>
-                  <th className="p-3">Payment Verification</th>
-                  <th className="p-3">Courier Tracking</th>
+                  <th className="p-3">Customer & Order</th>
+                  <th className="p-3">Material</th>
+                  <th className="p-3">Address</th>
+                  <th className="p-3">Status</th>
+                  <th className="p-3">Payment</th>
+                  <th className="p-3">Tracking</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/40">
@@ -691,20 +679,17 @@ export default function SuperAdminPage() {
 
       {/* Templates Tab */}
       {activeTab === 'templates' && (
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-bold text-foreground">Template Directory Governance</h3>
-              <p className="text-xs text-muted-foreground">Manage active status, required plan tiers, and test realistic demo previews across all 8 business verticals.</p>
-            </div>
+            <h3 className="text-sm font-semibold text-foreground">Templates</h3>
             <Badge variant="outline" className="text-xs text-primary border-primary/30">
-              {templates.length} Authoritative Templates
+              {templates.length}
             </Badge>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {templates.map((tpl) => (
-              <Card key={tpl.id} className="border-border/80 bg-card/60 overflow-hidden flex flex-col justify-between">
+              <Card key={tpl.id} className="border-border/80 bg-card overflow-hidden flex flex-col justify-between">
                 {tpl.thumbnailUrl && (
                   <div className="aspect-[16/9] w-full bg-neutral-900 relative overflow-hidden">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -726,42 +711,35 @@ export default function SuperAdminPage() {
                   </div>
                 )}
 
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <CardTitle className="text-base font-bold">{tpl.name}</CardTitle>
-                      <CardDescription className="text-xs mt-1 line-clamp-2">
-                        {tpl.description || 'Enterprise responsive template layout.'}
-                      </CardDescription>
-                    </div>
-                  </div>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-bold">{tpl.name}</CardTitle>
                 </CardHeader>
 
-                <CardContent className="space-y-4 text-xs pt-0 flex-1 flex flex-col justify-between">
+                <CardContent className="space-y-3 text-xs pt-0 flex-1 flex flex-col justify-between">
                   <div className="space-y-2 pt-2 border-t border-border/40">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">Adoption &amp; Usage:</span>
-                      <Badge variant="secondary" className="font-mono text-[11px]">
-                        {tpl.usageCount || 0} customer profiles
+                      <span className="text-muted-foreground">Usage:</span>
+                      <Badge variant="secondary" className="font-mono text-[10px]">
+                        {tpl.usageCount || 0}
                       </Badge>
                     </div>
 
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">Required Plan:</span>
+                      <span className="text-muted-foreground">Plan:</span>
                       <select
                         value={tpl.requiredPlanId}
                         onChange={(e) => handleUpdateTemplate(tpl.id, { requiredPlanId: e.target.value })}
                         className="px-2 py-0.5 rounded bg-card border border-border text-xs uppercase font-semibold text-foreground focus:outline-none focus:border-primary cursor-pointer"
                       >
-                        <option value="nano" className="bg-card text-foreground">Nano (Base)</option>
-                        <option value="micro" className="bg-card text-foreground">Micro (Solo)</option>
-                        <option value="mini" className="bg-card text-foreground">Mini (Growth)</option>
-                        <option value="max" className="bg-card text-foreground">Max (Luxury)</option>
+                        <option value="nano" className="bg-card text-foreground">Nano</option>
+                        <option value="micro" className="bg-card text-foreground">Micro</option>
+                        <option value="mini" className="bg-card text-foreground">Mini</option>
+                        <option value="max" className="bg-card text-foreground">Max</option>
                       </select>
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t border-border/40 flex items-center gap-2">
+                  <div className="pt-2 border-t border-border/40 flex items-center gap-2">
                     <Button
                       variant="outline"
                       size="sm"
@@ -772,7 +750,7 @@ export default function SuperAdminPage() {
                       className="flex-1 text-xs gap-1.5 h-8"
                     >
                       <Eye className="w-3.5 h-3.5 text-primary" />
-                      <span>Preview Demo</span>
+                      <span>Preview</span>
                     </Button>
 
                     <Button
@@ -794,16 +772,11 @@ export default function SuperAdminPage() {
 
       {/* Cloudinary Media Inspection Tab */}
       {activeTab === 'media' && (
-        <Card className="border-border/80 bg-card/60">
-          <CardHeader>
+        <Card className="border-border/80 bg-card">
+          <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-lg">Cloudinary Media Asset Registry</CardTitle>
-                <CardDescription className="text-xs">
-                  Centralized repository of all user avatars, logos, cover photos, gallery images, videos, and PDF brochures.
-                </CardDescription>
-              </div>
-              <Badge variant="outline" className="border-[#D4AF37]/40 text-[#D4AF37]">
+              <CardTitle className="text-sm font-semibold">Media</CardTitle>
+              <Badge variant="outline" className="border-[#D4AF37]/40 text-[#D4AF37] text-xs">
                 Cloud: {process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dhydmxcq2'}
               </Badge>
             </div>

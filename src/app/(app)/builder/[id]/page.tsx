@@ -33,7 +33,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from '@/components/ui/dialog';
 
 interface BusinessItem {
@@ -113,13 +112,13 @@ interface ProfileData {
 }
 
 const SECTION_TABS = [
-  { id: 'identity', label: 'Identity & Bio', icon: User },
-  { id: 'theme', label: 'Theme & Styling', icon: Palette },
-  { id: 'contacts', label: 'Contact Info', icon: Phone },
-  { id: 'businesses', label: 'Ventures & Businesses', icon: Building2 },
-  { id: 'catalogue', label: 'Products & Services', icon: Package },
-  { id: 'socials', label: 'Social Networks', icon: Share2 },
-  { id: 'reviews', label: 'Reviews & Leads', icon: Star },
+  { id: 'identity', label: 'Identity', icon: User },
+  { id: 'theme', label: 'Theme', icon: Palette },
+  { id: 'contacts', label: 'Contact', icon: Phone },
+  { id: 'businesses', label: 'Businesses', icon: Building2 },
+  { id: 'catalogue', label: 'Catalogue', icon: Package },
+  { id: 'socials', label: 'Socials', icon: Share2 },
+  { id: 'reviews', label: 'Extras', icon: Star },
 ];
 
 export default function ProfileBuilderPage({
@@ -589,7 +588,7 @@ export default function ProfileBuilderPage({
             className="text-xs h-8"
           >
             <Save className="w-3.5 h-3.5 mr-1" />
-            {isSaving ? 'Saving...' : 'Save Draft'}
+            {isSaving ? 'Saving...' : 'Save'}
           </Button>
 
           <Button
@@ -605,7 +604,7 @@ export default function ProfileBuilderPage({
             <Link href={`/p/${profile.slug}`} target="_blank">
               <Button variant="ghost" size="sm" className="text-xs h-8">
                 <ExternalLink className="w-3.5 h-3.5 mr-1" />
-                View Live
+                View
               </Button>
             </Link>
           )}
@@ -618,7 +617,7 @@ export default function ProfileBuilderPage({
         <aside className="w-64 border-r border-border/80 bg-card/60 flex flex-col shrink-0 overflow-y-auto">
           <div className="p-4 border-b border-border/60">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Profile Sections
+              Sections
             </span>
           </div>
           <nav className="p-2 space-y-1">
@@ -658,13 +657,8 @@ export default function ProfileBuilderPage({
         <main className="flex-1 overflow-y-auto p-6 sm:p-8 max-w-2xl border-r border-border/80">
           {/* Identity Tab */}
           {activeTab === 'identity' && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-lg font-bold">Identity & Narrative</h2>
-                <p className="text-xs text-muted-foreground">
-                  Personal and brand profile information shown at the top of your card.
-                </p>
-              </div>
+            <div className="space-y-5">
+              <h2 className="text-sm font-semibold">Identity</h2>
 
               <div className="space-y-4">
                 <div>
@@ -676,28 +670,28 @@ export default function ProfileBuilderPage({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold mb-1">Professional Headline</label>
+                  <label className="block text-xs font-semibold mb-1">Headline</label>
                   <Input
                     value={profile.headline || ''}
                     onChange={(e) => setProfile({ ...profile, headline: e.target.value })}
-                    placeholder="e.g. Managing Director & Tech Investor"
+                    placeholder="Managing Director & Tech Investor"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold mb-1">About / Bio</label>
+                  <label className="block text-xs font-semibold mb-1">Bio</label>
                   <Textarea
                     rows={4}
                     value={profile.bio || ''}
                     onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
                     className="text-xs"
-                    placeholder="Tell visitors about your background, career, and mission..."
+                    placeholder="About your background and mission..."
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold mb-1">Avatar Image URL</label>
+                    <label className="block text-xs font-semibold mb-1">Avatar URL</label>
                     <Input
                       value={profile.avatarUrl || ''}
                       onChange={(e) => setProfile({ ...profile, avatarUrl: e.target.value })}
@@ -705,7 +699,7 @@ export default function ProfileBuilderPage({
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold mb-1">Cover Banner URL</label>
+                    <label className="block text-xs font-semibold mb-1">Cover URL</label>
                     <Input
                       value={profile.coverUrl || ''}
                       onChange={(e) => setProfile({ ...profile, coverUrl: e.target.value })}
@@ -730,7 +724,7 @@ export default function ProfileBuilderPage({
                     className="text-xs h-8 bg-gold text-gold-foreground hover:bg-gold-light font-semibold"
                   >
                     <Save className="w-3.5 h-3.5 mr-1" />
-                    {savingSection === 'Identity' ? 'Saving Identity...' : 'Save Identity'}
+                    {savingSection === 'Identity' ? 'Saving...' : 'Save'}
                   </Button>
                 </div>
               </div>
@@ -739,17 +733,12 @@ export default function ProfileBuilderPage({
 
           {/* Theme Tab */}
           {activeTab === 'theme' && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-lg font-bold">Theme & Styling</h2>
-                <p className="text-xs text-muted-foreground">
-                  Customize the palette and visual feel across all device viewports.
-                </p>
-              </div>
+            <div className="space-y-5">
+              <h2 className="text-sm font-semibold">Theme</h2>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold mb-2">Accent / Primary Color</label>
+                  <label className="block text-xs font-semibold mb-2">Accent Color</label>
                   <div className="flex items-center gap-3">
                     <input
                       type="color"
@@ -776,12 +765,12 @@ export default function ProfileBuilderPage({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold mb-1">Active Template</label>
+                  <label className="block text-xs font-semibold mb-1">Template</label>
                   <div className="p-3 rounded-xl border border-border bg-card flex items-center justify-between">
                     <span className="text-xs font-semibold uppercase font-mono">{profile.templateId}</span>
                     <Link href={`/templates`}>
                       <Button variant="outline" size="sm" className="text-xs h-7">
-                        Change Template
+                        Change
                       </Button>
                     </Link>
                   </div>
@@ -799,7 +788,7 @@ export default function ProfileBuilderPage({
                     className="text-xs h-8 bg-gold text-gold-foreground hover:bg-gold-light font-semibold"
                   >
                     <Save className="w-3.5 h-3.5 mr-1" />
-                    {savingSection === 'Theme' ? 'Saving Theme...' : 'Save Theme'}
+                    {savingSection === 'Theme' ? 'Saving...' : 'Save'}
                   </Button>
                 </div>
               </div>
@@ -808,17 +797,12 @@ export default function ProfileBuilderPage({
 
           {/* Contacts Tab */}
           {activeTab === 'contacts' && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-lg font-bold">Contact Channels</h2>
-                <p className="text-xs text-muted-foreground">
-                  Direct communication channels displayed on your smart digital card.
-                </p>
-              </div>
+            <div className="space-y-5">
+              <h2 className="text-sm font-semibold">Contact</h2>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold mb-1">Phone Number</label>
+                  <label className="block text-xs font-semibold mb-1">Phone</label>
                   <Input
                     value={profile.phone || ''}
                     onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
@@ -826,7 +810,7 @@ export default function ProfileBuilderPage({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold mb-1">Email Address</label>
+                  <label className="block text-xs font-semibold mb-1">Email</label>
                   <Input
                     type="email"
                     value={profile.email || ''}
@@ -835,7 +819,7 @@ export default function ProfileBuilderPage({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold mb-1">WhatsApp Number</label>
+                  <label className="block text-xs font-semibold mb-1">WhatsApp</label>
                   <Input
                     value={profile.whatsapp || ''}
                     onChange={(e) => setProfile({ ...profile, whatsapp: e.target.value })}
@@ -843,7 +827,7 @@ export default function ProfileBuilderPage({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold mb-1">Primary Website</label>
+                  <label className="block text-xs font-semibold mb-1">Website</label>
                   <Input
                     value={profile.website || ''}
                     onChange={(e) => setProfile({ ...profile, website: e.target.value })}
@@ -851,7 +835,7 @@ export default function ProfileBuilderPage({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold mb-1">Physical Address / City</label>
+                  <label className="block text-xs font-semibold mb-1">Address</label>
                   <Input
                     value={profile.address || ''}
                     onChange={(e) => setProfile({ ...profile, address: e.target.value })}
@@ -875,7 +859,7 @@ export default function ProfileBuilderPage({
                     className="text-xs h-8 bg-gold text-gold-foreground hover:bg-gold-light font-semibold"
                   >
                     <Save className="w-3.5 h-3.5 mr-1" />
-                    {savingSection === 'Contacts' ? 'Saving Contacts...' : 'Save Contacts'}
+                    {savingSection === 'Contacts' ? 'Saving...' : 'Save'}
                   </Button>
                 </div>
               </div>
@@ -884,35 +868,30 @@ export default function ProfileBuilderPage({
 
           {/* Ventures & Multiple Businesses Tab */}
           {activeTab === 'businesses' && (
-            <div className="space-y-6">
+            <div className="space-y-5">
               <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-bold">Ventures & Businesses</h2>
-                  <p className="text-xs text-muted-foreground">
-                    Multiple business ownership showcase for personal profiles.
-                  </p>
-                </div>
+                <h2 className="text-sm font-semibold">Businesses</h2>
                 <Button
                   size="sm"
                   onClick={() => handleOpenBizModal()}
                   className="bg-gold text-gold-foreground hover:bg-gold-light text-xs font-semibold"
                 >
                   <Plus className="w-3.5 h-3.5 mr-1" />
-                  Add Venture
+                  Add
                 </Button>
               </div>
 
               {profile.businesses.length === 0 ? (
                 <div className="p-8 text-center border border-dashed border-border rounded-xl bg-card/40">
                   <Building2 className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-50" />
-                  <p className="text-xs text-muted-foreground">No ventures added yet.</p>
+                  <p className="text-xs text-muted-foreground">No businesses added.</p>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleOpenBizModal()}
                     className="mt-3 text-xs"
                   >
-                    Add Your First Company
+                    Add Business
                   </Button>
                 </div>
               ) : (
@@ -958,35 +937,30 @@ export default function ProfileBuilderPage({
 
           {/* Catalogue Tab (Products & Services) */}
           {activeTab === 'catalogue' && (
-            <div className="space-y-6">
+            <div className="space-y-5">
               <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-bold">Products & Services</h2>
-                  <p className="text-xs text-muted-foreground">
-                    Items, pricing, and enquiry links showcased on your profile.
-                  </p>
-                </div>
+                <h2 className="text-sm font-semibold">Catalogue</h2>
                 <Button
                   size="sm"
                   onClick={() => handleOpenCatModal()}
                   className="bg-gold text-gold-foreground hover:bg-gold-light text-xs font-semibold"
                 >
                   <Plus className="w-3.5 h-3.5 mr-1" />
-                  Add Item
+                  Add
                 </Button>
               </div>
 
               {profile.catalogue.length === 0 ? (
                 <div className="p-8 text-center border border-dashed border-border rounded-xl bg-card/40">
                   <Package className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-50" />
-                  <p className="text-xs text-muted-foreground">No catalogue items added yet.</p>
+                  <p className="text-xs text-muted-foreground">No items added.</p>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleOpenCatModal()}
                     className="mt-3 text-xs"
                   >
-                    Add Product / Service
+                    Add Item
                   </Button>
                 </div>
               ) : (
@@ -1039,17 +1013,12 @@ export default function ProfileBuilderPage({
 
           {/* Socials Tab */}
           {activeTab === 'socials' && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-lg font-bold">Social Media Profiles</h2>
-                <p className="text-xs text-muted-foreground">
-                  Add links to your professional and creator profiles.
-                </p>
-              </div>
+            <div className="space-y-5">
+              <h2 className="text-sm font-semibold">Socials</h2>
 
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs font-semibold mb-1">LinkedIn Profile</label>
+                  <label className="block text-xs font-semibold mb-1">LinkedIn</label>
                   <Input
                     value={profile.socialLinks?.linkedin || ''}
                     onChange={(e) =>
@@ -1088,7 +1057,7 @@ export default function ProfileBuilderPage({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold mb-1">YouTube Channel</label>
+                  <label className="block text-xs font-semibold mb-1">YouTube</label>
                   <Input
                     value={profile.socialLinks?.youtube || ''}
                     onChange={(e) =>
@@ -1126,7 +1095,7 @@ export default function ProfileBuilderPage({
                     className="text-xs h-8 bg-gold text-gold-foreground hover:bg-gold-light font-semibold"
                   >
                     <Save className="w-3.5 h-3.5 mr-1" />
-                    {savingSection === 'Social Networks' ? 'Saving Socials...' : 'Save Social Networks'}
+                    {savingSection === 'Social Networks' ? 'Saving...' : 'Save'}
                   </Button>
                 </div>
               </div>
@@ -1135,17 +1104,12 @@ export default function ProfileBuilderPage({
 
           {/* Reviews & Leads Tab */}
           {activeTab === 'reviews' && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-lg font-bold">Google Reviews & Lead Capture</h2>
-                <p className="text-xs text-muted-foreground">
-                  Boost trust and collect inbound contacts from your profile visitors.
-                </p>
-              </div>
+            <div className="space-y-5">
+              <h2 className="text-sm font-semibold">Extras</h2>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold mb-1">Google Review Link</label>
+                  <label className="block text-xs font-semibold mb-1">Google Review URL</label>
                   <Input
                     value={profile.googleReviewUrl || ''}
                     onChange={(e) => setProfile({ ...profile, googleReviewUrl: e.target.value })}
@@ -1153,7 +1117,7 @@ export default function ProfileBuilderPage({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold mb-1">Brochure PDF Download URL</label>
+                  <label className="block text-xs font-semibold mb-1">Brochure URL</label>
                   <Input
                     value={profile.brochureUrl || ''}
                     onChange={(e) => setProfile({ ...profile, brochureUrl: e.target.value })}
@@ -1176,7 +1140,7 @@ export default function ProfileBuilderPage({
                     className="text-xs h-8 bg-gold text-gold-foreground hover:bg-gold-light font-semibold"
                   >
                     <Save className="w-3.5 h-3.5 mr-1" />
-                    {savingSection === 'Reviews & Leads' ? 'Saving...' : 'Save Reviews & Leads'}
+                    {savingSection === 'Reviews & Leads' ? 'Saving...' : 'Save'}
                   </Button>
                 </div>
               </div>
@@ -1188,7 +1152,7 @@ export default function ProfileBuilderPage({
         <aside className="w-96 bg-neutral-950 p-6 flex flex-col items-center justify-center shrink-0 border-l border-border/80 overflow-y-auto">
           <div className="text-[11px] text-muted-foreground mb-3 flex items-center gap-1.5 uppercase font-semibold">
             <Smartphone className="w-3.5 h-3.5" />
-            Live Reactive Preview
+            Preview
           </div>
 
           {/* Phone Frame */}
@@ -1358,21 +1322,18 @@ export default function ProfileBuilderPage({
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle className="text-base font-bold">
-                {editingBizId ? 'Edit Business Venture' : 'Add Business Venture'}
+                {editingBizId ? 'Edit Business' : 'Add Business'}
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground">
-                Associate another company or enterprise with this personal profile.
-              </DialogDescription>
             </DialogHeader>
 
             <form onSubmit={handleSaveBusiness} className="space-y-3 mt-2">
               <div>
-                <label className="block text-xs font-semibold mb-1">Company / Venture Name *</label>
+                <label className="block text-xs font-semibold mb-1">Company Name *</label>
                 <Input
                   required
                   value={bizForm.name}
                   onChange={(e) => setBizForm({ ...bizForm, name: e.target.value })}
-                  placeholder="e.g. ABC Technologies Pvt Ltd"
+                  placeholder="ABC Technologies"
                 />
               </div>
 
@@ -1381,7 +1342,7 @@ export default function ProfileBuilderPage({
                 <Input
                   value={bizForm.tagline}
                   onChange={(e) => setBizForm({ ...bizForm, tagline: e.target.value })}
-                  placeholder="e.g. Enterprise Cloud Architecture"
+                  placeholder="Enterprise Cloud Architecture"
                 />
               </div>
 
@@ -1418,7 +1379,7 @@ export default function ProfileBuilderPage({
                   Cancel
                 </Button>
                 <Button type="submit" size="sm" className="bg-gold text-gold-foreground hover:bg-gold-light">
-                  Save Venture
+                  Save
                 </Button>
               </div>
             </form>
@@ -1432,11 +1393,8 @@ export default function ProfileBuilderPage({
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle className="text-base font-bold">
-                {editingCatId ? 'Edit Catalogue Item' : 'Add Catalogue Item'}
+                {editingCatId ? 'Edit Item' : 'Add Item'}
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground">
-                Add a product or service offered by your business.
-              </DialogDescription>
             </DialogHeader>
 
             <form onSubmit={handleSaveCatalogue} className="space-y-3 mt-2">
@@ -1470,16 +1428,16 @@ export default function ProfileBuilderPage({
                   required
                   value={catForm.title}
                   onChange={(e) => setCatForm({ ...catForm, title: e.target.value })}
-                  placeholder="e.g. Executive NFC Smart Card"
+                  placeholder="Product name"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold mb-1">Price / Fee</label>
+                <label className="block text-xs font-semibold mb-1">Price</label>
                 <Input
                   value={catForm.price}
                   onChange={(e) => setCatForm({ ...catForm, price: e.target.value })}
-                  placeholder="e.g. ₹2,999"
+                  placeholder="₹2,999"
                 />
               </div>
 
@@ -1490,12 +1448,12 @@ export default function ProfileBuilderPage({
                   value={catForm.description}
                   onChange={(e) => setCatForm({ ...catForm, description: e.target.value })}
                   className="text-xs"
-                  placeholder="Short description..."
+                  placeholder="Description..."
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold mb-1">Action URL (CTA Link)</label>
+                <label className="block text-xs font-semibold mb-1">Action URL</label>
                 <Input
                   value={catForm.actionUrl}
                   onChange={(e) => setCatForm({ ...catForm, actionUrl: e.target.value })}
@@ -1508,7 +1466,7 @@ export default function ProfileBuilderPage({
                   Cancel
                 </Button>
                 <Button type="submit" size="sm" className="bg-gold text-gold-foreground hover:bg-gold-light">
-                  Save Item
+                  Save
                 </Button>
               </div>
             </form>

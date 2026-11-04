@@ -4,14 +4,9 @@ import * as React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Search,
-  Sparkles,
-  Smartphone,
-  CheckCircle,
   ArrowRight,
   Eye,
   Check,
-  Monitor,
-  Tablet,
   CheckCircle2,
   Loader2,
   AlertCircle,
@@ -26,21 +21,21 @@ import { TemplatePreviewModal } from '@/components/templates/TemplatePreviewModa
 import type { ProfileRenderData } from '@/components/templates/ProfileRenderer';
 
 const CATEGORIES = [
-  { id: 'all', label: 'All Templates' },
-  { id: 'industrial', label: 'Industrial & Manufacturing' },
-  { id: 'corporate', label: 'Corporate Business' },
-  { id: 'business', label: 'Modern Business' },
-  { id: 'personal', label: 'Premium & Luxury' },
-  { id: 'retail', label: 'Retail & Shopping' },
-  { id: 'food', label: 'Food & Restaurant' },
-  { id: 'creative', label: 'Creative & Agency' },
+  { id: 'all', label: 'All' },
+  { id: 'industrial', label: 'Industrial' },
+  { id: 'corporate', label: 'Corporate' },
+  { id: 'business', label: 'Business' },
+  { id: 'personal', label: 'Luxury' },
+  { id: 'retail', label: 'Retail' },
+  { id: 'food', label: 'Food' },
+  { id: 'creative', label: 'Creative' },
 ];
 
 const PLAN_BADGES: Record<string, { label: string; variant: 'default' | 'secondary' | 'gold' | 'outline' }> = {
-  nano: { label: 'Free (Nano)', variant: 'secondary' },
-  micro: { label: 'Micro Plan', variant: 'outline' },
-  mini: { label: 'Mini Plan', variant: 'outline' },
-  max: { label: 'Max Luxury', variant: 'gold' },
+  nano: { label: 'Free', variant: 'secondary' },
+  micro: { label: 'Micro', variant: 'outline' },
+  mini: { label: 'Mini', variant: 'outline' },
+  max: { label: 'Max', variant: 'gold' },
 };
 
 function TemplateMarketplaceContent() {
@@ -210,41 +205,34 @@ function TemplateMarketplaceContent() {
       )}
 
       {/* Header Banner */}
-      <section className="border-b border-border/40 bg-card/40 backdrop-blur-md pt-12 pb-10 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto text-center">
-          <Badge variant="gold" className="mb-4">
-            <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-            Curated Template Directory
-          </Badge>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">
-            Explore Business &amp; Marketing Templates
+      <section className="border-b border-border/40 bg-card/40 backdrop-blur-md pt-8 pb-6 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto text-center">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+            Templates
           </h1>
-          <p className="mt-3 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-            Choose from 8 specialized layouts designed for industrial manufacturers, retail storefronts, restaurants, corporate advisory, and high-growth brands.
-          </p>
 
           {/* Search & Input */}
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 max-w-2xl mx-auto">
+          <div className="mt-5 flex items-center justify-center max-w-md mx-auto">
             <div className="relative w-full">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="Search templates by industry, feature, or machinery..."
+                placeholder="Search templates..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-11 bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary rounded-xl text-xs sm:text-sm"
+                className="pl-10 h-10 bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary rounded-xl text-xs sm:text-sm"
               />
             </div>
           </div>
 
           {/* Category Filter Chips */}
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-1.5">
             {CATEGORIES.map((cat) => (
               <button
                 key={cat.id}
                 type="button"
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                className={`px-3 py-1 rounded-full text-xs font-medium border transition-all ${
                   selectedCategory === cat.id
                     ? 'bg-gold/15 text-gold border-gold/40 shadow-sm font-semibold'
                     : 'bg-card/50 text-muted-foreground border-border/60 hover:bg-card hover:text-foreground'
@@ -258,13 +246,13 @@ function TemplateMarketplaceContent() {
       </section>
 
       {/* Grid of Templates */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div
                 key={i}
-                className="h-96 rounded-3xl bg-card/40 animate-pulse border border-border/40 flex flex-col justify-end p-6 space-y-3"
+                className="h-80 rounded-2xl bg-card/40 animate-pulse border border-border/40 flex flex-col justify-end p-6 space-y-3"
               >
                 <div className="h-4 bg-muted/60 rounded w-1/3" />
                 <div className="h-6 bg-muted/60 rounded w-2/3" />
@@ -273,34 +261,32 @@ function TemplateMarketplaceContent() {
             ))}
           </div>
         ) : loadError ? (
-          <div className="text-center py-16 bg-destructive/10 rounded-3xl border border-destructive/20 p-8 max-w-lg mx-auto">
-            <AlertCircle className="w-10 h-10 text-destructive mx-auto mb-3" />
-            <h3 className="text-lg font-bold text-foreground">Could not load templates</h3>
-            <p className="text-xs text-muted-foreground mt-1 mb-4">{loadError}</p>
-            <Button variant="outline" size="sm" onClick={fetchTemplates} className="gap-2">
+          <div className="text-center py-16 bg-destructive/10 rounded-2xl border border-destructive/20 p-8 max-w-lg mx-auto">
+            <AlertCircle className="w-8 h-8 text-destructive mx-auto mb-2" />
+            <h3 className="text-sm font-bold text-foreground">Could not load templates</h3>
+            <p className="text-xs text-muted-foreground mt-1 mb-3">{loadError}</p>
+            <Button variant="outline" size="sm" onClick={fetchTemplates} className="gap-2 text-xs">
               <RefreshCw className="w-3.5 h-3.5" />
-              <span>Retry Loading</span>
+              <span>Retry</span>
             </Button>
           </div>
         ) : filteredTemplates.length === 0 ? (
-          <div className="text-center py-20 bg-card/20 rounded-3xl border border-dashed border-border p-8">
-            <h3 className="text-lg font-semibold">No templates match your criteria</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Try adjusting your search query or reset your category filter.
-            </p>
+          <div className="text-center py-16 bg-card/20 rounded-2xl border border-dashed border-border p-8">
+            <h3 className="text-sm font-semibold">No templates found</h3>
             <Button
               variant="outline"
+              size="sm"
               onClick={() => {
                 setSelectedCategory('all');
                 setSearchQuery('');
               }}
-              className="mt-4"
+              className="mt-3 text-xs"
             >
-              Reset Filters
+              Reset
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredTemplates.map((template) => {
               const planBadge = PLAN_BADGES[template.requiredPlanId] || PLAN_BADGES.nano;
               const isCurrentActive =
@@ -310,7 +296,7 @@ function TemplateMarketplaceContent() {
               return (
                 <div
                   key={template.id}
-                  className={`group relative flex flex-col rounded-3xl border bg-card overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 ${
+                  className={`group relative flex flex-col rounded-2xl border bg-card overflow-hidden transition-all duration-300 hover:shadow-xl ${
                     isCurrentActive
                       ? 'border-amber-400 ring-2 ring-amber-400/20'
                       : 'border-border/80 hover:border-gold/50'
@@ -334,7 +320,7 @@ function TemplateMarketplaceContent() {
                       {isCurrentActive && (
                         <Badge className="bg-amber-500 text-neutral-950 font-bold text-[10px] gap-1">
                           <Check className="w-3 h-3" />
-                          <span>Active Template</span>
+                          <span>Active</span>
                         </Badge>
                       )}
                     </div>
@@ -348,58 +334,25 @@ function TemplateMarketplaceContent() {
                   </div>
 
                   {/* Body Content */}
-                  <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                     <div>
-                      <h3 className="text-lg font-bold text-foreground group-hover:text-gold transition-colors">
+                      <h3 className="text-base font-bold text-foreground group-hover:text-gold transition-colors">
                         {template.name}
                       </h3>
-                      <p className="mt-1.5 text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                      <p className="mt-1 text-xs text-muted-foreground line-clamp-2 leading-relaxed">
                         {template.description}
                       </p>
-
-                      {/* Layout Features Pill Tags */}
-                      {template.features && template.features.length > 0 && (
-                        <div className="mt-4 flex flex-wrap gap-1.5">
-                          {template.features.slice(0, 3).map((feat, idx) => (
-                            <span
-                              key={idx}
-                              className="inline-flex items-center text-[10px] font-medium text-neutral-300 bg-muted/80 px-2 py-0.5 rounded-md border border-border/40"
-                            >
-                              <CheckCircle className="w-2.5 h-2.5 mr-1 text-gold" />
-                              {feat}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Supported Devices Strip */}
-                      <div className="mt-3 flex items-center gap-3 text-[11px] text-muted-foreground pt-2 border-t border-border/40">
-                        <span className="text-[10px] uppercase font-semibold text-neutral-400">Devices:</span>
-                        <div className="flex items-center gap-2">
-                          <span className="flex items-center gap-1">
-                            <Smartphone className="w-3 h-3 text-gold" /> Mobile
-                          </span>
-                          <span>&bull;</span>
-                          <span className="flex items-center gap-1">
-                            <Tablet className="w-3 h-3 text-gold" /> Tablet
-                          </span>
-                          <span>&bull;</span>
-                          <span className="flex items-center gap-1">
-                            <Monitor className="w-3 h-3 text-gold" /> Desktop
-                          </span>
-                        </div>
-                      </div>
                     </div>
 
                     {/* Action Bar */}
-                    <div className="pt-3 border-t border-border/60 flex items-center gap-3">
+                    <div className="pt-3 border-t border-border/60 flex items-center gap-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        className="flex-1 text-xs gap-1.5 h-9"
+                        className="flex-1 text-xs gap-1.5 h-8"
                         onClick={() => setPreviewTemplateId(template.id)}
                       >
-                        <Eye className="w-3.5 h-3.5 text-primary" />
+                        <Eye className="w-3.5 h-3.5" />
                         <span>Preview</span>
                       </Button>
 
@@ -407,10 +360,10 @@ function TemplateMarketplaceContent() {
                         size="sm"
                         disabled={isApplying === template.id}
                         onClick={() => handleSelectTemplate(template.id)}
-                        className={`flex-1 text-xs font-bold h-9 gap-1.5 ${
+                        className={`flex-1 text-xs font-semibold h-8 gap-1.5 ${
                           isCurrentActive
                             ? 'bg-neutral-800 text-neutral-300 border border-neutral-700'
-                            : 'bg-gold text-gold-foreground hover:bg-gold-light shadow-md'
+                            : 'bg-gold text-gold-foreground hover:bg-gold-light'
                         }`}
                       >
                         {isApplying === template.id ? (
@@ -422,10 +375,10 @@ function TemplateMarketplaceContent() {
                         )}
                         <span>
                           {isCurrentActive
-                            ? 'Selected'
+                            ? 'Active'
                             : isAuthenticated
-                            ? 'Select Template'
-                            : 'Use This Template'}
+                            ? 'Select'
+                            : 'Use'}
                         </span>
                       </Button>
                     </div>

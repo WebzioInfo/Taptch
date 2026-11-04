@@ -6,9 +6,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { BrandLogo } from '@/components/brand';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { signIn, emailOtp } from '@/lib/auth/client';
-import { Shield, CheckCircle2, Loader2, ArrowLeft } from 'lucide-react';
+import { CheckCircle2, Loader2 } from 'lucide-react';
 import { getSafeRedirectUrl, buildAuthQueryString } from '@/lib/auth/redirect';
 
 function VerifyOtpInner() {
@@ -78,106 +78,88 @@ function VerifyOtpInner() {
   const loginHref = `/login${buildAuthQueryString(templateParam, redirectParam)}`;
 
   return (
-    <div className="w-full max-w-md space-y-6 z-10">
+    <div className="w-full max-w-sm space-y-4">
       <div className="text-center space-y-2">
-        <div className="flex justify-center mb-3">
-          <BrandLogo variant="symbol" size="xl" asLink href="/" />
+        <div className="flex justify-center mb-2">
+          <BrandLogo variant="symbol" size="lg" asLink href="/" />
         </div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          Enter Verification Code
+        <h1 className="text-xl font-bold tracking-tight text-foreground">
+          Verify
         </h1>
-        <p className="text-xs text-muted-foreground">
-          A one-time security code was sent to <span className="font-semibold text-foreground">{email || 'your device'}</span>
+        <p className="text-xs text-muted-foreground truncate">
+          Code sent to <span className="font-medium text-foreground">{email || 'email'}</span>
         </p>
       </div>
 
-      <Card className="border-border bg-card/80 backdrop-blur-md shadow-2xl">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>Enter 6-Digit Code</span>
-            <Link href={loginHref} className="text-primary hover:underline flex items-center gap-1">
-              <ArrowLeft className="h-3 w-3" />
-              <span>Change Email</span>
-            </Link>
+      <Card className="border-border/70 bg-card/60 p-5 shadow-sm space-y-4">
+        {errorMsg && (
+          <div className="p-2.5 rounded-md bg-destructive/15 border border-destructive/30 text-destructive text-xs">
+            {errorMsg}
           </div>
-        </CardHeader>
+        )}
 
-        <CardContent>
-          {errorMsg && (
-            <div className="p-3 mb-4 rounded-lg bg-destructive/15 border border-destructive/30 text-destructive text-xs">
-              {errorMsg}
-            </div>
-          )}
+        {message && (
+          <div className="p-2.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs flex items-center space-x-2">
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+            <span>{message}</span>
+          </div>
+        )}
 
-          {message && (
-            <div className="p-3 mb-4 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs flex items-center space-x-2">
-              <CheckCircle2 className="h-4 w-4 shrink-0" />
-              <span>{message}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleVerify} className="space-y-4">
-            {!emailParam && (
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Confirm Email Address
-                </label>
-                <Input
-                  type="email"
-                  required
-                  placeholder="name@company.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="bg-card border-border text-sm text-foreground placeholder:text-muted-foreground focus:border-primary"
-                />
-              </div>
-            )}
-
-            <div className="space-y-1.5">
+        <form onSubmit={handleVerify} className="space-y-3">
+          {!emailParam && (
+            <div className="space-y-1">
               <label className="text-xs font-medium text-muted-foreground">
-                One-Time Security Code
+                Email
               </label>
               <Input
-                type="text"
+                type="email"
                 required
-                maxLength={6}
-                placeholder="123456"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value.trim())}
-                className="bg-card border-border text-center text-2xl tracking-[0.5em] font-mono h-14 text-foreground placeholder:text-muted-foreground focus:border-primary"
+                placeholder="name@company.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="h-9 bg-card border-border text-xs text-foreground placeholder:text-muted-foreground focus:border-primary"
               />
             </div>
+          )}
 
-            <Button
-              type="submit"
-              disabled={loading || otp.length < 6}
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium"
-            >
-              {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : null}
-              Verify & Continue
-            </Button>
-          </form>
-        </CardContent>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">
+              6-Digit Code
+            </label>
+            <Input
+              type="text"
+              required
+              maxLength={6}
+              placeholder="123456"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value.trim())}
+              className="bg-card border-border text-center text-xl tracking-[0.4em] font-mono h-11 text-foreground placeholder:text-muted-foreground focus:border-primary"
+            />
+          </div>
 
-        <CardFooter className="pt-0 flex flex-col space-y-3 text-center border-t border-border/40 mt-4">
-          <div className="text-xs text-muted-foreground pt-4 flex items-center justify-center space-x-2">
-            <span>Didn&apos;t receive code?</span>
-            <button
-              type="button"
-              disabled={resending}
-              onClick={handleResend}
-              className="text-primary hover:underline font-semibold disabled:opacity-50"
-            >
-              {resending ? 'Sending...' : 'Resend Code'}
-            </button>
-          </div>
-          <div className="flex items-center justify-center space-x-1.5 text-[11px] text-muted-foreground">
-            <Shield className="h-3.5 w-3.5 text-primary" />
-            <span>Secure one-time verification code</span>
-          </div>
-        </CardFooter>
+          <Button
+            type="submit"
+            disabled={loading || otp.length < 6}
+            className="w-full h-8 text-xs bg-primary text-primary-foreground hover:bg-primary/90 font-semibold"
+          >
+            {loading && <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />}
+            <span>Verify</span>
+          </Button>
+        </form>
+
+        <div className="pt-3 border-t border-border/40 flex items-center justify-between text-xs text-muted-foreground">
+          <Link href={loginHref} className="text-muted-foreground hover:text-foreground">
+            ← Back
+          </Link>
+          <button
+            type="button"
+            disabled={resending}
+            onClick={handleResend}
+            className="text-primary hover:underline font-semibold disabled:opacity-50"
+          >
+            {resending ? 'Sending...' : 'Resend'}
+          </button>
+        </div>
       </Card>
     </div>
   );
@@ -185,13 +167,11 @@ function VerifyOtpInner() {
 
 export default function VerifyOtpPage() {
   return (
-    <div className="min-h-screen bg-background flex flex-col justify-center items-center p-4 relative overflow-hidden">
-      <div className="absolute top-[-15%] left-[50%] -translate-x-1/2 w-[500px] h-[300px] bg-primary/10 blur-[100px] rounded-full pointer-events-none" />
-
+    <div className="min-h-screen bg-background flex flex-col justify-center items-center p-4">
       <React.Suspense
         fallback={
-          <div className="w-full max-w-md p-8 flex items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="w-full max-w-sm p-8 flex items-center justify-center">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
           </div>
         }
       >

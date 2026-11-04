@@ -6,7 +6,6 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Badge } from '@/components/ui/badge';
 import {
   ShieldCheck,
-  Zap,
   ArrowRight,
   Palette,
   CheckCircle,
@@ -25,7 +24,7 @@ export default function HomePage() {
       plan: 'Nano',
       accent: 'border-amber-500/40 bg-gradient-to-br from-[#121216] to-[#0A0A0C]',
       textAccent: 'text-[#D4AF37]',
-      desc: 'Signature executive dark aesthetic with brushed gold accents, micro-borders, and high-contrast typography.',
+      desc: 'Signature executive aesthetic with brushed gold accents.',
     },
     {
       id: 'ivory-minimal',
@@ -34,7 +33,7 @@ export default function HomePage() {
       plan: 'Nano',
       accent: 'border-[#E2DDD3]/50 bg-gradient-to-br from-[#FAF8F5] to-[#F2EFE9] text-[#1E1E24]',
       textAccent: 'text-[#8C6D3B]',
-      desc: 'Warm alabaster editorial design with timeless serif headings, subtle dividers, and high legibility.',
+      desc: 'Warm editorial design with serif typography.',
     },
     {
       id: 'aurora-creator',
@@ -43,7 +42,7 @@ export default function HomePage() {
       plan: 'Micro',
       accent: 'border-purple-500/30 bg-gradient-to-br from-[#151833] to-[#0B0D1B]',
       textAccent: 'text-purple-400',
-      desc: 'Vibrant neon glassmorphism designed for creators, designers, agency founders, and media directors.',
+      desc: 'Vibrant glassmorphism for creative agencies.',
     },
     {
       id: 'zenith-corporate',
@@ -52,7 +51,7 @@ export default function HomePage() {
       plan: 'Mini',
       accent: 'border-blue-500/30 bg-gradient-to-br from-[#0F172A] to-[#080D1A]',
       textAccent: 'text-blue-400',
-      desc: 'Structured enterprise navy and titanium aesthetic for B2B executives, consultants, and legal partners.',
+      desc: 'Structured navy and titanium aesthetic for B2B.',
     },
     {
       id: 'catalyst-business',
@@ -61,7 +60,7 @@ export default function HomePage() {
       plan: 'Mini',
       accent: 'border-emerald-500/30 bg-gradient-to-br from-[#064E3B]/60 to-[#022C22]',
       textAccent: 'text-emerald-400',
-      desc: 'Commercial showcase design featuring dedicated product showcase shelves, service cards, and quick enquiries.',
+      desc: 'Commercial showcase with catalogue shelves.',
     },
     {
       id: 'apex-capital',
@@ -70,7 +69,7 @@ export default function HomePage() {
       plan: 'Max',
       accent: 'border-emerald-600/40 bg-gradient-to-br from-[#052E25] to-[#011410]',
       textAccent: 'text-emerald-300',
-      desc: 'Prestige emerald and dark graphite tailored for luxury real estate developers, venture capital, and private wealth.',
+      desc: 'Prestige emerald for wealth and real estate.',
     },
   ];
 
@@ -147,27 +146,24 @@ export default function HomePage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground relative overflow-hidden">
-      {/* Background Subtle Gradient Glow */}
-      <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[800px] h-[450px] bg-primary/10 blur-[140px] rounded-full pointer-events-none" />
-
       {/* Navigation Header */}
       <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur-md">
-        <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+        <div className="container mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6">
           <BrandLogo variant="horizontal" size="md" asLink href="/" />
 
           <nav className="hidden md:flex items-center space-x-6 text-xs font-medium text-muted-foreground">
             <Link href="#features" className="hover:text-foreground transition-colors">Features</Link>
             <Link href="/templates" className="hover:text-foreground transition-colors">Templates</Link>
             <Link href="#pricing" className="hover:text-foreground transition-colors">Pricing</Link>
-            <Link href="#hardware" className="hover:text-foreground transition-colors">NFC Cards</Link>
+            <Link href="#hardware" className="hover:text-foreground transition-colors">Cards</Link>
           </nav>
 
           <div className="flex items-center space-x-3">
             <Link href="/login">
-              <Button variant="ghost" size="sm" className="text-xs">Sign In</Button>
+              <Button variant="ghost" size="sm" className="text-xs h-8">Sign In</Button>
             </Link>
             <Link href="/register">
-              <Button variant="gold" size="sm" className="text-xs font-medium gap-1.5 shadow-sm">
+              <Button variant="gold" size="sm" className="text-xs font-medium gap-1.5 shadow-sm h-8">
                 <span>Get Started</span>
                 <ArrowRight className="h-3.5 w-3.5" />
               </Button>
@@ -177,28 +173,27 @@ export default function HomePage() {
       </header>
 
       {/* Hero Section */}
-      <section className="container mx-auto max-w-7xl px-4 sm:px-6 pt-16 pb-20 z-10 flex flex-col items-center text-center">
-
-        <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-foreground max-w-4xl leading-[1.1]">
-          Craft Your Executive <br className="hidden sm:inline" />
-          <span className="text-primary italic">Digital Identity</span> in Minutes
+      <section className="container mx-auto max-w-7xl px-4 sm:px-6 pt-14 pb-16 z-10 flex flex-col items-center text-center">
+        <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground max-w-3xl leading-[1.1]">
+          Digital identity <br className="hidden sm:inline" />
+          <span className="text-primary italic">for modern leaders</span>
         </h1>
 
-        <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mt-6 leading-relaxed">
-          The self-service digital profile and smart NFC platform for professionals, entrepreneurs, and high-growth businesses. Select luxury templates, attach multiple businesses, and share with a single tap.
+        <p className="text-sm sm:text-base text-muted-foreground max-w-xl mt-4 leading-relaxed">
+          Share profiles, multiple businesses, and digital portfolios with a single tap.
         </p>
 
-        <div className="flex flex-col sm:flex-row items-center gap-4 pt-8">
+        <div className="flex flex-col sm:flex-row items-center gap-3 pt-6">
           <Link href="/register">
-            <Button variant="gold" size="lg" className="gap-2 px-8 font-semibold shadow-xl">
-              <span>Create Free Profile</span>
-              <ArrowRight className="h-4 w-4" />
+            <Button variant="gold" size="default" className="gap-2 px-6 font-semibold shadow-lg text-xs h-9">
+              <span>Get Started</span>
+              <ArrowRight className="h-3.5 w-3.5" />
             </Button>
           </Link>
           <Link href="/templates">
-            <Button variant="outline" size="lg" className="gap-2 px-8 font-semibold">
-              <Palette className="h-4 w-4 text-primary" />
-              <span>Explore Templates</span>
+            <Button variant="outline" size="default" className="gap-2 px-6 font-semibold text-xs h-9">
+              <Palette className="h-3.5 w-3.5 text-primary" />
+              <span>Templates</span>
             </Button>
           </Link>
         </div>
@@ -256,28 +251,18 @@ export default function HomePage() {
               </div>
 
               {/* Physical NFC Card Showcase */}
-              <div className="md:col-span-5 text-left space-y-4 p-4">
-                <h3 className="text-2xl font-bold tracking-tight text-foreground">
-                  Paired with Smart NFC Cards
+              <div className="md:col-span-5 text-left space-y-3 p-4">
+                <h3 className="text-xl font-bold tracking-tight text-foreground">
+                  Smart NFC
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Every digital profile pairs instantly with our laser-engraved Matte Black PVC or stainless steel cards. Tap any modern smartphone to open your card in under 50 milliseconds.
+                  Pair your digital profile with a laser-engraved NFC card. Tap any smartphone to share instantly.
                 </p>
-
-                <div className="p-4 rounded-2xl border border-primary/20 bg-primary/5 space-y-2">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
-                    <Zap className="h-4 w-4 text-primary" />
-                    <span>Sub-50ms Edge Redirects</span>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground">
-                    No clunky native app required. Works natively on all modern iOS and Android devices.
-                  </p>
-                </div>
 
                 <div className="pt-2">
                   <Link href="#hardware">
-                    <Button variant="outline" size="sm" className="text-xs gap-1.5">
-                      <span>View Card Materials</span>
+                    <Button variant="outline" size="sm" className="text-xs gap-1.5 h-8">
+                      <span>Card Materials</span>
                       <ChevronRight className="h-3.5 w-3.5" />
                     </Button>
                   </Link>
@@ -289,103 +274,73 @@ export default function HomePage() {
       </section>
 
       {/* How It Works Section */}
-      <section id="features" className="container mx-auto max-w-7xl px-4 sm:px-6 py-20 border-t border-border/60">
-        <div className="text-center max-w-3xl mx-auto space-y-3 mb-16">
-          <Badge variant="gold" className="text-xs uppercase tracking-wider">
-            Self-Service Architecture
-          </Badge>
-          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-foreground">
-            How It Works in 4 Simple Steps
+      <section id="features" className="container mx-auto max-w-7xl px-4 sm:px-6 py-16 border-t border-border/60">
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+            How it works
           </h2>
-          <p className="text-sm sm:text-base text-muted-foreground">
-            From sign-up to your first tap in less than two minutes.
-          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="border-border/80 bg-card/60 relative overflow-hidden">
-            <CardHeader className="pb-3 space-y-2">
-              <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center font-mono font-bold text-primary">
-                01
-              </div>
-              <CardTitle className="text-lg">Choose Profile Mode</CardTitle>
-            </CardHeader>
-            <CardContent className="text-xs text-muted-foreground leading-relaxed">
-              Select between a Personal executive card or a Business card with multi-company branding.
-            </CardContent>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          <Card className="border-border/80 bg-card p-4">
+            <div className="h-8 w-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center font-mono text-xs font-bold text-primary mb-2">
+              01
+            </div>
+            <h3 className="text-sm font-semibold mb-1">Mode</h3>
+            <p className="text-xs text-muted-foreground">Personal or business card structure.</p>
           </Card>
 
-          <Card className="border-border/80 bg-card/60 relative overflow-hidden">
-            <CardHeader className="pb-3 space-y-2">
-              <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center font-mono font-bold text-primary">
-                02
-              </div>
-              <CardTitle className="text-lg">Select Luxury Template</CardTitle>
-            </CardHeader>
-            <CardContent className="text-xs text-muted-foreground leading-relaxed">
-              Browse Obsidian Luxury, Ivory Minimal, Aurora Creator, Zenith, and Catalyst templates.
-            </CardContent>
+          <Card className="border-border/80 bg-card p-4">
+            <div className="h-8 w-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center font-mono text-xs font-bold text-primary mb-2">
+              02
+            </div>
+            <h3 className="text-sm font-semibold mb-1">Template</h3>
+            <p className="text-xs text-muted-foreground">Select from curated executive layouts.</p>
           </Card>
 
-          <Card className="border-border/80 bg-card/60 relative overflow-hidden">
-            <CardHeader className="pb-3 space-y-2">
-              <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center font-mono font-bold text-primary">
-                03
-              </div>
-              <CardTitle className="text-lg">Customize & Publish</CardTitle>
-            </CardHeader>
-            <CardContent className="text-xs text-muted-foreground leading-relaxed">
-              Upload photos, add multiple business entities, showcase product catalogues, and publish live.
-            </CardContent>
+          <Card className="border-border/80 bg-card p-4">
+            <div className="h-8 w-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center font-mono text-xs font-bold text-primary mb-2">
+              03
+            </div>
+            <h3 className="text-sm font-semibold mb-1">Customise</h3>
+            <p className="text-xs text-muted-foreground">Add links, ventures, and catalogues.</p>
           </Card>
 
-          <Card className="border-border/80 bg-card/60 relative overflow-hidden">
-            <CardHeader className="pb-3 space-y-2">
-              <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center font-mono font-bold text-primary">
-                04
-              </div>
-              <CardTitle className="text-lg">Tap & Share</CardTitle>
-            </CardHeader>
-            <CardContent className="text-xs text-muted-foreground leading-relaxed">
-              Share via unguessable NFC token redirect, QR code, or reciprocal contact exchange form.
-            </CardContent>
+          <Card className="border-border/80 bg-card p-4">
+            <div className="h-8 w-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center font-mono text-xs font-bold text-primary mb-2">
+              04
+            </div>
+            <h3 className="text-sm font-semibold mb-1">Share</h3>
+            <p className="text-xs text-muted-foreground">Share via NFC tap, QR, or link.</p>
           </Card>
         </div>
       </section>
 
       {/* Luxury Template Gallery Teaser */}
-      <section className="container mx-auto max-w-7xl px-4 sm:px-6 py-20 border-t border-border/60">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-          <div>
-            <Badge variant="gold" className="text-xs uppercase tracking-wider mb-2">
-              Aesthetic Direction
-            </Badge>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
-              Curated Luxury Templates
-            </h2>
-            <p className="text-sm text-muted-foreground mt-1 max-w-xl">
-              Engineered with Obsidian Luxury principles, WCAG 2.2 contrast ratios, and responsive layouts.
-            </p>
-          </div>
+      <section className="container mx-auto max-w-7xl px-4 sm:px-6 py-16 border-t border-border/60">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+            Templates
+          </h2>
           <Link href="/templates">
-            <Button variant="gold" size="sm" className="gap-2 text-xs">
-              <span>View All Templates</span>
+            <Button variant="outline" size="sm" className="gap-1.5 text-xs h-8">
+              <span>All Templates</span>
               <ArrowRight className="h-3.5 w-3.5" />
             </Button>
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {templates.map((tpl) => (
-            <Card key={tpl.id} className={`border ${tpl.accent} shadow-xl hover:scale-[1.01] transition-transform`}>
-              <CardHeader className="pb-3">
+            <Card key={tpl.id} className={`border ${tpl.accent} shadow-md`}>
+              <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <Badge variant="gold" className="text-[10px] uppercase">
-                    Plan: {tpl.plan}
+                    {tpl.plan}
                   </Badge>
                   <span className="text-xs font-mono opacity-60 uppercase">{tpl.category}</span>
                 </div>
-                <CardTitle className={`text-xl font-bold pt-2 ${tpl.textAccent}`}>
+                <CardTitle className={`text-base font-bold pt-2 ${tpl.textAccent}`}>
                   {tpl.name}
                 </CardTitle>
                 <CardDescription className="text-xs opacity-80 leading-relaxed pt-1">
@@ -393,9 +348,9 @@ export default function HomePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-2">
-                <Link href={`/templates`}>
-                  <Button variant="outline" size="sm" className="w-full text-xs gap-1.5">
-                    <span>Preview Template</span>
+                <Link href="/templates">
+                  <Button variant="outline" size="sm" className="w-full text-xs gap-1.5 h-8">
+                    <span>Preview</span>
                     <ExternalLink className="h-3 w-3" />
                   </Button>
                 </Link>
@@ -406,64 +361,46 @@ export default function HomePage() {
       </section>
 
       {/* Multi-Business Architecture Section */}
-      <section className="container mx-auto max-w-7xl px-4 sm:px-6 py-20 border-t border-border/60">
-        <div className="p-8 sm:p-12 rounded-3xl border border-primary/20 bg-gradient-to-r from-card/80 via-card/50 to-primary/10 shadow-2xl">
+      <section className="container mx-auto max-w-7xl px-4 sm:px-6 py-16 border-t border-border/60">
+        <div className="p-6 sm:p-10 rounded-2xl border border-primary/20 bg-card shadow-xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            <div className="space-y-4">
-              <Badge variant="gold" className="text-xs uppercase tracking-wider">
-                Multi-Business Capability
-              </Badge>
-              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
-                One Person. Multiple Businesses. <br />
-                <span className="text-primary italic">One Single Smart Card.</span>
+            <div className="space-y-3">
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+                One Profile. Multiple Businesses.
               </h2>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                You run a venture capital firm, an architecture studio, and an advisory practice. With {brandConfig.name}, you never need to carry three different cards. Attach multiple businesses to your digital profile and allow clients to browse distinct company overviews, download brochures, and view catalogs.
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                Attach multiple business entities to your digital card with distinct logos, catalogues, and enquiry links.
               </p>
-              <ul className="space-y-2 text-xs text-muted-foreground pt-2">
-                <li className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-primary shrink-0" />
-                  <span>Distinct company logos, roles, and industry descriptions</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-primary shrink-0" />
-                  <span>Dedicated product & service showcase shelves with inquiry triggers</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-primary shrink-0" />
-                  <span>Individual brochure download links for corporate decks</span>
-                </li>
-              </ul>
             </div>
 
-            <div className="space-y-3">
-              <Card className="border-border/80 bg-background/80 p-4">
+            <div className="space-y-2.5">
+              <Card className="border-border/80 bg-background/80 p-3.5">
                 <div className="flex items-center justify-between text-xs">
                   <div className="font-semibold text-foreground">Apex Capital India</div>
                   <Badge variant="gold" className="text-[10px]">Private Equity</Badge>
                 </div>
-                <div className="text-[11px] text-muted-foreground mt-1">
-                  Managing Partner • Fund II ($50M AUM) • Bangalore
+                <div className="text-[11px] text-muted-foreground mt-0.5">
+                  Managing Partner • Bengaluru
                 </div>
               </Card>
 
-              <Card className="border-border/80 bg-background/80 p-4">
+              <Card className="border-border/80 bg-background/80 p-3.5">
                 <div className="flex items-center justify-between text-xs">
-                  <div className="font-semibold text-foreground">Studio D Urban Architecture</div>
+                  <div className="font-semibold text-foreground">Studio D Architecture</div>
                   <Badge variant="outline" className="text-[10px]">Architecture</Badge>
                 </div>
-                <div className="text-[11px] text-muted-foreground mt-1">
-                  Co-Founder & Strategic Director • Sustainable Masterplanning
+                <div className="text-[11px] text-muted-foreground mt-0.5">
+                  Co-Founder & Strategic Director
                 </div>
               </Card>
 
-              <Card className="border-border/80 bg-background/80 p-4">
+              <Card className="border-border/80 bg-background/80 p-3.5">
                 <div className="flex items-center justify-between text-xs">
                   <div className="font-semibold text-foreground">Pulse AI Hardware</div>
                   <Badge variant="outline" className="text-[10px]">Technology</Badge>
                 </div>
-                <div className="text-[11px] text-muted-foreground mt-1">
-                  Angel Investor & Board Advisor • Edge Robotics
+                <div className="text-[11px] text-muted-foreground mt-0.5">
+                  Advisor & Investor
                 </div>
               </Card>
             </div>
@@ -472,59 +409,52 @@ export default function HomePage() {
       </section>
 
       {/* Pricing Matrix Section */}
-      <section id="pricing" className="container mx-auto max-w-7xl px-4 sm:px-6 py-20 border-t border-border/60">
-        <div className="text-center max-w-3xl mx-auto space-y-3 mb-16">
-          <Badge variant="gold" className="text-xs uppercase tracking-wider">
-            Transparent Pricing
-          </Badge>
-          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-foreground">
-            Plans for Every Stage of Growth
+      <section id="pricing" className="container mx-auto max-w-7xl px-4 sm:px-6 py-16 border-t border-border/60">
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+            Pricing
           </h2>
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Start for free forever, or upgrade as your business portfolio expands. No credit card required.
-          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           {plans.map((p) => (
             <Card
               key={p.id}
               className={`border relative flex flex-col justify-between ${p.highlighted
-                ? 'border-primary bg-primary/5 shadow-2xl ring-1 ring-primary'
-                : 'border-border/80 bg-card/60'
+                ? 'border-primary bg-primary/5 shadow-xl ring-1 ring-primary'
+                : 'border-border/80 bg-card'
                 }`}
             >
               <div>
-                <CardHeader className="pb-4">
+                <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <Badge variant={p.highlighted ? 'gold' : 'outline'} className="text-[10px]">
                       {p.badge}
                     </Badge>
                   </div>
-                  <CardTitle className="text-2xl font-bold pt-2">{p.name}</CardTitle>
-                  <CardDescription className="text-xs min-h-[32px] pt-1">{p.desc}</CardDescription>
-                  <div className="pt-4 flex items-baseline gap-1">
-                    <span className="text-3xl font-extrabold text-foreground font-mono">{p.price}</span>
+                  <CardTitle className="text-xl font-bold pt-2">{p.name}</CardTitle>
+                  <div className="pt-3 flex items-baseline gap-1">
+                    <span className="text-2xl font-bold text-foreground font-mono">{p.price}</span>
                     <span className="text-xs text-muted-foreground">{p.period}</span>
                   </div>
                 </CardHeader>
 
-                <CardContent className="pt-2 pb-6 space-y-2.5 text-xs text-muted-foreground border-t border-border/40">
+                <CardContent className="pt-2 pb-5 space-y-2 text-xs text-muted-foreground border-t border-border/40">
                   {p.features.map((f, i) => (
                     <div key={i} className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      <CheckCircle className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
                       <span>{f}</span>
                     </div>
                   ))}
                 </CardContent>
               </div>
 
-              <div className="p-6 pt-0">
+              <div className="p-5 pt-0">
                 <Link href="/register">
                   <Button
                     variant={p.highlighted ? 'gold' : 'outline'}
                     size="sm"
-                    className="w-full text-xs font-semibold"
+                    className="w-full text-xs font-semibold h-8"
                   >
                     Select {p.name}
                   </Button>
@@ -536,70 +466,55 @@ export default function HomePage() {
       </section>
 
       {/* Hardware Materials Section */}
-      <section id="hardware" className="container mx-auto max-w-7xl px-4 sm:px-6 py-20 border-t border-border/60">
-        <div className="text-center max-w-3xl mx-auto space-y-3 mb-16">
-          <Badge variant="gold" className="text-xs uppercase tracking-wider">
-            Physical Hardware
-          </Badge>
-          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-foreground">
-            Precision Crafted NFC Hardware
+      <section id="hardware" className="container mx-auto max-w-7xl px-4 sm:px-6 py-16 border-t border-border/60">
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+            NFC Cards
           </h2>
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Every card features high-speed NTAG chips, anti-metal ferrite protection, and durable coatings.
-          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="border-border/80 bg-card/60">
-            <CardHeader className="pb-3">
-              <Badge variant="outline" className="text-[10px] w-fit mb-2">PVC Edition</Badge>
-              <CardTitle className="text-lg">Matte Black PVC</CardTitle>
-              <CardDescription className="text-xs">
-                Ultra-durable, waterproof, and scratch-resistant matte PVC with spot gloss detailing.
-              </CardDescription>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <Card className="border-border/80 bg-card">
+            <CardHeader className="pb-2">
+              <Badge variant="outline" className="text-[10px] w-fit mb-1">PVC</Badge>
+              <CardTitle className="text-base">Matte Black PVC</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 text-xs">
-              <div className="font-mono text-lg font-bold text-primary">₹999</div>
-              <ul className="space-y-1.5 text-muted-foreground">
-                <li>• NXP NTAG216 Chip (888 bytes)</li>
+            <CardContent className="space-y-2 text-xs">
+              <div className="font-mono text-base font-bold text-primary">₹999</div>
+              <ul className="space-y-1 text-muted-foreground">
+                <li>• NXP NTAG216 Chip</li>
                 <li>• Waterproof & bend-resistant</li>
-                <li>• Instant pairing & re-linkable</li>
+                <li>• Instant tap redirect</li>
               </ul>
             </CardContent>
           </Card>
 
-          <Card className="border-primary/40 bg-card/60 relative overflow-hidden ring-1 ring-primary/30">
-            <CardHeader className="pb-3">
-              <Badge variant="gold" className="text-[10px] w-fit mb-2">Executive Edition</Badge>
-              <CardTitle className="text-lg">Brushed Stainless Metal</CardTitle>
-              <CardDescription className="text-xs">
-                Substantial laser-engraved stainless steel card with internal anti-metal ferrite barrier.
-              </CardDescription>
+          <Card className="border-primary/40 bg-card relative overflow-hidden ring-1 ring-primary/30">
+            <CardHeader className="pb-2">
+              <Badge variant="gold" className="text-[10px] w-fit mb-1">Metal</Badge>
+              <CardTitle className="text-base">Stainless Steel</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 text-xs">
-              <div className="font-mono text-lg font-bold text-primary">₹2,499</div>
-              <ul className="space-y-1.5 text-muted-foreground">
-                <li>• Heavyweight 24g steel core</li>
-                <li>• Precision laser etched name & logo</li>
-                <li>• Ferrite shielding for smartphone tap</li>
+            <CardContent className="space-y-2 text-xs">
+              <div className="font-mono text-base font-bold text-primary">₹2,499</div>
+              <ul className="space-y-1 text-muted-foreground">
+                <li>• 24g steel core</li>
+                <li>• Laser etched logo</li>
+                <li>• Anti-metal ferrite layer</li>
               </ul>
             </CardContent>
           </Card>
 
-          <Card className="border-border/80 bg-card/60">
-            <CardHeader className="pb-3">
-              <Badge variant="outline" className="text-[10px] w-fit mb-2">Artisanal Edition</Badge>
-              <CardTitle className="text-lg">Sustainable Wood / Bamboo</CardTitle>
-              <CardDescription className="text-xs">
-                Responsibly harvested natural walnut and bamboo with embedded RFID antenna.
-              </CardDescription>
+          <Card className="border-border/80 bg-card">
+            <CardHeader className="pb-2">
+              <Badge variant="outline" className="text-[10px] w-fit mb-1">Wood</Badge>
+              <CardTitle className="text-base">Natural Bamboo</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 text-xs">
-              <div className="font-mono text-lg font-bold text-primary">₹1,499</div>
-              <ul className="space-y-1.5 text-muted-foreground">
-                <li>• Natural organic wood grain</li>
-                <li>• Eco-friendly biodegradable core</li>
-                <li>• Custom laser engraved monogram</li>
+            <CardContent className="space-y-2 text-xs">
+              <div className="font-mono text-base font-bold text-primary">₹1,499</div>
+              <ul className="space-y-1 text-muted-foreground">
+                <li>• Natural organic grain</li>
+                <li>• Eco-friendly core</li>
+                <li>• Custom laser engraving</li>
               </ul>
             </CardContent>
           </Card>
@@ -607,22 +522,19 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="container mx-auto max-w-5xl px-4 sm:px-6 py-20">
-        <div className="rounded-3xl border border-primary/30 bg-gradient-to-r from-card via-card/90 to-primary/10 p-8 sm:p-14 text-center space-y-6 shadow-2xl">
-          <Badge variant="gold" className="text-xs uppercase tracking-wider">
-            Ready to Upgrade Your Network?
-          </Badge>
-          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-foreground">
-            Get Your Digital Identity Today
+      <section className="container mx-auto max-w-4xl px-4 sm:px-6 py-16">
+        <div className="rounded-2xl border border-primary/30 bg-card p-8 sm:p-12 text-center space-y-4 shadow-xl">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+            Get started
           </h2>
-          <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
-            Join executives, partners, and high-growth founders using {brandConfig.name} to exchange contacts with zero friction.
+          <p className="text-xs sm:text-sm text-muted-foreground max-w-md mx-auto">
+            Create your digital identity in minutes.
           </p>
-          <div className="pt-4 flex justify-center gap-4">
+          <div className="pt-2 flex justify-center">
             <Link href="/register">
-              <Button variant="gold" size="lg" className="gap-2 px-8 font-semibold shadow-xl">
-                <span>Start Free Profile</span>
-                <ArrowRight className="h-4 w-4" />
+              <Button variant="gold" size="default" className="gap-2 px-6 font-semibold shadow-lg text-xs h-9">
+                <span>Create Profile</span>
+                <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             </Link>
           </div>

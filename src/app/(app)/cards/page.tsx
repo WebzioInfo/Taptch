@@ -12,7 +12,6 @@ import {
   Plus,
   ShoppingBag,
   ExternalLink,
-  Truck,
   ShieldCheck,
   Loader2,
   AlertCircle,
@@ -167,90 +166,85 @@ export default function CardsPage() {
   };
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto pb-12">
+    <div className="space-y-6 max-w-6xl mx-auto pb-10">
       {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-border/60">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Smart Cards
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Manage your physical NFC cards and orders.
-          </p>
-        </div>
+      <div className="flex items-center justify-between gap-4 pb-4 border-b border-border/60">
+        <h1 className="text-xl font-bold tracking-tight text-foreground">
+          Cards
+        </h1>
 
-        <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm" onClick={() => setShowClaimModal(true)} className="gap-2">
-            <Plus className="h-4 w-4" />
-            <span>Activate Card</span>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setShowClaimModal(true)} className="h-8 text-xs gap-1.5 px-3">
+            <Plus className="h-3.5 w-3.5" />
+            <span>Activate</span>
           </Button>
-          <Button variant="gold" size="sm" onClick={() => setShowOrderModal(true)} className="gap-2">
-            <ShoppingBag className="h-4 w-4" />
-            <span>Order Card</span>
+          <Button variant="gold" size="sm" onClick={() => setShowOrderModal(true)} className="h-8 text-xs font-semibold gap-1.5 px-3">
+            <ShoppingBag className="h-3.5 w-3.5" />
+            <span>Order</span>
           </Button>
         </div>
       </div>
 
       {loading ? (
         <div className="flex justify-center py-16">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>
       ) : (
         <>
           {/* Active Cards Grid */}
-          <section className="space-y-4">
+          <section className="space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold tracking-tight text-foreground flex items-center gap-2">
-                <CreditCard className="h-5 w-5 text-primary" />
-                <span>Active Cards</span>
+              <h2 className="text-sm font-semibold text-foreground">
+                Linked Cards
               </h2>
-              <span className="text-xs text-muted-foreground">{cards.length} linked</span>
+              <span className="text-xs text-muted-foreground">{cards.length} cards</span>
             </div>
 
             {cards.length === 0 ? (
-              <Card className="border-border/60 bg-card/40 text-center py-12">
-                <CardContent className="space-y-4 max-w-md mx-auto">
-                  <div className="mx-auto h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                    <CreditCard className="h-6 w-6" />
+              <Card className="border-border/60 bg-card/40 text-center py-10">
+                <CardContent className="space-y-3 max-w-sm mx-auto">
+                  <div className="mx-auto h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                    <CreditCard className="h-5 w-5" />
                   </div>
-                  <h3 className="font-semibold text-lg text-foreground">No cards linked yet</h3>
+                  <h3 className="font-semibold text-base text-foreground">No Cards Linked</h3>
                   <p className="text-xs text-muted-foreground">
-                    Activate an existing card with your packaging code or order new custom hardware.
+                    Activate a card using its packaging code or order new hardware.
                   </p>
-                  <div className="flex justify-center gap-3 pt-2">
-                    <Button variant="outline" size="sm" onClick={() => setShowClaimModal(true)}>
-                      Activate Card
+                  <div className="flex justify-center gap-2 pt-1">
+                    <Button variant="outline" size="sm" onClick={() => setShowClaimModal(true)} className="h-7 text-xs px-2.5">
+                      Activate
                     </Button>
-                    <Button variant="gold" size="sm" onClick={() => setShowOrderModal(true)}>
-                      Order Card
+                    <Button variant="gold" size="sm" onClick={() => setShowOrderModal(true)} className="h-7 text-xs px-2.5 font-semibold">
+                      Order
                     </Button>
                   </div>
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {cards.map((card) => (
-                  <Card key={card.id} className="border-border/80 bg-card/60 backdrop-blur-sm relative overflow-hidden group hover:border-primary/50 transition-colors">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full pointer-events-none" />
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <Badge variant="gold" className="text-[10px] tracking-wider uppercase">
-                          {card.material} Edition
-                        </Badge>
-                        <Badge variant={card.status === 'active' ? 'outline' : 'secondary'} className="text-[10px] capitalize">
-                          {card.status}
-                        </Badge>
-                      </div>
-                      <CardTitle className="text-base font-mono tracking-tight pt-2">
+                  <Card key={card.id} className="border-border/70 bg-card/40 p-4 space-y-3 hover:border-primary/40 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <Badge variant="gold" className="text-[10px] tracking-wider uppercase px-1.5 py-0">
+                        {card.material}
+                      </Badge>
+                      <Badge variant={card.status === 'active' ? 'outline' : 'secondary'} className="text-[10px] capitalize px-1.5 py-0">
+                        {card.status}
+                      </Badge>
+                    </div>
+
+                    <div>
+                      <div className="text-sm font-mono font-semibold text-foreground">
                         {card.serialNumber}
-                      </CardTitle>
-                      <CardDescription className="text-xs font-mono">
+                      </div>
+                      <div className="text-[11px] text-muted-foreground font-mono">
                         Chip: {card.chipType.toUpperCase()}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-3 text-xs">
-                      <div className="p-2.5 rounded-lg bg-background/60 border border-border/40 flex items-center justify-between">
-                        <span className="text-muted-foreground">Linked Profile:</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5 pt-2 border-t border-border/40 text-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">Profile:</span>
                         <span className="font-medium text-foreground">
                           {card.profileName ? (
                             <Link href={`/p/${card.profileSlug}`} target="_blank" className="hover:text-primary transition-colors flex items-center gap-1">
@@ -262,67 +256,64 @@ export default function CardsPage() {
                           )}
                         </span>
                       </div>
-                      <div className="p-2.5 rounded-lg bg-background/60 border border-border/40 flex items-center justify-between">
-                        <span className="text-muted-foreground">NFC Tap Link:</span>
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">Tap:</span>
                         <code className="text-[11px] text-primary">/n/{card.redirectToken.slice(0, 10)}...</code>
                       </div>
-                    </CardContent>
+                    </div>
                   </Card>
                 ))}
               </div>
             )}
           </section>
 
-          {/* Orders History Section */}
-          <section className="space-y-4 pt-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold tracking-tight text-foreground flex items-center gap-2">
-                <Truck className="h-5 w-5 text-primary" />
-                <span>Physical Card Orders</span>
-              </h2>
-            </div>
+          {/* Orders Section */}
+          <section className="space-y-3 pt-4">
+            <h2 className="text-sm font-semibold text-foreground">
+              Orders
+            </h2>
 
             {orders.length === 0 ? (
-              <Card className="border-border/60 bg-card/20 py-8 text-center">
+              <Card className="border-border/60 bg-card/20 py-6 text-center">
                 <CardContent>
-                  <p className="text-xs text-muted-foreground">No recent hardware order requests.</p>
+                  <p className="text-xs text-muted-foreground">No hardware orders.</p>
                 </CardContent>
               </Card>
             ) : (
-              <Card className="border-border/80 bg-card/60">
+              <Card className="border-border/70 bg-card/40 overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="border-b border-border/60 bg-muted/20 text-muted-foreground">
-                        <th className="p-3">Order ID</th>
-                        <th className="p-3">Material</th>
-                        <th className="p-3">Qty</th>
-                        <th className="p-3">Status</th>
-                        <th className="p-3">Payment</th>
-                        <th className="p-3">Tracking</th>
-                        <th className="p-3">Date</th>
+                      <tr className="border-b border-border/60 bg-muted/20 text-muted-foreground text-[11px]">
+                        <th className="p-2.5">Order</th>
+                        <th className="p-2.5">Material</th>
+                        <th className="p-2.5">Qty</th>
+                        <th className="p-2.5">Status</th>
+                        <th className="p-2.5">Payment</th>
+                        <th className="p-2.5">Tracking</th>
+                        <th className="p-2.5">Date</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/40">
                       {orders.map((ord) => (
                         <tr key={ord.id} className="hover:bg-muted/10">
-                          <td className="p-3 font-mono font-medium">{ord.id.slice(0, 12)}...</td>
-                          <td className="p-3 capitalize">{ord.material}</td>
-                          <td className="p-3">{ord.quantity}</td>
-                          <td className="p-3">
-                            <Badge variant="outline" className="capitalize text-[10px]">
+                          <td className="p-2.5 font-mono font-medium">{ord.id.slice(0, 10)}...</td>
+                          <td className="p-2.5 capitalize">{ord.material}</td>
+                          <td className="p-2.5">{ord.quantity}</td>
+                          <td className="p-2.5">
+                            <Badge variant="outline" className="capitalize text-[10px] px-1.5 py-0">
                               {ord.orderStatus.replace('_', ' ')}
                             </Badge>
                           </td>
-                          <td className="p-3">
-                            <Badge variant={ord.paymentStatus === 'paid_offline' || ord.paymentStatus === 'waived' ? 'gold' : 'secondary'} className="text-[10px] capitalize">
+                          <td className="p-2.5">
+                            <Badge variant={ord.paymentStatus === 'paid_offline' || ord.paymentStatus === 'waived' ? 'gold' : 'secondary'} className="text-[10px] capitalize px-1.5 py-0">
                               {ord.paymentStatus.replace('_', ' ')}
                             </Badge>
                           </td>
-                          <td className="p-3 font-mono text-primary">
-                            {ord.trackingNumber || <span className="text-muted-foreground italic">Pending shipment</span>}
+                          <td className="p-2.5 font-mono text-[11px] text-muted-foreground">
+                            {ord.trackingNumber || '—'}
                           </td>
-                          <td className="p-3 text-muted-foreground">
+                          <td className="p-2.5 text-muted-foreground text-[11px]">
                             {new Date(ord.createdAt).toLocaleDateString()}
                           </td>
                         </tr>

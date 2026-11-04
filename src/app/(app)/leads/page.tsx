@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
   Users,
@@ -83,117 +83,96 @@ export default function LeadsPage() {
   };
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto pb-12">
-      {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-border/60">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Leads
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Contacts exchanged through your profiles and smart card taps.
-          </p>
-        </div>
+    <div className="space-y-6 max-w-6xl mx-auto pb-10">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-4 pb-4 border-b border-border/60">
+        <h1 className="text-xl font-bold tracking-tight text-foreground">
+          Leads
+        </h1>
 
-        <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExportCsv}
-            disabled={leads.length === 0}
-            className="gap-2 text-xs"
-          >
-            <Download className="h-4 w-4" />
-            <span>Export CSV</span>
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleExportCsv}
+          disabled={leads.length === 0}
+          className="h-8 text-xs gap-1.5 px-3"
+        >
+          <Download className="h-3.5 w-3.5" />
+          <span>Export CSV</span>
+        </Button>
       </div>
 
       {/* Search & Filter Bar */}
       <div className="flex items-center justify-between gap-4">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, company, or email..."
-            className="pl-9 h-10 bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary text-xs"
+            placeholder="Search leads..."
+            className="pl-8 h-8 bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary text-xs"
           />
         </div>
         <div className="text-xs text-muted-foreground">
-          Showing {filteredLeads.length} of {leads.length} contacts
+          {filteredLeads.length} leads
         </div>
       </div>
 
       {loading ? (
         <div className="flex justify-center py-16">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>
       ) : filteredLeads.length === 0 ? (
-        <Card className="border-border/60 bg-card/40 text-center py-16">
-          <CardContent className="space-y-4 max-w-md mx-auto">
-            <div className="mx-auto h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-              <Users className="h-6 w-6" />
+        <Card className="border-border/60 bg-card/40 text-center py-12">
+          <CardContent className="space-y-3 max-w-sm mx-auto">
+            <div className="mx-auto h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+              <Users className="h-5 w-5" />
             </div>
-            <h3 className="font-semibold text-lg text-foreground">
-              {search ? 'No contacts match your query' : 'No contacts captured yet'}
+            <h3 className="font-semibold text-base text-foreground">
+              {search ? 'No Matches' : 'No Leads'}
             </h3>
             <p className="text-xs text-muted-foreground">
-              When clients or prospects tap your card and exchange their contact details, they appear here instantly.
+              Contacts exchanged through cards and profiles will appear here.
             </p>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredLeads.map((lead) => (
-            <Card key={lead.id} className="border-border/80 bg-card/60 backdrop-blur-sm hover:border-primary/40 transition-colors">
-              <CardHeader className="pb-3 border-b border-border/40">
-                <div className="flex items-center justify-between">
-                  <div className="font-semibold text-base text-foreground tracking-tight">
-                    {lead.name}
-                  </div>
-                  <Badge variant="outline" className="text-[10px]">
-                    {lead.profileName || 'Profile'}
-                  </Badge>
+            <Card key={lead.id} className="border-border/70 bg-card/40 p-4 space-y-3 hover:border-primary/40 transition-colors">
+              <div className="flex items-center justify-between">
+                <div className="font-semibold text-sm text-foreground truncate">
+                  {lead.name}
                 </div>
-                {(lead.jobTitle || lead.company) && (
-                  <div className="text-xs text-muted-foreground flex items-center gap-1.5 pt-1">
-                    {lead.jobTitle && <span>{lead.jobTitle}</span>}
-                    {lead.jobTitle && lead.company && <span>•</span>}
-                    {lead.company && <span className="font-medium text-foreground">{lead.company}</span>}
-                  </div>
-                )}
-              </CardHeader>
-              <CardContent className="pt-3 space-y-2 text-xs">
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                  {lead.profileName || 'Profile'}
+                </Badge>
+              </div>
+
+              {(lead.jobTitle || lead.company) && (
+                <div className="text-xs text-muted-foreground truncate">
+                  {[lead.jobTitle, lead.company].filter(Boolean).join(' • ')}
+                </div>
+              )}
+
+              <div className="space-y-1 pt-2 border-t border-border/40 text-xs">
                 {lead.email && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Mail className="h-3.5 w-3.5 text-primary shrink-0" />
-                    <a href={`mailto:${lead.email}`} className="hover:text-foreground truncate transition-colors">
-                      {lead.email}
-                    </a>
+                  <div className="flex items-center gap-2 text-muted-foreground truncate">
+                    <Mail className="h-3 w-3 shrink-0" />
+                    <span className="truncate">{lead.email}</span>
                   </div>
                 )}
                 {lead.phone && (
                   <div className="flex items-center gap-2 text-muted-foreground">
-                    <Phone className="h-3.5 w-3.5 text-primary shrink-0" />
-                    <a href={`tel:${lead.phone}`} className="hover:text-foreground transition-colors">
-                      {lead.phone}
-                    </a>
+                    <Phone className="h-3 w-3 shrink-0" />
+                    <span>{lead.phone}</span>
                   </div>
                 )}
-                {lead.notes && (
-                  <div className="mt-2 p-2 rounded bg-background/50 border border-border/40 text-[11px] text-muted-foreground italic">
-                    &quot;{lead.notes}&quot;
-                  </div>
-                )}
-                <div className="pt-2 text-[10px] text-muted-foreground/80 flex items-center justify-between border-t border-border/30">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    {new Date(lead.createdAt).toLocaleDateString()}
-                  </span>
-                  <span className="capitalize">{lead.source.replace('_', ' ')}</span>
+                <div className="flex items-center gap-2 text-muted-foreground text-[11px] pt-1">
+                  <Calendar className="h-3 w-3 shrink-0" />
+                  <span>{new Date(lead.createdAt).toLocaleDateString()}</span>
                 </div>
-              </CardContent>
+              </div>
             </Card>
           ))}
         </div>

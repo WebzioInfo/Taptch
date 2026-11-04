@@ -3,18 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import {
-  User,
-  Building2,
-  Sparkles,
-  ArrowRight,
-  AlertCircle,
-  Check,
-} from 'lucide-react';
+import { Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { defaultBrandConfig } from '@/config/brand';
 import type { Template } from '@/modules/templates';
 
 export default function NewProfilePage() {
@@ -111,195 +102,158 @@ export default function NewProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto">
-        {/* Navigation Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-6">
-          <Link href="/dashboard" className="hover:text-foreground">
-            Dashboard
-          </Link>
-          <span>/</span>
-          <Link href="/templates" className="hover:text-foreground">
-            Templates
-          </Link>
-          <span>/</span>
-          <span className="text-foreground font-medium">Create Profile</span>
-        </div>
-
+    <div className="min-h-screen bg-background text-foreground py-8 px-4 sm:px-6">
+      <div className="max-w-xl mx-auto space-y-6">
         {/* Title */}
-        <div className="text-center mb-8">
-          <Badge variant="gold" className="mb-3">
-            <Sparkles className="w-3.5 h-3.5 mr-1" />
-            Step 1 of 2: Profile Setup
-          </Badge>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            Create Your Digital Identity
+        <div className="border-b border-border/60 pb-4">
+          <h1 className="text-xl font-bold tracking-tight text-foreground">
+            Create Profile
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Configure your core profile identity and choose your presentation mode on {defaultBrandConfig.name}.
-          </p>
         </div>
 
         {/* Error Alert */}
         {error && (
-          <div className="mb-6 p-4 rounded-xl bg-destructive/10 border border-destructive/30 text-destructive text-sm flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-            <div className="flex-1">{error}</div>
+          <div className="p-3 rounded-md bg-destructive/15 border border-destructive/30 text-destructive text-xs">
+            {error}
           </div>
         )}
 
-        <form onSubmit={handleCreate} className="space-y-6 bg-card border border-border/80 rounded-2xl p-6 sm:p-8 shadow-sm">
+        <form onSubmit={handleCreate} className="space-y-5 bg-card/40 border border-border/70 rounded-xl p-5 shadow-sm">
           {/* Profile Type Selector */}
-          <div>
-            <label className="block text-sm font-semibold mb-3">Select Profile Mode</label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Mode</label>
+            <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => setProfileType('personal')}
-                className={`p-4 rounded-xl border text-left flex flex-col justify-between transition-all ${
+                className={`p-3 rounded-lg border text-left transition-all ${
                   profileType === 'personal'
-                    ? 'border-gold bg-gold/5 shadow-sm'
-                    : 'border-border/80 bg-background hover:bg-card/50'
+                    ? 'border-gold bg-gold/10'
+                    : 'border-border/70 bg-background hover:bg-card'
                 }`}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="p-2 rounded-lg bg-gold/15 text-gold">
-                    <User className="w-5 h-5" />
-                  </div>
-                  {profileType === 'personal' && <Check className="w-4 h-4 text-gold" />}
+                <div className="flex items-center justify-between">
+                  <div className="font-semibold text-xs text-foreground">Personal</div>
+                  {profileType === 'personal' && <Check className="w-3.5 h-3.5 text-gold" />}
                 </div>
-                <div>
-                  <div className="font-bold text-sm text-foreground">Personal Profile</div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    For founders, executives & creators. Supports showcasing multiple businesses under one profile.
-                  </div>
+                <div className="text-[11px] text-muted-foreground mt-0.5">
+                  Individuals & executives
                 </div>
               </button>
 
               <button
                 type="button"
                 onClick={() => setProfileType('business')}
-                className={`p-4 rounded-xl border text-left flex flex-col justify-between transition-all ${
+                className={`p-3 rounded-lg border text-left transition-all ${
                   profileType === 'business'
-                    ? 'border-gold bg-gold/5 shadow-sm'
-                    : 'border-border/80 bg-background hover:bg-card/50'
+                    ? 'border-gold bg-gold/10'
+                    : 'border-border/70 bg-background hover:bg-card'
                 }`}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="p-2 rounded-lg bg-gold/15 text-gold">
-                    <Building2 className="w-5 h-5" />
-                  </div>
-                  {profileType === 'business' && <Check className="w-4 h-4 text-gold" />}
+                <div className="flex items-center justify-between">
+                  <div className="font-semibold text-xs text-foreground">Business</div>
+                  {profileType === 'business' && <Check className="w-3.5 h-3.5 text-gold" />}
                 </div>
-                <div>
-                  <div className="font-bold text-sm text-foreground">Single Business Profile</div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    Dedicated standalone company identity with products, services catalogue, and brochure downloads.
-                  </div>
+                <div className="text-[11px] text-muted-foreground mt-0.5">
+                  Standalone company
                 </div>
               </button>
             </div>
           </div>
 
           {/* Name & Headline */}
-          <div className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold mb-1 text-foreground">
-                {profileType === 'personal' ? 'Your Full Name' : 'Company / Business Name'} *
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted-foreground">
+                {profileType === 'personal' ? 'Name' : 'Company Name'} *
               </label>
               <Input
                 type="text"
-                placeholder={profileType === 'personal' ? 'e.g. John Mathew' : 'e.g. ABC Technologies Pvt Ltd'}
+                placeholder={profileType === 'personal' ? 'John Mathew' : 'ABC Tech'}
                 value={displayName}
                 onChange={(e) => handleNameChange(e.target.value)}
                 required
-                className="h-11"
+                className="h-9 text-xs"
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold mb-1 text-foreground">
-                Headline / Title
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted-foreground">
+                Headline
               </label>
               <Input
                 type="text"
-                placeholder={profileType === 'personal' ? 'e.g. Managing Director & Tech Investor' : 'e.g. Next-Gen Enterprise Cloud Architecture'}
+                placeholder={profileType === 'personal' ? 'Managing Director' : 'Cloud Architecture'}
                 value={headline}
                 onChange={(e) => setHeadline(e.target.value)}
-                className="h-11"
+                className="h-9 text-xs"
               />
             </div>
-          </div>
 
-          {/* Custom Slug */}
-          <div>
-            <label className="block text-xs font-semibold mb-1 text-foreground">
-              Profile URL Slug *
-            </label>
-            <div className="flex items-center">
-              <span className="inline-flex items-center px-3 h-11 rounded-l-md border border-r-0 border-border bg-muted text-xs text-muted-foreground">
-                {defaultBrandConfig.primaryDomain}/p/
-              </span>
-              <Input
-                type="text"
-                placeholder="yourname"
-                value={slug}
-                onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '-'))}
-                required
-                className="rounded-l-none h-11 font-mono text-sm"
-              />
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted-foreground">
+                Slug *
+              </label>
+              <div className="flex items-center">
+                <span className="inline-flex items-center px-2.5 h-9 rounded-l-md border border-r-0 border-border bg-muted/30 text-xs text-muted-foreground font-mono">
+                  /p/
+                </span>
+                <Input
+                  type="text"
+                  placeholder="yourname"
+                  value={slug}
+                  onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '-'))}
+                  required
+                  className="rounded-l-none h-9 font-mono text-xs"
+                />
+              </div>
             </div>
-            <p className="mt-1 text-[11px] text-muted-foreground">
-              This will be your permanent public link and NFC smart card destination.
-            </p>
           </div>
 
           {/* Template Selection */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="block text-xs font-semibold text-foreground">
-                Visual Template
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-medium text-muted-foreground">
+                Template
               </label>
-              <Link href="/templates" className="text-xs text-gold hover:underline">
-                Browse All
+              <Link href="/templates" className="text-xs text-primary hover:underline">
+                View all
               </Link>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {templates.map((tpl) => (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {templates.slice(0, 6).map((tpl) => (
                 <button
                   key={tpl.id}
                   type="button"
                   onClick={() => setSelectedTemplateId(tpl.id)}
-                  className={`p-3 rounded-xl border text-left transition-all ${
+                  className={`p-2.5 rounded-lg border text-left transition-all ${
                     selectedTemplateId === tpl.id
-                      ? 'border-gold bg-gold/10 shadow-sm'
+                      ? 'border-gold bg-gold/10'
                       : 'border-border/60 bg-background/50 hover:bg-card'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold truncate text-foreground">{tpl.name}</span>
-                    {selectedTemplateId === tpl.id && <Check className="w-3.5 h-3.5 text-gold shrink-0" />}
+                    <span className="text-xs font-medium truncate text-foreground">{tpl.name}</span>
+                    {selectedTemplateId === tpl.id && <Check className="w-3 h-3 text-gold shrink-0" />}
                   </div>
-                  <span className="text-[10px] text-muted-foreground uppercase">{tpl.category}</span>
                 </button>
               ))}
             </div>
           </div>
 
           {/* Submit */}
-          <div className="pt-4 border-t border-border flex items-center justify-between gap-4">
+          <div className="pt-3 border-t border-border/60 flex items-center justify-between gap-3">
             <Link href="/dashboard">
-              <Button type="button" variant="outline" size="sm">
+              <Button type="button" variant="outline" size="sm" className="h-8 text-xs">
                 Cancel
               </Button>
             </Link>
             <Button
               type="submit"
               disabled={isLoading}
-              className="bg-gold text-gold-foreground hover:bg-gold-light font-semibold"
+              className="h-8 text-xs font-semibold bg-gold text-neutral-950 hover:bg-gold-light"
             >
-              {isLoading ? 'Creating Profile...' : 'Open Profile Builder'}
-              <ArrowRight className="w-4 h-4 ml-2" />
+              {isLoading ? 'Creating...' : 'Create'}
             </Button>
           </div>
         </form>
