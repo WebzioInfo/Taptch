@@ -90,5 +90,53 @@ describe('Centralized Permission Engine: can(actor, action, resource)', () => {
     expect(can(actor, 'org:manage')).toBe(false);
     expect(can(actor, 'dept:manage')).toBe(false);
   });
+
+  it('org admin should have management rights within their org, but CANNOT access competing orgs or platform controls', () => {
+    const adminActor: ActorContext = { userId: 'admin-corp-1', orgId: 'org-alpha', role: 'admin' };
+
+    // Allowed within org-alpha
+    expect(can(adminActor, 'dept:manage', { organizationId: 'org-alpha' })).toBe(true);
+    expect(can(adminActor, 'member:invite', { organizationId: 'org-alpha' })).toBe(true);
+    expect(can(adminActor, 'staff:manage', { organizationId: 'org-alpha' })).toBe(true);
+    expect(can(adminActor, 'lead:export', { organizationId: 'org-alpha' })).toBe(true);
+
+    // Cross-tenant boundaries strictly enforced: access to org-beta is DENIED
+    expect(can(adminActor, 'dept:manage', { organizationId: 'org-beta' })).toBe(false);
+    expect(can(adminActor, 'staff:manage', { organizationId: 'org-beta' })).toBe(false);
+    expect(can(adminActor, 'lead:view', { organizationId: 'org-beta' })).toBe(false);
+
+    // Platform-level sovereignty forbidden
+    expect(can(adminActor, 'plan:assign')).toBe(false);
+    expect(can(adminActor, 'admin:access')).toBe(false);
+  });
+
+  it('org viewer should only have read-only analytics/viewing rights and zero write permissions', () => {
+    const viewerActor: ActorContext = { userId: 'viewer-1', orgId: 'org-alpha', role: 'viewer' };
+
+    expect(can(viewerActor, 'profile:view', { organizationId: 'org-alpha' })).toBe(true);
+    expect(can(viewerActor, 'qr:view', { organizationId: 'org-alpha' })).toBe(true);
+    expect(can(viewerActor, 'lead:view', { organizationId: 'org-alpha' })).toBe(true);
+    expect(can(viewerActor, 'analytics:view', { organizationId: 'org-alpha' })).toBe(true);
+
+    // Mutation actions strictly forbidden
+    expect(can(viewerActor, 'profile:edit', { organizationId: 'org-alpha' })).toBe(false);
+    expect(can(viewerActor, 'profile:create')).toBe(false);
+    expect(can(viewerActor, 'member:invite')).toBe(false);
+    expect(can(viewerActor, 'staff:manage')).toBe(false);
+  });
+
+  it('field sales staff should activate/assign QRs, but cannot manage organizations or assign plans', () => {
+    const salesActor: ActorContext = { userId: 'sales-1', role: 'staff' };
+
+    expect(can(salesActor, 'qr:assign')).toBe(true);
+    expect(can(salesActor, 'qr:activate')).toBe(true);
+    expect(can(salesActor, 'qr:scan_verify')).toBe(true);
+
+    // Forbidden administrative actions
+    expect(can(salesActor, 'org:manage')).toBe(false);
+    expect(can(salesActor, 'member:invite')).toBe(false);
+    expect(can(salesActor, 'plan:assign')).toBe(false);
+    expect(can(salesActor, 'admin:access')).toBe(false);
+  });
 });
 

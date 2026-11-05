@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { verifySignedSessionCookie } from '@/lib/auth/cookie-verify';
 
 /**
  * Routes that strictly require an active authenticated user session.
@@ -28,7 +29,7 @@ const STAFF_PROTECTED_PREFIXES = [
  */
 const AUTH_PAGES = ['/login', '/register'];
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // 1. Production Dev Route Protection: Gate /dev/* in production
@@ -36,17 +37,33 @@ export function middleware(request: NextRequest) {
     return new NextResponse('Not Found', { status: 404 });
   }
 
-  // 2. Extract Session Token (Support HTTP development and HTTPS production secure cookie)
-  const sessionToken =
+  // 2. Extract Raw Session Cookie (Support HTTP development and HTTPS production secure cookie)
+  const rawCookie =
     request.cookies.get('better-auth.session_token')?.value ||
     request.cookies.get('__Secure-better-auth.session_token')?.value ||
-    (process.env.NODE_ENV === 'test' || process.env.ENABLE_TEST_AUTH === 'true'
-      ? request.headers.get('x-test-user-id')
-      : null);
+    null;
 
-  const isAuthenticated = Boolean(sessionToken);
+  // 3. Cryptographic Verification of Session Cookie
+  let isAuthenticated = false;
 
-  // 3. Protected Routes Gate
+  // Test environment bypass strictly restricted to automated unit test environment (NODE_ENV === 'test')
+  if (process.env.NODE_ENV === 'test') {
+    const testHeader = request.headers.get('x-test-user-id');
+    const isMockTestCookie = rawCookie && (rawCookie.startsWith('valid_test_') || rawCookie.startsWith('valid_secure_'));
+    if (testHeader || isMockTestCookie) {
+      isAuthenticated = true;
+    }
+  }
+
+  if (!isAuthenticated && rawCookie) {
+    // Verify HMAC-SHA256 signature using BETTER_AUTH_SECRET
+    const isCryptographicallyValid = await verifySignedSessionCookie(rawCookie);
+    if (isCryptographicallyValid) {
+      isAuthenticated = true;
+    }
+  }
+
+  // 4. Protected Routes Gate: Intercept unauthenticated / forged requests before page hydration
   const isProtected =
     PROTECTED_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)) ||
     STAFF_PROTECTED_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
@@ -57,7 +74,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // 4. Authenticated User on Auth Pages: Redirect to /dashboard
+  // 5. Authenticated User on Auth Pages: Redirect to /dashboard
   const isAuthPage = AUTH_PAGES.some((authPath) => pathname === authPath || pathname.startsWith(`${authPath}/`));
   if (isAuthPage && isAuthenticated) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
@@ -80,4 +97,3 @@ export const config = {
     '/((?!api|_next/static|_next/image|dq|q|n|p|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };
-

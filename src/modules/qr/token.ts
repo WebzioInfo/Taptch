@@ -1,11 +1,13 @@
 import { randomBytes, createHash } from 'node:crypto';
 
 /**
- * Generates an 8-character lowercase URL-safe cryptographic token (32 bits entropy, 4 billion space).
- * Generated via crypto.randomBytes(4).toString('hex').
+ * Generates a 32-character lowercase URL-safe cryptographic token (128 bits entropy, 3.4 x 10^38 space).
+ * Generated via crypto.randomBytes(16).toString('hex').
+ * Upgraded from legacy 32-bit (8-char) tokens to full 128-bit cryptographically secure entropy.
+ * Backward-compatible: database schema varchar(32) accommodates both 8-char legacy and 32-char new tokens.
  */
 export function generateQRToken(): string {
-  return randomBytes(4).toString('hex').toLowerCase();
+  return randomBytes(16).toString('hex').toLowerCase();
 }
 
 /**

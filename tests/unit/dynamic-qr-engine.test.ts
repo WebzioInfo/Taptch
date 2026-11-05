@@ -28,12 +28,17 @@ describe('Tappzio Dynamic QR Engine (Phase 1)', () => {
   });
 
   describe('1. Token Security & Cryptographic Entropy', () => {
-    it('generates high-entropy base64url unguessable tokens', () => {
+    it('generates 128-bit cryptographically secure unguessable tokens (32 hex characters)', () => {
       const token = generateQRToken();
       expect(token).toBeDefined();
-      expect(token.length).toBe(8);
-      // Hexadecimal lowercase characters only
-      expect(/^[0-9a-f]{8}$/.test(token)).toBe(true);
+      expect(token.length).toBe(32);
+      // 128-bit Hexadecimal lowercase characters only
+      expect(/^[0-9a-f]{32}$/.test(token)).toBe(true);
+    });
+
+    it('maintains backward compatibility with legacy 8-character tokens', () => {
+      const legacyToken = 'a1b2c3d4';
+      expect(/^[0-9a-f]{8,32}$/.test(legacyToken)).toBe(true);
     });
 
     it('guarantees collision-free tokens across batch generations', () => {

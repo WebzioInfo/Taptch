@@ -11,8 +11,8 @@ export async function getActorFromRequest(
 ): Promise<ActorContext | null> {
   const reqHeaders = requestHeaders || (await headers());
 
-  // Test environment bypass for deterministic automated testing
-  if (process.env.NODE_ENV === 'test' || process.env.ENABLE_TEST_AUTH === 'true') {
+  // Test environment bypass strictly restricted to automated unit test environments (NODE_ENV === 'test')
+  if (process.env.NODE_ENV === 'test') {
     const testUserId = reqHeaders.get('x-test-user-id');
     if (testUserId) {
       return {
@@ -49,7 +49,7 @@ export async function getActorFromRequest(
       userId,
       orgId,
       role: systemRole,
-      isAdmin: systemRole === 'super_admin' || systemRole === 'admin',
+      isAdmin: systemRole === 'super_admin',
     };
   } catch {
     return null;

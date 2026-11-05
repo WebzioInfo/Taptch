@@ -200,8 +200,8 @@ export function can(
     return false;
   }
 
-  // 1. Super Admin bypass: Global administrative sovereignty
-  if (actor.isAdmin || actor.role === 'super_admin') {
+  // 1. Super Admin bypass: Global administrative sovereignty strictly for super_admin
+  if (actor.role === 'super_admin') {
     return true;
   }
 

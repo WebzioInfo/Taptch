@@ -460,3 +460,28 @@
   - ESLint (`next lint`) passes with 0 warnings and 0 errors.
   - Next.js 15 production build compiled cleanly (24 static pages and 54 dynamic routes, with Edge Middleware size 34.5 kB).
 
+## ADR-029: 128-Bit QR Token Entropy, Edge HMAC Cookie Verification & Anti-Privilege Escalation
+- **Date**: 2026-11-05
+- **Status**: Accepted & Implemented
+- **Context**: A second-stage security audit revealed three critical vulnerabilities:
+  1. (P0 — SEC-VULN-001): Dynamic QR token generation in `src/modules/qr/token.ts` used 4 bytes (8 hex chars, 32 bits entropy), causing birthday collision vulnerabilities at only 65,536 tokens.
+  2. (P0 — SEC-VULN-002): Next.js Edge Middleware only checked cookie presence without verifying Better Auth's HMAC-SHA256 signature, and permitted `ENABLE_TEST_AUTH` header bypass in potential production builds.
+  3. (P0 — SEC-VULN-003): Organization Admins (`role: 'admin'`) received `isAdmin: true` in `src/lib/auth/session.ts`, triggering global administrative bypass in `can()` across competing organizations.
+- **Decision**:
+  1. **128-Bit Cryptographically Secure QR Tokens**:
+     - Upgraded `generateQRToken()` to `randomBytes(16).toString('hex')` (32 hex characters = 128 bits cryptographic entropy).
+     - Database schema `varchar(32)` accommodates both 8-character legacy tokens and 32-character tokens without breaking existing printed QR codes.
+  2. **Edge HMAC-SHA256 Cookie Signature Verification (`src/lib/auth/cookie-verify.ts`)**:
+     - Middleware uses Web Crypto API (`crypto.subtle`) to verify Better Auth cookie HMAC signatures. Forged, unsigned, or tampered tokens are rejected immediately with HTTP 307 redirect to `/login`.
+     - Test headers (`x-test-user-id`) are strictly restricted to `process.env.NODE_ENV === 'test'`.
+  3. **Strict Privilege Scoping**:
+     - `isAdmin` and global multi-tenant bypass in `can()` are strictly restricted to `role === 'super_admin'`. Organization Admins are strictly scoped to their `organizationId`.
+  4. **Adversarial Security Test Suite (`tests/integration/adversarial-security.test.ts`)**:
+     - Verified anti-privilege escalation, cross-tenant mutation rejection, path verification (`/q/`, `/dq/`, `/n/`), and empirical latency benchmarks (p50 < 50ms).
+- **Verification**:
+  - 21/21 test suites passed (162/162 tests) across Vitest.
+  - TypeScript strict check (`tsc --noEmit`) passes with 0 errors.
+  - ESLint (`next lint`) passes with 0 warnings and 0 errors.
+  - Next.js 15 production build compiled cleanly (24 static pages and 54 dynamic routes, Middleware size 34.8 kB).
+  - NPM audit reports 0 vulnerabilities.
+

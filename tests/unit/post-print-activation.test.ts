@@ -105,7 +105,8 @@ describe('Enterprise Post-Print Activation & Field Staff Subsystem', () => {
       expect(items.length).toBe(5);
       expect(items[0].status).toBe('unassigned');
       expect(items[0].batchSequence).toBe(101);
-      expect(items[0].token.length).toBe(8);
+      // 128-bit cryptographic random token length
+      expect(items[0].token.length).toBe(32);
       expect(items[4].batchSequence).toBe(105);
     });
 
