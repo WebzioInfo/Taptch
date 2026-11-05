@@ -10,6 +10,8 @@ export const users = pgTable('users', {
   twoFactorEnabled: boolean('two_factor_enabled').notNull().default(false),
   phoneNumber: varchar('phone_number', { length: 32 }),
   phoneNumberVerified: boolean('phone_number_verified').notNull().default(false),
+  place: varchar('place', { length: 255 }),
+  business: varchar('business', { length: 255 }),
   status: varchar('status', { length: 32 }).notNull().default('active'), // 'active' | 'suspended' | 'deactivated'
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),

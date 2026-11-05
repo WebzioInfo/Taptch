@@ -38,13 +38,14 @@ export interface UpdateQRInput {
 }
 
 export interface ResolveQRTarget {
-  status: 'active' | 'available' | 'disabled' | 'archived' | 'not_found';
+  status: 'assigned' | 'unassigned' | 'available' | 'disabled' | 'archived' | 'not_found';
   qrId?: string;
   destinationType?: QRDestinationType;
   redirectUrl?: string;
   slug?: string;
   profileId?: string | null;
   token?: string;
+  message?: string;
 }
 
 export interface RecordQRScanParams {

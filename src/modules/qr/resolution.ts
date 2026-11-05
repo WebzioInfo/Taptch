@@ -1,6 +1,6 @@
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { db } from '@/db';
-import { qrCodes, qrScanEvents } from '@/db/schema/qr';
+import { qrCodes, qrScanEvents, qrGroups, qrCategories } from '@/db/schema/qr';
 import { profiles } from '@/db/schema/profiles';
 import { cards } from '@/db/schema/cards';
 import { redis } from '@/lib/redis';
@@ -50,18 +50,27 @@ export function validateTargetUrl(rawUrl: string): { isValid: boolean; sanitized
  * Employs Redis edge cache (<50ms) with database fallback.
  */
 export async function resolveQRToken(token: string): Promise<ResolveQRTarget> {
-  const cacheKey = `qr:token:${token}`;
+  const cleanToken = token.toLowerCase().trim();
+  const cacheKey = `qr:token:${cleanToken}`;
 
   try {
     const cached = await redis.get(cacheKey);
     if (cached) {
-      return JSON.parse(cached) as ResolveQRTarget;
+      const parsed = JSON.parse(cached) as ResolveQRTarget;
+      // Increment scan count asynchronously
+      if (parsed.qrId && parsed.status === 'assigned') {
+        db.update(qrCodes)
+          .set({ scanCount: sql`${qrCodes.scanCount} + 1`, lastScannedAt: new Date() })
+          .where(eq(qrCodes.id, parsed.qrId))
+          .catch(() => {});
+      }
+      return parsed;
     }
   } catch (err) {
     logger.warn({ err }, 'Redis error during QR token lookup, falling back to database');
   }
 
-  // 1. Primary lookup in qr_codes table
+  // 1. Primary lookup in qr_codes table with joins to groups and categories
   const [qrRow] = await db
     .select({
       id: qrCodes.id,
@@ -69,31 +78,51 @@ export async function resolveQRToken(token: string): Promise<ResolveQRTarget> {
       token: qrCodes.token,
       destinationType: qrCodes.destinationType,
       targetUrl: qrCodes.targetUrl,
+      manualRedirectUrl: qrCodes.manualRedirectUrl,
       destinationPayload: qrCodes.destinationPayload,
       profileId: qrCodes.profileId,
       profileSlug: profiles.slug,
+      categorySlug: qrCategories.slug,
     })
     .from(qrCodes)
     .leftJoin(profiles, eq(qrCodes.profileId, profiles.id))
-    .where(eq(qrCodes.token, token))
+    .leftJoin(qrGroups, eq(qrCodes.groupId, qrGroups.id))
+    .leftJoin(qrCategories, eq(qrGroups.categoryId, qrCategories.id))
+    .where(eq(qrCodes.token, cleanToken))
     .limit(1);
 
   if (qrRow) {
     if (qrRow.status === 'disabled' || qrRow.status === 'archived') {
-      return { status: qrRow.status as 'disabled' | 'archived', token };
+      return { status: 'disabled', token: cleanToken, message: 'This QR code has been deactivated.' };
     }
 
-    if (qrRow.status === 'available') {
-      return { status: 'available', qrId: qrRow.id, token };
+    // Unassigned QR -> Route to category slug or generic setup
+    if (qrRow.status === 'unassigned' || qrRow.status === 'available') {
+      const setupPath = qrRow.categorySlug
+        ? `/${qrRow.categorySlug}?token=${cleanToken}`
+        : `/setup?token=${cleanToken}`;
+
+      return {
+        status: 'unassigned',
+        qrId: qrRow.id,
+        token: cleanToken,
+        redirectUrl: setupPath,
+      };
     }
 
-    // Determine final redirect URL based on destination type
-    let redirectUrl: string | undefined;
+    // Assigned QR -> Increment scan count atomically and determine redirect URL
+    db.update(qrCodes)
+      .set({ scanCount: sql`${qrCodes.scanCount} + 1`, lastScannedAt: new Date() })
+      .where(eq(qrCodes.id, qrRow.id))
+      .catch(() => {});
+
+    let redirectUrl: string | undefined = qrRow.manualRedirectUrl || qrRow.targetUrl || undefined;
 
     switch (qrRow.destinationType) {
       case 'url': {
-        if (qrRow.targetUrl) {
-          const validated = validateTargetUrl(qrRow.targetUrl);
+        const dest = qrRow.manualRedirectUrl || qrRow.targetUrl;
+        if (dest) {
+          const validated = validateTargetUrl(dest);
           if (validated.isValid && validated.sanitizedUrl) {
             redirectUrl = validated.sanitizedUrl;
           }
@@ -123,13 +152,13 @@ export async function resolveQRToken(token: string): Promise<ResolveQRTarget> {
     }
 
     const result: ResolveQRTarget = {
-      status: 'active',
+      status: 'assigned',
       qrId: qrRow.id,
       destinationType: qrRow.destinationType as ResolveQRTarget['destinationType'],
       redirectUrl,
       slug: qrRow.profileSlug || undefined,
       profileId: qrRow.profileId,
-      token,
+      token: cleanToken,
     };
 
     // Cache active resolved targets in Redis for 120 seconds
@@ -152,29 +181,29 @@ export async function resolveQRToken(token: string): Promise<ResolveQRTarget> {
     })
     .from(cards)
     .leftJoin(profiles, eq(cards.profileId, profiles.id))
-    .where(eq(cards.redirectToken, token))
+    .where(eq(cards.redirectToken, cleanToken))
     .limit(1);
 
   if (cardRow) {
     if (cardRow.status === 'active' && cardRow.slug) {
       const legacyResult: ResolveQRTarget = {
-        status: 'active',
+        status: 'assigned',
         qrId: cardRow.id,
         destinationType: 'profile',
         redirectUrl: `/p/${cardRow.slug}?ref=qr`,
         slug: cardRow.slug,
         profileId: cardRow.profileId,
-        token,
+        token: cleanToken,
       };
       return legacyResult;
     }
     if (cardRow.status === 'unclaimed') {
-      return { status: 'available', qrId: cardRow.id, token };
+      return { status: 'unassigned', qrId: cardRow.id, token: cleanToken, redirectUrl: `/claim/${cleanToken}?ref=qr` };
     }
-    return { status: 'disabled', token };
+    return { status: 'disabled', token: cleanToken, message: 'This QR code has been deactivated.' };
   }
 
-  return { status: 'not_found', token };
+  return { status: 'not_found', token: cleanToken };
 }
 
 /**
@@ -221,4 +250,3 @@ export async function recordQRScanEvent(params: RecordQRScanParams): Promise<voi
     logger.warn({ err }, 'Failed to record QR scan telemetry event');
   }
 }
-

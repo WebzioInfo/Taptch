@@ -31,9 +31,9 @@ describe('Tappzio Dynamic QR Engine (Phase 1)', () => {
     it('generates high-entropy base64url unguessable tokens', () => {
       const token = generateQRToken();
       expect(token).toBeDefined();
-      expect(token.length).toBeGreaterThanOrEqual(15);
-      // Base64URL safe characters only
-      expect(/^[A-Za-z0-9_-]+$/.test(token)).toBe(true);
+      expect(token.length).toBe(8);
+      // Hexadecimal lowercase characters only
+      expect(/^[0-9a-f]{8}$/.test(token)).toBe(true);
     });
 
     it('guarantees collision-free tokens across batch generations', () => {
@@ -119,7 +119,7 @@ describe('Tappzio Dynamic QR Engine (Phase 1)', () => {
 
       // Resolve the token
       const resolved = await resolveQRToken(qr.token);
-      expect(resolved.status).toBe('active');
+      expect(resolved.status).toBe('assigned');
       expect(resolved.redirectUrl).toBe('https://partner-portal.com/');
     });
 
@@ -141,7 +141,7 @@ describe('Tappzio Dynamic QR Engine (Phase 1)', () => {
 
       // Verify resolved destination has shifted immediately
       const resolved = await resolveQRToken(qr.token);
-      expect(resolved.status).toBe('active');
+      expect(resolved.status).toBe('assigned');
       expect(resolved.redirectUrl).toContain('https://wa.me/919876543210');
       expect(resolved.redirectUrl).toContain('Hello%20from%20Tappzio%20QR');
     });

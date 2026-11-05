@@ -15,7 +15,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
   const target = await resolveQRToken(token);
 
-  if (target.status === 'active' && target.redirectUrl) {
+  if ((target.status === 'assigned' || target.status === 'available') && target.redirectUrl) {
     // Non-blocking telemetry dispatch
     if (target.qrId) {
       recordQRScanEvent({
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.redirect(redirectUrl, { status: 307 });
   }
 
-  if (target.status === 'available') {
+  if (target.status === 'available' || target.status === 'unassigned') {
     const claimUrl = new URL(`/claim/${token}?ref=qr`, request.url);
     return NextResponse.redirect(claimUrl, { status: 307 });
   }

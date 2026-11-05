@@ -351,3 +351,37 @@
   - 100/100 Vitest tests passing across 16 test files.
   - `tsc --noEmit` and `next lint` pass with 0 warnings/errors.
   - Production `next build` compiled all routes cleanly.
+
+## ADR-025: Enterprise Post-Print Activation Dynamic QR Ecosystem, Field Staff RBAC & Calendar Analytics
+- **Date**: 2026-11-05
+- **Status**: Accepted & Implemented
+- **Context**: In physical smart card and dynamic QR distribution models, pre-printing unique URLs tied directly to end-customer profiles beforehand causes severe operational bottlenecks and high scrap rates. An enterprise post-print activation dynamic QR engine was needed:
+  1. Mint unassigned QR batches at volume with cryptographic tokens and human-readable tracking serial numbers.
+  2. Support vector multi-sheet PDF generation across 3 layout formats (`branded_sheet` 3x4 A4 grid, `thermal_sticker` 50x50mm, and `table_tent` 4x6" standees).
+  3. "Scan & Assign After Generated" workflow enabling field sales reps to scan physical codes with mobile cameras and pair them with clients in real-time.
+  4. Role-based access control segregating `super_admin`/`admin` ops from `sales_staff` field reps.
+  5. Luminous GitHub-style calendar heatmap analytics and staff performance audit ledgers.
+- **Decision**:
+  1. **Cryptographic Token Architecture (`src/modules/qr/token.ts`)**:
+     - 8-character lowercase hexadecimal tokens (`crypto.randomBytes(4).toString('hex')`) with 32-bit entropy space (~4.3 billion values), collision-checked during batch generation.
+     - Human-readable sequential serial numbers (`generateQRSerial(seq, 'BATCH')`).
+     - Daily rotating salt hash for visitor IPs adhering to DPDP Act 2023.
+     - Universal client-safe parser (`extractQRToken`) extracting tokens from camera streams, URLs, query parameters, or raw strings.
+  2. **PDF Vector Print Engine (`src/modules/qr/print-engine.ts`)**:
+     - Uses `pdf-lib` to compose vector sheets with QR PNG matrix at 400 DPI, crop/cut marks, serial text, and instructions.
+  3. **"Scan & Assign After Generated" API & Prevention Rules (`src/modules/qr/service.ts`, `/api/admin/sales/assign-qr`)**:
+     - Enforces RBAC verification (`super_admin`, `admin`, `sales_staff`).
+     - Automatically creates new customer user records or attaches to existing customers.
+     - Guards against accidental overwriting of already assigned codes by rejecting requests unless `isReassign: true` is explicitly provided.
+  4. **Mobile-First Field Staff Experience (`/staff/*`)**:
+     - `/staff/login`, `/staff/dashboard` (with live camera viewfinder + `jsQR` and file upload fallback), `/staff/assign/[token]`, and `/staff/history`.
+  5. **Portal-X Operations Suite (`/portal-x/*`)**:
+     - `/portal-x/qr-management`: Batch generation modal with URL template parameter interpolation, batches ledger, and warehouse QA scanner tab with Web Audio API feedback (880Hz sine wave for unique, 200Hz sawtooth buzz for duplicates).
+     - `/portal-x/staff`: Field staff list, search, status badge, provisioning modal, and block/unblock controls (`PATCH /api/admin/staff/[id]/status`).
+     - `/portal-x/staff/[id]/analytics`: Staff performance audit ledger, KPI metrics, and client reassignment modal.
+     - `/portal-x/analytics`: Luminous GitHub-style calendar heatmap aggregating daily assignment counts using `date-fns` intervals and a 5-tier intensity matrix.
+- **Verification**:
+  - 18/18 test suites passed, 127/127 tests passed.
+  - `npm run typecheck` (`tsc --noEmit`) passes with 0 errors.
+  - `npm run lint` (`next lint`) passes with 0 warnings and 0 errors.
+  - `npm run build` compiles 21 static pages and 48 dynamic routes cleanly (exit code 0).
