@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, varchar, integer } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, boolean, varchar, integer, jsonb } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
   id: text('id').primaryKey(),
@@ -67,19 +67,26 @@ export const members = pgTable('members', {
   id: text('id').primaryKey(),
   organizationId: text('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
   userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  role: text('role').notNull().default('employee'), // 'owner' | 'admin' | 'manager' | 'employee'
+  role: text('role').notNull().default('staff'), // 'owner' | 'admin' | 'manager' | 'staff' | 'viewer'
+  status: varchar('status', { length: 32 }).notNull().default('active'), // 'active' | 'suspended' | 'deactivated'
+  permissions: jsonb('permissions').$type<string[]>().default([]),
+  assignedResponsibilities: text('assigned_responsibilities'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
 export const invitations = pgTable('invitations', {
   id: text('id').primaryKey(),
   organizationId: text('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
   email: text('email').notNull(),
-  role: text('role'),
-  status: text('status').notNull().default('pending'),
+  phoneNumber: varchar('phone_number', { length: 32 }),
+  role: text('role').notNull().default('staff'),
+  permissions: jsonb('permissions').$type<string[]>().default([]),
+  status: text('status').notNull().default('pending'), // 'pending' | 'accepted' | 'rejected' | 'expired' | 'revoked'
   expiresAt: timestamp('expires_at').notNull(),
   inviterId: text('inviter_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
 export const twoFactor = pgTable('two_factor', {

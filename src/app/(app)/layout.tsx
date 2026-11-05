@@ -24,6 +24,7 @@ import {
   Users,
   Palette,
   QrCode,
+  ShieldCheck,
 } from 'lucide-react';
 
 interface AppLayoutProps {
@@ -48,6 +49,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
     { href: '/templates', label: 'Templates', icon: Palette },
     { href: '/cards', label: 'Cards', icon: CreditCard },
     { href: '/leads', label: 'Leads', icon: Users },
+    { href: '/team', label: 'Team', icon: ShieldCheck },
   ];
 
   const handleSignOut = async () => {

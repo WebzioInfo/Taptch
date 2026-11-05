@@ -19,6 +19,8 @@ export interface ActorContext {
   orgId?: string | null;
   role: string;
   isAdmin?: boolean;
+  memberRole?: string | null;
+  permissions?: string[] | null;
 }
 
 // Global cached client instance for HMR across dev reloads

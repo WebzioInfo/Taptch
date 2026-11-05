@@ -15,6 +15,11 @@ import {
   ShieldCheck,
   Loader2,
   AlertCircle,
+  Radio,
+  Smartphone,
+  Copy,
+  CheckCircle,
+  X,
 } from 'lucide-react';
 
 interface CardItem {
@@ -77,6 +82,47 @@ export default function CardsPage() {
   });
   const [ordering, setOrdering] = React.useState(false);
   const [orderError, setOrderError] = React.useState<string | null>(null);
+
+  // NFC Web Writer & Diagnostic state
+  const [nfcWritingCard, setNfcWritingCard] = React.useState<CardItem | null>(null);
+  const [nfcWriteStatus, setNfcWriteStatus] = React.useState<'idle' | 'scanning' | 'success' | 'error' | 'unsupported'>('idle');
+  const [nfcWriteMsg, setNfcWriteMsg] = React.useState<string | null>(null);
+  const [copiedToken, setCopiedToken] = React.useState<string | null>(null);
+
+  const handleStartNfcWrite = async (card: CardItem) => {
+    setNfcWritingCard(card);
+    const targetUrl = `${window.location.origin}/n/${card.redirectToken}`;
+
+    // Check if Web NFC API (NDEFReader) is supported in current browser
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (typeof window !== 'undefined' && 'NDEFReader' in (window as any)) {
+      setNfcWriteStatus('scanning');
+      setNfcWriteMsg('Hold an NFC card or tag near the back of your phone...');
+
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const ndef = new (window as any).NDEFReader();
+        await ndef.write({
+          records: [{ recordType: 'url', data: targetUrl }],
+        });
+        setNfcWriteStatus('success');
+        setNfcWriteMsg('Success! NFC tag has been encoded with your Tappzio redirect URL.');
+      } catch (err: unknown) {
+        setNfcWriteStatus('error');
+        setNfcWriteMsg(err instanceof Error ? err.message : 'NFC write operation failed or was cancelled.');
+      }
+    } else {
+      setNfcWriteStatus('unsupported');
+      setNfcWriteMsg('In-browser Web NFC writing requires Chromium on an Android device with NFC enabled.');
+    }
+  };
+
+  const handleCopyNdefUrl = (card: CardItem) => {
+    const targetUrl = `${window.location.origin}/n/${card.redirectToken}`;
+    navigator.clipboard.writeText(targetUrl);
+    setCopiedToken(card.id);
+    setTimeout(() => setCopiedToken(null), 2500);
+  };
 
   const fetchData = React.useCallback(async () => {
     try {
@@ -260,6 +306,32 @@ export default function CardsPage() {
                         <span className="text-muted-foreground">Tap:</span>
                         <code className="text-[11px] text-primary">/n/{card.redirectToken.slice(0, 10)}...</code>
                       </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 pt-2 border-t border-border/40">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleStartNfcWrite(card)}
+                        className="h-6 text-[11px] px-2 gap-1 border-primary/30 text-primary hover:bg-primary/10 flex-1"
+                      >
+                        <Radio className="h-3 w-3" />
+                        <span>Write Tag</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleCopyNdefUrl(card)}
+                        className="h-6 text-[11px] px-2 gap-1 text-muted-foreground hover:text-foreground"
+                        title="Copy NDEF URL"
+                      >
+                        {copiedToken === card.id ? (
+                          <CheckCircle className="h-3 w-3 text-emerald-400" />
+                        ) : (
+                          <Copy className="h-3 w-3" />
+                        )}
+                        <span>{copiedToken === card.id ? 'Copied' : 'URL'}</span>
+                      </Button>
                     </div>
                   </Card>
                 ))}
@@ -559,6 +631,125 @@ export default function CardsPage() {
                 </div>
               </form>
             </CardContent>
+          </Card>
+        </div>
+      )}
+      {/* NFC Tag Writer & Hardware Diagnostic Modal */}
+      {nfcWritingCard && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
+          <Card className="border-border/70 bg-card w-full max-w-md p-6 space-y-4 shadow-2xl relative text-xs">
+            <button
+              onClick={() => {
+                setNfcWritingCard(null);
+                setNfcWriteStatus('idle');
+                setNfcWriteMsg(null);
+              }}
+              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <div className="flex items-center gap-2">
+              <Radio className="h-5 w-5 text-primary" />
+              <h2 className="text-base font-bold text-foreground">NFC Tag Writer & Diagnostic</h2>
+            </div>
+
+            <div className="p-3 rounded-xl bg-background/80 border border-border/50 space-y-1 font-mono text-[11px]">
+              <div className="text-muted-foreground">Target Card: {nfcWritingCard.serialNumber}</div>
+              <div className="text-primary truncate font-semibold">
+                {typeof window !== 'undefined' ? `${window.location.origin}/n/${nfcWritingCard.redirectToken}` : ''}
+              </div>
+            </div>
+
+            {nfcWriteStatus === 'scanning' && (
+              <div className="p-4 rounded-xl bg-primary/10 border border-primary/30 text-center space-y-3">
+                <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+                <p className="font-semibold text-foreground">{nfcWriteMsg}</p>
+                <p className="text-[11px] text-muted-foreground">Ensure NFC is turned on in your device settings.</p>
+              </div>
+            )}
+
+            {nfcWriteStatus === 'success' && (
+              <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-2">
+                <CheckCircle className="h-8 w-8 text-emerald-400 mx-auto" />
+                <p className="font-semibold text-emerald-400">{nfcWriteMsg}</p>
+              </div>
+            )}
+
+            {nfcWriteStatus === 'error' && (
+              <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/30 space-y-2 text-center">
+                <AlertCircle className="h-6 w-6 text-destructive mx-auto" />
+                <p className="font-semibold text-destructive">{nfcWriteMsg}</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleStartNfcWrite(nfcWritingCard)}
+                  className="h-7 text-xs"
+                >
+                  Retry Write
+                </Button>
+              </div>
+            )}
+
+            {nfcWriteStatus === 'unsupported' && (
+              <div className="space-y-3">
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs space-y-1.5">
+                  <div className="flex items-center gap-1.5 font-semibold">
+                    <Smartphone className="h-4 w-4" />
+                    <span>Hardware & Browser Compatibility Notice</span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    Direct in-browser Web NFC writing is supported on <strong>Chromium on Android</strong> devices.
+                  </p>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    <strong>iOS Devices:</strong> Apple allows native NFC reading on all iPhones without an app, but restricts third-party web browsers from direct write access.
+                  </p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <span className="font-medium text-foreground">Write Manually with NFC Tools:</span>
+                  <p className="text-[11px] text-muted-foreground">
+                    Copy the NDEF URL below and write it as a URL/URI record using the free &apos;NFC Tools&apos; app on iOS or Android:
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={typeof window !== 'undefined' ? `${window.location.origin}/n/${nfcWritingCard.redirectToken}` : ''}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-background border border-border/60 text-xs font-mono text-muted-foreground"
+                    />
+                    <Button
+                      variant="gold"
+                      size="sm"
+                      onClick={() => handleCopyNdefUrl(nfcWritingCard)}
+                      className="h-8 text-xs px-3 shrink-0 gap-1 font-semibold"
+                    >
+                      {copiedToken === nfcWritingCard.id ? (
+                        <CheckCircle className="h-3.5 w-3.5 text-emerald-400" />
+                      ) : (
+                        <Copy className="h-3.5 w-3.5" />
+                      )}
+                      <span>{copiedToken === nfcWritingCard.id ? 'Copied' : 'Copy'}</span>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-end pt-2 border-t border-border/40">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setNfcWritingCard(null);
+                  setNfcWriteStatus('idle');
+                  setNfcWriteMsg(null);
+                }}
+                className="h-8 text-xs"
+              >
+                Close
+              </Button>
+            </div>
           </Card>
         </div>
       )}

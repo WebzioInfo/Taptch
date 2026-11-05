@@ -408,3 +408,28 @@
   - TypeScript strict check (`tsc --noEmit`) passes with 0 errors.
   - ESLint (`next lint`) passes with 0 warnings and 0 errors.
   - Next.js 15 production build compiled cleanly (22 static pages and 48 dynamic routes).
+
+## ADR-027: Multi-Tenant Organization Staff Management, 5-Tier RBAC & NFC Web Writer
+- **Date**: 2026-11-05
+- **Status**: Accepted & Implemented
+- **Context**: Tappzio previously had isolated field representative provisioning for Portal-X, but organization owners had no multi-tenant staff management capabilities. Customers needed to invite team members, assign fine-grained operational roles, manage permissions, suspend/revoke access, track chronological staff activities, and have a personalized staff workspace. In addition, physical card management required browser-level NFC NDEF encoding and honest hardware guidance.
+- **Decision**:
+  1. **Multi-Tenant Staff Architecture (`src/modules/orgs/`)**:
+     - Built comprehensive service orchestration: `createOrganization`, `listUserOrganizations`, `inviteStaff`, `listOrganizationStaff`, `updateStaffMember`, `removeStaffMember`, `acceptInvitation`, `rejectInvitation`, `getStaffDashboardData`, `logStaffActivity`, and `getOrganizationAuditLogs`.
+     - 5 distinct operational roles: `owner` (full sovereign control), `admin` (team and profile administration), `manager` (profile and QR operations), `staff` (field activation, QR pairing, leads), and `viewer` (read-only audit).
+     - Strict privilege escalation barriers: managers cannot invite admins; admins cannot modify other admins or the owner; owner cannot be removed.
+     - Session revocation: suspending or deactivating a staff member automatically revokes active session pointers to the organization.
+  2. **Database Migration 0009**:
+     - Created `0009_organization_staff_management.sql` altering `members` and `invitations` tables to add `status` ('active' | 'suspended' | 'deactivated'), `permissions` (JSONB array), `assigned_responsibilities` (text), and `phone_number`. Applied to both Supabase PostgreSQL and PGlite embedded test databases.
+  3. **RESTful API Roster**:
+     - Implemented 8 endpoints under `/api/v1/orgs/` supporting organization listings, staff invites, member updates, audit inspection, personal staff dashboard metrics, and invite acceptance/rejection.
+  4. **Frontend Staff Suite**:
+     - Created `/team` (Organization & Staff Administration), `/team/my-work` (Personal Staff Workspace), and `/invite/[id]` (Invitation response portal). Added `Team` to main customer navigation (`src/app/(app)/layout.tsx`).
+  5. **NFC Tag Writer & Compatibility Guidance (`/cards`)**:
+     - Implemented in-browser Web NFC writing (`NDEFReader`) on supported Android Chromium devices.
+     - Transparently documented hardware limitations for iOS/desktop with one-click NDEF URL copying and NFC Tools recommendations.
+- **Verification**:
+  - 19/19 test suites passed (141/141 tests) across Vitest.
+  - TypeScript strict check (`tsc --noEmit`) passes with 0 errors.
+  - ESLint (`next lint`) passes with 0 warnings and 0 errors.
+  - Next.js 15 production build compiled cleanly (24 static pages and 54 dynamic routes).
