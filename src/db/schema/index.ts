@@ -10,3 +10,4 @@ export * from './leads';
 export * from './orders';
 export * from './media';
 export * from './publishing';
+export * from './qr';
