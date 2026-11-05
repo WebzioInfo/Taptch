@@ -266,16 +266,37 @@ export default function StaffAssignPage() {
           </div>
 
           <div>
-            <Label className="text-xs text-neutral-300 flex items-center gap-1.5">
-              <MapPin className="h-3.5 w-3.5 text-neutral-500" />
-              <span>Location / City</span>
+            <Label className="text-xs text-neutral-300 flex items-center justify-between">
+              <span className="flex items-center gap-1.5">
+                <MapPin className="h-3.5 w-3.5 text-neutral-500" />
+                <span>Location / City (Google Places)</span>
+              </span>
+              <span className="text-[10px] text-neutral-500">Auto-suggest</span>
             </Label>
             <Input
-              placeholder="e.g. Indiranagar, Bengaluru"
+              id="places-autocomplete-input"
+              placeholder="e.g. Indiranagar, Bengaluru or search place..."
               value={place}
               onChange={(e) => setPlace(e.target.value)}
               className="mt-1 h-10 text-xs bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-500"
             />
+            {/* Quick-tap territory chips */}
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {['Bengaluru', 'Mumbai', 'Delhi NCR', 'Hyderabad', 'Pune', 'Chennai'].map((city) => (
+                <button
+                  type="button"
+                  key={city}
+                  onClick={() => setPlace(city)}
+                  className={`text-[10px] px-2 py-0.5 rounded-full border transition-colors ${
+                    place === city
+                      ? 'bg-primary/20 text-primary border-primary/40'
+                      : 'bg-neutral-900 text-neutral-400 border-neutral-800 hover:text-white hover:border-neutral-700'
+                  }`}
+                >
+                  {city}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div>

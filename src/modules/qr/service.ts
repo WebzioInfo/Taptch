@@ -537,11 +537,17 @@ export async function getCalendarHeatmapAnalytics(params: {
     if (r.count > maxDaily) maxDaily = r.count;
   }
 
+  const dailyAssignments = rows.map((r: { dateStr: string; count: number }) => ({
+    date: r.dateStr,
+    count: r.count,
+  }));
+
   return {
     year: params.year,
     month: params.month,
     totalAssigned,
     maxDaily,
     dailyCounts,
+    dailyAssignments,
   };
 }

@@ -44,3 +44,4 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
   return NextResponse.redirect(new URL('/?error=qr_not_found', request.url), { status: 302 });
 }
+

@@ -76,3 +76,4 @@ export function PortalXHeader({ title, subtitle, actions }: PortalXHeaderProps) 
     </div>
   );
 }
+

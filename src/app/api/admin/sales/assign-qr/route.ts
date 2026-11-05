@@ -11,15 +11,23 @@ import { apiSuccess, apiError, handleApiError } from '@/lib/api/response';
 
 export const dynamic = 'force-dynamic';
 
-const assignQRSchema = z.object({
-  qr_token: z.string().min(1).max(64),
-  name: z.string().min(1).max(128),
-  mobile_number: z.string().optional().nullable(),
-  place: z.string().optional().nullable(),
-  business: z.string().optional().nullable(),
-  destination_url: z.string().min(1),
-  isReassign: z.boolean().optional(),
-});
+const assignQRSchema = z
+  .object({
+    qr_token: z.string().optional(),
+    qrToken: z.string().optional(),
+    name: z.string().min(1).max(128),
+    mobile_number: z.string().optional().nullable(),
+    mobileNumber: z.string().optional().nullable(),
+    place: z.string().optional().nullable(),
+    business: z.string().optional().nullable(),
+    destination_url: z.string().optional(),
+    destinationUrl: z.string().optional(),
+    isReassign: z.boolean().optional(),
+  })
+  .refine(
+    (data) => Boolean(data.qr_token || data.qrToken) && Boolean(data.destination_url || data.destinationUrl),
+    { message: 'Both QR token and destination URL are required.' }
+  );
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,14 +49,18 @@ export async function POST(request: NextRequest) {
       return apiError('VALIDATION_ERROR', 'Invalid assignment payload.', 400, validated.error.format());
     }
 
+    const qrToken = (validated.data.qr_token || validated.data.qrToken)!;
+    const destinationUrl = (validated.data.destination_url || validated.data.destinationUrl)!;
+    const mobileNumber = validated.data.mobile_number || validated.data.mobileNumber;
+
     try {
       const result = await assignQRInField({
-        qrToken: validated.data.qr_token,
+        qrToken,
         name: validated.data.name,
-        mobileNumber: validated.data.mobile_number,
+        mobileNumber,
         place: validated.data.place,
         business: validated.data.business,
-        destinationUrl: validated.data.destination_url,
+        destinationUrl,
         isReassign: validated.data.isReassign,
         staffUserId: actor.userId,
       });
@@ -74,3 +86,4 @@ export async function POST(request: NextRequest) {
     return handleApiError(error);
   }
 }
+

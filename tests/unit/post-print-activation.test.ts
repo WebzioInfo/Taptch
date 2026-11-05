@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
+import { hash, compare } from 'bcryptjs';
 import { db } from '@/db';
 import { users } from '@/db/schema/auth';
 import { qrCodes } from '@/db/schema/qr';
@@ -295,6 +296,23 @@ describe('Enterprise Post-Print Activation & Field Staff Subsystem', () => {
       expect(pdfBytes).toBeInstanceOf(Uint8Array);
       const header = Buffer.from(pdfBytes.slice(0, 5)).toString('ascii');
       expect(header).toBe('%PDF-');
+    });
+  });
+
+  describe('6. Staff Credential Security & Password Hashing', () => {
+    it('verifies staff passwords are securely hashed with bcryptjs salt rounds >= 10', async () => {
+      const rawPassword = 'SecureFieldPass123!';
+      const saltRounds = 10;
+      const hashedPassword = await hash(rawPassword, saltRounds);
+
+      expect(hashedPassword).toBeDefined();
+      expect(hashedPassword.startsWith('$2a$') || hashedPassword.startsWith('$2b$')).toBe(true);
+
+      const isValid = await compare(rawPassword, hashedPassword);
+      expect(isValid).toBe(true);
+
+      const isInvalid = await compare('WrongPassword', hashedPassword);
+      expect(isInvalid).toBe(false);
     });
   });
 });

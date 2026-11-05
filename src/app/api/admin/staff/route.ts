@@ -1,8 +1,9 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { eq, inArray, desc } from 'drizzle-orm';
+import { hash } from 'bcryptjs';
 import { db } from '@/db';
-import { users } from '@/db/schema/auth';
+import { users, accounts } from '@/db/schema/auth';
 import { getActorFromRequest } from '@/lib/auth/session';
 import { apiSuccess, apiError, handleApiError } from '@/lib/api/response';
 
@@ -11,6 +12,7 @@ export const dynamic = 'force-dynamic';
 const createStaffSchema = z.object({
   name: z.string().min(2).max(128),
   email: z.string().email(),
+  password: z.string().min(6).optional(),
   role: z.enum(['admin', 'sales_staff']).default('sales_staff'),
   phoneNumber: z.string().optional(),
 });
@@ -82,8 +84,21 @@ export async function POST(request: NextRequest) {
         createdAt: users.createdAt,
       });
 
-    return apiSuccess(created, undefined, 201);
+    // Hash password with bcryptjs (min 10 rounds per spec) and create credential account
+    const tempPassword = validated.data.password || `Staff@${Math.random().toString(36).slice(2, 8)}!`;
+    const passwordHash = await hash(tempPassword, 10);
+
+    await db.insert(accounts).values({
+      id: `acc_${newStaffId}`,
+      userId: newStaffId,
+      accountId: newStaffId,
+      providerId: 'credential',
+      password: passwordHash,
+    });
+
+    return apiSuccess({ ...created, temporaryPassword: tempPassword }, undefined, 201);
   } catch (error) {
     return handleApiError(error);
   }
 }
+

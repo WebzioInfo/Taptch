@@ -119,17 +119,17 @@ export default function PortalXCalendarHeatmapAnalyticsPage() {
 
     switch (level) {
       case 0:
-        return `bg-[#141418] border border-neutral-800/80 text-neutral-500 hover:border-neutral-700 ${borderAccent}`;
+        return `bg-[#0f172a]/60 border border-slate-800/80 text-slate-500 hover:border-slate-700 ${borderAccent}`;
       case 1:
-        return `bg-amber-950/40 border border-amber-900/50 text-amber-300/80 hover:bg-amber-950/60 ${borderAccent}`;
+        return `bg-indigo-950/40 border border-indigo-900/50 text-indigo-300 hover:bg-indigo-950/60 ${borderAccent}`;
       case 2:
-        return `bg-amber-900/60 border border-amber-700/60 text-amber-200 hover:bg-amber-800/70 shadow-[0_0_8px_rgba(217,119,6,0.15)] ${borderAccent}`;
+        return `bg-indigo-900/60 border border-indigo-700/60 text-indigo-200 hover:bg-indigo-800/70 shadow-[0_0_8px_rgba(99,102,241,0.2)] ${borderAccent}`;
       case 3:
-        return `bg-amber-600/90 border border-amber-500 text-white font-bold hover:bg-amber-500 shadow-[0_0_14px_rgba(217,119,6,0.35)] ${borderAccent}`;
+        return `bg-indigo-600/90 border border-indigo-500 text-white font-bold hover:bg-indigo-500 shadow-[0_0_14px_rgba(99,102,241,0.4)] ${borderAccent}`;
       case 4:
-        return `bg-gradient-to-br from-amber-400 to-amber-500 border border-amber-300 text-black font-extrabold hover:brightness-110 shadow-[0_0_20px_rgba(245,158,11,0.6)] ${borderAccent}`;
+        return `bg-gradient-to-br from-indigo-400 to-indigo-600 border border-indigo-300 text-white font-extrabold hover:brightness-110 shadow-[0_0_22px_rgba(129,140,248,0.7)] ${borderAccent}`;
       default:
-        return `bg-[#141418] border border-neutral-800 text-neutral-500 ${borderAccent}`;
+        return `bg-[#0f172a]/60 border border-slate-800 text-slate-500 ${borderAccent}`;
     }
   };
 
@@ -323,11 +323,11 @@ export default function PortalXCalendarHeatmapAnalyticsPage() {
               <span className="text-[11px]">Monthly assignment cycle</span>
               <div className="flex items-center gap-1.5">
                 <span className="text-[11px] mr-1">Less</span>
-                <div className="h-3 w-3 rounded bg-[#141418] border border-neutral-800" title="0" />
-                <div className="h-3 w-3 rounded bg-amber-950/40 border border-amber-900/50" title="1-25%" />
-                <div className="h-3 w-3 rounded bg-amber-900/60 border border-amber-700/60" title="26-50%" />
-                <div className="h-3 w-3 rounded bg-amber-600 border border-amber-500" title="51-75%" />
-                <div className="h-3 w-3 rounded bg-amber-400 border border-amber-300" title="76-100%" />
+                <div className="h-3 w-3 rounded bg-[#0f172a] border border-slate-800" title="0" />
+                <div className="h-3 w-3 rounded bg-indigo-950 border border-indigo-900" title="1-25%" />
+                <div className="h-3 w-3 rounded bg-indigo-800 border border-indigo-700" title="26-50%" />
+                <div className="h-3 w-3 rounded bg-indigo-600 border border-indigo-500" title="51-75%" />
+                <div className="h-3 w-3 rounded bg-indigo-400 border border-indigo-300 shadow-[0_0_8px_rgba(129,140,248,0.7)]" title="76-100%" />
                 <span className="text-[11px] ml-1">More</span>
               </div>
             </div>

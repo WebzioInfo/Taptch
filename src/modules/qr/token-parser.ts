@@ -21,3 +21,4 @@ export function extractQRToken(rawText: string): string {
   }
   return trimmed;
 }
+

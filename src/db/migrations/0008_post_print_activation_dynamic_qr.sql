@@ -79,3 +79,4 @@ CREATE POLICY qr_groups_all_read ON qr_groups
 CREATE POLICY qr_groups_admin_all ON qr_groups
     FOR ALL
     USING (current_setting('app.is_admin', true) = 'true');
+

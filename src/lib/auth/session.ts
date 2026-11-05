@@ -35,14 +35,21 @@ export async function getActorFromRequest(
 
     const user = sessionData.user as Record<string, unknown>;
     const userId = (user.id as string) || '';
-    const role = (user.role as string) || 'user';
+    const status = (user.status as string) || 'active';
+
+    // Immediate session rejection for suspended or deactivated accounts
+    if (status === 'suspended' || status === 'deactivated') {
+      return null;
+    }
+
+    const systemRole = (user.systemRole as string) || (user.role as string) || 'user';
     const orgId = (user.activeOrganizationId as string) || null;
 
     return {
       userId,
       orgId,
-      role,
-      isAdmin: role === 'super_admin',
+      role: systemRole,
+      isAdmin: systemRole === 'super_admin' || systemRole === 'admin',
     };
   } catch {
     return null;

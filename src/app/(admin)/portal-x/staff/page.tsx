@@ -42,10 +42,12 @@ export default function PortalXStaffManagementPage() {
   const [showAddModal, setShowAddModal] = React.useState(false);
   const [name, setName] = React.useState('');
   const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
   const [phoneNumber, setPhoneNumber] = React.useState('');
   const [role, setRole] = React.useState<'sales_staff' | 'admin'>('sales_staff');
   const [submitting, setSubmitting] = React.useState(false);
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
+  const [createdCredentials, setCreatedCredentials] = React.useState<{ email: string; tempPass: string } | null>(null);
 
   // Status Action state
   const [togglingId, setTogglingId] = React.useState<string | null>(null);
@@ -83,6 +85,7 @@ export default function PortalXStaffManagementPage() {
         body: JSON.stringify({
           name: name.trim(),
           email: email.trim().toLowerCase(),
+          password: password.trim() || undefined,
           phoneNumber: phoneNumber.trim() || undefined,
           role,
         }),
@@ -94,8 +97,15 @@ export default function PortalXStaffManagementPage() {
       }
 
       setShowAddModal(false);
+      if (result.data?.temporaryPassword) {
+        setCreatedCredentials({
+          email: result.data.email,
+          tempPass: result.data.temporaryPassword,
+        });
+      }
       setName('');
       setEmail('');
+      setPassword('');
       setPhoneNumber('');
       setRole('sales_staff');
       fetchStaff();
@@ -432,6 +442,20 @@ export default function PortalXStaffManagementPage() {
               </div>
 
               <div className="space-y-1.5">
+                <Label className="text-xs text-neutral-300">Temporary Password (Optional)</Label>
+                <Input
+                  type="password"
+                  placeholder="Leave empty to auto-generate"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="bg-[#18181D] border-neutral-800 text-xs"
+                />
+                <p className="text-[10px] text-neutral-500">
+                  Minimum 6 characters. If empty, a secure password will be generated automatically.
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
                 <Label className="text-xs text-neutral-300">Phone Number (Optional)</Label>
                 <Input
                   type="tel"
@@ -476,6 +500,40 @@ export default function PortalXStaffManagementPage() {
                 </Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Success Credentials Modal */}
+      {createdCredentials && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md bg-[#121216] border border-neutral-800 rounded-xl p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-2 text-emerald-400">
+              <CheckCircle2 className="h-5 w-5" />
+              <h3 className="text-base font-bold text-white">Staff Account Provisioned</h3>
+            </div>
+            <p className="text-xs text-neutral-300">
+              Share these credentials with the field staff member for logging in at <span className="font-mono text-white">/staff/login</span>.
+            </p>
+            <div className="p-3 bg-[#18181D] border border-neutral-800 rounded-lg space-y-2 font-mono text-xs">
+              <div>
+                <span className="text-neutral-500">Email:</span>{' '}
+                <span className="text-white font-semibold">{createdCredentials.email}</span>
+              </div>
+              <div>
+                <span className="text-neutral-500">Password:</span>{' '}
+                <span className="text-primary font-bold">{createdCredentials.tempPass}</span>
+              </div>
+            </div>
+            <div className="flex justify-end pt-2">
+              <Button
+                variant="gold"
+                size="sm"
+                onClick={() => setCreatedCredentials(null)}
+                className="text-xs font-bold"
+              >
+                Done
+              </Button>
+            </div>
           </div>
         </div>
       )}
