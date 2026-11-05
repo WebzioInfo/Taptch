@@ -22,6 +22,7 @@ import {
   FileCheck2,
   Clock,
   Send,
+  QrCode,
 } from 'lucide-react';
 import { TemplatePreviewModal } from '@/components/templates/TemplatePreviewModal';
 
@@ -92,7 +93,8 @@ export default function DashboardPage() {
     }
   }, [user]);
 
-  const activeProfile = profiles.length > 0 ? profiles[0] : null;
+  const [selectedProfileId, setSelectedProfileId] = React.useState<string | null>(null);
+  const activeProfile = (selectedProfileId ? profiles.find((p) => p.id === selectedProfileId) : profiles[0]) ?? null;
 
   const handleCopyLink = (slug: string) => {
     const url = `${window.location.origin}/p/${slug}`;
@@ -161,6 +163,32 @@ export default function DashboardPage() {
             </Card>
           </div>
 
+          {/* Multi-Profile Switcher (if > 1 profile) */}
+          {profiles.length > 1 && (
+            <div className="flex items-center gap-2 overflow-x-auto pb-1">
+              <span className="text-xs text-muted-foreground whitespace-nowrap font-medium mr-1">Select Profile:</span>
+              {profiles.map((p) => {
+                const isSelected = (activeProfile?.id === p.id);
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => setSelectedProfileId(p.id)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                      isSelected
+                        ? 'bg-primary/20 text-primary border border-primary/40 font-semibold'
+                        : 'bg-card/40 text-muted-foreground border border-border/40 hover:text-foreground hover:bg-muted/30'
+                    }`}
+                  >
+                    <span className="truncate max-w-[130px]">{p.displayName}</span>
+                    <Badge variant={p.status === 'published' ? 'gold' : 'secondary'} className="text-[9px] px-1 py-0 h-3.5">
+                      {p.status === 'published' ? 'Live' : 'Draft'}
+                    </Badge>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
           {/* Active Profile Spotlight */}
           {activeProfile ? (
             <Card className="border-border/70 bg-card/40 p-5 space-y-4">
@@ -187,7 +215,13 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 self-start sm:self-center">
+                <div className="flex items-center gap-1.5 self-start sm:self-center flex-wrap">
+                  <Link href={`/qr`}>
+                    <Button variant="outline" size="sm" className="h-7 text-xs px-2.5 gap-1 border-primary/30 text-primary hover:bg-primary/10">
+                      <QrCode className="h-3 w-3" />
+                      <span>QR Code</span>
+                    </Button>
+                  </Link>
                   <Button
                     variant="outline"
                     size="sm"

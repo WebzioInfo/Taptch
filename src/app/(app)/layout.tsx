@@ -23,6 +23,7 @@ import {
   CreditCard,
   Users,
   Palette,
+  QrCode,
 } from 'lucide-react';
 
 interface AppLayoutProps {
@@ -43,6 +44,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
   const navLinks = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/qr', label: 'QR Codes', icon: QrCode },
     { href: '/templates', label: 'Templates', icon: Palette },
     { href: '/cards', label: 'Cards', icon: CreditCard },
     { href: '/leads', label: 'Leads', icon: Users },

@@ -22,6 +22,7 @@ import {
   X,
   Eye,
   Power,
+  QrCode,
 } from 'lucide-react';
 import { TemplatePreviewModal } from '@/components/templates/TemplatePreviewModal';
 import type { ProfileRenderData } from '@/components/templates/ProfileRenderer';
@@ -292,10 +293,18 @@ export default function SuperAdminPage() {
           </Badge>
         </div>
 
-        <Button onClick={loadAdminData} disabled={loading} variant="outline" size="sm" className="gap-2 self-start sm:self-auto text-xs h-8">
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
-        </Button>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <Button asChild variant="outline" size="sm" className="gap-1.5 text-xs h-8 border-primary/30 text-primary hover:bg-primary/10">
+            <Link href="/portal-x">
+              <QrCode className="w-3.5 h-3.5" />
+              Portal-X Operations
+            </Link>
+          </Button>
+          <Button onClick={loadAdminData} disabled={loading} variant="outline" size="sm" className="gap-2 text-xs h-8">
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {/* KPI Counters */}
