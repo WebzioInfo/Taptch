@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { notFound } from 'next/navigation';
 import { brandConfig } from '@/config/brand';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,6 +29,10 @@ import {
 import { Smartphone, Laptop, MoreVertical, CreditCard } from 'lucide-react';
 
 export default function DesignSystemGalleryPage() {
+  if (process.env.NODE_ENV === 'production') {
+    notFound();
+  }
+
   const [theme, setTheme] = React.useState<'obsidian' | 'ivory' | 'aurora'>('obsidian');
   const [viewport, setViewport] = React.useState<'desktop' | 'mobile'>('desktop');
 

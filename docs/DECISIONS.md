@@ -433,3 +433,30 @@
   - TypeScript strict check (`tsc --noEmit`) passes with 0 errors.
   - ESLint (`next lint`) passes with 0 warnings and 0 errors.
   - Next.js 15 production build compiled cleanly (24 static pages and 54 dynamic routes).
+
+## ADR-028: 360° Master Project Audit & Edge Route Guard Middleware Architecture
+- **Date**: 2026-11-05
+- **Status**: Accepted & Implemented
+- **Context**: A comprehensive 360-degree audit across Product Strategy, Architecture, UI/UX, Feature Integrity, RBAC, Database, Security, Performance, and DevOps was conducted. The audit revealed two security vulnerabilities:
+  1. (P0 — AUD-SEC-001): Protected application routes (`/dashboard`, `/qr`, `/cards`, `/leads`, `/team`, `/builder/*`, `/portal-x/*`, `/admin/*`) lacked Next.js Edge Route Protection Middleware and relied solely on client-side React `useEffect` redirects in `AppLayout`. Unauthenticated visitors received an unhydrated HTML shell and loading spinner before browser redirection fired.
+  2. (P1 — AUD-SEC-002): Internal development utilities (`/dev/gallery` and `/dev/supabase-test`) were compiled into production builds without environment gating, risking internal endpoint exposure.
+- **Decision**:
+  1. **Next.js Edge Route Protection Middleware (`src/middleware.ts`)**:
+     - Implemented Edge middleware inspecting Better Auth session cookies (`better-auth.session_token` and `__Secure-better-auth.session_token`).
+     - Supports automated test environment bypass via `x-test-user-id`.
+     - Automatically redirects unauthenticated requests on protected routes to `/login?callbackUrl=${encodeURIComponent(...)}` before any page rendering occurs.
+     - Automatically redirects authenticated users visiting `/login` or `/register` to `/dashboard`.
+     - Explicit matcher excludes static assets, public profiles (`/p/*`), dynamic token redirects (`/dq/*`, `/q/*`, `/n/*`), and API handlers (`/api/*`).
+  2. **Production Gating for Dev Utility Routes (`src/app/dev/*`)**:
+     - Added `if (process.env.NODE_ENV === 'production') notFound();` to `/dev/gallery` and `/dev/supabase-test`.
+     - Middleware additionally returns HTTP 404 for any `/dev/*` request when running in production.
+  3. **Comprehensive Audit Documentation**:
+     - Authored all 13 required master audit deliverables in `docs/audit/` (`01-executive-summary.md` to `13-final-readiness-scorecard.md`).
+  4. **Dedicated Verification**:
+     - Added 7 dedicated unit tests in `tests/unit/middleware.test.ts`.
+- **Verification**:
+  - 20/20 test suites passed (148/148 tests) across Vitest.
+  - TypeScript strict check (`tsc --noEmit`) passes with 0 errors.
+  - ESLint (`next lint`) passes with 0 warnings and 0 errors.
+  - Next.js 15 production build compiled cleanly (24 static pages and 54 dynamic routes, with Edge Middleware size 34.5 kB).
+

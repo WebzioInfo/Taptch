@@ -1,12 +1,17 @@
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Database, CheckCircle2, AlertCircle } from 'lucide-react';
 
 export default async function SupabaseTestPage() {
+  if (process.env.NODE_ENV === 'production') {
+    notFound();
+  }
+
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
