@@ -217,14 +217,14 @@ export function renderOtpEmailTemplate(otp: string, type: string = 'verification
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${brandName} ${typeLabel}</title>
   <style>
-    body { margin: 0; padding: 0; background-color: #0A0A0C; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #FFFFFF; }
+    body { margin: 0; padding: 0; background-color: #0A0A0C; font-family: 'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #FFFFFF; }
     .wrapper { width: 100%; max-width: 600px; margin: 0 auto; padding: 40px 20px; }
     .card { background-color: #121216; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 40px; text-align: center; }
-    .brand { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; color: ${goldColor}; margin-bottom: 24px; text-transform: uppercase; }
-    .title { font-size: 20px; font-weight: 600; color: #FFFFFF; margin-bottom: 12px; }
+    .brand { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; color: ${goldColor}; margin-bottom: 24px; text-transform: uppercase; }
+    .title { font-size: 20px; font-weight: 600; letter-spacing: -0.015em; color: #FFFFFF; margin-bottom: 12px; }
     .desc { font-size: 14px; color: #A1A1AA; line-height: 1.6; margin-bottom: 32px; }
     .otp-box { background: #18181D; border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 12px; padding: 20px; display: inline-block; margin-bottom: 32px; }
-    .otp-code { font-family: 'SF Mono', Consolas, Monaco, monospace; font-size: 36px; font-weight: 700; letter-spacing: 0.25em; color: ${goldColor}; padding-left: 0.25em; }
+    .otp-code { font-family: 'Geist Mono', 'SF Mono', Consolas, Monaco, monospace; font-size: 32px; font-weight: 600; letter-spacing: 0.25em; color: ${goldColor}; padding-left: 0.25em; }
     .validity { font-size: 13px; color: #71717A; margin-bottom: 24px; }
     .footer { font-size: 12px; color: #52525B; line-height: 1.5; margin-top: 32px; border-top: 1px solid rgba(255, 255, 255, 0.06); padding-top: 24px; }
   </style>
@@ -265,12 +265,12 @@ export function renderWelcomeEmailTemplate(userName?: string): { html: string; t
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Welcome to ${brandName}</title>
   <style>
-    body { margin: 0; padding: 0; background-color: #0A0A0C; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #FFFFFF; }
+    body { margin: 0; padding: 0; background-color: #0A0A0C; font-family: 'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #FFFFFF; }
     .wrapper { width: 100%; max-width: 600px; margin: 0 auto; padding: 40px 20px; }
     .card { background-color: #121216; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 40px; }
-    .brand { font-size: 24px; font-weight: 700; color: ${goldColor}; margin-bottom: 24px; text-transform: uppercase; }
-    .title { font-size: 22px; font-weight: 600; color: #FFFFFF; margin-bottom: 16px; }
-    .desc { font-size: 15px; color: #A1A1AA; line-height: 1.6; margin-bottom: 24px; }
+    .brand { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; color: ${goldColor}; margin-bottom: 24px; text-transform: uppercase; }
+    .title { font-size: 20px; font-weight: 600; letter-spacing: -0.015em; color: #FFFFFF; margin-bottom: 16px; }
+    .desc { font-size: 14px; color: #A1A1AA; line-height: 1.6; margin-bottom: 24px; }
     .footer { font-size: 12px; color: #52525B; line-height: 1.5; margin-top: 32px; border-top: 1px solid rgba(255, 255, 255, 0.06); padding-top: 24px; text-align: center; }
   </style>
 </head>

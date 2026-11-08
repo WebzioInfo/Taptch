@@ -97,3 +97,10 @@
     - `npm run lint`: 0 errors.
     - `npm run build`: Next.js 16.4.5 (Turbopack) production build compiled clean.
     - Reports: Generated `DATABASE_MIGRATION_AUDIT.md`, `SUPABASE_DATABASE_MIGRATION_REPORT.md`, `SUPABASE_MIGRATION_TEST_REPORT.md`, and `docs/DATABASE_SETUP.md`.
+- **Premium Typography System Modernization (ADR 032)**:
+  - **Geist Sans & Geist Mono**: Self-hosted variable font system configured in `src/config/fonts.ts` using `next/font/google` with zero runtime external requests. Injected at root in `src/app/layout.tsx`.
+  - **Design Tokens & Typographic Scale**: Configured in `tailwind.config.ts` and `src/app/globals.css` with display (48–64px), H1 (36–48px), H2 (28–36px), H3 (20–24px), body (14–16px), secondary (13–14px), labels (12–13px), and metadata (11–12px).
+  - **Weight Discipline**: Replaced aggressive bold weights (`font-extrabold`, `font-black`) across landing pages, campaign storefronts, admin dashboards, and luxury templates with crisp `font-semibold` (headings) and `font-medium` (navigation, controls, labels).
+  - **Selective Monospace**: Applied Geist Mono to numeric KPI counters, pricing figures, order numbers, barcode strings, and transaction tracking.
+  - **Email Modernization**: Updated transactional HTML email templates (`src/lib/email/index.ts`) with Geist Sans and Geist Mono fallbacks.
+  - **Verification Gate**: `npm run typecheck` (0 errors), `npm run lint` (0 errors), `npm test` (173/173 tests passed), `npm run build` (Next.js 16.4.5 Turbopack compiled clean).

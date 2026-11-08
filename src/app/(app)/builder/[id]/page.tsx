@@ -522,7 +522,7 @@ export default function ProfileBuilderPage({
       <div className="min-h-screen flex items-center justify-center p-6 bg-background">
         <div className="text-center max-w-md p-6 bg-white border border-slate-200 rounded-xl">
           <AlertCircle className="w-10 h-10 text-destructive mx-auto mb-3" />
-          <h2 className="text-lg font-bold">Profile Unavailable</h2>
+          <h2 className="text-lg font-semibold tracking-tight">Profile Unavailable</h2>
           <p className="text-xs text-muted-foreground mt-1">{errorMessage || 'Could not find profile.'}</p>
           <Link href="/dashboard" className="mt-4 inline-block">
             <Button size="sm">Back to Dashboard</Button>

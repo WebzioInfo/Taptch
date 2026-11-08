@@ -405,7 +405,7 @@ export default function CardsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <Card className="w-full max-w-md border-slate-200 bg-white shadow-2xl">
             <CardHeader className="border-b border-slate-200 pb-4">
-              <CardTitle className="text-lg font-bold flex items-center gap-2">
+              <CardTitle className="text-lg font-semibold tracking-tight flex items-center gap-2">
                 <CreditCard className="h-5 w-5 text-blue-600" />
                 Activate Physical Smart Card
               </CardTitle>

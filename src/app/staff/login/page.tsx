@@ -48,7 +48,7 @@ export default function StaffLoginPage() {
         <div className="inline-flex justify-center">
           <BrandLogo variant="symbol" size="lg" />
         </div>
-        <h1 className="text-xl font-bold tracking-tight text-white">Staff Field Portal</h1>
+        <h1 className="text-xl sm:text-2xl font-semibold tracking-[-0.02em] text-white">Staff Field Portal</h1>
         <p className="text-xs text-neutral-400">Scan, assign, and activate dynamic physical QRs</p>
       </div>
 

@@ -282,7 +282,7 @@ export default function InstagramCardStorefrontPage() {
           </div>
 
           {/* Master Headline */}
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-[#111827] leading-[1.08] max-w-3xl mx-auto">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-[-0.035em] text-[#111827] leading-[1.08] max-w-3xl mx-auto">
             Your Instagram.
             <br />
             <span className="text-[#2563EB]">One Tap Away.</span>
@@ -378,7 +378,7 @@ export default function InstagramCardStorefrontPage() {
       <section id="collection" className="py-20 bg-[#F8FAFC] border-y border-[#E5E7EB]">
         <div className="max-w-6xl mx-auto px-5 sm:px-8">
           <div className="max-w-xl mx-auto text-center space-y-2 mb-14">
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#111827]">
+            <h2 className="text-3xl sm:text-4xl font-semibold tracking-[-0.025em] text-[#111827]">
               Crafted for Connection.
             </h2>
             <p className="text-sm sm:text-base text-[#64748B]">
@@ -528,7 +528,7 @@ export default function InstagramCardStorefrontPage() {
                     <Sparkles className="h-3.5 w-3.5" />
                     <span>Executive Flagship</span>
                   </div>
-                  <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                  <h3 className="text-2xl sm:text-3xl font-semibold tracking-tight">
                     Titanium Brushed Steel
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-lg">
@@ -586,7 +586,7 @@ export default function InstagramCardStorefrontPage() {
       <section id="how-it-works" className="py-24 bg-white">
         <div className="max-w-5xl mx-auto px-5 sm:px-8">
           <div className="max-w-lg mx-auto text-center space-y-2 mb-16">
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#111827]">
+            <h2 className="text-3xl sm:text-4xl font-semibold tracking-[-0.025em] text-[#111827]">
               How It Works
             </h2>
             <p className="text-sm sm:text-base text-[#64748B]">
@@ -597,10 +597,10 @@ export default function InstagramCardStorefrontPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8 text-left">
             {/* Step 01 */}
             <div className="space-y-3">
-              <span className="text-3xl sm:text-4xl font-extrabold text-[#2563EB] tracking-tighter block">
+              <span className="text-3xl sm:text-4xl font-semibold font-mono text-[#2563EB] tracking-tight block">
                 01
               </span>
-              <h3 className="text-lg font-bold text-[#111827]">
+              <h3 className="text-lg font-semibold text-[#111827]">
                 Choose your design.
               </h3>
               <p className="text-xs sm:text-sm text-[#64748B] leading-relaxed">
@@ -610,10 +610,10 @@ export default function InstagramCardStorefrontPage() {
 
             {/* Step 02 */}
             <div className="space-y-3">
-              <span className="text-3xl sm:text-4xl font-extrabold text-[#2563EB] tracking-tighter block">
+              <span className="text-3xl sm:text-4xl font-semibold font-mono text-[#2563EB] tracking-tight block">
                 02
               </span>
-              <h3 className="text-lg font-bold text-[#111827]">
+              <h3 className="text-lg font-semibold text-[#111827]">
                 We craft & program.
               </h3>
               <p className="text-xs sm:text-sm text-[#64748B] leading-relaxed">
@@ -623,10 +623,10 @@ export default function InstagramCardStorefrontPage() {
 
             {/* Step 03 */}
             <div className="space-y-3">
-              <span className="text-3xl sm:text-4xl font-extrabold text-[#2563EB] tracking-tighter block">
+              <span className="text-3xl sm:text-4xl font-semibold font-mono text-[#2563EB] tracking-tight block">
                 03
               </span>
-              <h3 className="text-lg font-bold text-[#111827]">
+              <h3 className="text-lg font-semibold text-[#111827]">
                 Tap to connect.
               </h3>
               <p className="text-xs sm:text-sm text-[#64748B] leading-relaxed">
@@ -659,7 +659,7 @@ export default function InstagramCardStorefrontPage() {
       <section id="customize" className="py-20 bg-[#F8FAFC] border-t border-[#E5E7EB]">
         <div className="max-w-6xl mx-auto px-5 sm:px-8">
           <div className="max-w-xl mx-auto text-center space-y-2 mb-12">
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#111827]">
+            <h2 className="text-3xl sm:text-4xl font-semibold tracking-[-0.025em] text-[#111827]">
               Made to look like you.
             </h2>
             <p className="text-sm sm:text-base text-[#64748B]">
@@ -1082,7 +1082,7 @@ export default function InstagramCardStorefrontPage() {
         <div className="max-w-4xl mx-auto px-5 sm:px-8">
           {/* Final Call to Action */}
           <div className="rounded-3xl bg-[#111827] text-white p-8 sm:p-12 text-center space-y-5 mb-20 shadow-xl">
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-semibold tracking-[-0.025em]">
               Ready to make an impression?
             </h2>
             <p className="text-xs sm:text-sm text-slate-300 max-w-lg mx-auto leading-relaxed">
@@ -1090,7 +1090,7 @@ export default function InstagramCardStorefrontPage() {
             </p>
             <div>
               <a href="#customize">
-                <Button className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold h-11 px-8 rounded-full text-sm shadow-md transition-all">
+                <Button className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-medium h-11 px-8 rounded-full text-sm shadow-md transition-all">
                   Order Your Card Now
                 </Button>
               </a>
@@ -1100,7 +1100,7 @@ export default function InstagramCardStorefrontPage() {
           {/* Compact 5-Question FAQ */}
           <div className="max-w-2xl mx-auto space-y-4">
             <div className="text-center space-y-2 mb-10">
-              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111827]">
+              <h2 className="text-2xl sm:text-3xl font-semibold tracking-[-0.02em] text-[#111827]">
                 Frequently Asked Questions
               </h2>
               <p className="text-xs text-[#64748B]">Everything you need to know about your NFC card.</p>

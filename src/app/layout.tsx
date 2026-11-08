@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { brandConfig } from '@/config/brand';
+import { geistSans, geistMono } from '@/config/fonts';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import './globals.css';
@@ -40,7 +41,11 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang="en" className="light" data-theme="light">
+    <html
+      lang="en"
+      className={`light ${geistSans.variable} ${geistMono.variable}`}
+      data-theme="light"
+    >
       <body className="min-h-screen bg-background text-foreground font-sans antialiased">
         <NextIntlClientProvider messages={messages}>
           {children}

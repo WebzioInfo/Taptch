@@ -136,33 +136,33 @@ export default function DashboardPage() {
           {/* 2. Key Metrics - Clean & Professional */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-2xs">
-              <div className="flex items-center justify-between text-xs font-semibold text-slate-600">
+              <div className="flex items-center justify-between text-xs font-medium text-slate-500">
                 <span>Profiles</span>
                 <Eye className="h-4 w-4 text-blue-600" />
               </div>
-              <div className="text-2xl font-bold text-slate-900 mt-2">{profiles.length}</div>
+              <div className="text-3xl font-semibold font-mono tracking-tight text-slate-900 mt-2">{profiles.length}</div>
               <div className="text-xs text-slate-500 mt-1">
                 {profiles.filter((p) => p.status === 'published' || p.status === 'PUBLISHED').length} published and live
               </div>
             </div>
 
             <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-2xs">
-              <div className="flex items-center justify-between text-xs font-semibold text-slate-600">
+              <div className="flex items-center justify-between text-xs font-medium text-slate-500">
                 <span>Contacts & Leads</span>
                 <Users className="h-4 w-4 text-blue-600" />
               </div>
-              <div className="text-2xl font-bold text-slate-900 mt-2">{leads.length}</div>
+              <div className="text-3xl font-semibold font-mono tracking-tight text-slate-900 mt-2">{leads.length}</div>
               <div className="text-xs text-slate-500 mt-1">
                 Received via contact exchange
               </div>
             </div>
 
             <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-2xs">
-              <div className="flex items-center justify-between text-xs font-semibold text-slate-600">
+              <div className="flex items-center justify-between text-xs font-medium text-slate-500">
                 <span>Connected Cards</span>
                 <CreditCard className="h-4 w-4 text-blue-600" />
               </div>
-              <div className="text-2xl font-bold text-slate-900 mt-2">{cards.length}</div>
+              <div className="text-3xl font-semibold font-mono tracking-tight text-slate-900 mt-2">{cards.length}</div>
               <div className="text-xs text-slate-500 mt-1">
                 {cards.filter((c) => c.status === 'active' || c.profileId).length} active NFC cards
               </div>
@@ -175,7 +175,7 @@ export default function DashboardPage() {
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <h2 className="text-lg font-bold text-slate-900">
+                    <h2 className="text-lg font-semibold tracking-tight text-slate-900">
                       {activeProfile.displayName}
                     </h2>
                     <span

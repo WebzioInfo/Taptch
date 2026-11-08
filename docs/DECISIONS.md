@@ -570,6 +570,34 @@
   - `npm run lint`: 0 errors.
   - `npm run build`: Next.js 16.4.5 (Turbopack) compiled 34 static and dynamic routes cleanly.
 
+---
+
+## ADR-032: Premium Typography System Modernization (Geist Sans & Geist Mono, Tokenized Scale & Strict Weight Discipline)
+
+- **Date**: 2026-11-09
+- **Status**: Accepted & Implemented
+- **Context**: The user requested modernizing the entire TAPTCH typography system to deliver an understated, premium, minimal, and consistent visual experience using Geist Sans (primary) and Geist Mono (monospace), establishing a rigorous type scale, eliminating aggressive/excessive bold weights (`font-extrabold`, `font-black`, blunt bold), and introducing reusable design tokens.
+- **Decision**:
+  1. **Primary Font Architecture (`src/config/fonts.ts`)**:
+     - Configured `Geist` (primary sans-serif) and `Geist_Mono` (tabular / technical monospace) via Next.js native font optimization (`next/font/google`).
+     - Fonts are pre-downloaded, self-hosted, and optimized at build time with zero client runtime network requests to Google Fonts.
+     - Exposed CSS variables `--font-geist-sans` and `--font-geist-mono` injected at `<html>` root in `src/app/layout.tsx`.
+  2. **Tailwind Token System & Font Scaling (`tailwind.config.ts`)**:
+     - Configured `fontFamily.sans`, `fontFamily.mono`, and `fontFamily.heading`.
+     - Standardized display and heading scale: Display (48–64px desktop with `-0.03em` tracking), H1 (36–48px), H2 (28–36px), H3 (20–24px), Body (14–16px with relaxed line-height), Secondary (13–14px), Labels (12–13px), Small metadata (11–12px).
+  3. **CSS Typography Tokens (`src/app/globals.css`)**:
+     - Added `@layer components` design tokens: `.taptch-display`, `.taptch-h1`, `.taptch-h2`, `.taptch-h3`, `.taptch-body`, `.taptch-secondary`, `.taptch-label`, `.taptch-meta`, and `.taptch-mono`.
+  4. **Weight Discipline & Visual De-cluttering**:
+     - Pruned all `font-extrabold` and `font-black` declarations across the application (landing page, campaign pages, admin dashboards, templates).
+     - Standardized weights: 400 for body copy, 500 (`font-medium`) for navigation, controls, and form labels, 600 (`font-semibold`) for headings, and selective mono for tracking numbers, order barcodes, pricing, and metric KPIs.
+     - Modernized responsive transactional emails (`src/lib/email/index.ts`) with Geist Sans and Geist Mono fallbacks.
+- **Verification**:
+  - `npm run typecheck`: 0 errors.
+  - `npm run lint`: 0 errors.
+  - `npm test`: 22 test files passed, 173/173 tests passed.
+  - `npm run build`: Next.js 16.4.5 (Turbopack) production build compiled all 32 static and dynamic routes cleanly.
+
+
 
 
 

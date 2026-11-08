@@ -144,23 +144,23 @@ export default function HomePage() {
               Professional Digital Identity
             </Badge>
 
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-slate-950 leading-[1.1]">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-[-0.03em] text-slate-950 leading-[1.08]">
               Your professional identity, one link.
             </h1>
 
-            <p className="text-lg text-slate-600 max-w-xl leading-relaxed">
+            <p className="text-base sm:text-lg text-slate-600 max-w-xl leading-relaxed font-normal">
               Create a digital profile that makes it easy to share your details, connect with people and grow your network.
             </p>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
               <Link href="/register">
-                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold gap-2 w-full sm:w-auto">
+                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white font-medium gap-2 w-full sm:w-auto">
                   <span>Create your profile</span>
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/templates">
-                <Button variant="outline" size="lg" className="border-slate-300 text-slate-800 hover:bg-slate-50 w-full sm:w-auto">
+                <Button variant="outline" size="lg" className="border-slate-300 text-slate-800 hover:bg-slate-50 font-medium w-full sm:w-auto">
                   Explore profiles
                 </Button>
               </Link>
@@ -282,7 +282,7 @@ export default function HomePage() {
       {/* 4. Core Features */}
       <section id="features" className="container mx-auto max-w-6xl px-4 sm:px-6 py-20">
         <div className="max-w-xl mx-auto text-center space-y-2 mb-14">
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-950">
+          <h2 className="text-2xl sm:text-3xl font-semibold tracking-[-0.02em] text-slate-950">
             Engineered for modern professionals
           </h2>
           <p className="text-sm text-slate-600">
@@ -331,7 +331,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-10 items-center">
             <div className="md:col-span-6 space-y-4">
               <Badge variant="brand" className="text-xs">Business & Teams</Badge>
-              <h2 className="text-2xl sm:text-3xl font-bold text-slate-950">
+              <h2 className="text-2xl sm:text-3xl font-semibold tracking-[-0.02em] text-slate-950">
                 Manage your team's digital presence
               </h2>
               <p className="text-sm text-slate-600 leading-relaxed">
@@ -395,7 +395,7 @@ export default function HomePage() {
       {/* 6. Pricing Section */}
       <section id="pricing" className="container mx-auto max-w-6xl px-4 sm:px-6 py-20">
         <div className="max-w-xl mx-auto text-center space-y-2 mb-14">
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-950">
+          <h2 className="text-2xl sm:text-3xl font-semibold tracking-[-0.02em] text-slate-950">
             Simple, transparent pricing
           </h2>
           <p className="text-sm text-slate-600">
@@ -416,13 +416,13 @@ export default function HomePage() {
               <div className="space-y-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="font-bold text-slate-900 text-lg">{p.name}</h3>
+                    <h3 className="font-semibold text-slate-900 text-lg tracking-tight">{p.name}</h3>
                     <p className="text-[11px] text-slate-500">{p.badge}</p>
                   </div>
                 </div>
 
                 <div className="pt-2">
-                  <span className="text-3xl font-bold text-slate-950">{p.price}</span>
+                  <span className="text-3xl font-semibold font-mono tracking-tight text-slate-950">{p.price}</span>
                   <span className="text-xs text-slate-500 ml-1">{p.period}</span>
                 </div>
 

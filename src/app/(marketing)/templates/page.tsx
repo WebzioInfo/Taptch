@@ -226,7 +226,7 @@ function TemplateMarketplaceContent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+              <h1 className="text-2xl sm:text-3xl font-semibold tracking-[-0.025em] text-slate-900">
                 Templates
               </h1>
               <p className="text-xs text-slate-500 mt-0.5">

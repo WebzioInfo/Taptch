@@ -358,7 +358,7 @@ export default function CampaignAdminDashboardPage() {
               <span>-₹{finance.kpis.operatingOverheads}</span>
             </div>
 
-            <div className="flex justify-between font-extrabold text-blue-700 text-base border-t border-slate-200 pt-3">
+            <div className="flex justify-between font-semibold font-mono text-blue-700 text-base border-t border-slate-200 pt-3">
               <span>Net Profit (Pre-tax)</span>
               <span>₹{finance.kpis.netProfit}</span>
             </div>

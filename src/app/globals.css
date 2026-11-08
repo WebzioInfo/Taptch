@@ -77,6 +77,13 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading tracking-tight;
   }
 
   ::selection {
@@ -200,5 +207,36 @@
     caret-color: #8B4513 !important;
     border-color: #E6DFD5 !important;
     transition: background-color 5000s ease-in-out 0s;
+  }
+}
+
+@layer components {
+  /* TAPTCH Premium Typography Design Tokens */
+  .taptch-display {
+    @apply text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-[-0.03em] leading-[1.08] text-foreground;
+  }
+  .taptch-h1 {
+    @apply text-3xl sm:text-4xl font-semibold tracking-[-0.025em] leading-[1.16] text-foreground;
+  }
+  .taptch-h2 {
+    @apply text-2xl sm:text-3xl font-semibold tracking-[-0.02em] leading-[1.22] text-foreground;
+  }
+  .taptch-h3 {
+    @apply text-lg sm:text-xl font-semibold tracking-[-0.015em] leading-[1.3] text-foreground;
+  }
+  .taptch-body {
+    @apply text-sm sm:text-base font-normal leading-relaxed text-muted-foreground;
+  }
+  .taptch-secondary {
+    @apply text-[13px] sm:text-sm font-normal leading-normal text-muted-foreground;
+  }
+  .taptch-label {
+    @apply text-xs font-medium tracking-normal text-foreground/80;
+  }
+  .taptch-meta {
+    @apply text-[11px] font-normal tracking-normal text-muted-foreground;
+  }
+  .taptch-mono {
+    @apply font-mono text-xs tracking-tight;
   }
 }

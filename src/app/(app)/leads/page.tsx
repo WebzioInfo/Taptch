@@ -86,7 +86,7 @@ export default function LeadsPage() {
     <div className="space-y-6 max-w-6xl mx-auto pb-10">
       {/* Header */}
       <div className="flex items-center justify-between gap-4 pb-4 border-b border-slate-200">
-        <h1 className="text-xl font-bold tracking-tight text-slate-900">
+        <h1 className="text-xl sm:text-2xl font-semibold tracking-[-0.02em] text-slate-900">
           Leads
         </h1>
 

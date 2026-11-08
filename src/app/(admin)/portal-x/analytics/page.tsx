@@ -125,9 +125,9 @@ export default function PortalXCalendarHeatmapAnalyticsPage() {
       case 2:
         return `bg-indigo-900/60 border border-indigo-700/60 text-indigo-200 hover:bg-indigo-800/70 shadow-[0_0_8px_rgba(99,102,241,0.2)] ${borderAccent}`;
       case 3:
-        return `bg-indigo-600/90 border border-indigo-500 text-white font-bold hover:bg-indigo-500 shadow-[0_0_14px_rgba(99,102,241,0.4)] ${borderAccent}`;
+        return `bg-indigo-600/90 border border-indigo-500 text-white font-medium hover:bg-indigo-500 shadow-[0_0_14px_rgba(99,102,241,0.4)] ${borderAccent}`;
       case 4:
-        return `bg-gradient-to-br from-indigo-400 to-indigo-600 border border-indigo-300 text-white font-extrabold hover:brightness-110 shadow-[0_0_22px_rgba(129,140,248,0.7)] ${borderAccent}`;
+        return `bg-gradient-to-br from-indigo-400 to-indigo-600 border border-indigo-300 text-white font-semibold hover:brightness-110 shadow-[0_0_22px_rgba(129,140,248,0.7)] ${borderAccent}`;
       default:
         return `bg-[#0f172a]/60 border border-slate-800 text-slate-500 ${borderAccent}`;
     }

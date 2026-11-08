@@ -195,7 +195,7 @@ export default function StaffDashboardPage() {
         <div className="bg-[#121216] border border-neutral-800 rounded-xl p-4 flex items-center justify-between">
           <div>
             <div className="text-[11px] text-neutral-400 font-medium">Activated by you</div>
-            <div className="text-xl font-bold text-primary mt-0.5">{totalConfigured} QRs</div>
+            <div className="text-2xl font-semibold font-mono tracking-tight text-primary mt-0.5">{totalConfigured} QRs</div>
           </div>
           <div className="h-10 w-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
             <CheckCircle2 className="h-5 w-5" />
@@ -205,7 +205,7 @@ export default function StaffDashboardPage() {
         {/* Viewfinder / Camera Section */}
         <div className="bg-[#121216] border border-neutral-800 rounded-2xl p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white uppercase tracking-wider">Live Camera Scanner</span>
+            <span className="text-xs font-semibold text-white tracking-wide">Live Camera Scanner</span>
             {cameraActive && (
               <span className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-medium bg-emerald-500/10 px-2 py-0.5 rounded-full">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />

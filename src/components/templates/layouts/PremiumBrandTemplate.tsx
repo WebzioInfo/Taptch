@@ -100,7 +100,7 @@ export function PremiumBrandTemplate({
 
             <div className="mt-4 space-y-1">
               <div className="flex items-center justify-center gap-1.5">
-                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+                <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white">
                   {profile.displayName}
                 </h1>
                 <ShieldCheck className="h-5 w-5 text-[#D4AF37]" />

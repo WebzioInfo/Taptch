@@ -313,25 +313,25 @@ export default function SuperAdminPage() {
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         <Card className="bg-card border-border/60 p-3.5">
           <div className="text-xs text-muted-foreground font-medium">Users</div>
-          <div className="text-xl font-bold text-foreground mt-0.5">{stats?.totalUsers ?? '—'}</div>
+          <div className="text-2xl font-semibold font-mono tracking-tight text-foreground mt-0.5">{stats?.totalUsers ?? '—'}</div>
         </Card>
         <Card className="bg-card border-border/60 p-3.5">
           <div className="text-xs text-muted-foreground font-medium">Profiles</div>
-          <div className="text-xl font-bold text-foreground mt-0.5">{stats?.totalProfiles ?? '—'}</div>
+          <div className="text-2xl font-semibold font-mono tracking-tight text-foreground mt-0.5">{stats?.totalProfiles ?? '—'}</div>
         </Card>
         <Card className="bg-card border-border/60 p-3.5">
           <div className="text-xs text-muted-foreground font-medium">Pending</div>
-          <div className="text-xl font-bold text-primary mt-0.5">
+          <div className="text-2xl font-semibold font-mono tracking-tight text-primary mt-0.5">
             {publications.filter((p) => p.status === 'PENDING_PUBLICATION').length}
           </div>
         </Card>
         <Card className="bg-card border-border/60 p-3.5">
           <div className="text-xs text-muted-foreground font-medium">Orders</div>
-          <div className="text-xl font-bold text-foreground mt-0.5">{stats?.totalOrders ?? '—'}</div>
+          <div className="text-2xl font-semibold font-mono tracking-tight text-foreground mt-0.5">{stats?.totalOrders ?? '—'}</div>
         </Card>
         <Card className="bg-card border-border/60 p-3.5">
           <div className="text-xs text-muted-foreground font-medium">Media</div>
-          <div className="text-xl font-bold text-[#D4AF37] mt-0.5">
+          <div className="text-2xl font-semibold font-mono tracking-tight text-[#D4AF37] mt-0.5">
             {Math.round((mediaStats.totalBytes / (1024 * 1024)) * 10) / 10} MB
           </div>
         </Card>

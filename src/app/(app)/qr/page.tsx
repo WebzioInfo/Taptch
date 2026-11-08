@@ -377,7 +377,7 @@ export default function CustomerQRPage() {
           <div className="h-12 w-12 rounded-2xl bg-blue-600/10 border border-blue-600/20 flex items-center justify-center text-blue-600 mx-auto mb-4">
             <QrCode className="h-6 w-6" />
           </div>
-          <h2 className="text-base font-bold text-slate-900">No QR Codes Yet</h2>
+          <h2 className="text-base font-semibold tracking-tight text-slate-900">No QR Codes Yet</h2>
           <p className="text-xs text-slate-500 mt-1 mb-6">
             Create a dynamic QR code for your digital profile, website, or WhatsApp. You can change where it points at any time.
           </p>
@@ -385,7 +385,7 @@ export default function CustomerQRPage() {
             variant="default"
             size="sm"
             onClick={() => setIsCreateOpen(true)}
-            className="text-xs font-semibold gap-1.5"
+            className="text-xs font-medium gap-1.5"
           >
             <Plus className="h-3.5 w-3.5" />
             Create Your First QR

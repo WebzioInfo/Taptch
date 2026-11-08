@@ -98,7 +98,7 @@ export function FoodRestaurantTemplate({
 
             <div className="space-y-1.5 flex-1 min-w-0">
               <div className="flex items-center justify-center md:justify-start gap-2">
-                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+                <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white">
                   {profile.displayName}
                 </h1>
                 <ShieldCheck className="h-5 w-5 text-orange-400 shrink-0" />

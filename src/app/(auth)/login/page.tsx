@@ -79,7 +79,7 @@ function LoginContent() {
           <div className="inline-block">
             <BrandLogo variant="horizontal" size="md" asLink href="/" />
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-xl sm:text-2xl font-semibold tracking-[-0.02em] text-slate-900">
             Sign in to your account
           </h1>
           <p className="text-xs text-slate-500">
@@ -123,7 +123,7 @@ function LoginContent() {
             {authMode === 'otp' ? (
               <form onSubmit={handleSendOtp} className="space-y-4">
                 <div className="space-y-1.5 text-left">
-                  <label htmlFor="email" className="text-xs font-semibold text-slate-700">
+                  <label htmlFor="email" className="text-xs font-medium text-slate-700">
                     Email address
                   </label>
                   <Input
@@ -153,7 +153,7 @@ function LoginContent() {
             ) : (
               <form onSubmit={handlePasswordLogin} className="space-y-4">
                 <div className="space-y-1.5 text-left">
-                  <label htmlFor="pwd-email" className="text-xs font-semibold text-slate-700">
+                  <label htmlFor="pwd-email" className="text-xs font-medium text-slate-700">
                     Email address
                   </label>
                   <Input
@@ -169,7 +169,7 @@ function LoginContent() {
                 </div>
 
                 <div className="space-y-1.5 text-left">
-                  <label htmlFor="password" className="text-xs font-semibold text-slate-700">
+                  <label htmlFor="password" className="text-xs font-medium text-slate-700">
                     Password
                   </label>
                   <Input

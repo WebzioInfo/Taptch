@@ -60,8 +60,20 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'Geist', 'var(--font-sans)', 'system-ui', '-apple-system', 'sans-serif'],
-        heading: ['Inter', 'Geist', 'var(--font-heading)', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-geist-sans)', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['var(--font-geist-mono)', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+        heading: ['var(--font-geist-sans)', 'system-ui', '-apple-system', 'sans-serif'],
+      },
+      fontSize: {
+        'display-2xl': ['4rem', { lineHeight: '1.08', letterSpacing: '-0.035em' }],
+        'display-xl': ['3.5rem', { lineHeight: '1.1', letterSpacing: '-0.03em' }],
+        display: ['3rem', { lineHeight: '1.12', letterSpacing: '-0.025em' }],
+        h1: ['2.25rem', { lineHeight: '1.18', letterSpacing: '-0.025em' }],
+        'h1-lg': ['2.5rem', { lineHeight: '1.16', letterSpacing: '-0.025em' }],
+        h2: ['1.75rem', { lineHeight: '1.22', letterSpacing: '-0.02em' }],
+        'h2-lg': ['2rem', { lineHeight: '1.2', letterSpacing: '-0.02em' }],
+        h3: ['1.25rem', { lineHeight: '1.3', letterSpacing: '-0.015em' }],
+        'h3-lg': ['1.5rem', { lineHeight: '1.28', letterSpacing: '-0.015em' }],
       },
       borderRadius: {
         DEFAULT: '0.375rem',
