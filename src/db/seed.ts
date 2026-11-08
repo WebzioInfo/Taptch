@@ -12,12 +12,7 @@ if (fs.existsSync(path.resolve('.env.local'))) {
 }
 dotenv.config({ path: path.resolve('.env') });
 
-// Password hasher matching Better Auth standard scrypt / sha256 password hash format
-function hashPassword(password: string): string {
-  // Better Auth stores passwords hashed; for testing we can generate a deterministic SHA-256 or bcrypt hash
-  const salt = 'taptch_secure_salt_2026';
-  return crypto.createHash('sha256').update(password + salt).digest('hex');
-}
+import { hashPassword } from 'better-auth/crypto';
 
 export async function seedDatabase() {
   console.log('[SEED] Starting idempotent Indian demo data seed...');
@@ -301,7 +296,7 @@ export async function seedDatabase() {
         accountId: u.id,
         providerId: 'credential',
         userId: u.id,
-        password: hashPassword('TaptchAdmin@2026!'),
+        password: await hashPassword('TaptchAdmin@2026!'),
       })
       .onConflictDoNothing({ target: schema.accounts.id });
   }
@@ -385,7 +380,7 @@ export async function seedDatabase() {
         accountId: emp.id,
         providerId: 'credential',
         userId: emp.id,
-        password: hashPassword('ApexCapital@2026!'),
+        password: await hashPassword('ApexCapital@2026!'),
       })
       .onConflictDoNothing({ target: schema.accounts.id });
   }
@@ -416,7 +411,7 @@ export async function seedDatabase() {
         accountId: ind.id,
         providerId: 'credential',
         userId: ind.id,
-        password: hashPassword('TaptchDemo@2026!'),
+        password: await hashPassword('TaptchDemo@2026!'),
       })
       .onConflictDoNothing({ target: schema.accounts.id });
 

@@ -21,3 +21,4 @@ export const geistMono = Geist_Mono({
   fallback: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
   adjustFontFallback: true,
 });
+
