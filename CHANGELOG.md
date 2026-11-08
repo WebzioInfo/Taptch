@@ -7,6 +7,9 @@ All notable changes to the TAPTCH platform are documented here.
 ## [Unreleased] — 2026-11-09
 
 ### Added
+- **Next.js 16.4.5 Framework Upgrade:** Successfully upgraded full-stack framework from Next.js 15.5.28 to Next.js 16.4.5 (Turbopack). Verified React 19.3.1 peer alignment and full compatibility with App Router, Server Actions, and Server Components.
+- **Next 16 ESLint Flat Config:** Modernized `eslint.config.mjs` to consume `eslint-config-next@16.4.5` native Flat Config array export directly without `FlatCompat`.
+- **Turbopack Production Compilation:** Production builds now compile with Turbopack in 20.9s with 0 errors across all 34 routes.
 - **Cloudflare Infrastructure Integration:** Replaced Cloudinary with native Cloudflare Images (Direct Creator Upload v2 and delivery variants) and Cloudflare R2 (S3 SigV4 direct uploads for PDFs and documents).
 - **Unified Storage Architecture:** Implemented provider-neutral storage service in `src/lib/storage/` with offline test mock fallback.
 - **Cloudflare Schema Migration:** Applied database migration `0012_cloudflare_storage.sql` to live Supabase and local test database, adding provider-neutral metadata columns (`storage_provider`, `storage_key`, `storage_object_id`, `asset_url`).

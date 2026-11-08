@@ -6,7 +6,7 @@ TAPTCH is an enterprise-grade digital identity platform engineered to bridge phy
 ```
 +-------------------------------------------------------------------------------+
 |                             CLIENT APPLICATION                                |
-|  Next.js 15 App Router • React 19 • Tailwind CSS • Lucide Icons       |
+|  Next.js 16 App Router (Turbopack) • React 19 • Tailwind CSS • Lucide Icons|
 +-------------------------------------------------------------------------------+
                                       |
                                       v

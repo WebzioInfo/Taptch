@@ -18,11 +18,11 @@ This matrix outlines the evaluation, upgrade path, and architectural decisions f
 | Component | Installed Baseline | Current Latest on npm | Target Modernized Version | Peer Compatibility Status | Upgrade Feasibility & Breaking Changes Evaluation |
 |---|---|---|---|---|---|
 | **Node.js Runtime** | v24.15.0 | v24.x LTS | **v24.15.0** | Compatible with all packages | **Verified stable**. Full support for native ES modules, crypto, and modern standard APIs. |
-| **Next.js** | 15.5.28 | 16.4.5 / 15.5.28 | **15.5.28 (LTS Baseline)** | React 19.3.1 peer clean | **Preserved on 15.5.28 LTS**. Next.js 16 introduces breaking shifts in route handler generation, async metadata contracts, and ecosystem plugin interfaces. 15.5.28 guarantees zero regressions for the Zero Dynamic Hot Path (`/p/[slug]`). |
-| **React** | 19.3.1 | 19.3.1 | **19.3.1** | Next.js 15.5.28 clean | **Aligned & Verified**. Leveraging React 19 Actions, Server Components, and optimistic state. |
+| **Next.js** | 15.5.28 | 16.4.5 | **16.4.5 (Turbopack Active)** | React 19.3.1 peer clean | **Upgraded & Verified**. Turbopack production builds enabled. Full compatibility with React 19 Server Components, Actions, and Zero Dynamic Profile Hot Path (`/p/[slug]`). |
+| **React** | 19.3.1 | 19.3.1 | **19.3.1** | Next.js 16.4.5 clean | **Aligned & Verified**. Leveraging React 19 Actions, Server Components, and optimistic state. |
 | **React DOM** | 19.3.1 | 19.3.1 | **19.3.1** | React 19.3.1 clean | **Aligned & Verified**. |
 | **TypeScript** | 5.9.3 | 5.9.3 | **5.9.3** | Strict Mode & Bundler clean | **Verified**. Strict typechecking (`npm run typecheck`) compiles with zero errors across all modules. |
-| **ESLint** | 9.39.3 | 9.39.3 | **9.39.3 (Flat Config)** | Node.js 24 clean | **Modernized**. Migrated from deprecated `next lint` CLI to native ESLint flat config (`eslint src` via `eslint.config.mjs`). Zero errors. |
+| **ESLint** | 9.39.5 | 9.39.5 | **9.39.5 (Flat Config)** | Node.js 24 clean | **Modernized**. Native ESLint 9 flat configuration using `eslint-config-next@16.4.5` array export (`eslint src` via `eslint.config.mjs`). Zero errors. |
 | **Tailwind CSS** | 3.4.19 | 4.3.5 / 3.4.19 | **3.4.19 (LTS Baseline)** | PostCSS 8.5.8 clean | **Preserved on 3.4.19**. Tailwind v4 breaks Obsidian Luxury custom `@layer` directives and `tailwindcss-animate` Radix motion utilities. Upgraded PostCSS and Autoprefixer to latest compatible versions. |
 
 ---
@@ -90,4 +90,5 @@ The following packages were identified as unused or premature in this milestone 
 | **TypeScript Strict** | `npm run typecheck` | 0 errors across entire codebase | **0** |
 | **ESLint Analysis** | `npm run lint` | 0 errors across all source files | **0** |
 | **Test Suite** | `npm test` | 22 test files passed, 173/173 tests passed | **0** |
-| **Next.js Production Build** | `npm run build` | 35/35 pages compiled and optimized cleanly | **0** |
+| **Next.js Production Build** | `npm run build` | 34 routes compiled with Turbopack and optimized cleanly | **0** |
+

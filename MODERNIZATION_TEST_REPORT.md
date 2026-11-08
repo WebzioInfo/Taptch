@@ -110,9 +110,11 @@ Every command was executed in Windows PowerShell on the real codebase, capturing
 ## 6. Next.js Production Build (`npm run build`)
 
 - **Command:** `npm run build` (`next build`)
+- **Version:** Next.js 16.4.5 (Turbopack)
 - **Result:**
-  - Compiled successfully in 25.7 seconds
-  - All 35 routes prerendered and optimized
-  - Shared First Load JS: 103 kB
+  - Compiled successfully with Turbopack in 20.9 seconds
+  - All 34 static and dynamic routes prerendered and optimized
+  - Static page generation completed across 7 worker threads in 2.1s
   - Zero Dynamic Hot Path on `/p/[slug]` verified
 - **Exit Code:** 0
+

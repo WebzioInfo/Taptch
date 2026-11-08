@@ -65,3 +65,4 @@ All retained dependencies serve active, verified architectural responsibilities:
 - **ioredis (`5.6.0`)**: Redis client for QR token resolution and caching.
 - **Nodemailer (`6.10.0`)**: Transactional SMTP email engine with mock console fallback.
 - **Tailwind CSS (`3.4.19`)**: Obsidian Luxury design tokens and responsive utilities.
+
