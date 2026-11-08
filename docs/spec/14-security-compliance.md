@@ -1,4 +1,4 @@
-# Tapzio Specification — 14 Security, Privacy & Compliance
+﻿# Taptch Specification — 14 Security, Privacy & Compliance
 
 > Source: Master Prompt Section 14
 

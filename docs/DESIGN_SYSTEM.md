@@ -1,7 +1,7 @@
-# Tapzio — Design System & Visual Specification
+﻿# Taptch — Design System & Visual Specification
 
 ## 1. Design Philosophy
-Tapzio products are **mobile-first, tactile, and uncompromisingly premium**. The public profile is the digital face of an executive or enterprise. It must load in under a second, feel native on an iPhone or high-end Android, and avoid the cluttered, generic appearance of link-in-bio directories.
+Taptch products are **mobile-first, tactile, and uncompromisingly premium**. The public profile is the digital face of an executive or enterprise. It must load in under a second, feel native on an iPhone or high-end Android, and avoid the cluttered, generic appearance of link-in-bio directories.
 
 ### Core Tenets
 1. **Designed at 390×844 px First**: The public profile is viewed 98% of the time on smartphones following a physical card tap or camera scan.

@@ -2,77 +2,19 @@ import Link from 'next/link';
 import { brandConfig } from '@/config/brand';
 import { BrandLogo } from '@/components/brand';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
-  ShieldCheck,
   ArrowRight,
-  Palette,
-  CheckCircle,
-  ExternalLink,
-  ChevronRight,
-  Download,
+  Check,
+  QrCode,
+  Smartphone,
   Share2,
+  Users,
+  ShieldCheck,
+  ChevronDown,
 } from 'lucide-react';
 
 export default function HomePage() {
-  const templates = [
-    {
-      id: 'obsidian-luxury',
-      name: 'Obsidian Luxury',
-      category: 'Executive',
-      plan: 'Nano',
-      accent: 'border-amber-500/40 bg-gradient-to-br from-[#121216] to-[#0A0A0C]',
-      textAccent: 'text-[#D4AF37]',
-      desc: 'Signature executive aesthetic with brushed gold accents.',
-    },
-    {
-      id: 'ivory-minimal',
-      name: 'Ivory Minimalist',
-      category: 'Editorial',
-      plan: 'Nano',
-      accent: 'border-[#E2DDD3]/50 bg-gradient-to-br from-[#FAF8F5] to-[#F2EFE9] text-[#1E1E24]',
-      textAccent: 'text-[#8C6D3B]',
-      desc: 'Warm editorial design with serif typography.',
-    },
-    {
-      id: 'aurora-creator',
-      name: 'Aurora Creator',
-      category: 'Creative',
-      plan: 'Micro',
-      accent: 'border-purple-500/30 bg-gradient-to-br from-[#151833] to-[#0B0D1B]',
-      textAccent: 'text-purple-400',
-      desc: 'Vibrant glassmorphism for creative agencies.',
-    },
-    {
-      id: 'zenith-corporate',
-      name: 'Zenith Corporate',
-      category: 'Enterprise',
-      plan: 'Mini',
-      accent: 'border-blue-500/30 bg-gradient-to-br from-[#0F172A] to-[#080D1A]',
-      textAccent: 'text-blue-400',
-      desc: 'Structured navy and titanium aesthetic for B2B.',
-    },
-    {
-      id: 'catalyst-business',
-      name: 'Catalyst Business',
-      category: 'Commercial',
-      plan: 'Mini',
-      accent: 'border-emerald-500/30 bg-gradient-to-br from-[#064E3B]/60 to-[#022C22]',
-      textAccent: 'text-emerald-400',
-      desc: 'Commercial showcase with catalogue shelves.',
-    },
-    {
-      id: 'apex-capital',
-      name: 'Apex Capital',
-      category: 'Prestige',
-      plan: 'Max',
-      accent: 'border-emerald-600/40 bg-gradient-to-br from-[#052E25] to-[#011410]',
-      textAccent: 'text-emerald-300',
-      desc: 'Prestige emerald for wealth and real estate.',
-    },
-  ];
-
   const plans = [
     {
       id: 'nano',
@@ -80,13 +22,13 @@ export default function HomePage() {
       badge: 'Free Forever',
       price: '₹0',
       period: 'forever',
-      desc: 'Ideal for individuals and students starting with digital networking.',
+      desc: 'Create your digital profile and start sharing your contact details.',
       features: [
         '1 Digital Profile',
-        'Standard Obsidian & Ivory Templates',
-        'Instant vCard Download',
-        'Direct Profile QR Code',
-        'Unlimited Profile Views',
+        'Standard profile style',
+        'Instant vCard download',
+        'Direct profile QR code',
+        'Unlimited profile views',
       ],
       highlighted: false,
     },
@@ -96,176 +38,194 @@ export default function HomePage() {
       badge: 'Solo Professional',
       price: '₹499',
       period: '/year',
-      desc: 'For freelancers, independent consultants, and solo practitioners.',
+      desc: 'Ideal for independent consultants and solo professionals.',
       features: [
         '2 Digital Profiles',
-        '1 Linked Business Entity',
-        'Company Overview & Bio',
-        'Reciprocal Contact Exchange Form',
-        'Photo Gallery (up to 5 images)',
-        'Google Maps Integration',
+        '1 Linked Business Profile',
+        'Company overview and bio',
+        'Contact exchange form',
+        'Photo gallery (5 images)',
+        'Map location integration',
       ],
       highlighted: false,
     },
     {
       id: 'mini',
       name: 'Mini',
-      badge: 'Growth Business',
+      badge: 'Most Popular',
       price: '₹1,499',
       period: '/year',
-      desc: 'Designed for small business owners, agencies, and retail brands.',
+      desc: 'Designed for small business owners and growing practices.',
       features: [
         '5 Digital Profiles',
-        'Up to 3 Linked Business Entities',
-        'Product & Service Showcase (10 items)',
-        'Photo Gallery (up to 15 images)',
-        'Aurora & Zenith Premium Templates',
-        'Priority Lead Capture & CSV Export',
+        'Up to 3 Linked Business Profiles',
+        'Catalogue showcase (10 items)',
+        'Photo gallery (15 images)',
+        'Premium profile styles',
+        'Lead capture & export',
       ],
       highlighted: true,
     },
     {
       id: 'max',
       name: 'Max',
-      badge: 'Enterprise Multi-Brand',
+      badge: 'Multi-Brand & Team',
       price: '₹3,999',
       period: '/year',
-      desc: 'For serial entrepreneurs, enterprise partners, and multi-brand founders.',
+      desc: 'For multi-brand founders, directors, and enterprise teams.',
       features: [
         '20 Digital Profiles',
         'Up to 10 Distinct Businesses',
-        '50 Products & 50 Services Showcase',
-        'Brochure & PDF Catalog Downloads',
-        'YouTube Video Integrations',
-        'Custom Domain Mapping',
-        'All Luxury Templates Unlocked',
+        'Complete product and service catalogue',
+        'Brochure and document downloads',
+        'Video integration',
+        'Custom domain support',
+        'All profile styles unlocked',
       ],
       highlighted: false,
     },
   ];
 
+  const faqs = [
+    {
+      q: 'How does someone save my profile?',
+      a: 'When a visitor opens your profile, they click "Save this profile". This immediately downloads a standard vCard (.vcf) file directly into their phone contacts without requiring any app install.',
+    },
+    {
+      q: 'Do recipients need an app to view my profile?',
+      a: 'No. TAPTCH profiles are instant web pages that open seamlessly in any browser when tapped via NFC or scanned via QR code.',
+    },
+    {
+      q: 'Can I connect a physical NFC card to my digital profile?',
+      a: 'Yes. You can link any compatible NFC card or standee directly to your profile link or dynamic QR code in seconds.',
+    },
+    {
+      q: 'Can I update my details after creating or printing?',
+      a: 'Yes. Your contact information, business details, and links update instantly in real time without needing to reprint cards or QR codes.',
+    },
+  ];
+
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground relative overflow-hidden">
-      {/* Navigation Header */}
-      <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur-md">
-        <div className="container mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6">
+    <div className="flex min-h-screen flex-col bg-white text-slate-900 antialiased selection:bg-blue-600 selection:text-white">
+      {/* 1. Header Navigation */}
+      <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/95 backdrop-blur-xs">
+        <div className="container mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <BrandLogo variant="horizontal" size="md" asLink href="/" />
 
-          <nav className="hidden md:flex items-center space-x-6 text-xs font-medium text-muted-foreground">
-            <Link href="#features" className="hover:text-foreground transition-colors">Features</Link>
-            <Link href="/templates" className="hover:text-foreground transition-colors">Templates</Link>
-            <Link href="#pricing" className="hover:text-foreground transition-colors">Pricing</Link>
-            <Link href="#hardware" className="hover:text-foreground transition-colors">Cards</Link>
+          <nav className="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-600">
+            <a href="#how-it-works" className="hover:text-slate-900 transition-colors">How it works</a>
+            <a href="#features" className="hover:text-slate-900 transition-colors">Features</a>
+            <a href="#business" className="hover:text-slate-900 transition-colors">For Business</a>
+            <a href="#pricing" className="hover:text-slate-900 transition-colors">Pricing</a>
+            <a href="#faq" className="hover:text-slate-900 transition-colors">FAQ</a>
           </nav>
 
           <div className="flex items-center space-x-3">
             <Link href="/login">
-              <Button variant="ghost" size="sm" className="text-xs h-8">Sign In</Button>
+              <Button variant="ghost" size="sm" className="text-slate-700 hover:text-slate-900">
+                Sign In
+              </Button>
             </Link>
             <Link href="/register">
-              <Button variant="gold" size="sm" className="text-xs font-medium gap-1.5 shadow-sm h-8">
-                <span>Get Started</span>
-                <ArrowRight className="h-3.5 w-3.5" />
+              <Button variant="default" size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                Create Profile
               </Button>
             </Link>
           </div>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="container mx-auto max-w-7xl px-4 sm:px-6 pt-14 pb-16 z-10 flex flex-col items-center text-center">
-        <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground max-w-3xl leading-[1.1]">
-          Digital identity <br className="hidden sm:inline" />
-          <span className="text-primary italic">for modern leaders</span>
-        </h1>
+      {/* 2. Hero Section */}
+      <section className="container mx-auto max-w-6xl px-4 sm:px-6 pt-16 pb-20 md:pt-24 md:pb-28">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
+          {/* Left Column: Clear Value Proposition */}
+          <div className="md:col-span-7 space-y-6 text-left">
+            <Badge variant="brand" className="text-xs px-2.5 py-1 font-medium bg-blue-50 text-blue-700 border-blue-100">
+              Professional Digital Identity
+            </Badge>
 
-        <p className="text-sm sm:text-base text-muted-foreground max-w-xl mt-4 leading-relaxed">
-          Share profiles, multiple businesses, and digital portfolios with a single tap.
-        </p>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-slate-950 leading-[1.1]">
+              Your professional identity, one link.
+            </h1>
 
-        <div className="flex flex-col sm:flex-row items-center gap-3 pt-6">
-          <Link href="/register">
-            <Button variant="gold" size="default" className="gap-2 px-6 font-semibold shadow-lg text-xs h-9">
-              <span>Get Started</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Button>
-          </Link>
-          <Link href="/templates">
-            <Button variant="outline" size="default" className="gap-2 px-6 font-semibold text-xs h-9">
-              <Palette className="h-3.5 w-3.5 text-primary" />
-              <span>Templates</span>
-            </Button>
-          </Link>
-        </div>
+            <p className="text-lg text-slate-600 max-w-xl leading-relaxed">
+              Create a digital profile that makes it easy to share your details, connect with people and grow your network.
+            </p>
 
-        {/* Realistic Interactive Mockup Frame */}
-        <div className="mt-16 w-full max-w-4xl relative">
-          <div className="p-3 sm:p-6 rounded-3xl border border-primary/20 bg-gradient-to-b from-card/80 via-card/40 to-background backdrop-blur-xl shadow-2xl">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-              {/* Phone Digital Profile Frame */}
-              <div className="md:col-span-7 flex justify-center">
-                <div className="w-full max-w-xs sm:max-w-sm rounded-[2.5rem] border-4 border-neutral-800 bg-[#0A0A0C] p-4 shadow-2xl relative overflow-hidden text-left">
-                  {/* Phone Speaker Notch */}
-                  <div className="mx-auto w-24 h-4 bg-neutral-900 rounded-full mb-3" />
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+              <Link href="/register">
+                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold gap-2 w-full sm:w-auto">
+                  <span>Create your profile</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+              <Link href="/templates">
+                <Button variant="outline" size="lg" className="border-slate-300 text-slate-800 hover:bg-slate-50 w-full sm:w-auto">
+                  Explore profiles
+                </Button>
+              </Link>
+            </div>
 
-                  {/* Profile Mock Content */}
-                  <div className="rounded-2xl bg-[#121216] border border-white/10 p-5 space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-14 w-14 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center font-bold text-xl text-[#D4AF37]">
-                        A
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-1.5 font-bold text-base text-foreground">
-                          Aditya Singhania
-                          <ShieldCheck className="h-4 w-4 text-[#D4AF37]" />
-                        </div>
-                        <p className="text-xs text-muted-foreground">Managing Partner, Singhania Capital</p>
-                      </div>
-                    </div>
+            <div className="pt-4 flex items-center gap-6 text-xs text-slate-500">
+              <div className="flex items-center gap-1.5">
+                <Check className="h-4 w-4 text-blue-600" />
+                <span>Instant contact saving (vCard)</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Check className="h-4 w-4 text-blue-600" />
+                <span>Works on all smartphones</span>
+              </div>
+            </div>
+          </div>
 
-                    <div className="flex gap-2">
-                      <button className="flex-1 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold flex items-center justify-center gap-1">
-                        <Download className="h-3 w-3" /> Save Contact
-                      </button>
-                      <button className="flex-1 py-1.5 rounded-lg border border-white/15 text-xs font-semibold flex items-center justify-center gap-1">
-                        <Share2 className="h-3 w-3" /> Exchange
-                      </button>
-                    </div>
-
-                    {/* Multi-business switcher teaser */}
-                    <div className="p-3 rounded-xl bg-background/60 border border-white/5 space-y-1.5 text-xs">
-                      <div className="flex justify-between items-center text-[10px] text-primary uppercase font-bold tracking-wider">
-                        <span>Active Venture</span>
-                        <Badge variant="outline" className="text-[9px] py-0">Business 1 of 2</Badge>
-                      </div>
-                      <div className="font-semibold text-foreground">Apex Capital India</div>
-                      <p className="text-[11px] text-muted-foreground">Private Equity & High-Growth Venture Advisory</p>
-                    </div>
-
-                    <div className="pt-2 flex justify-between items-center text-[10px] text-muted-foreground border-t border-white/5">
-                      <span className="font-mono">tappzio.com/p/aditya</span>
-                      <span className="text-[#D4AF37] font-semibold">NFC Active</span>
-                    </div>
-                  </div>
-                </div>
+          {/* Right Column: Realistic Clean Profile Preview */}
+          <div className="md:col-span-5 flex justify-center">
+            <div className="w-full max-w-[340px] rounded-2xl border border-slate-200 bg-white shadow-xl overflow-hidden text-left">
+              <div className="h-28 bg-gradient-to-r from-blue-600 to-blue-700 relative p-4 flex justify-between items-start">
+                <span className="text-[11px] font-semibold tracking-wider text-blue-100 uppercase">
+                  Verified Identity
+                </span>
+                <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] text-white">
+                  Active
+                </span>
               </div>
 
-              {/* Physical NFC Card Showcase */}
-              <div className="md:col-span-5 text-left space-y-3 p-4">
-                <h3 className="text-xl font-bold tracking-tight text-foreground">
-                  Smart NFC
-                </h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Pair your digital profile with a laser-engraved NFC card. Tap any smartphone to share instantly.
-                </p>
+              <div className="px-6 pb-6 pt-0 relative -mt-10 space-y-4">
+                <div className="flex items-end justify-between">
+                  <div className="h-20 w-20 rounded-full border-4 border-white bg-slate-100 shadow-sm flex items-center justify-center font-bold text-2xl text-blue-600">
+                    AD
+                  </div>
+                  <div className="text-right">
+                    <span className="inline-flex items-center text-xs font-semibold text-blue-600">
+                      taptch.com/p/aditya
+                    </span>
+                  </div>
+                </div>
 
-                <div className="pt-2">
-                  <Link href="#hardware">
-                    <Button variant="outline" size="sm" className="text-xs gap-1.5 h-8">
-                      <span>Card Materials</span>
-                      <ChevronRight className="h-3.5 w-3.5" />
-                    </Button>
-                  </Link>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 leading-tight">Aditya Sharma</h3>
+                  <p className="text-xs text-slate-600 font-medium">Founder & Managing Director</p>
+                  <p className="text-xs text-slate-500">Apex Capital Partners</p>
+                </div>
+
+                <div className="space-y-2 pt-2">
+                  <div className="w-full rounded-md bg-blue-600 text-white text-xs font-semibold py-2.5 text-center shadow-xs">
+                    Save this profile
+                  </div>
+                  <div className="w-full rounded-md border border-slate-200 text-slate-700 text-xs font-medium py-2 text-center hover:bg-slate-50">
+                    Exchange contact
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                  <span className="flex items-center gap-1">
+                    <Smartphone className="h-3.5 w-3.5 text-blue-600" />
+                    NFC Enabled
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <QrCode className="h-3.5 w-3.5 text-blue-600" />
+                    Dynamic QR
+                  </span>
                 </div>
               </div>
             </div>
@@ -273,289 +233,290 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* How It Works Section */}
-      <section id="features" className="container mx-auto max-w-7xl px-4 sm:px-6 py-16 border-t border-border/60">
-        <div className="text-center max-w-2xl mx-auto mb-10">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-            How it works
-          </h2>
-        </div>
+      {/* 3. How TAPTCH Works */}
+      <section id="how-it-works" className="border-t border-slate-200 bg-slate-50/60 py-20">
+        <div className="container mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="max-w-xl mx-auto text-center space-y-2 mb-14">
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-950">
+              How TAPTCH works
+            </h2>
+            <p className="text-sm text-slate-600">
+              Simple steps to establish and share your professional presence.
+            </p>
+          </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="border-border/80 bg-card p-4">
-            <div className="h-8 w-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center font-mono text-xs font-bold text-primary mb-2">
-              01
-            </div>
-            <h3 className="text-sm font-semibold mb-1">Mode</h3>
-            <p className="text-xs text-muted-foreground">Personal or business card structure.</p>
-          </Card>
-
-          <Card className="border-border/80 bg-card p-4">
-            <div className="h-8 w-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center font-mono text-xs font-bold text-primary mb-2">
-              02
-            </div>
-            <h3 className="text-sm font-semibold mb-1">Template</h3>
-            <p className="text-xs text-muted-foreground">Select from curated executive layouts.</p>
-          </Card>
-
-          <Card className="border-border/80 bg-card p-4">
-            <div className="h-8 w-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center font-mono text-xs font-bold text-primary mb-2">
-              03
-            </div>
-            <h3 className="text-sm font-semibold mb-1">Customise</h3>
-            <p className="text-xs text-muted-foreground">Add links, ventures, and catalogues.</p>
-          </Card>
-
-          <Card className="border-border/80 bg-card p-4">
-            <div className="h-8 w-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center font-mono text-xs font-bold text-primary mb-2">
-              04
-            </div>
-            <h3 className="text-sm font-semibold mb-1">Share</h3>
-            <p className="text-xs text-muted-foreground">Share via NFC tap, QR, or link.</p>
-          </Card>
-        </div>
-      </section>
-
-      {/* Luxury Template Gallery Teaser */}
-      <section className="container mx-auto max-w-7xl px-4 sm:px-6 py-16 border-t border-border/60">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-            Templates
-          </h2>
-          <Link href="/templates">
-            <Button variant="outline" size="sm" className="gap-1.5 text-xs h-8">
-              <span>All Templates</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Button>
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {templates.map((tpl) => (
-            <Card key={tpl.id} className={`border ${tpl.accent} shadow-md`}>
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <Badge variant="gold" className="text-[10px] uppercase">
-                    {tpl.plan}
-                  </Badge>
-                  <span className="text-xs font-mono opacity-60 uppercase">{tpl.category}</span>
-                </div>
-                <CardTitle className={`text-base font-bold pt-2 ${tpl.textAccent}`}>
-                  {tpl.name}
-                </CardTitle>
-                <CardDescription className="text-xs opacity-80 leading-relaxed pt-1">
-                  {tpl.desc}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-2">
-                <Link href="/templates">
-                  <Button variant="outline" size="sm" className="w-full text-xs gap-1.5 h-8">
-                    <span>Preview</span>
-                    <ExternalLink className="h-3 w-3" />
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      {/* Multi-Business Architecture Section */}
-      <section className="container mx-auto max-w-7xl px-4 sm:px-6 py-16 border-t border-border/60">
-        <div className="p-6 sm:p-10 rounded-2xl border border-primary/20 bg-card shadow-xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            <div className="space-y-3">
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-                One Profile. Multiple Businesses.
-              </h2>
-              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                Attach multiple business entities to your digital card with distinct logos, catalogues, and enquiry links.
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white p-6 rounded-lg border border-slate-200 space-y-3">
+              <div className="h-10 w-10 rounded-md bg-blue-50 text-blue-600 font-bold flex items-center justify-center text-sm">
+                1
+              </div>
+              <h3 className="font-semibold text-slate-900 text-base">Build your profile</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Add your professional details, contact info, social handles, and business catalogue in minutes.
               </p>
             </div>
 
-            <div className="space-y-2.5">
-              <Card className="border-border/80 bg-background/80 p-3.5">
-                <div className="flex items-center justify-between text-xs">
-                  <div className="font-semibold text-foreground">Apex Capital India</div>
-                  <Badge variant="gold" className="text-[10px]">Private Equity</Badge>
-                </div>
-                <div className="text-[11px] text-muted-foreground mt-0.5">
-                  Managing Partner • Bengaluru
-                </div>
-              </Card>
+            <div className="bg-white p-6 rounded-lg border border-slate-200 space-y-3">
+              <div className="h-10 w-10 rounded-md bg-blue-50 text-blue-600 font-bold flex items-center justify-center text-sm">
+                2
+              </div>
+              <h3 className="font-semibold text-slate-900 text-base">Share with anyone</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Tap via physical NFC card, scan your dynamic QR code, or share your personalized profile link.
+              </p>
+            </div>
 
-              <Card className="border-border/80 bg-background/80 p-3.5">
-                <div className="flex items-center justify-between text-xs">
-                  <div className="font-semibold text-foreground">Studio D Architecture</div>
-                  <Badge variant="outline" className="text-[10px]">Architecture</Badge>
-                </div>
-                <div className="text-[11px] text-muted-foreground mt-0.5">
-                  Co-Founder & Strategic Director
-                </div>
-              </Card>
-
-              <Card className="border-border/80 bg-background/80 p-3.5">
-                <div className="flex items-center justify-between text-xs">
-                  <div className="font-semibold text-foreground">Pulse AI Hardware</div>
-                  <Badge variant="outline" className="text-[10px]">Technology</Badge>
-                </div>
-                <div className="text-[11px] text-muted-foreground mt-0.5">
-                  Advisor & Investor
-                </div>
-              </Card>
+            <div className="bg-white p-6 rounded-lg border border-slate-200 space-y-3">
+              <div className="h-10 w-10 rounded-md bg-blue-50 text-blue-600 font-bold flex items-center justify-center text-sm">
+                3
+              </div>
+              <h3 className="font-semibold text-slate-900 text-base">Instant contact save</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Visitors click "Save this profile" to download a clean vCard directly to their contacts without installing any app.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Pricing Matrix Section */}
-      <section id="pricing" className="container mx-auto max-w-7xl px-4 sm:px-6 py-16 border-t border-border/60">
-        <div className="text-center max-w-2xl mx-auto mb-10">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-            Pricing
+      {/* 4. Core Features */}
+      <section id="features" className="container mx-auto max-w-6xl px-4 sm:px-6 py-20">
+        <div className="max-w-xl mx-auto text-center space-y-2 mb-14">
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-950">
+            Engineered for modern professionals
           </h2>
+          <p className="text-sm text-slate-600">
+            Everything you need to present your business and make meaningful connections.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {plans.map((p) => (
-            <Card
-              key={p.id}
-              className={`border relative flex flex-col justify-between ${p.highlighted
-                ? 'border-primary bg-primary/5 shadow-xl ring-1 ring-primary'
-                : 'border-border/80 bg-card'
-                }`}
-            >
-              <div>
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <Badge variant={p.highlighted ? 'gold' : 'outline'} className="text-[10px]">
-                      {p.badge}
-                    </Badge>
-                  </div>
-                  <CardTitle className="text-xl font-bold pt-2">{p.name}</CardTitle>
-                  <div className="pt-3 flex items-baseline gap-1">
-                    <span className="text-2xl font-bold text-foreground font-mono">{p.price}</span>
-                    <span className="text-xs text-muted-foreground">{p.period}</span>
-                  </div>
-                </CardHeader>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="p-6 rounded-lg border border-slate-200 space-y-3">
+            <Share2 className="h-6 w-6 text-blue-600" />
+            <h3 className="font-semibold text-slate-900 text-base">Share through NFC & QR</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Use physical smart cards, counter standees, or digital QR codes. All links route instantly to your live profile.
+            </p>
+          </div>
 
-                <CardContent className="pt-2 pb-5 space-y-2 text-xs text-muted-foreground border-t border-border/40">
-                  {p.features.map((f, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <CheckCircle className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
-                      <span>{f}</span>
-                    </div>
-                  ))}
-                </CardContent>
+          <div className="p-6 rounded-lg border border-slate-200 space-y-3">
+            <Users className="h-6 w-6 text-blue-600" />
+            <h3 className="font-semibold text-slate-900 text-base">Two-way contact exchange</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Allow clients and partners to send their details back to you directly through a built-in exchange form.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-lg border border-slate-200 space-y-3">
+            <ShieldCheck className="h-6 w-6 text-blue-600" />
+            <h3 className="font-semibold text-slate-900 text-base">Real-time profile updates</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Update phone numbers, job titles, links, and products anytime. Your printed cards and QR codes always point to current data.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-lg border border-slate-200 space-y-3">
+            <Smartphone className="h-6 w-6 text-blue-600" />
+            <h3 className="font-semibold text-slate-900 text-base">Zero installation barrier</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Runs as a fast, responsive web application. No app store downloads or sign-ups required for visitors to view or save.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. For Business & Teams */}
+      <section id="business" className="border-t border-slate-200 bg-slate-50/60 py-20">
+        <div className="container mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-10 items-center">
+            <div className="md:col-span-6 space-y-4">
+              <Badge variant="brand" className="text-xs">Business & Teams</Badge>
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-950">
+                Manage your team's digital presence
+              </h2>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                Provide unified digital profiles for your executives, sales force, and employees. Control company branding, track engagement, and capture inbound business leads.
+              </p>
+              <ul className="space-y-2 text-xs text-slate-700 pt-2">
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-blue-600" />
+                  <span>Centralized team roster and profile management</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-blue-600" />
+                  <span>Consistent corporate identity across all profiles</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-blue-600" />
+                  <span>Inbound lead collection and contact exports</span>
+                </li>
+              </ul>
+              <div className="pt-2">
+                <Link href="/register">
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold">
+                    Set up your team
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            <div className="md:col-span-6 bg-white p-6 rounded-lg border border-slate-200 space-y-4">
+              <div className="text-xs font-semibold text-slate-900 border-b border-slate-100 pb-3">
+                Team Overview Preview
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-2 rounded-md bg-slate-50 text-xs">
+                  <div>
+                    <span className="font-semibold text-slate-900">Aditya Sharma</span>
+                    <span className="text-slate-500 block text-[11px]">Managing Director</span>
+                  </div>
+                  <span className="text-blue-600 font-mono text-[11px]">taptch.com/p/aditya</span>
+                </div>
+                <div className="flex items-center justify-between p-2 rounded-md bg-slate-50 text-xs">
+                  <div>
+                    <span className="font-semibold text-slate-900">Pooja Patel</span>
+                    <span className="text-slate-500 block text-[11px]">Head of Client Relations</span>
+                  </div>
+                  <span className="text-blue-600 font-mono text-[11px]">taptch.com/p/pooja</span>
+                </div>
+                <div className="flex items-center justify-between p-2 rounded-md bg-slate-50 text-xs">
+                  <div>
+                    <span className="font-semibold text-slate-900">Karan Mehta</span>
+                    <span className="text-slate-500 block text-[11px]">Senior Associate</span>
+                  </div>
+                  <span className="text-blue-600 font-mono text-[11px]">taptch.com/p/karan</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. Pricing Section */}
+      <section id="pricing" className="container mx-auto max-w-6xl px-4 sm:px-6 py-20">
+        <div className="max-w-xl mx-auto text-center space-y-2 mb-14">
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-950">
+            Simple, transparent pricing
+          </h2>
+          <p className="text-sm text-slate-600">
+            Choose the plan that fits your professional or organization goals.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {plans.map((p) => (
+            <div
+              key={p.id}
+              className={`rounded-lg border p-6 flex flex-col justify-between transition-all ${
+                p.highlighted
+                  ? 'border-blue-600 ring-1 ring-blue-600 bg-white shadow-md'
+                  : 'border-slate-200 bg-white shadow-xs'
+              }`}
+            >
+              <div className="space-y-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-bold text-slate-900 text-lg">{p.name}</h3>
+                    <p className="text-[11px] text-slate-500">{p.badge}</p>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <span className="text-3xl font-bold text-slate-950">{p.price}</span>
+                  <span className="text-xs text-slate-500 ml-1">{p.period}</span>
+                </div>
+
+                <p className="text-xs text-slate-600 leading-relaxed min-h-[36px]">
+                  {p.desc}
+                </p>
+
+                <div className="pt-4 border-t border-slate-100">
+                  <div className="text-[11px] font-semibold text-slate-800 mb-2">What's included:</div>
+                  <ul className="space-y-2 text-xs text-slate-600">
+                    {p.features.map((feat, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <Check className="h-3.5 w-3.5 text-blue-600 shrink-0 mt-0.5" />
+                        <span>{feat}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
 
-              <div className="p-5 pt-0">
+              <div className="pt-6">
                 <Link href="/register">
                   <Button
-                    variant={p.highlighted ? 'gold' : 'outline'}
-                    size="sm"
-                    className="w-full text-xs font-semibold h-8"
+                    variant={p.highlighted ? 'default' : 'outline'}
+                    className={`w-full text-xs font-semibold ${
+                      p.highlighted ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'border-slate-300 text-slate-800'
+                    }`}
                   >
                     Select {p.name}
                   </Button>
                 </Link>
               </div>
-            </Card>
+            </div>
           ))}
         </div>
       </section>
 
-      {/* Hardware Materials Section */}
-      <section id="hardware" className="container mx-auto max-w-7xl px-4 sm:px-6 py-16 border-t border-border/60">
-        <div className="text-center max-w-2xl mx-auto mb-10">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-            NFC Cards
-          </h2>
-        </div>
+      {/* 7. FAQ Section */}
+      <section id="faq" className="border-t border-slate-200 bg-slate-50/60 py-20">
+        <div className="container mx-auto max-w-4xl px-4 sm:px-6">
+          <div className="text-center space-y-2 mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-950">
+              Frequently asked questions
+            </h2>
+            <p className="text-sm text-slate-600">
+              Clear answers to common questions about TAPTCH.
+            </p>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <Card className="border-border/80 bg-card">
-            <CardHeader className="pb-2">
-              <Badge variant="outline" className="text-[10px] w-fit mb-1">PVC</Badge>
-              <CardTitle className="text-base">Matte Black PVC</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-xs">
-              <div className="font-mono text-base font-bold text-primary">₹999</div>
-              <ul className="space-y-1 text-muted-foreground">
-                <li>• NXP NTAG216 Chip</li>
-                <li>• Waterproof & bend-resistant</li>
-                <li>• Instant tap redirect</li>
-              </ul>
-            </CardContent>
-          </Card>
-
-          <Card className="border-primary/40 bg-card relative overflow-hidden ring-1 ring-primary/30">
-            <CardHeader className="pb-2">
-              <Badge variant="gold" className="text-[10px] w-fit mb-1">Metal</Badge>
-              <CardTitle className="text-base">Stainless Steel</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-xs">
-              <div className="font-mono text-base font-bold text-primary">₹2,499</div>
-              <ul className="space-y-1 text-muted-foreground">
-                <li>• 24g steel core</li>
-                <li>• Laser etched logo</li>
-                <li>• Anti-metal ferrite layer</li>
-              </ul>
-            </CardContent>
-          </Card>
-
-          <Card className="border-border/80 bg-card">
-            <CardHeader className="pb-2">
-              <Badge variant="outline" className="text-[10px] w-fit mb-1">Wood</Badge>
-              <CardTitle className="text-base">Natural Bamboo</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-xs">
-              <div className="font-mono text-base font-bold text-primary">₹1,499</div>
-              <ul className="space-y-1 text-muted-foreground">
-                <li>• Natural organic grain</li>
-                <li>• Eco-friendly core</li>
-                <li>• Custom laser engraving</li>
-              </ul>
-            </CardContent>
-          </Card>
+          <div className="divide-y divide-slate-200 bg-white rounded-lg border border-slate-200">
+            {faqs.map((f, i) => (
+              <div key={i} className="p-6 space-y-2">
+                <h3 className="font-semibold text-slate-900 text-sm">{f.q}</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">{f.a}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="container mx-auto max-w-4xl px-4 sm:px-6 py-16">
-        <div className="rounded-2xl border border-primary/30 bg-card p-8 sm:p-12 text-center space-y-4 shadow-xl">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-            Get started
+      {/* 8. Final CTA Section */}
+      <section className="container mx-auto max-w-4xl px-4 sm:px-6 py-20 text-center">
+        <div className="rounded-2xl border border-slate-200 bg-white p-10 sm:p-14 space-y-4 shadow-sm">
+          <h2 className="text-3xl sm:text-4xl font-bold text-slate-950 tracking-tight">
+            Create your profile in minutes.
           </h2>
-          <p className="text-xs sm:text-sm text-muted-foreground max-w-md mx-auto">
-            Create your digital identity in minutes.
+          <p className="text-sm text-slate-600 max-w-md mx-auto">
+            Your identity. One simple link. Keep your contact information updated and easy to share.
           </p>
-          <div className="pt-2 flex justify-center">
+          <div className="pt-4 flex justify-center">
             <Link href="/register">
-              <Button variant="gold" size="default" className="gap-2 px-6 font-semibold shadow-lg text-xs h-9">
-                <span>Create Profile</span>
-                <ArrowRight className="h-3.5 w-3.5" />
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold gap-2">
+                <span>Create your profile</span>
+                <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="w-full border-t border-border/50 py-12 bg-background/50">
-        <div className="container mx-auto max-w-7xl px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-muted-foreground">
+      {/* 9. Minimal Clean Footer */}
+      <footer className="w-full border-t border-slate-200 py-10 bg-white text-xs text-slate-500">
+        <div className="container mx-auto max-w-6xl px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center space-x-3">
             <BrandLogo variant="symbol" size="sm" />
-            <span className="font-semibold text-sm text-foreground">{brandConfig.name}</span>
+            <span className="font-semibold text-slate-900">{brandConfig.name}</span>
             <span>•</span>
             <span>{brandConfig.tagline}</span>
           </div>
 
           <div className="flex items-center space-x-6">
-            <Link href="/templates" className="hover:text-foreground transition-colors">Templates</Link>
-            <Link href="/dev/gallery" className="hover:text-foreground transition-colors">UI Studio</Link>
-            <Link href="/login" className="hover:text-foreground transition-colors">Sign In</Link>
-            <Link href="/register" className="hover:text-foreground transition-colors">Register</Link>
+            <Link href="/templates" className="hover:text-slate-900">Templates</Link>
+            <Link href="/login" className="hover:text-slate-900">Sign In</Link>
+            <Link href="/register" className="hover:text-slate-900">Create Profile</Link>
           </div>
 
           <div>

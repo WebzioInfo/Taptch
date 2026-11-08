@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     siteName: brandConfig.name,
     images: [
       {
-        url: '/branding/logo/tappzio-logo-stacked.svg',
+        url: brandConfig.assets.logoStackedUrl,
         width: 1200,
         height: 630,
         alt: brandConfig.name,
@@ -40,8 +40,8 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang="en" className="dark" data-theme="obsidian">
-      <body className="min-h-screen bg-background text-foreground antialiased">
+    <html lang="en" className="light" data-theme="light">
+      <body className="min-h-screen bg-background text-foreground font-sans antialiased">
         <NextIntlClientProvider messages={messages}>
           {children}
         </NextIntlClientProvider>

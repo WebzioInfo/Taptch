@@ -139,7 +139,7 @@ describe('Adversarial Security, Tenant Isolation & Benchmark Validation', () => 
       const sample = await createQRCode({
         ownerUserId: owner1Id,
         destinationType: 'url',
-        targetUrl: 'https://benchmark.tappzio.com/test',
+        targetUrl: 'https://benchmark.taptch.com/test',
         name: 'Latency Benchmark',
       });
 

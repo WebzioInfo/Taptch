@@ -1,4 +1,4 @@
----
+﻿---
 name: frontend-development
 description: Next.js App Router, React 19, Tailwind CSS, shadcn/ui (Radix), Obsidian Luxury design system, Zustand state management, dnd-kit builder, responsive mobile-first UI, and accessibility. Activate when developing UI components, pages, or client state.
 ---
@@ -16,7 +16,7 @@ description: Next.js App Router, React 19, Tailwind CSS, shadcn/ui (Radix), Obsi
 - **CRITICAL**: Never import `cookies()`, `headers()`, or `connection()` inside `/p/[slug]` hot paths, as this forces dynamic server-side rendering and degrades cacheability.
 
 ## 3. Brand Config Compliance
-- Never hardcode "Tappzio" or any customer brand name in application components or templates.
+- Never hardcode "Taptch" or any customer brand name in application components or templates.
 - Import all brand assets, titles, and logos from `@/config/brand` or database `system_settings`.
 - Enforced by automated architecture test `tests/architecture/brand-literal.test.ts`.
 

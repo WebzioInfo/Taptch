@@ -1,4 +1,4 @@
-# Tappzio 360° Master Project Audit — 05: Staff & Organization RBAC Audit
+﻿# Taptch 360° Master Project Audit — 05: Staff & Organization RBAC Audit
 
 **Focus:** Enterprise Hierarchy, 5-Tier RBAC Engine, Anti-Privilege Escalation, Field Agent Workflows  
 **Auditor:** Principal Security Architect & Backend Lead  
@@ -8,7 +8,7 @@
 
 ## 1. Multi-Tenant Role-Based Access Control (RBAC) Architecture
 
-Tappzio implements a hierarchical RBAC matrix comprising 5 system roles and 25 granular permissions:
+Taptch implements a hierarchical RBAC matrix comprising 5 system roles and 25 granular permissions:
 
 ```
                   ┌──────────────┐

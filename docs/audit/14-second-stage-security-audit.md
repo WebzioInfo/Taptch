@@ -1,4 +1,4 @@
-# Tappzio — Second-Stage Independent Security & Production Audit Report
+﻿# Taptch — Second-Stage Independent Security & Production Audit Report
 
 **Audit Phase:** Stage 2 (Deep Cryptographic, Architectural, Tenant Isolation & Secret Verification)  
 **Lead Auditor:** Independent Principal Security Architect & Lead Systems Engineer  
@@ -24,7 +24,7 @@ A rigorous, line-by-line inspection of source code, Git history, and cryptograph
 
 ## 2. Fixed Vulnerabilities (Implemented & Verified)
 
-### Fix 1: 128-Bit Cryptographically Secure Random QR Tokens ([`src/modules/qr/token.ts`](file:///d:/Webzio/Tappzio/src/modules/qr/token.ts))
+### Fix 1: 128-Bit Cryptographically Secure Random QR Tokens ([`src/modules/qr/token.ts`](file:///d:/Webzio/Taptch/src/modules/qr/token.ts))
 - **Remediation**: Upgraded `generateQRToken()` to `randomBytes(16).toString('hex')` (16 bytes = 128 bits of entropy = 32 lowercase hex characters).
 - **Collision Resistance**: $2^{128} \approx 3.4 \times 10^{38}$ possibilities. Birthday bound moves to $2^{64} \approx 1.84 \times 10^{19}$ tokens.
 - **Backward Compatibility**:
@@ -32,14 +32,14 @@ A rigorous, line-by-line inspection of source code, Git history, and cryptograph
   - Existing printed customer QR codes are preserved 100% intact. Resolution logic in `resolveQRToken(cleanToken)` does not enforce a token length requirement.
   - Verified by Vitest test in `tests/unit/dynamic-qr-engine.test.ts`.
 
-### Fix 2: Cryptographic HMAC-SHA256 Session Cookie Verification ([`src/middleware.ts`](file:///d:/Webzio/Tappzio/src/middleware.ts) & [`src/lib/auth/cookie-verify.ts`](file:///d:/Webzio/Tappzio/src/lib/auth/cookie-verify.ts))
+### Fix 2: Cryptographic HMAC-SHA256 Session Cookie Verification ([`src/middleware.ts`](file:///d:/Webzio/Taptch/src/middleware.ts) & [`src/lib/auth/cookie-verify.ts`](file:///d:/Webzio/Taptch/src/lib/auth/cookie-verify.ts))
 - **Remediation**: 
   - Integrated Web Crypto API HMAC-SHA256 signature verification matching Better Auth's token signing format (`<raw_token>.<base64_hmac_sha256_signature>`).
   - Edge middleware verifies that incoming session cookies were authentically signed with `BETTER_AUTH_SECRET`. Forged cookies or unsigned raw tokens are rejected immediately (HTTP 307 redirect to `/login`).
   - Purged `ENABLE_TEST_AUTH`. Test header bypasses (`x-test-user-id`) are strictly constrained to `process.env.NODE_ENV === 'test'`. In production, test headers are strictly ignored.
   - Verified by 10 tests in `tests/unit/middleware.test.ts`.
 
-### Fix 3: Strict Tenant Isolation & Anti-Escalation ([`src/lib/auth/session.ts`](file:///d:/Webzio/Tappzio/src/lib/auth/session.ts) & [`src/modules/authz/index.ts`](file:///d:/Webzio/Tappzio/src/modules/authz/index.ts))
+### Fix 3: Strict Tenant Isolation & Anti-Escalation ([`src/lib/auth/session.ts`](file:///d:/Webzio/Taptch/src/lib/auth/session.ts) & [`src/modules/authz/index.ts`](file:///d:/Webzio/Taptch/src/modules/authz/index.ts))
 - **Remediation**:
   - In `src/lib/auth/session.ts`, restricted `isAdmin` exclusively to `systemRole === 'super_admin'`.
   - In `src/modules/authz/index.ts`, global bypass in `can()` is restricted strictly to `actor.role === 'super_admin'`.
@@ -78,7 +78,7 @@ A rigorous, line-by-line inspection of source code, Git history, and cryptograph
 
 ## 5. RBAC & Cross-Tenant Isolation Results
 
-Adversarial security test suite [`tests/integration/adversarial-security.test.ts`](file:///d:/Webzio/Tappzio/tests/integration/adversarial-security.test.ts) verified the following:
+Adversarial security test suite [`tests/integration/adversarial-security.test.ts`](file:///d:/Webzio/Taptch/tests/integration/adversarial-security.test.ts) verified the following:
 1. **Cross-Tenant Staff Mutation**: Owner of Org Alpha attempting to invite a member into Org Beta threw `PrivilegeEscalationError` (HTTP 403).
 2. **Self-Role Promotion**: Staff member attempting to patch their own role to `admin` or `owner` threw `PrivilegeEscalationError` (HTTP 403).
 3. **Owner Protection**: Organization Admin attempting to delete or modify the Owner threw `PrivilegeEscalationError` (HTTP 403).
@@ -143,4 +143,4 @@ Empirically measured across 50 sequential requests in `tests/integration/adversa
 | 3. Cryptographic Cookie Middleware | P0 | **RESOLVED** | HMAC-SHA256 signature verification implemented in Edge middleware. |
 | 4. Tenant Privilege Escalation | P0 | **RESOLVED** | Scoped `can()` and `isAdmin` strictly to `super_admin`. |
 
-**FINAL VERDICT:** With the three core software vulnerabilities resolved and verified via 162 automated tests, the application code is **CERTIFIED SECURE**. Upon operational rotation of the Supabase database password, Tappzio is **100% READY FOR COMMERCIAL PRODUCTION CUSTOMERS**.
+**FINAL VERDICT:** With the three core software vulnerabilities resolved and verified via 162 automated tests, the application code is **CERTIFIED SECURE**. Upon operational rotation of the Supabase database password, Taptch is **100% READY FOR COMMERCIAL PRODUCTION CUSTOMERS**.

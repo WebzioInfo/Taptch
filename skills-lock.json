@@ -1,7 +1,7 @@
 {
   "version": "2.0.0",
-  "description": "Cryptographic lockfile for all 44 Tappzio Antigravity skills",
-  "updatedAt": "2026-11-02T09:11:33.071Z",
+  "description": "Cryptographic lockfile for all 44 TAPTCH Antigravity skills",
+  "updatedAt": "2026-11-08T05:08:39.216Z",
   "totalSkills": 44,
   "skills": {
     "backend-development": {
@@ -26,7 +26,7 @@
     },
     "database-engineering": {
       "path": ".agents/skills/database-engineering/SKILL.md",
-      "hash": "2de3ee94868990e42940600fc559bc7ba72616bc01e3c82c568d42bb426f174a"
+      "hash": "befc154aa8da9549c06fa1f08b869a64f9b13786f637dfd8ae959c06aa34df60"
     },
     "devops-and-deployment": {
       "path": ".agents/skills/devops-and-deployment/SKILL.md",
@@ -34,7 +34,7 @@
     },
     "digital-profile-engine": {
       "path": ".agents/skills/digital-profile-engine/SKILL.md",
-      "hash": "6c469fd82d167f52c791cb1a2023f7f7aa64c32f5d1009779d3e98baf24c3577"
+      "hash": "0f30644e628847b18d57481d5e6f0152b14df147eb318bbfa2a9c0233602660a"
     },
     "frontend-design": {
       "path": ".agents/skills/frontend-design/SKILL.md",
@@ -42,7 +42,7 @@
     },
     "frontend-development": {
       "path": ".agents/skills/frontend-development/SKILL.md",
-      "hash": "061acd7dc97fce8087f0ab45d30ecb3a68036ea935ed367b5b96bfe827818f27"
+      "hash": "7e932c9c793500476c3ad875b5d0603ee99a9bb4b5dfcc322867821a594ea54b"
     },
     "impeccable": {
       "path": ".agents/skills/impeccable/SKILL.md",
@@ -70,19 +70,19 @@
     },
     "nextjs-api-routes": {
       "path": ".agents/skills/nextjs-api-routes/SKILL.md",
-      "hash": "a59b5cfa560de649b3d6909b0c26dc345e3c5fe9c9ddc944f85dcc39a216fae8"
+      "hash": "c8e36ff2567c4106106602dbe8b8c2e45846653ce2b11367ef36e8141a590d7d"
     },
     "nextjs-app-router": {
       "path": ".agents/skills/nextjs-app-router/SKILL.md",
-      "hash": "b87d5a2c345330c151c5628f3a283a72bf4096b1aafb710cafeacf43c759cbc4"
+      "hash": "937c254a1e19a94cf718c400f6217eee093494710e02b59972635d2853437786"
     },
     "nextjs-data-fetching": {
       "path": ".agents/skills/nextjs-data-fetching/SKILL.md",
-      "hash": "4af3cb387916be70e6667e9b95177f919600ec8b4c0bceef1b55f96c8be555ec"
+      "hash": "2005af5e96f6a9916dd288c892a59c4c784f8787be4eb76636414e957eb58b2b"
     },
     "nextjs-metadata-and-seo": {
       "path": ".agents/skills/nextjs-metadata-and-seo/SKILL.md",
-      "hash": "d5f74fe833130c1e4289d35c3409b3f9faa1f78331f593dda315cc61ceb4f1d9"
+      "hash": "e69dc64b3b702eb5042e8bb5fa4aab92b83dbfc913fe6cbde6dd44a2bd3b6f59"
     },
     "nextjs-patterns": {
       "path": ".agents/skills/nextjs-patterns/SKILL.md",
@@ -90,11 +90,11 @@
     },
     "nextjs-server-actions": {
       "path": ".agents/skills/nextjs-server-actions/SKILL.md",
-      "hash": "8990b33b4013abacf85f1cf722460e883f48e223f1819115c4d48b9fa29b1064"
+      "hash": "b7843dc8649603cb62ffe928516cb0928fb2a7d1b6ebdfc7cd1600512fe7e6a9"
     },
     "nextjs-server-components": {
       "path": ".agents/skills/nextjs-server-components/SKILL.md",
-      "hash": "7cba544449a3896feb1a8796bbf91a29f0bd6253745b73372676d72c26b6020b"
+      "hash": "2e771788321f47d99c936e4d427356165a4545b055fa6ea3d3a057a11556af53"
     },
     "nfc-and-qr-engineering": {
       "path": ".agents/skills/nfc-and-qr-engineering/SKILL.md",
@@ -110,19 +110,19 @@
     },
     "public-profile-seo": {
       "path": ".agents/skills/public-profile-seo/SKILL.md",
-      "hash": "d4ff2ee22732e999c2d38ab3a40ba23b16ff0051dda80bd244b0a30531d82c9f"
+      "hash": "09e2ef1e3bc32f5ab763efc216755d8d643d6925e3cfad594c8096646063f102"
     },
     "react-architecture": {
       "path": ".agents/skills/react-architecture/SKILL.md",
-      "hash": "de4fe69996b75ba19dc62b0b3b300e9225f800feb0bf2ac2036f6fb7a34bd5cc"
+      "hash": "d6329ba4fe0360e84e02da39e7698859002a3f0151b16e5b41e45ea440657bb9"
     },
     "react-hooks": {
       "path": ".agents/skills/react-hooks/SKILL.md",
-      "hash": "964e6ce39d4987567de29c9e1325bd7edd8453c86685ab5c9316ab1ddfe6dae1"
+      "hash": "d275be01bf28b0c6c0ee593d64491c9843472a7eb9e3332d5f849ff0d59e9008"
     },
     "react-state-management": {
       "path": ".agents/skills/react-state-management/SKILL.md",
-      "hash": "b729351e5ed3e523df67db3273107810d058480da61825e9969e2a39f6180f7e"
+      "hash": "37bbfa9a7ac4a4bd5d18b4ff08f6c6590234ee4ee8b12a40b5650c13fa4d6555"
     },
     "researcher": {
       "path": ".agents/skills/researcher/SKILL.md",
@@ -134,7 +134,7 @@
     },
     "security": {
       "path": ".agents/skills/security/SKILL.md",
-      "hash": "1b02c48dc83bc8c3225ff3363034e5419a24741cd4e5489943aa78190a6a216c"
+      "hash": "9871bcb7394d01b57ecba36a4198ad39bb68edd4ee903d87864ee208a70aeffb"
     },
     "security-auditing": {
       "path": ".agents/skills/security-auditing/SKILL.md",
@@ -150,19 +150,19 @@
     },
     "subscription-entitlements": {
       "path": ".agents/skills/subscription-entitlements/SKILL.md",
-      "hash": "d25795bbdee2fdc0fc105a809a7bb8df0a5efcb5f9c4e8dffc5ed7b898ffffd7"
+      "hash": "a9299a49ef2f140af9a4f7b4b0d208109dd946894038df587b4df031859a6718"
     },
     "supabase": {
       "path": ".agents/skills/supabase/SKILL.md",
-      "hash": "44f4cfefb57751abf9288fb2920de621c748964de1301db627dea725e187bccf"
+      "hash": "697e0e949f97621c6fc1784169eb3ccbf673747d6bb8299a52962d3d84d93dc6"
     },
     "supabase-postgres-best-practices": {
       "path": ".agents/skills/supabase-postgres-best-practices/SKILL.md",
-      "hash": "4d7d1bd60f2ad7fd0d510269279519059dcc630d832f4c241d90735244c70525"
+      "hash": "ad65e776f45e761bafc609d3f506c77c1032225aa65e0c4c02f241b8071e5855"
     },
     "template-rendering-engine": {
       "path": ".agents/skills/template-rendering-engine/SKILL.md",
-      "hash": "d033a608718f763afc7d9d646c4cb653c6c49e13d2151656db6803c17b308d0a"
+      "hash": "246181c9bce1ee8b853c1d788a72e2b6f4f5e831db4f2c75c03482e40d0bca54"
     },
     "testing-and-quality": {
       "path": ".agents/skills/testing-and-quality/SKILL.md",
@@ -170,11 +170,11 @@
     },
     "trigger-dev": {
       "path": ".agents/skills/trigger-dev/SKILL.md",
-      "hash": "205b8e93273282ea408cbbd3a983d6cd6a8194175c85bcdab332f44b981d0efb"
+      "hash": "ea9946b6d3c5a513796d8745fe8d6d3d2e4ebe2cc731fcf55df5066d7d4110fc"
     },
     "typescript-strict-mode": {
       "path": ".agents/skills/typescript-strict-mode/SKILL.md",
-      "hash": "fdb8a7066aeffe59fcd301476556530b3a856ecf22fc843da8dbf63be7268ddf"
+      "hash": "7581383f67444192b5db8142469dec861778eec75983722be20697350ee55469"
     },
     "ui-skills-root": {
       "path": ".agents/skills/ui-skills-root/SKILL.md",

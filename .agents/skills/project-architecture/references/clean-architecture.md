@@ -1,4 +1,4 @@
-# Clean Architecture Reference for Antigravity
+﻿# Clean Architecture Reference for Antigravity
 
 ## Core Tenet: Dependency Inversion
 The fundamental rule of Clean Architecture is that **dependencies only point inward toward higher-level policies**.
@@ -14,7 +14,7 @@ The fundamental rule of Clean Architecture is that **dependencies only point inw
 ```
 
 ## Directory Mapping in Next.js Modular Monolith
-In the Tappzio project, Clean Architecture is realized as follows:
+In the Taptch project, Clean Architecture is realized as follows:
 - `Entities & Domain Models`: Pure TypeScript types and business validation rules in `src/modules/<domain>/domain/`.
 - `Use Cases & Application Services`: Orchestration functions in `src/modules/<domain>/services/` accepting ports/interfaces.
 - `Adapters & Persistence`: Drizzle ORM repositories and Redis clients in `src/modules/<domain>/data/` or `src/db/`.

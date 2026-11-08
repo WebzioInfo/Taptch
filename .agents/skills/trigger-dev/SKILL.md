@@ -1,4 +1,4 @@
----
+﻿---
 name: trigger-dev
 description: Build Trigger.dev background jobs, automations, and workflows in TypeScript. Use when the user wants to create tasks, scheduled jobs, AI agent workflows, queued background processing, cron jobs, or any long-running async work with Trigger.dev. Triggers on imports from @trigger.dev/sdk or mentions of trigger.dev.
 argument-hint: [description of what to build]
@@ -8,7 +8,7 @@ argument-hint: [description of what to build]
 
 
 > [!NOTE]
-> **Tappzio Architecture Note**: Tappzio utilizes BullMQ in a decoupled worker process as its primary core queue (see `.agents/skills/backend-development/SKILL.md`). This Trigger.dev skill provides production-grade patterns for external serverless workflows, cloud background jobs, and third-party automations.
+> **Taptch Architecture Note**: Taptch utilizes BullMQ in a decoupled worker process as its primary core queue (see `.agents/skills/backend-development/SKILL.md`). This Trigger.dev skill provides production-grade patterns for external serverless workflows, cloud background jobs, and third-party automations.
 
 You are an expert at building production-grade Trigger.dev v4 background tasks, workflows, and automations in TypeScript.
 

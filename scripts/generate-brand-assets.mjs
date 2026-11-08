@@ -13,7 +13,7 @@ const BRAND_DIR = path.join(OUT_DIR, 'brand');
 
 /**
  * ---------------------------------------------------------------------------
- * TAPPZIO NEXUS SYMBOL DEFINITION
+ * TAPTCH NEXUS SYMBOL DEFINITION
  * The architectural letter 'T' integrated with dual NFC radiating facets
  * and a central digital identity pillar.
  * ---------------------------------------------------------------------------
@@ -95,7 +95,7 @@ function getSymbolSvgSnippet({
   // Geometric path elements (100x100 viewBox)
   return `
     <defs>${defs}</defs>
-    <g class="tappzio-symbol-mark">
+    <g class="taptch-symbol-mark">
       <!-- Left Contactless Wave Wing of T -->
       <path
         d="M 14,24 L 46,24 C 47.1,24 48,24.9 48,26 L 48,38 C 48,39.1 47.1,40 46,40 L 26,40 C 23.8,40 21.8,38.8 20.8,36.9 L 14.8,26.9 C 14.1,25.7 14.9,24 16.4,24 Z"
@@ -161,7 +161,7 @@ function getSymbolSvgSnippet({
 
 /**
  * ---------------------------------------------------------------------------
- * TAPPZIO WORDMARK SVG DEFINITION
+ * TAPTCH WORDMARK SVG DEFINITION
  * Custom geometric grotesque letterforms
  * ---------------------------------------------------------------------------
  */
@@ -173,17 +173,17 @@ function getWordmarkSvgSnippet({
   scale = 1,
 } = {}) {
   return `
-    <g transform="translate(${x}, ${y}) scale(${scale})" class="tappzio-wordmark">
+    <g transform="translate(${x}, ${y}) scale(${scale})" class="taptch-wordmark">
       <text
         x="0"
         y="30"
         font-family="'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
         font-size="28"
         font-weight="900"
-        letter-spacing="0.18em"
+        letter-spacing="0.22em"
         fill="${color}"
       >
-        TAPP<tspan fill="${accentColor}">Z</tspan>IO
+        TAP<tspan fill="${accentColor}">TC</tspan>H
       </text>
     </g>
   `;
@@ -308,16 +308,16 @@ function generateFaviconSvg() {
  * Generate All Assets
  */
 async function buildAssets() {
-  console.log('Generating Tappzio Brand Identity SVG Assets...');
+  console.log('Generating TAPTCH Brand Identity SVG Assets...');
 
   const svgs = {
-    'tappzio-logo-primary.svg': generatePrimaryLogoSvg(),
-    'tappzio-logo-light.svg': generateLightLogoSvg(),
-    'tappzio-logo-dark.svg': generateDarkLogoSvg(),
-    'tappzio-logo-horizontal.svg': generateHorizontalLogoSvg(),
-    'tappzio-logo-stacked.svg': generateStackedLogoSvg(),
-    'tappzio-symbol.svg': generateSymbolSvg(),
-    'tappzio-monochrome.svg': generateMonochromeSvg(),
+    'taptch-logo-primary.svg': generatePrimaryLogoSvg(),
+    'taptch-logo-light.svg': generateLightLogoSvg(),
+    'taptch-logo-dark.svg': generateDarkLogoSvg(),
+    'taptch-logo-horizontal.svg': generateHorizontalLogoSvg(),
+    'taptch-logo-stacked.svg': generateStackedLogoSvg(),
+    'taptch-symbol.svg': generateSymbolSvg(),
+    'taptch-monochrome.svg': generateMonochromeSvg(),
   };
 
   for (const [filename, content] of Object.entries(svgs)) {

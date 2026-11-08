@@ -122,12 +122,12 @@ CREATE TABLE "feature_flags" (
 --> statement-breakpoint
 CREATE TABLE "system_settings" (
 	"id" varchar(64) PRIMARY KEY DEFAULT 'default' NOT NULL,
-	"brand_name" varchar(128) DEFAULT 'Tapzio' NOT NULL,
+	"brand_name" varchar(128) DEFAULT 'Taptch' NOT NULL,
 	"brand_tagline" text DEFAULT 'Intelligent Digital Identity & Smart Networking',
 	"brand_logo_url" text DEFAULT '/assets/brand/logo.svg',
 	"brand_colors" jsonb DEFAULT '{"primary":"#D4AF37","secondary":"#141418","accent":"#38BDF8","obsidianGold":"#D4AF37"}'::jsonb NOT NULL,
-	"contact_email" varchar(255) DEFAULT 'support@tapzio.com',
-	"custom_domain_cname" varchar(255) DEFAULT 'domains.tapzio.com',
+	"contact_email" varchar(255) DEFAULT 'support@taptch.com',
+	"custom_domain_cname" varchar(255) DEFAULT 'domains.taptch.com',
 	"features_enabled" jsonb DEFAULT '{"enablePublicRegistration":true,"enableGoogleAuth":false,"enablePhoneOtp":true,"enableWalletPasses":false,"enableCustomDomains":true}'::jsonb NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );

@@ -1,4 +1,4 @@
-# Tapzio Specification — 04 Profile Engine
+﻿# Taptch Specification — 04 Profile Engine
 
 > Source: Master Prompt Section 4
 

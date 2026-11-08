@@ -1,8 +1,8 @@
-# Next.js 15 & React 19 Skills Technical Coverage Report
+﻿# Next.js 15 & React 19 Skills Technical Coverage Report
 
 ## 1. Executive Summary
 
-This report documents the full coverage of **Next.js 15 App Router**, **React 19**, and **TypeScript 5.8+** within the Tapzio Antigravity skills repository.
+This report documents the full coverage of **Next.js 15 App Router**, **React 19**, and **TypeScript 5.8+** within the Taptch Antigravity skills repository.
 
 All skills adhere to the actual installed package versions in `package.json` (`next: ^15.5.0`, `react: ^19.0.0`, `typescript: ^5.8.2`, `drizzle-orm: ^0.45.4`).
 
@@ -23,7 +23,7 @@ All skills adhere to the actual installed package versions in `package.json` (`n
 | **TypeScript Strictness** | `typescript-strict-mode`, `software-engineering` | Strict mode flags, zero `any` policy, branded types (`UserId`, `ProfileId`), discriminated unions, Zod schema type inference (`z.infer`). |
 | **SEO, Metadata & Social Previews** | `nextjs-metadata-and-seo`, `public-profile-seo` | Next.js Metadata API, dynamic `generateMetadata`, Open Graph, Twitter cards, `sitemap.ts`, `robots.ts`, Search Console coverage states. |
 | **Core Web Vitals & Performance** | `performance-engineering`, `cost-reducer`, `improve-animations` | Sub-50ms Redis redirect caching, font optimization (`next/font`), image optimization (`next/image`), atomic JSON snapshot compilation. |
-| **Tapzio Domain Engines** | `digital-profile-engine`, `template-rendering-engine`, `subscription-entitlements`, `nfc-and-qr-engineering`, `public-profile-seo` | Personal vs business profiles, multi-business switcher tabs, 6 luxury templates (Obsidian, Ivory, Aurora, Zenith, Catalyst, Apex), 4-tier plan matrix (Nano, Micro, Mini, Max), NFC NTAG216 tokens, anti-metal ferrite shielding. |
+| **Taptch Domain Engines** | `digital-profile-engine`, `template-rendering-engine`, `subscription-entitlements`, `nfc-and-qr-engineering`, `public-profile-seo` | Personal vs business profiles, multi-business switcher tabs, 6 luxury templates (Obsidian, Ivory, Aurora, Zenith, Catalyst, Apex), 4-tier plan matrix (Nano, Micro, Mini, Max), NFC NTAG216 tokens, anti-metal ferrite shielding. |
 
 ---
 
@@ -42,7 +42,7 @@ All skills adhere to the actual installed package versions in `package.json` (`n
 10. `typescript-strict-mode`: TypeScript 5.8+ strict engineering, branded types, discriminated unions.
 11. `digital-profile-engine`: Personal vs business profiles, multi-business association, JSON snapshots.
 12. `template-rendering-engine`: 6 luxury themes, dual-device live preview, theme token resolution.
-13. `subscription-entitlements`: Tapzio 4-tier plan matrix, resource limits, server-side permission gates.
+13. `subscription-entitlements`: Taptch 4-tier plan matrix, resource limits, server-side permission gates.
 14. `public-profile-seo`: Public profile SEO indexing, Zero Dynamic Hot Path on `/p/[slug]`, Open Graph.
 
 ### Pre-Existing Verified Skills (30 Skills Maintained)
@@ -52,7 +52,7 @@ All skills adhere to the actual installed package versions in `package.json` (`n
 
 ## 4. Consolidations & Obsolete Material Handling
 
-- **Legacy Next.js 14 Template (`template.md`)**: Flagged as legacy Next.js 14 template referencing Prisma and NextAuth. Superseded by native Tapzio architecture (`nextjs-app-router`, `database-engineering` with Drizzle ORM, `backend-development` with Better Auth).
+- **Legacy Next.js 14 Template (`template.md`)**: Flagged as legacy Next.js 14 template referencing Prisma and NextAuth. Superseded by native Taptch architecture (`nextjs-app-router`, `database-engineering` with Drizzle ORM, `backend-development` with Better Auth).
 - **SEO & Routing Documentation (`seo-indexing.md`, `rooter.md`, `best-practice.md`)**: Fully absorbed and enhanced inside `nextjs-metadata-and-seo`, `public-profile-seo`, `nextjs-app-router`, `nextjs-server-components`, and `nextjs-data-fetching`.
 - **Archive & Canonical Location**: All knowledge consolidated into canonical `.agents/skills/` with full historical archive stored in external backup.
 

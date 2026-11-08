@@ -101,8 +101,7 @@ class InMemoryRedisMock {
 export type RedisClient = Redis | InMemoryRedisMock;
 
 declare global {
-  var __tappzio_redis__: RedisClient | undefined;
-  var __tapzio_redis__: RedisClient | undefined;
+  var __taptch_redis__: RedisClient | undefined;
 }
 
 function createRedisClient(): RedisClient {
@@ -139,9 +138,8 @@ function createRedisClient(): RedisClient {
 }
 
 export const redis: RedisClient =
-  globalThis.__tappzio_redis__ ||
-  globalThis.__tapzio_redis__ ||
-  (globalThis.__tappzio_redis__ = createRedisClient());
+  globalThis.__taptch_redis__ ||
+  (globalThis.__taptch_redis__ = createRedisClient());
 
 export const redisClient = redis;
 

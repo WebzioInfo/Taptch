@@ -86,7 +86,7 @@ describe('Mass Marketing & Template Preview with Mock Data Test Suite', () => {
     it('guarantees demo mock data is read-only and separate from real profiles', () => {
       const sample = getDemoBusinessByTemplate('corporate-business');
       expect(sample.isDemo).toBe(true);
-      // Real profile IDs in Tappzio use UUID/CUID, not 'demo-'
+      // Real profile IDs in TAPTCH use UUID/CUID, not 'demo-'
       expect(sample.id.startsWith('demo-')).toBe(true);
     });
   });

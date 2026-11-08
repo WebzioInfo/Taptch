@@ -1,4 +1,4 @@
-# Tappzio 360° Master Project Audit — 04: UI/UX & Design System Audit
+﻿# Taptch 360° Master Project Audit — 04: UI/UX & Design System Audit
 
 **Focus:** Design System Quality, Obsidian Luxury Aesthetic, Mobile Responsiveness, Micro-interactions, Accessibility (WCAG 2.2)  
 **Auditor:** UI/UX Director & Enterprise Product Designer  
@@ -8,7 +8,7 @@
 
 ## 1. Design System Overview & Aesthetic Compliance
 
-Tappzio’s user interface implements the proprietary **Obsidian Luxury** visual language, designed to convey executive authority, precision engineering, and timeless elegance:
+Taptch’s user interface implements the proprietary **Obsidian Luxury** visual language, designed to convey executive authority, precision engineering, and timeless elegance:
 
 1. **Color Geometry**:
    - Canvas / Body Background: `bg-neutral-950` (`#0A0A0C`)
@@ -55,5 +55,5 @@ Every interactive component across the dashboard and public views adheres to str
 ## 4. UI/UX Score & Conclusion
 
 - **Score: 9.0 / 10**
-- **Assessment**: The user interface is polished, cohesive, professional, and distinctly avoids generic AI templates. The luxury aesthetic elevates Tappzio's perceived market value.
+- **Assessment**: The user interface is polished, cohesive, professional, and distinctly avoids generic AI templates. The luxury aesthetic elevates Taptch's perceived market value.
 

@@ -1,10 +1,10 @@
-# Tappzio 360° Master Project Audit — 01: Executive Summary
+﻿# Taptch 360° Master Project Audit — 01: Executive Summary
 
 **Date:** November 2026  
 **Auditor Roles:** CTO, Chief Product Officer, Principal Software Architect, Cybersecurity Auditor, QA Director  
-**Platform:** Tappzio (Enterprise Digital Identity & Dynamic QR/NFC Ecosystem)  
+**Platform:** Taptch (Enterprise Digital Identity & Dynamic QR/NFC Ecosystem)  
 **Parent Entity:** Webzio International  
-**Production URL:** `https://tappzio.webziotech.in`  
+**Production URL:** `https://Taptch.webziotech.in`  
 **Repository Working Tree:** Verified clean (`main` branch)  
 **Baseline Test Results:** 19/19 test files passed, 141/141 tests passing, 0 TypeScript errors, 0 ESLint errors  
 
@@ -12,7 +12,7 @@
 
 ## 1. Executive Overview
 
-Tappzio is an enterprise-grade digital identity, smart-connect, and dynamic physical-to-digital bridge platform engineered for professionals, enterprises, field teams, and physical cardholders. The platform seamlessly unifies:
+Taptch is an enterprise-grade digital identity, smart-connect, and dynamic physical-to-digital bridge platform engineered for professionals, enterprises, field teams, and physical cardholders. The platform seamlessly unifies:
 1. **Digital Profile Identity**: Personal and multi-business profile portfolios with customizable luxury themes, dynamic section layout reordering, and instant vCard / reciprocal lead exchange.
 2. **Dynamic QR & Smart Post-Print Activation**: Pre-printed unassigned QR hardware paired post-manufacture by on-field staff or customers with instantaneous, zero-reprint destination redirection and privacy-safe geolocation analytics.
 3. **NFC Physical-to-Digital Bridge**: High-entropy NDEF token encoding supporting metallic, wooden, and PVC cards with cross-platform mobile handling (Android Web NFC NDEFReader API and iOS NFC Tools deep-linking).
@@ -59,5 +59,5 @@ Tappzio is an enterprise-grade digital identity, smart-connect, and dynamic phys
 
 ## 4. Auditor Sign-Off & Verdict
 
-The Tappzio codebase demonstrates exceptional architectural discipline, adhering to strict clean-code principles, high cohesion, low coupling, and rigorous test-driven verification. Upon applying the edge middleware and route guard fixes identified in this audit, Tappzio is certified **READY FOR PRODUCTION DEPLOYMENT** across Indian and international enterprise workloads.
+The Taptch codebase demonstrates exceptional architectural discipline, adhering to strict clean-code principles, high cohesion, low coupling, and rigorous test-driven verification. Upon applying the edge middleware and route guard fixes identified in this audit, Taptch is certified **READY FOR PRODUCTION DEPLOYMENT** across Indian and international enterprise workloads.
 

@@ -1,4 +1,4 @@
-# Tapzio — Scale, Performance & High-Concurrency Architecture Plan
+﻿# Taptch — Scale, Performance & High-Concurrency Architecture Plan
 
 **Document Version:** 1.0.0  
 **Target Concurrency:** Baseline 1,000 concurrent visitors · Verified at 5,000 · Scalable to 50,000+  
@@ -9,7 +9,7 @@
 
 ## 1. High-Throughput Architecture & Target Metrics
 
-Tapzio is designed for severe traffic spikes typical of real-world business networking: a keynote speaker or conference booth where hundreds of attendees simultaneously tap physical NFC cards or scan projector QR codes within seconds.
+Taptch is designed for severe traffic spikes typical of real-world business networking: a keynote speaker or conference booth where hundreds of attendees simultaneously tap physical NFC cards or scan projector QR codes within seconds.
 
 | Performance Metric | Baseline Target (1,000 Concurrent) | Verified Stress (5,000 Concurrent) | Enterprise Peak (50,000 Concurrent) |
 | :--- | :---: | :---: | :---: |
@@ -215,7 +215,7 @@ sequenceDiagram
 ## 6. Conference Spike Simulation: 1,000 Taps in 60 Seconds
 
 ### The Scenario
-A keynote speaker at a major Bangalore tech conference (1,000 attendees) concludes their talk and displays their Tapzio dynamic QR code on the auditorium screen while passing around physical metal cards. Within 60 seconds, **1,000 attendees scan or tap the profile simultaneously**.
+A keynote speaker at a major Bangalore tech conference (1,000 attendees) concludes their talk and displays their Taptch dynamic QR code on the auditorium screen while passing around physical metal cards. Within 60 seconds, **1,000 attendees scan or tap the profile simultaneously**.
 
 ### Detailed Layer-by-Layer Execution Flow
 
@@ -281,7 +281,7 @@ The following automated k6 load scripts are scheduled for authoring and executio
 
 ### 8.1 Scenario A: Edge Redirect SLA Benchmark (`redirect_stress.js`)
 - **Virtual Users (VUs)**: Ramp from 50 to 1,000 VUs over 2 minutes; hold 1,000 VUs for 3 minutes; ramp down to 0 over 1 minute.
-- **Target URL**: `GET https://staging.tapzio.com/n/{test_token}`.
+- **Target URL**: `GET https://staging.Taptch.com/n/{test_token}`.
 - **Pass / Fail Thresholds**:
   - `http_req_duration{status:302}`: **p(95) < 50ms**, **p(99) < 80ms**.
   - `http_req_failed`: **< 0.01%**.

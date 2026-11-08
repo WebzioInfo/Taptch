@@ -10,12 +10,14 @@ import * as schema from '@/db/schema';
 import { sendOtpEmail, sendOtpSms } from './otp-provider';
 
 export const auth = betterAuth({
-  secret: process.env.BETTER_AUTH_SECRET || 'tappzio-development-better-auth-secret-min-32-chars-long',
+  secret: process.env.BETTER_AUTH_SECRET || 'taptch-development-better-auth-secret-min-32-chars-long',
   baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3000',
   trustedOrigins: [
     process.env.BETTER_AUTH_URL,
     process.env.NEXT_PUBLIC_APP_URL,
-    'https://tappzio.webziotech.in',
+    'https://taptch.webziotech.in',
+    'https://taptch.com',
+    'https://app.taptch.com',
   ].filter(Boolean) as string[],
   database: drizzleAdapter(db, {
     provider: 'pg',
@@ -50,7 +52,7 @@ export const auth = betterAuth({
       allowUserToCreateOrganization: true,
     }),
     twoFactor({
-      issuer: 'Tappzio Identity',
+      issuer: `${process.env.NEXT_PUBLIC_BRAND_NAME || 'TAPTCH'} Identity`,
     }),
     phoneNumber({
       sendOTP: async ({ phoneNumber, code }) => {

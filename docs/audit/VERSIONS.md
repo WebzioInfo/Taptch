@@ -1,4 +1,4 @@
-# Tapzio — Verified Stable Dependency Versions & Registry Pins
+﻿# Taptch — Verified Stable Dependency Versions & Registry Pins
 
 **Verification Date:** October 31, 2026  
 **Source Registry:** Official npm Registry (`https://registry.npmjs.org`)  

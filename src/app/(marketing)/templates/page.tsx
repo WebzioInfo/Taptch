@@ -212,24 +212,24 @@ function TemplateMarketplaceContent() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-20">
+    <div className="min-h-screen bg-white text-slate-900 pb-20">
       {/* Toast Notification Banner */}
       {selectedSuccessMessage && (
-        <div className="fixed top-5 right-5 z-50 max-w-sm bg-card border border-primary/40 text-foreground px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2.5 backdrop-blur-md animate-in fade-in slide-in-from-top-4">
-          <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+        <div className="fixed top-5 right-5 z-50 max-w-sm bg-white border border-blue-600/40 text-slate-900 px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2.5 backdrop-blur-md animate-in fade-in slide-in-from-top-4">
+          <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
           <div className="text-xs font-medium">{selectedSuccessMessage}</div>
         </div>
       )}
 
       {/* Header Bar */}
-      <section className="border-b border-border/40 bg-card/20 backdrop-blur-md">
+      <section className="border-b border-slate-100 bg-white/20 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900">
                 Templates
               </h1>
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <p className="text-xs text-slate-500 mt-0.5">
                 Curated layouts for digital profiles and smart NFC cards.
               </p>
             </div>
@@ -237,19 +237,19 @@ function TemplateMarketplaceContent() {
             {/* Search & Sort Controls */}
             <div className="flex items-center gap-2">
               <div className="relative w-full sm:w-56">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
                 <Input
                   type="text"
                   placeholder="Search templates..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-8 pr-7 h-8 text-xs bg-card border-border/80 rounded-lg placeholder:text-muted-foreground focus:border-primary"
+                  className="pl-8 pr-7 h-8 text-xs bg-white border-slate-200/80 rounded-lg placeholder:text-slate-500 focus:border-blue-600"
                 />
                 {searchQuery && (
                   <button
                     type="button"
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-0.5"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-900 p-0.5"
                     aria-label="Clear search"
                   >
                     <X className="w-3 h-3" />
@@ -260,7 +260,7 @@ function TemplateMarketplaceContent() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as 'featured' | 'name' | 'plan')}
-                className="h-8 px-2.5 rounded-lg bg-card border border-border/80 text-xs text-foreground font-medium focus:outline-none focus:border-primary cursor-pointer shrink-0"
+                className="h-8 px-2.5 rounded-lg bg-white border border-slate-200/80 text-xs text-slate-900 font-medium focus:outline-none focus:border-blue-600 cursor-pointer shrink-0"
                 aria-label="Sort templates"
               >
                 <option value="featured">Featured</option>
@@ -280,7 +280,7 @@ function TemplateMarketplaceContent() {
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
                   selectedCategory === cat.id
                     ? 'bg-foreground text-background font-semibold shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
+                    : 'text-slate-500 hover:text-slate-900 hover:bg-muted/60'
                 }`}
               >
                 {cat.label}
@@ -297,24 +297,24 @@ function TemplateMarketplaceContent() {
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
               <div
                 key={i}
-                className="aspect-[16/10] rounded-xl bg-card/40 animate-pulse border border-border/40"
+                className="aspect-[16/10] rounded-xl bg-white animate-pulse border border-slate-100"
               />
             ))}
           </div>
         ) : loadError ? (
           <div className="text-center py-16 bg-destructive/10 rounded-2xl border border-destructive/20 p-8 max-w-sm mx-auto">
             <AlertCircle className="w-8 h-8 text-destructive mx-auto mb-2" />
-            <h3 className="text-sm font-bold text-foreground">Could not load templates</h3>
-            <p className="text-xs text-muted-foreground mt-1 mb-3">{loadError}</p>
+            <h3 className="text-sm font-bold text-slate-900">Could not load templates</h3>
+            <p className="text-xs text-slate-500 mt-1 mb-3">{loadError}</p>
             <Button variant="outline" size="sm" onClick={fetchTemplates} className="gap-2 text-xs h-8">
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Retry</span>
             </Button>
           </div>
         ) : filteredTemplates.length === 0 ? (
-          <div className="text-center py-16 bg-card/20 rounded-2xl border border-dashed border-border p-8 max-w-sm mx-auto">
-            <h3 className="text-sm font-semibold text-foreground">No templates found</h3>
-            <p className="text-xs text-muted-foreground mt-1">Try adjusting your search query or category filter.</p>
+          <div className="text-center py-16 bg-white/20 rounded-2xl border border-dashed border-slate-200 p-8 max-w-sm mx-auto">
+            <h3 className="text-sm font-semibold text-slate-900">No templates found</h3>
+            <p className="text-xs text-slate-500 mt-1">Try adjusting your search query or category filter.</p>
             <Button
               variant="outline"
               size="sm"
@@ -338,10 +338,10 @@ function TemplateMarketplaceContent() {
               return (
                 <div
                   key={template.id}
-                  className={`group relative flex flex-col rounded-xl border bg-card overflow-hidden transition-all duration-200 hover:border-border hover:shadow-lg ${
+                  className={`group relative flex flex-col rounded-xl border bg-white overflow-hidden transition-all duration-200 hover:border-slate-200 hover:shadow-lg ${
                     isCurrentActive
-                      ? 'border-primary ring-1 ring-primary/30'
-                      : 'border-border/60'
+                      ? 'border-blue-600 ring-1 ring-primary/30'
+                      : 'border-slate-200'
                   }`}
                 >
                   {/* Large Visual Preview */}
@@ -380,22 +380,22 @@ function TemplateMarketplaceContent() {
                     {/* Hover Action Overlay */}
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                       <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-900/90 text-white text-xs font-medium border border-white/15 backdrop-blur-md shadow-md">
-                        <Eye className="w-3.5 h-3.5 text-primary" />
+                        <Eye className="w-3.5 h-3.5 text-blue-600" />
                         <span>Preview</span>
                       </span>
                     </div>
                   </div>
 
                   {/* Card Info & Action Bar */}
-                  <div className="p-3.5 flex items-center justify-between gap-3 border-t border-border/40">
+                  <div className="p-3.5 flex items-center justify-between gap-3 border-t border-slate-100">
                     <div className="min-w-0">
                       <h3
                         onClick={() => setPreviewTemplateId(template.id)}
-                        className="text-xs font-semibold text-foreground truncate cursor-pointer hover:text-primary transition-colors"
+                        className="text-xs font-semibold text-slate-900 truncate cursor-pointer hover:text-blue-600 transition-colors"
                       >
                         {template.name}
                       </h3>
-                      <span className="text-[11px] text-muted-foreground capitalize">
+                      <span className="text-[11px] text-slate-500 capitalize">
                         {template.category}
                       </span>
                     </div>
@@ -407,8 +407,8 @@ function TemplateMarketplaceContent() {
                       onClick={() => handleSelectTemplate(template.id)}
                       className={`h-7 px-3 text-xs font-medium shrink-0 ${
                         isCurrentActive
-                          ? 'bg-muted text-muted-foreground'
-                          : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                          ? 'bg-muted text-slate-500'
+                          : 'bg-blue-600 text-blue-600-foreground hover:bg-blue-600/90'
                       }`}
                     >
                       {isApplying === template.id ? (
@@ -446,8 +446,8 @@ export default function TemplateMarketplacePage() {
   return (
     <React.Suspense
       fallback={
-        <div className="min-h-screen bg-background flex items-center justify-center p-8">
-          <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+        <div className="min-h-screen bg-white flex items-center justify-center p-8">
+          <div className="w-8 h-8 rounded-full border-2 border-blue-600 border-t-transparent animate-spin" />
         </div>
       }
     >

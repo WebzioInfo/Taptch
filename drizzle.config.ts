@@ -8,7 +8,7 @@ export default defineConfig({
     url:
       process.env.DATABASE_URL_DIRECT ||
       process.env.DATABASE_URL ||
-      'postgres://tapzio_migrator:tapzio_migrator_pass@localhost:5432/tapzio_db?sslmode=disable',
+      'postgres://taptch_migrator:taptch_migrator_pass@localhost:5432/taptch_db?sslmode=disable',
   },
   verbose: true,
   strict: true,

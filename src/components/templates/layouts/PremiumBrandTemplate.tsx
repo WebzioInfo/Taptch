@@ -126,7 +126,7 @@ export function PremiumBrandTemplate({
                 className="gap-2 shadow-lg font-semibold text-xs h-10"
               >
                 <Download className="h-4 w-4" />
-                <span>Save Contact</span>
+                <span>Save this profile</span>
               </Button>
               <Button
                 variant="outline"

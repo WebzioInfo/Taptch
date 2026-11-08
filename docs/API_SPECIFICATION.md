@@ -1,9 +1,9 @@
-# Tapzio — REST API Specification (v1)
+﻿# Taptch — REST API Specification (v1)
 ## Realigned API for Template Marketplace, Profile Creation & Multi-Business Networking
 
-**Product:** Tapzio  
+**Product:** Taptch  
 **Platform Owner:** Webzio Technology  
-**Base URL:** `https://tapzio.com/api/v1`  
+**Base URL:** `https://Taptch.com/api/v1`  
 **Document Version:** 2.0 (Product Vision Realignment)  
 **Status:** Approved & Authoritative
 
@@ -84,8 +84,8 @@ interface ApiResponse<T> {
     "displayName": "John Mathew",
     "headline": "Angel Investor & Founder",
     "bio": "Serial entrepreneur building next-gen tech.",
-    "avatarUrl": "https://cdn.tapzio.com/avatars/user_1.png",
-    "coverUrl": "https://cdn.tapzio.com/covers/user_1.png",
+    "avatarUrl": "https://cdn.Taptch.com/avatars/user_1.png",
+    "coverUrl": "https://cdn.Taptch.com/covers/user_1.png",
     "templateId": "obsidian-luxury",
     "themeConfig": {
       "primaryColor": "#D4AF37",
@@ -113,7 +113,7 @@ interface ApiResponse<T> {
   {
     "name": "ABC Technologies",
     "tagline": "Enterprise Cloud Architecture",
-    "logoUrl": "https://cdn.tapzio.com/logos/abc.png",
+    "logoUrl": "https://cdn.Taptch.com/logos/abc.png",
     "description": "Custom enterprise SaaS systems.",
     "website": "https://abctech.in",
     "phone": "+919876543210",
@@ -148,8 +148,8 @@ interface ApiResponse<T> {
     "description": "Laser-etched stainless steel card with NFC chip.",
     "price": "₹3,499",
     "currency": "INR",
-    "imageUrl": "https://cdn.tapzio.com/products/metal.png",
-    "actionUrl": "https://tapzio.com/order",
+    "imageUrl": "https://cdn.Taptch.com/products/metal.png",
+    "actionUrl": "https://Taptch.com/order",
     "actionLabel": "Order Now"
   }
   ```

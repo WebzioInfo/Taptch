@@ -158,7 +158,7 @@ export function RetailTemplate({
                 className="flex-1 md:flex-none border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700 text-xs h-10 px-5 gap-2"
               >
                 <Download className="h-4 w-4 text-rose-400" />
-                <span>Save Contact</span>
+                <span>Save this profile</span>
               </Button>
             </div>
           </div>

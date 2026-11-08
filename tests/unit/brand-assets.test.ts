@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { brandConfig } from '@/config/brand';
 
-describe('Tappzio Brand Identity & Logo Assets Suite', () => {
+describe('TAPTCH Brand Identity & Logo Assets Suite', () => {
   const publicDir = path.resolve(process.cwd(), 'public');
   const brandingLogoDir = path.join(publicDir, 'branding', 'logo');
   const brandingIconsDir = path.join(publicDir, 'branding', 'icons');
@@ -11,13 +11,13 @@ describe('Tappzio Brand Identity & Logo Assets Suite', () => {
 
   it('verifies all 7 SVG logo variations exist and are valid SVG vectors', () => {
     const requiredLogos = [
-      'tappzio-logo-primary.svg',
-      'tappzio-logo-light.svg',
-      'tappzio-logo-dark.svg',
-      'tappzio-logo-horizontal.svg',
-      'tappzio-logo-stacked.svg',
-      'tappzio-symbol.svg',
-      'tappzio-monochrome.svg',
+      'taptch-logo-primary.svg',
+      'taptch-logo-light.svg',
+      'taptch-logo-dark.svg',
+      'taptch-logo-horizontal.svg',
+      'taptch-logo-stacked.svg',
+      'taptch-symbol.svg',
+      'taptch-monochrome.svg',
     ];
 
     for (const file of requiredLogos) {
@@ -62,7 +62,6 @@ describe('Tappzio Brand Identity & Logo Assets Suite', () => {
     ];
 
     for (const relativeUrl of assetMap) {
-      // relativeUrl is e.g. /branding/logo/tappzio-logo-primary.svg
       const localPath = path.join(publicDir, relativeUrl.replace(/^\//, ''));
       expect(fs.existsSync(localPath), `brandConfig asset does not exist: ${relativeUrl} -> ${localPath}`).toBe(true);
     }
@@ -70,10 +69,10 @@ describe('Tappzio Brand Identity & Logo Assets Suite', () => {
 
   it('verifies brand guidelines documentation exists', () => {
     const guidelinesPath = path.join(brandingBrandDir, 'brand-guidelines.md');
-    const archRecordPath = path.resolve(process.cwd(), 'docs', 'TAPPZIO_BRAND_IDENTITY.md');
+    const archRecordPath = path.resolve(process.cwd(), 'docs', 'TAPTCH_BRAND_IDENTITY.md');
 
     expect(fs.existsSync(guidelinesPath), 'brand-guidelines.md missing').toBe(true);
-    expect(fs.existsSync(archRecordPath), 'TAPPZIO_BRAND_IDENTITY.md missing').toBe(true);
+    expect(fs.existsSync(archRecordPath), 'TAPTCH_BRAND_IDENTITY.md missing').toBe(true);
 
     const content = fs.readFileSync(guidelinesPath, 'utf-8');
     expect(content).toContain('Harmonic Nexus');

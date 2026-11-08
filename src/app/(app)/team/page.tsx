@@ -249,13 +249,13 @@ export default function TeamStaffManagementPage() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-12">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/60">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <ShieldCheck className="h-5 w-5 text-primary" />
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+            <ShieldCheck className="h-5 w-5 text-blue-600" />
             Staff & Team Management
           </h1>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <p className="text-xs text-slate-500 mt-0.5">
             Manage organization members, assign operational roles, control permissions, and review audit trails.
           </p>
         </div>
@@ -263,7 +263,7 @@ export default function TeamStaffManagementPage() {
         <div className="flex items-center gap-2">
           {selectedOrgId && (
             <Link href={`/team/my-work?orgId=${selectedOrgId}`}>
-              <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10">
+              <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5 border-blue-600/30 text-blue-600 hover:bg-blue-600/10">
                 <Briefcase className="h-3.5 w-3.5" />
                 <span>My Workspace</span>
               </Button>
@@ -272,7 +272,7 @@ export default function TeamStaffManagementPage() {
 
           {isOwnerOrAdmin && (
             <Button
-              variant="gold"
+              variant="default"
               size="sm"
               onClick={() => setShowInviteModal(true)}
               className="h-8 text-xs font-semibold gap-1.5 px-3"
@@ -285,13 +285,13 @@ export default function TeamStaffManagementPage() {
       </div>
 
       {/* Organization Selector Bar */}
-      <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-card/50 border border-border/60">
+      <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-white/50 border border-slate-200">
         <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-          <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
-          <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">Organization:</span>
+          <Building2 className="h-4 w-4 text-slate-500 shrink-0" />
+          <span className="text-xs font-medium text-slate-500 whitespace-nowrap">Organization:</span>
 
           {orgs.length === 0 ? (
-            <span className="text-xs text-muted-foreground italic">No organizations found</span>
+            <span className="text-xs text-slate-500 italic">No organizations found</span>
           ) : (
             orgs.map((org) => {
               const isSelected = org.orgId === selectedOrgId;
@@ -301,8 +301,8 @@ export default function TeamStaffManagementPage() {
                   onClick={() => setSelectedOrgId(org.orgId)}
                   className={`px-3 py-1 rounded-lg text-xs font-medium transition-all whitespace-nowrap flex items-center gap-1.5 ${
                     isSelected
-                      ? 'bg-primary/20 text-primary border border-primary/40 font-semibold'
-                      : 'bg-background/80 text-muted-foreground border border-border/40 hover:text-foreground'
+                      ? 'bg-blue-600/20 text-blue-600 border border-blue-600/40 font-semibold'
+                      : 'bg-white/80 text-slate-500 border border-slate-100 hover:text-slate-900'
                   }`}
                 >
                   <span>{org.orgName}</span>
@@ -326,55 +326,55 @@ export default function TeamStaffManagementPage() {
       </div>
 
       {/* Main Tabs */}
-      <div className="flex border-b border-border/60 gap-4 text-xs font-medium">
+      <div className="flex border-b border-slate-200 gap-4 text-xs font-medium">
         <button
           onClick={() => setActiveTab('staff')}
           className={`pb-2.5 transition-all relative ${
-            activeTab === 'staff' ? 'text-primary font-semibold' : 'text-muted-foreground hover:text-foreground'
+            activeTab === 'staff' ? 'text-blue-600 font-semibold' : 'text-slate-500 hover:text-slate-900'
           }`}
         >
           Staff Members ({staffList.length})
-          {activeTab === 'staff' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />}
+          {activeTab === 'staff' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />}
         </button>
 
         <button
           onClick={() => setActiveTab('invitations')}
           className={`pb-2.5 transition-all relative ${
-            activeTab === 'invitations' ? 'text-primary font-semibold' : 'text-muted-foreground hover:text-foreground'
+            activeTab === 'invitations' ? 'text-blue-600 font-semibold' : 'text-slate-500 hover:text-slate-900'
           }`}
         >
           Pending Invitations ({invitationsList.length})
-          {activeTab === 'invitations' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />}
+          {activeTab === 'invitations' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />}
         </button>
 
         <button
           onClick={() => setActiveTab('audit')}
           className={`pb-2.5 transition-all relative ${
-            activeTab === 'audit' ? 'text-primary font-semibold' : 'text-muted-foreground hover:text-foreground'
+            activeTab === 'audit' ? 'text-blue-600 font-semibold' : 'text-slate-500 hover:text-slate-900'
           }`}
         >
           Activity & Audit Logs ({auditLogs.length})
-          {activeTab === 'audit' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />}
+          {activeTab === 'audit' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />}
         </button>
       </div>
 
       {/* Content Area */}
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 space-y-3">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          <p className="text-xs text-muted-foreground">Loading staff roster and permissions...</p>
+          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+          <p className="text-xs text-slate-500">Loading staff roster and permissions...</p>
         </div>
       ) : activeTab === 'staff' ? (
         <div className="space-y-3">
           {staffList.length === 0 ? (
-            <Card className="border-border/60 bg-card/40 p-8 text-center max-w-md mx-auto my-6">
-              <Users className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-              <h3 className="text-sm font-bold text-foreground">No Staff Members</h3>
-              <p className="text-xs text-muted-foreground mt-1 mb-4">
+            <Card className="border-slate-200 bg-white p-8 text-center max-w-md mx-auto my-6">
+              <Users className="h-8 w-8 text-slate-500 mx-auto mb-3" />
+              <h3 className="text-sm font-bold text-slate-900">No Staff Members</h3>
+              <p className="text-xs text-slate-500 mt-1 mb-4">
                 Invite team members to collaborate on digital profiles and dynamic QRs.
               </p>
               {isOwnerOrAdmin && (
-                <Button variant="gold" size="sm" onClick={() => setShowInviteModal(true)} className="text-xs font-semibold">
+                <Button variant="default" size="sm" onClick={() => setShowInviteModal(true)} className="text-xs font-semibold">
                   Invite Staff
                 </Button>
               )}
@@ -386,15 +386,15 @@ export default function TeamStaffManagementPage() {
                 const isSuspended = member.status === 'suspended';
 
                 return (
-                  <Card key={member.id} className="border-border/60 bg-card/40 p-4 space-y-3">
+                  <Card key={member.id} className="border-slate-200 bg-white p-4 space-y-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-sm shrink-0">
+                        <div className="h-9 w-9 rounded-xl bg-blue-600/10 border border-blue-600/20 flex items-center justify-center text-blue-600 font-bold text-sm shrink-0">
                           {member.name.charAt(0)}
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
-                            <span className="font-semibold text-sm text-foreground truncate">{member.name}</span>
+                            <span className="font-semibold text-sm text-slate-900 truncate">{member.name}</span>
                             <Badge
                               variant={isMemberOwner ? 'gold' : 'secondary'}
                               className="text-[9px] uppercase px-1 py-0 h-4"
@@ -402,7 +402,7 @@ export default function TeamStaffManagementPage() {
                               {member.role}
                             </Badge>
                           </div>
-                          <p className="text-xs text-muted-foreground truncate">{member.email}</p>
+                          <p className="text-xs text-slate-500 truncate">{member.email}</p>
                         </div>
                       </div>
 
@@ -415,14 +415,14 @@ export default function TeamStaffManagementPage() {
                     </div>
 
                     {member.assignedResponsibilities && (
-                      <div className="p-2 rounded-lg bg-background/60 border border-border/40 text-[11px] text-muted-foreground">
-                        <span className="font-medium text-foreground mr-1">Role Focus:</span>
+                      <div className="p-2 rounded-lg bg-white/60 border border-slate-100 text-[11px] text-slate-500">
+                        <span className="font-medium text-slate-900 mr-1">Role Focus:</span>
                         {member.assignedResponsibilities}
                       </div>
                     )}
 
-                    <div className="flex items-center justify-between pt-2 border-t border-border/40 text-xs">
-                      <span className="text-[10px] text-muted-foreground">
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+                      <span className="text-[10px] text-slate-500">
                         Joined: {new Date(member.createdAt).toLocaleDateString()}
                       </span>
 
@@ -457,27 +457,27 @@ export default function TeamStaffManagementPage() {
       ) : activeTab === 'invitations' ? (
         <div className="space-y-3">
           {invitationsList.length === 0 ? (
-            <Card className="border-border/60 bg-card/40 p-8 text-center max-w-md mx-auto my-6">
-              <Mail className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-              <h3 className="text-sm font-bold text-foreground">No Pending Invitations</h3>
-              <p className="text-xs text-muted-foreground mt-1">
+            <Card className="border-slate-200 bg-white p-8 text-center max-w-md mx-auto my-6">
+              <Mail className="h-8 w-8 text-slate-500 mx-auto mb-3" />
+              <h3 className="text-sm font-bold text-slate-900">No Pending Invitations</h3>
+              <p className="text-xs text-slate-500 mt-1">
                 All invitations have been accepted or no new invitations have been sent.
               </p>
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {invitationsList.map((inv) => (
-                <Card key={inv.id} className="border-border/60 bg-card/40 p-4 space-y-2.5">
+                <Card key={inv.id} className="border-slate-200 bg-white p-4 space-y-2.5">
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <span className="font-semibold text-xs text-foreground truncate">{inv.email}</span>
+                        <span className="font-semibold text-xs text-slate-900 truncate">{inv.email}</span>
                         <Badge variant="outline" className="text-[9px] uppercase px-1 py-0">
                           {inv.role}
                         </Badge>
                       </div>
                       {inv.phoneNumber && (
-                        <p className="text-[11px] text-muted-foreground mt-0.5">{inv.phoneNumber}</p>
+                        <p className="text-[11px] text-slate-500 mt-0.5">{inv.phoneNumber}</p>
                       )}
                     </div>
 
@@ -486,7 +486,7 @@ export default function TeamStaffManagementPage() {
                     </Badge>
                   </div>
 
-                  <div className="text-[10px] text-muted-foreground flex items-center justify-between pt-2 border-t border-border/40">
+                  <div className="text-[10px] text-slate-500 flex items-center justify-between pt-2 border-t border-slate-100">
                     <span>Invited by: {inv.inviterName || 'Administrator'}</span>
                     <span>Expires: {new Date(inv.expiresAt).toLocaleDateString()}</span>
                   </div>
@@ -499,33 +499,33 @@ export default function TeamStaffManagementPage() {
         /* AUDIT & ACTIVITY LOGS TAB */
         <div className="space-y-3">
           {auditLogs.length === 0 ? (
-            <Card className="border-border/60 bg-card/40 p-8 text-center max-w-md mx-auto my-6">
-              <History className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-              <h3 className="text-sm font-bold text-foreground">No Activity Recorded</h3>
-              <p className="text-xs text-muted-foreground mt-1">
+            <Card className="border-slate-200 bg-white p-8 text-center max-w-md mx-auto my-6">
+              <History className="h-8 w-8 text-slate-500 mx-auto mb-3" />
+              <h3 className="text-sm font-bold text-slate-900">No Activity Recorded</h3>
+              <p className="text-xs text-slate-500 mt-1">
                 Organization and staff actions will automatically appear here.
               </p>
             </Card>
           ) : (
-            <div className="rounded-xl border border-border/60 bg-card/40 overflow-hidden divide-y divide-border/40 text-xs">
+            <div className="rounded-xl border border-slate-200 bg-white overflow-hidden divide-y divide-border/40 text-xs">
               {auditLogs.map((log) => (
                 <div key={log.id} className="p-3 flex items-center justify-between gap-3 hover:bg-muted/10 transition-colors">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono font-semibold text-primary text-[11px] uppercase">
+                      <span className="font-mono font-semibold text-blue-600 text-[11px] uppercase">
                         {log.action}
                       </span>
-                      <span className="text-muted-foreground text-[11px]">on</span>
-                      <span className="font-mono text-foreground text-[11px]">
+                      <span className="text-slate-500 text-[11px]">on</span>
+                      <span className="font-mono text-slate-900 text-[11px]">
                         {log.resourceType}:{log.resourceId?.slice(0, 12)}
                       </span>
                     </div>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
-                      by <span className="font-medium text-foreground">{log.actorName}</span> ({log.actorEmail})
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      by <span className="font-medium text-slate-900">{log.actorName}</span> ({log.actorEmail})
                     </p>
                   </div>
 
-                  <div className="text-right shrink-0 text-[10px] text-muted-foreground font-mono">
+                  <div className="text-right shrink-0 text-[10px] text-slate-500 font-mono">
                     <div>{new Date(log.createdAt).toLocaleDateString()}</div>
                     <div>{new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                   </div>
@@ -539,15 +539,15 @@ export default function TeamStaffManagementPage() {
       {/* INVITE STAFF MODAL */}
       {showInviteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-card border border-border/70 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl relative text-xs">
+          <div className="bg-white border border-slate-200/70 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl relative text-xs">
             <button
               onClick={() => setShowInviteModal(false)}
-              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
+              className="absolute top-4 right-4 text-slate-500 hover:text-slate-900"
             >
               <X className="h-4 w-4" />
             </button>
 
-            <h2 className="text-base font-bold text-foreground">Invite Staff Member</h2>
+            <h2 className="text-base font-bold text-slate-900">Invite Staff Member</h2>
 
             {inviteError && (
               <div className="p-2.5 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs">
@@ -557,34 +557,34 @@ export default function TeamStaffManagementPage() {
 
             <form onSubmit={handleInviteSubmit} className="space-y-4">
               <div>
-                <label className="block font-medium text-foreground mb-1">Email Address *</label>
+                <label className="block font-medium text-slate-900 mb-1">Email Address *</label>
                 <input
                   type="email"
                   placeholder="colleague@example.com"
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground text-xs focus:outline-none focus:border-primary"
+                  className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
                   required
                 />
               </div>
 
               <div>
-                <label className="block font-medium text-foreground mb-1">Phone Number (Optional)</label>
+                <label className="block font-medium text-slate-900 mb-1">Phone Number (Optional)</label>
                 <input
                   type="tel"
                   placeholder="+919876543210"
                   value={invitePhone}
                   onChange={(e) => setInvitePhone(e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground text-xs focus:outline-none focus:border-primary"
+                  className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
                 />
               </div>
 
               <div>
-                <label className="block font-medium text-foreground mb-1">Role</label>
+                <label className="block font-medium text-slate-900 mb-1">Role</label>
                 <select
                   value={inviteRole}
                   onChange={(e) => setInviteRole(e.target.value as 'admin' | 'manager' | 'staff' | 'viewer')}
-                  className="w-full px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground text-xs focus:outline-none focus:border-primary"
+                  className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
                 >
                   <option value="staff">Staff (QR assignment, leads, profile editing)</option>
                   <option value="manager">Manager (Staff invites, batch operations, reports)</option>
@@ -594,17 +594,17 @@ export default function TeamStaffManagementPage() {
               </div>
 
               <div>
-                <label className="block font-medium text-foreground mb-1">Assigned Responsibilities / Focus</label>
+                <label className="block font-medium text-slate-900 mb-1">Assigned Responsibilities / Focus</label>
                 <input
                   type="text"
                   placeholder="e.g. South Region NFC Card Pairing, Hospitality Standees"
                   value={inviteResponsibilities}
                   onChange={(e) => setInviteResponsibilities(e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground text-xs focus:outline-none focus:border-primary"
+                  className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-border/40">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
                 <Button
                   type="button"
                   variant="outline"
@@ -617,7 +617,7 @@ export default function TeamStaffManagementPage() {
                 </Button>
                 <Button
                   type="submit"
-                  variant="gold"
+                  variant="default"
                   size="sm"
                   disabled={submittingInvite}
                   className="h-8 text-xs font-semibold gap-1.5"
@@ -634,17 +634,17 @@ export default function TeamStaffManagementPage() {
       {/* EDIT STAFF MODAL */}
       {editingMember && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-card border border-border/70 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl relative text-xs">
+          <div className="bg-white border border-slate-200/70 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl relative text-xs">
             <button
               onClick={() => setEditingMember(null)}
-              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
+              className="absolute top-4 right-4 text-slate-500 hover:text-slate-900"
             >
               <X className="h-4 w-4" />
             </button>
 
             <div>
-              <h2 className="text-base font-bold text-foreground">Edit Staff Member</h2>
-              <p className="text-muted-foreground text-xs">{editingMember.name} ({editingMember.email})</p>
+              <h2 className="text-base font-bold text-slate-900">Edit Staff Member</h2>
+              <p className="text-slate-500 text-xs">{editingMember.name} ({editingMember.email})</p>
             </div>
 
             {editError && (
@@ -655,11 +655,11 @@ export default function TeamStaffManagementPage() {
 
             <form onSubmit={handleEditSubmit} className="space-y-4">
               <div>
-                <label className="block font-medium text-foreground mb-1">Role</label>
+                <label className="block font-medium text-slate-900 mb-1">Role</label>
                 <select
                   value={editRole}
                   onChange={(e) => setEditRole(e.target.value as 'admin' | 'manager' | 'staff' | 'viewer')}
-                  className="w-full px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground text-xs focus:outline-none focus:border-primary"
+                  className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
                 >
                   <option value="staff">Staff</option>
                   <option value="manager">Manager</option>
@@ -669,11 +669,11 @@ export default function TeamStaffManagementPage() {
               </div>
 
               <div>
-                <label className="block font-medium text-foreground mb-1">Status</label>
+                <label className="block font-medium text-slate-900 mb-1">Status</label>
                 <select
                   value={editStatus}
                   onChange={(e) => setEditStatus(e.target.value as 'active' | 'suspended')}
-                  className="w-full px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground text-xs focus:outline-none focus:border-primary"
+                  className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
                 >
                   <option value="active">Active (Full access)</option>
                   <option value="suspended">Suspended (Access revoked)</option>
@@ -681,16 +681,16 @@ export default function TeamStaffManagementPage() {
               </div>
 
               <div>
-                <label className="block font-medium text-foreground mb-1">Assigned Responsibilities</label>
+                <label className="block font-medium text-slate-900 mb-1">Assigned Responsibilities</label>
                 <input
                   type="text"
                   value={editResponsibilities}
                   onChange={(e) => setEditResponsibilities(e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground text-xs focus:outline-none focus:border-primary"
+                  className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-border/40">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
                 <Button
                   type="button"
                   variant="outline"
@@ -703,7 +703,7 @@ export default function TeamStaffManagementPage() {
                 </Button>
                 <Button
                   type="submit"
-                  variant="gold"
+                  variant="default"
                   size="sm"
                   disabled={submittingEdit}
                   className="h-8 text-xs font-semibold gap-1.5"
@@ -720,30 +720,30 @@ export default function TeamStaffManagementPage() {
       {/* CREATE ORG MODAL */}
       {showCreateOrgModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-card border border-border/70 rounded-2xl w-full max-w-sm p-6 space-y-4 shadow-2xl relative text-xs">
+          <div className="bg-white border border-slate-200/70 rounded-2xl w-full max-w-sm p-6 space-y-4 shadow-2xl relative text-xs">
             <button
               onClick={() => setShowCreateOrgModal(false)}
-              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
+              className="absolute top-4 right-4 text-slate-500 hover:text-slate-900"
             >
               <X className="h-4 w-4" />
             </button>
 
-            <h2 className="text-base font-bold text-foreground">Create Organization</h2>
+            <h2 className="text-base font-bold text-slate-900">Create Organization</h2>
 
             <form onSubmit={handleCreateOrg} className="space-y-4">
               <div>
-                <label className="block font-medium text-foreground mb-1">Organization Name</label>
+                <label className="block font-medium text-slate-900 mb-1">Organization Name</label>
                 <input
                   type="text"
                   placeholder="e.g. Apex Hospitality Group"
                   value={newOrgName}
                   onChange={(e) => setNewOrgName(e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground text-xs focus:outline-none focus:border-primary"
+                  className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
                   required
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-border/40">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
                 <Button
                   type="button"
                   variant="outline"
@@ -756,7 +756,7 @@ export default function TeamStaffManagementPage() {
                 </Button>
                 <Button
                   type="submit"
-                  variant="gold"
+                  variant="default"
                   size="sm"
                   disabled={creatingOrg}
                   className="h-8 text-xs font-semibold gap-1.5"

@@ -1,8 +1,8 @@
-# Tapzio — Cloudinary Media Management Architecture
+﻿# Taptch — Cloudinary Media Management Architecture
 
 ## 1. Architectural Overview
 
-Tapzio integrates **Cloudinary** as the centralized, enterprise-grade Digital Asset Management (DAM) platform powering high-resolution avatars, business logos, cover images, product & service catalogues, photo galleries, video showcases, and downloadable PDF corporate brochures.
+Taptch integrates **Cloudinary** as the centralized, enterprise-grade Digital Asset Management (DAM) platform powering high-resolution avatars, business logos, cover images, product & service catalogues, photo galleries, video showcases, and downloadable PDF corporate brochures.
 
 The integration strictly follows our **Controlled Publishing & Plan Assignment System**:
 - Registered users can upload media assets and assemble complete profiles in draft mode.
@@ -34,18 +34,18 @@ To maintain enterprise order and prevent asset collision, all uploads adhere to 
 
 | Media Purpose | Cloudinary Folder Path | Resource Type | Max File Size |
 | :--- | :--- | :--- | :--- |
-| **Personal Avatars** | `tapzio/profiles/personal` | `image` | 10 MB |
-| **Personal Covers** | `tapzio/profiles/covers` | `image` | 10 MB |
-| **Personal Galleries** | `tapzio/profiles/galleries` | `image` | 10 MB |
-| **Business Logos** | `tapzio/businesses/logos` | `image` | 10 MB |
-| **Business Covers** | `tapzio/businesses/covers` | `image` | 10 MB |
-| **Catalogue Products** | `tapzio/businesses/products` | `image` | 10 MB |
-| **Catalogue Services** | `tapzio/businesses/services` | `image` | 10 MB |
-| **Business Galleries** | `tapzio/businesses/galleries` | `image` | 10 MB |
-| **PDF Brochures** | `tapzio/documents/brochures` | `raw` / `document` | 20 MB |
-| **Promotional Videos** | `tapzio/videos` | `video` | 50 MB |
-| **Template Previews** | `tapzio/templates/previews` | `image` | 10 MB |
-| **Physical NFC Assets** | `tapzio/nfc-products` | `image` | 10 MB |
+| **Personal Avatars** | `Taptch/profiles/personal` | `image` | 10 MB |
+| **Personal Covers** | `Taptch/profiles/covers` | `image` | 10 MB |
+| **Personal Galleries** | `Taptch/profiles/galleries` | `image` | 10 MB |
+| **Business Logos** | `Taptch/businesses/logos` | `image` | 10 MB |
+| **Business Covers** | `Taptch/businesses/covers` | `image` | 10 MB |
+| **Catalogue Products** | `Taptch/businesses/products` | `image` | 10 MB |
+| **Catalogue Services** | `Taptch/businesses/services` | `image` | 10 MB |
+| **Business Galleries** | `Taptch/businesses/galleries` | `image` | 10 MB |
+| **PDF Brochures** | `Taptch/documents/brochures` | `raw` / `document` | 20 MB |
+| **Promotional Videos** | `Taptch/videos` | `video` | 50 MB |
+| **Template Previews** | `Taptch/templates/previews` | `image` | 10 MB |
+| **Physical NFC Assets** | `Taptch/nfc-products` | `image` | 10 MB |
 
 ---
 
@@ -82,7 +82,7 @@ images: {
 
 ### 5.2 Direct Client-Side Signed Uploads (`POST /api/v1/media/signature`)
 - Generates HMAC-SHA256 request signatures via Cloudinary SDK without exposing `CLOUDINARY_API_SECRET` to the browser.
-- Attaches contextual tags: `['tapzio', 'user_<id>', '<category>']`.
+- Attaches contextual tags: `['Taptch', 'user_<id>', '<category>']`.
 - Enables high-speed, direct-from-browser uploads straight to Cloudinary Edge CDN.
 
 ### 5.3 Media Deletion (`DELETE /api/v1/media/[id]`)

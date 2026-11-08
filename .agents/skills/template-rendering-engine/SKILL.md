@@ -1,15 +1,15 @@
----
+﻿---
 name: template-rendering-engine
-description: "Master Tappzio's template rendering system, 6 luxury themes, theme customization swatches, dual-device live preview, and data preservation across template switches."
+description: "Master Taptch's template rendering system, 6 luxury themes, theme customization swatches, dual-device live preview, and data preservation across template switches."
 risk: safe
-source: Tappzio-core
+source: Taptch-core
 date_added: "2026-11-02"
 version: "1.0.0"
 ---
 
-# Tappzio Template Rendering Engine Skill
+# Taptch Template Rendering Engine Skill
 
-Engineering standard for Tappzio's luxury profile template system, dual-device live previewing, theme token resolution, and content preservation across template transitions.
+Engineering standard for Taptch's luxury profile template system, dual-device live previewing, theme token resolution, and content preservation across template transitions.
 
 ---
 
@@ -24,7 +24,7 @@ Engineering standard for Tappzio's luxury profile template system, dual-device l
 
 ## 2. The 6 Luxury Template Aesthetics
 
-Tappzio features 6 distinct design directions engineered to serve specific professional verticals:
+Taptch features 6 distinct design directions engineered to serve specific professional verticals:
 
 | Template Slug | Identity & Theme | Target Audience | Required Plan |
 | :--- | :--- | :--- | :--- |
@@ -39,7 +39,7 @@ Tappzio features 6 distinct design directions engineered to serve specific profe
 
 ## 3. Data Preservation Guarantee Across Template Switches
 
-A critical principle of the Tappzio platform: **Templates are lenses over data, not containers.**
+A critical principle of the Taptch platform: **Templates are lenses over data, not containers.**
 
 When a user switches from `obsidian-luxury` to `ivory-minimal`:
 1. All profile fields (name, headline, bio, avatar, cover) remain 100% intact.

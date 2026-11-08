@@ -1,8 +1,8 @@
----
+﻿---
 name: nextjs-app-router
 description: "Master Next.js 15 App Router architecture, file conventions, layouts, templates, error boundaries, parallel routes, and intercepting routes."
 risk: safe
-source: Tappzio-core
+source: Taptch-core
 date_added: "2026-11-02"
 version: "1.0.0"
 ---

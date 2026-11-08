@@ -1,4 +1,4 @@
-# Tapzio — Implementation Roadmap & Execution Plan
+﻿# Taptch — Implementation Roadmap & Execution Plan
 
 ## 1. Roadmap Architecture
 Development progresses through 10 gated milestones (M0 through M9). Each milestone delivers a small, verified slice of functionality verified with automated tests and visual inspections before proceeding.

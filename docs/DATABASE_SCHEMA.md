@@ -1,7 +1,7 @@
-# Tapzio — Database Schema & Data Architecture
+﻿# Taptch — Database Schema & Data Architecture
 ## Realigned Schema Supporting Digital Profiles, Multi-Business Associations & Dynamic Templates
 
-**Product:** Tapzio  
+**Product:** Taptch  
 **Platform Owner:** Webzio Technology  
 **Database Engine:** PostgreSQL 17 (Supabase / Direct PgBouncer) + Embedded PGlite  
 **ORM:** Drizzle ORM (`prepare: false`)  

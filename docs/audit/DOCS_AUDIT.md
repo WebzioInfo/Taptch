@@ -1,4 +1,4 @@
-# Tapzio — Comprehensive Documentation & Architectural Audit
+﻿# Taptch — Comprehensive Documentation & Architectural Audit
 
 **Document Version:** 1.0.0  
 **Audit Date:** October 31, 2026  
@@ -9,7 +9,7 @@
 
 ## 1. Inventory of Existing Documentation
 
-The repository at `D:\Webzio\Tapzio\docs` contains **25 documentation and specification files** totaling **118,725 bytes**. Below is the complete catalog assessing purpose, completeness status, and disk footprint.
+The repository at `D:\Webzio\Taptch\docs` contains **25 documentation and specification files** totaling **118,725 bytes**. Below is the complete catalog assessing purpose, completeness status, and disk footprint.
 
 | File Path | Purpose | Completeness Status | Size (Bytes) | Lines |
 | :--- | :--- | :---: | :---: | :---: |
@@ -173,15 +173,15 @@ Every item from the review checklist has been audited against the codebase and m
 #### 3.4 India OTP SMS (DLT/TRAI) & WhatsApp OTP Fallback
 - **TRAI DLT Compliance**:
   - Entity Registration: Webzio Technology registered as Principal Entity (PE) on Telecom Regulatory Authority of India (TRAI) DLT portal (e.g. Vilpower / Jio DLT).
-  - Approved Header / Sender ID: `TAPZIO` or `WBZTAP` (6-character alphanumeric, Transactional/Service category).
-  - Registered Template ID: e.g., `1007829104829102938` (*"Your Tapzio verification code is {#var#}. Valid for 10 minutes. Do not share this code with anyone. Webzio Technology"*).
+  - Approved Header / Sender ID: `Taptch` or `WBZTAP` (6-character alphanumeric, Transactional/Service category).
+  - Registered Template ID: e.g., `1007829104829102938` (*"Your Taptch verification code is {#var#}. Valid for 10 minutes. Do not share this code with anyone. Webzio Technology"*).
 - **Primary SMS Gateway**: MSG91 or Twilio Verify India route with automated DLT Template ID injection.
-- **WhatsApp OTP Alternative**: Meta Cloud API for WhatsApp Business. Sent via pre-approved template message: `tapzio_login_otp`. Delivers 99.2% delivery success within 4 seconds compared to fluctuating telecom SMS delivery latencies in India.
+- **WhatsApp OTP Alternative**: Meta Cloud API for WhatsApp Business. Sent via pre-approved template message: `Taptch_login_otp`. Delivers 99.2% delivery success within 4 seconds compared to fluctuating telecom SMS delivery latencies in India.
 
 #### 3.5 Card Manufacturing Path & Hardware Tap Physics
 - **Primary Production Path**:
   1. Production run creates batch record in DB (`card_batches`).
-  2. System generates CSV export containing: `serial_number`, `token`, `target_url` (`https://tapzio.com/n/{token}`), and `activation_code`.
+  2. System generates CSV export containing: `serial_number`, `token`, `target_url` (`https://Taptch.com/n/{token}`), and `activation_code`.
   3. CSV delivered securely to contract manufacturer for pre-encoding onto cards during laminating/printing.
 - **Secondary Path / Quality Assurance**:
   - `tools/nfc-encoder`: In-house desktop CLI utility connecting to ACS ACR122U or Identiv uTrust USB smartcard readers via `nfc-pcsc`. Used for on-demand custom metal cards and factory QC sampling.
@@ -196,7 +196,7 @@ Every item from the review checklist has been audited against the codebase and m
 #### 3.6 Apple Developer & Google Wallet Prerequisites
 - **Apple Wallet (.pkpass)**:
   - Requires Apple Developer Program Organization account ($99/year).
-  - Pass Type Identifier: `pass.com.tapzio.card`.
+  - Pass Type Identifier: `pass.com.Taptch.card`.
   - Pass Signing Certificate: Created in Apple Member Center, exported as `.p12`, decrypted to private PEM key.
   - Server pipeline: Built using `passkit-generator` to assemble `manifest.json`, icon assets, `pass.json`, and generate cryptographic signature.
 - **Google Wallet Passes**:
@@ -206,11 +206,11 @@ Every item from the review checklist has been audited against the codebase and m
 
 #### 3.7 Custom-Domain SSL & Host-to-Tenant Routing
 - **Architecture**:
-  - **Primary**: Cloudflare for Platforms (Custom Hostnames API). Enterprise SSL automation at edge. Customer configures CNAME `profile.clientcompany.com` pointing to `domains.tapzio.com`. Cloudflare auto-issues SSL certificate within 90 seconds.
+  - **Primary**: Cloudflare for Platforms (Custom Hostnames API). Enterprise SSL automation at edge. Customer configures CNAME `profile.clientcompany.com` pointing to `domains.Taptch.com`. Cloudflare auto-issues SSL certificate within 90 seconds.
   - **Alternative / Self-Hosted**: Reverse proxy running Caddy 2.8+ with On-Demand TLS enabled. Caddy queries internal endpoint (`/api/v1/internal/domains/check?domain={domain}`) before issuing Let's Encrypt certificates to prevent certificate exhaustion attacks.
 - **Tenant Resolution Middleware**:
   - Edge middleware checks incoming `Host` header.
-  - If `Host` equals `tapzio.com` or `localhost`, proceed with standard route group handling.
+  - If `Host` equals `Taptch.com` or `localhost`, proceed with standard route group handling.
   - If `Host` matches a verified custom domain, middleware issues internal rewrite to `/p/[slug]` mapped from Redis key `custom_domain:{host}`.
 
 #### 3.8 Indian GST Invoicing Rules & Razorpay Integration
@@ -228,7 +228,7 @@ Every item from the review checklist has been audited against the codebase and m
   - Refunds: Full API refund reversal triggers credit note document generation linked to original invoice ID.
 
 #### 3.9 DPDP Act 2023 Compliance & Data Retention
-- **Age Restriction & Minors' Data**: Tapzio explicitly restricts platform registration to individuals aged 18 and older. The Terms of Service state that Tapzio is a professional business networking tool. Under Section 9 of India's DPDP Act 2023 (processing of children's data), processing personal data of children requires verifiable parental consent and forbids behavioral monitoring. To eliminate severe liability, children under 18 are prohibited from holding accounts.
+- **Age Restriction & Minors' Data**: Taptch explicitly restricts platform registration to individuals aged 18 and older. The Terms of Service state that Taptch is a professional business networking tool. Under Section 9 of India's DPDP Act 2023 (processing of children's data), processing personal data of children requires verifiable parental consent and forbids behavioral monitoring. To eliminate severe liability, children under 18 are prohibited from holding accounts.
 - **Consent Mechanism**: Lead capture modal includes an unchecked checkbox: *"I consent to sharing my contact details with [Name/Company] for business networking purposes."* Timestamp, IP hash, and consent text version are recorded.
 - **Right to Portability**: Automated user export generates a password-protected `.zip` containing:
   - `profile.json`: All profile revisions and content blocks.

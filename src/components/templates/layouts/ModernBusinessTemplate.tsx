@@ -141,7 +141,7 @@ export function ModernBusinessTemplate({
                 className="flex-1 md:flex-none bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold gap-2 text-xs h-10 px-5 shadow-lg shadow-emerald-500/20"
               >
                 <Download className="h-4 w-4" />
-                <span>Save Contact</span>
+                <span>Save this profile</span>
               </Button>
               <Button
                 variant="outline"

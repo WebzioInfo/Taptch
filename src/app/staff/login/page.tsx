@@ -69,7 +69,7 @@ export default function StaffLoginPage() {
                 <Input
                   type="email"
                   required
-                  placeholder="agent@tappzio.com"
+                  placeholder="agent@taptch.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-9 h-10 text-xs bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-500"

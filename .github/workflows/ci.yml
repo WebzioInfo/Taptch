@@ -1,4 +1,4 @@
-name: Tapzio CI
+name: TAPTCH CI
 
 on:
   push:

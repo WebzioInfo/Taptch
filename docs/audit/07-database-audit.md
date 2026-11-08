@@ -1,4 +1,4 @@
-# Tappzio 360° Master Project Audit — 07: Database & Data Integrity Audit
+﻿# Taptch 360° Master Project Audit — 07: Database & Data Integrity Audit
 
 **Focus:** PostgreSQL 16 Schema (34 Tables), Drizzle ORM, Foreign Key Constraints, PgBouncer RLS Isolation, Migration Ledger  
 **Auditor:** Database Architect & Performance Engineer  
@@ -8,7 +8,7 @@
 
 ## 1. Database Topology & Table Schema Inventory
 
-The Tappzio PostgreSQL database comprises 34 normalized relational tables partitioned into core domain clusters:
+The Taptch PostgreSQL database comprises 34 normalized relational tables partitioned into core domain clusters:
 
 ### A. Authentication & User Identity Cluster
 1. `users`: Core identity, email, hashed password, phone, status (`active`, `suspended`, `deactivated`), system role.
@@ -43,7 +43,7 @@ The Tappzio PostgreSQL database comprises 34 normalized relational tables partit
 22. `templates`: Luxury profile visual themes and style presets.
 23. `system_settings`: Platform-wide configurations (brand overrides, maintenance flags).
 24. `audit_logs`: Immutable security event logs.
-25. `__tappzio_migrations`: Authoritative schema migration version tracker.
+25. `__Taptch_migrations`: Authoritative schema migration version tracker.
 
 ---
 
@@ -51,7 +51,7 @@ The Tappzio PostgreSQL database comprises 34 normalized relational tables partit
 
 In high-scale enterprise environments with PgBouncer running in transaction pooling mode:
 1. **The Leakage Risk**: Standard session variables set via `SET app.current_user_id = '...'` persist across transactions if the pooler assigns the same backend connection to another tenant.
-2. **The Tappzio Guard**: Every tenant-scoped query executed via `db.withActor(actor, fn)` injects the actor variable with transaction scoping:
+2. **The Taptch Guard**: Every tenant-scoped query executed via `db.withActor(actor, fn)` injects the actor variable with transaction scoping:
    ```sql
    SELECT set_config('app.current_user_id', $1, true);
    ```
@@ -62,7 +62,7 @@ In high-scale enterprise environments with PgBouncer running in transaction pool
 
 ## 3. Migration Reliability
 
-- The migration runner (`src/db/migrate.ts`) inspects the migration table and automatically reconciles migrations across both `__tappzio_migrations` and legacy naming.
+- The migration runner (`src/db/migrate.ts`) inspects the migration table and automatically reconciles migrations across both `__Taptch_migrations` and legacy naming.
 - All migrations from `0000_init.sql` to `0009_organization_staff_management.sql` execute idempotently.
 
 ---

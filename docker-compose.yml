@@ -2,19 +2,19 @@ services:
   # 1. Primary PostgreSQL 16 Instance
   postgres:
     image: postgres:16-alpine
-    container_name: tapzio-postgres
+    container_name: taptch-postgres
     restart: unless-stopped
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_DB: tapzio_db
+      POSTGRES_DB: taptch_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres_root_pass
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./infra/docker/postgres-init:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d tapzio_db"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d taptch_db"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -22,16 +22,16 @@ services:
   # 2. PgBouncer Connection Pooler (Transaction Mode)
   pgbouncer:
     image: edoburu/pgbouncer:latest
-    container_name: tapzio-pgbouncer
+    container_name: taptch-pgbouncer
     restart: unless-stopped
     ports:
       - "6432:6432"
     environment:
-      DB_USER: tapzio_app
-      DB_PASSWORD: tapzio_app_pass
+      DB_USER: taptch_app
+      DB_PASSWORD: taptch_app_pass
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_NAME: tapzio_db
+      DB_NAME: taptch_db
       POOL_MODE: transaction
       MAX_CLIENT_CONN: 5000
       DEFAULT_POOL_SIZE: 25
@@ -45,7 +45,7 @@ services:
   # 3. Redis In-Memory Cache & Message Broker
   redis:
     image: redis:7.2-alpine
-    container_name: tapzio-redis
+    container_name: taptch-redis
     restart: unless-stopped
     ports:
       - "6379:6379"
@@ -61,7 +61,7 @@ services:
   # 4. MinIO S3-Compatible Local Object Storage
   minio:
     image: minio/minio:latest
-    container_name: tapzio-minio
+    container_name: taptch-minio
     restart: unless-stopped
     ports:
       - "9000:9000"
@@ -81,22 +81,22 @@ services:
   # 5. MinIO Initialization (Create Public Media Bucket)
   minio-init:
     image: minio/mc:latest
-    container_name: tapzio-minio-init
+    container_name: taptch-minio-init
     depends_on:
       minio:
         condition: service_healthy
     entrypoint: >
       /bin/sh -c "
       /usr/bin/mc config host add myminio http://minio:9000 minioadmin minioadmin;
-      /usr/bin/mc mb --ignore-existing myminio/tapzio-media;
-      /usr/bin/mc anonymous set download myminio/tapzio-media;
+      /usr/bin/mc mb --ignore-existing myminio/taptch-media;
+      /usr/bin/mc anonymous set download myminio/taptch-media;
       exit 0;
       "
 
   # 6. Mailpit Transactional Email Testing UI
   mailpit:
     image: axllent/mailpit:latest
-    container_name: tapzio-mailpit
+    container_name: taptch-mailpit
     restart: unless-stopped
     ports:
       - "1025:1025" # SMTP port

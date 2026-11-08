@@ -1,4 +1,4 @@
-# Tapzio — Comprehensive Technology Stack Evaluation & Decisions
+﻿# Taptch — Comprehensive Technology Stack Evaluation & Decisions
 
 **Document Version:** 1.0.0  
 **Date of Verification:** October 31, 2026  
@@ -9,7 +9,7 @@
 
 ## 1. Architectural Principles & Evaluation Rubric
 
-Every architectural component in Tapzio is evaluated against five non-negotiable engineering criteria:
+Every architectural component in Taptch is evaluated against five non-negotiable engineering criteria:
 1. **India-First Latency**: Public NFC taps (`/n/*`) and profile views (`/p/*`) must execute with sub-50ms redirect and sub-1.2s mobile LCP on Indian 4G/5G networks (Jio / Airtel).
 2. **Strict Multi-Tenant Isolation**: Dual-layer defense (Application Data Access Layer + PostgreSQL Row-Level Security) must guarantee zero IDOR or cross-tenant data leakage under pooled database connections.
 3. **Operational Sovereignty & Predictable Cost**: Zero vendor lock-in traps; self-hostable primitives with linear cost curves.
@@ -308,7 +308,7 @@ Every architectural component in Tapzio is evaluated against five non-negotiable
 - **Chosen Option**: **`passkit-generator` (Apple Wallet `.pkpass`) + Google Wallet REST API (JWT signed)**.
 - **Alternatives Evaluated**:
   1. *PassKit.com / PassNinja (Third-Party SaaS)*: Charges \$0.05–\$0.15 per active pass per month (\$500/mo for 10,000 passes); creates an external dependency on customer identity.
-- **Why Chosen (Evidence)**: Direct generation gives Tapzio complete ownership over cryptographic signing keys and push notification triggers for contact updates. Shipped behind a feature flag disabled until developer certificates are uploaded; dev environment provides an interactive mock visual preview.
+- **Why Chosen (Evidence)**: Direct generation gives Taptch complete ownership over cryptographic signing keys and push notification triggers for contact updates. Shipped behind a feature flag disabled until developer certificates are uploaded; dev environment provides an interactive mock visual preview.
 - **Known Risks**: Apple developer certificates expire annually (mitigated by automated monitoring alerts).
 - **When to Switch**: Never.
 - **Monthly Cost**: \$99/year (Apple Developer fee) + \$0 (Google Wallet API is free).
@@ -367,7 +367,7 @@ Every architectural component in Tapzio is evaluated against five non-negotiable
 - **Chosen Option**: **Cloudflare for Platforms (Custom Hostnames API) with Caddy 2.8+ On-Demand TLS Fallback**.
 - **Alternatives Evaluated**:
   1. *Vercel Domains API*: Proprietary to Vercel hosting; incurs steep per-domain pricing tiers for white-label reseller setups.
-- **Why Chosen (Evidence)**: Cloudflare for Platforms automates wildcard and custom apex/subdomain SSL provisioning at the edge with zero origin certificate management. Customer simply points a CNAME to `domains.tapzio.com`. Caddy serves as an independent self-hosted fallback capable of issuing on-demand Let's Encrypt certificates after validating domain ownership via an internal API.
+- **Why Chosen (Evidence)**: Cloudflare for Platforms automates wildcard and custom apex/subdomain SSL provisioning at the edge with zero origin certificate management. Customer simply points a CNAME to `domains.Taptch.com`. Caddy serves as an independent self-hosted fallback capable of issuing on-demand Let's Encrypt certificates after validating domain ownership via an internal API.
 - **Known Risks**: Domain verification delays if customer DNS TTL is long.
 - **When to Switch**: Never.
 - **Monthly Cost**: \$0 (First 100 domains free on Cloudflare; \$0.10/domain/month thereafter).

@@ -11,7 +11,7 @@ if (fs.existsSync(path.resolve('.env.local'))) {
 dotenv.config({ path: path.resolve('.env') });
 
 export async function runMigrations() {
-  console.log('[MIGRATIONS] Starting Tappzio database migrations...');
+  console.log('[MIGRATIONS] Starting TAPTCH database migrations...');
 
   const migrationsDir = path.resolve('src/db/migrations');
   const sqlFiles = fs
@@ -28,20 +28,16 @@ export async function runMigrations() {
     console.log(`[MIGRATIONS] Executing migrations on embedded PGlite (${dataDir})...`);
     const client = new PGlite(dataDir);
 
-    // Ensure migrations ledger exists (support both __tappzio_migrations and legacy __tapzio_migrations)
+    // Ensure migrations ledger exists
     await client.exec(`
-      CREATE TABLE IF NOT EXISTS __tappzio_migrations (
-        name VARCHAR(255) PRIMARY KEY,
-        applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-      CREATE TABLE IF NOT EXISTS __tapzio_migrations (
+      CREATE TABLE IF NOT EXISTS __taptch_migrations (
         name VARCHAR(255) PRIMARY KEY,
         applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
 
     const appliedRows = await client.query<{ name: string }>(
-      'SELECT name FROM __tappzio_migrations UNION SELECT name FROM __tapzio_migrations'
+      'SELECT name FROM __taptch_migrations'
     );
     const appliedSet = new Set(appliedRows.rows.map((r) => r.name));
 
@@ -53,37 +49,31 @@ export async function runMigrations() {
       const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf-8');
       console.log(`[MIGRATIONS] Applying ${file}...`);
       await client.exec(sql);
-      await client.exec(`INSERT INTO __tappzio_migrations (name) VALUES ('${file}') ON CONFLICT DO NOTHING`);
+      await client.exec(`INSERT INTO __taptch_migrations (name) VALUES ('${file}') ON CONFLICT DO NOTHING`);
     }
     console.log('[MIGRATIONS] Embedded PGlite migrations completed successfully.');
     return;
   }
 
-  // Connect via DIRECT migrator connection (tappzio_migrator)
+  // Connect via DIRECT migrator connection (taptch_migrator or fallback)
   const connectionString =
     process.env.DATABASE_URL_DIRECT ||
     process.env.DATABASE_URL ||
-    'postgres://tappzio_migrator:tappzio_migrator_pass@localhost:5432/tappzio_db?sslmode=disable';
+    'postgres://taptch_migrator:taptch_migrator_pass@localhost:5432/taptch_db?sslmode=disable';
 
   console.log(`[MIGRATIONS] Connecting to ${connectionString.replace(/:[^:@]+@/, ':***@')}...`);
   const sqlClient = postgres(connectionString, { max: 1 });
 
   try {
     await sqlClient.unsafe(`
-      CREATE TABLE IF NOT EXISTS __tappzio_migrations (
-        name VARCHAR(255) PRIMARY KEY,
-        applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-      CREATE TABLE IF NOT EXISTS __tapzio_migrations (
+      CREATE TABLE IF NOT EXISTS __taptch_migrations (
         name VARCHAR(255) PRIMARY KEY,
         applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
 
     const applied = await sqlClient<{ name: string }[]>`
-      SELECT name FROM __tappzio_migrations
-      UNION
-      SELECT name FROM __tapzio_migrations
+      SELECT name FROM __taptch_migrations
     `;
     const appliedSet = new Set(applied.map((r) => r.name));
 
@@ -95,7 +85,7 @@ export async function runMigrations() {
       const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf-8');
       console.log(`[MIGRATIONS] Applying ${file}...`);
       await sqlClient.unsafe(sql);
-      await sqlClient`INSERT INTO __tappzio_migrations (name) VALUES (${file}) ON CONFLICT DO NOTHING`;
+      await sqlClient`INSERT INTO __taptch_migrations (name) VALUES (${file}) ON CONFLICT DO NOTHING`;
     }
     console.log('[MIGRATIONS] All PostgreSQL migrations applied successfully.');
   } catch (error) {

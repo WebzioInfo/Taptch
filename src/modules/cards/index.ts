@@ -58,7 +58,7 @@ export function hashActivationCode(code: string): string {
  */
 export function anonymizeVisitorIp(ip?: string): string {
   const dayString = new Date().toISOString().slice(0, 10);
-  const salt = process.env.VISITOR_SALT_SECRET || 'tappzio-visitor-salt-2026';
+  const salt = process.env.VISITOR_SALT_SECRET || 'taptch-visitor-salt-2026';
   return createHash('sha256')
     .update(`${ip || '127.0.0.1'}-${dayString}-${salt}`)
     .digest('hex')

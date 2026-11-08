@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { middleware } from '@/middleware';
 
-const TEST_SECRET = 'tappzio-development-better-auth-secret-min-32-chars-long';
+const TEST_SECRET = 'taptch-development-better-auth-secret-min-32-chars-long';
 
 async function createSignedCookie(token: string, secret: string = TEST_SECRET): Promise<string> {
   const algorithm = { name: 'HMAC', hash: 'SHA-256' };

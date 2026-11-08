@@ -85,8 +85,8 @@ export default function LeadsPage() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-10">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4 pb-4 border-b border-border/60">
-        <h1 className="text-xl font-bold tracking-tight text-foreground">
+      <div className="flex items-center justify-between gap-4 pb-4 border-b border-slate-200">
+        <h1 className="text-xl font-bold tracking-tight text-slate-900">
           Leads
         </h1>
 
@@ -105,33 +105,33 @@ export default function LeadsPage() {
       {/* Search & Filter Bar */}
       <div className="flex items-center justify-between gap-4">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search leads..."
-            className="pl-8 h-8 bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary text-xs"
+            className="pl-8 h-8 bg-white border-slate-200 text-slate-900 placeholder:text-slate-500 focus:border-blue-600 text-xs"
           />
         </div>
-        <div className="text-xs text-muted-foreground">
+        <div className="text-xs text-slate-500">
           {filteredLeads.length} leads
         </div>
       </div>
 
       {loading ? (
         <div className="flex justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
         </div>
       ) : filteredLeads.length === 0 ? (
-        <Card className="border-border/60 bg-card/40 text-center py-12">
+        <Card className="border-slate-200 bg-white text-center py-12">
           <CardContent className="space-y-3 max-w-sm mx-auto">
-            <div className="mx-auto h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+            <div className="mx-auto h-10 w-10 rounded-xl bg-blue-600/10 flex items-center justify-center text-blue-600">
               <Users className="h-5 w-5" />
             </div>
-            <h3 className="font-semibold text-base text-foreground">
+            <h3 className="font-semibold text-base text-slate-900">
               {search ? 'No Matches' : 'No Leads'}
             </h3>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-slate-500">
               Contacts exchanged through cards and profiles will appear here.
             </p>
           </CardContent>
@@ -139,9 +139,9 @@ export default function LeadsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredLeads.map((lead) => (
-            <Card key={lead.id} className="border-border/70 bg-card/40 p-4 space-y-3 hover:border-primary/40 transition-colors">
+            <Card key={lead.id} className="border-slate-200/70 bg-white p-4 space-y-3 hover:border-blue-600/40 transition-colors">
               <div className="flex items-center justify-between">
-                <div className="font-semibold text-sm text-foreground truncate">
+                <div className="font-semibold text-sm text-slate-900 truncate">
                   {lead.name}
                 </div>
                 <Badge variant="outline" className="text-[10px] px-1.5 py-0">
@@ -150,25 +150,25 @@ export default function LeadsPage() {
               </div>
 
               {(lead.jobTitle || lead.company) && (
-                <div className="text-xs text-muted-foreground truncate">
+                <div className="text-xs text-slate-500 truncate">
                   {[lead.jobTitle, lead.company].filter(Boolean).join(' • ')}
                 </div>
               )}
 
-              <div className="space-y-1 pt-2 border-t border-border/40 text-xs">
+              <div className="space-y-1 pt-2 border-t border-slate-100 text-xs">
                 {lead.email && (
-                  <div className="flex items-center gap-2 text-muted-foreground truncate">
+                  <div className="flex items-center gap-2 text-slate-500 truncate">
                     <Mail className="h-3 w-3 shrink-0" />
                     <span className="truncate">{lead.email}</span>
                   </div>
                 )}
                 {lead.phone && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
+                  <div className="flex items-center gap-2 text-slate-500">
                     <Phone className="h-3 w-3 shrink-0" />
                     <span>{lead.phone}</span>
                   </div>
                 )}
-                <div className="flex items-center gap-2 text-muted-foreground text-[11px] pt-1">
+                <div className="flex items-center gap-2 text-slate-500 text-[11px] pt-1">
                   <Calendar className="h-3 w-3 shrink-0" />
                   <span>{new Date(lead.createdAt).toLocaleDateString()}</span>
                 </div>

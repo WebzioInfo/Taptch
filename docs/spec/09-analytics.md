@@ -1,4 +1,4 @@
-# Tapzio Specification — 09 Honest & Privacy-Aware Analytics
+﻿# Taptch Specification — 09 Honest & Privacy-Aware Analytics
 
 > Source: Master Prompt Section 9
 

@@ -37,7 +37,7 @@ packages = [
 today = datetime.now().strftime("%B %d, %Y")
 
 out_lines = [
-    "# Tapzio — Verified Stable Dependency Versions & Registry Pins",
+    "# Taptch — Verified Stable Dependency Versions & Registry Pins",
     "",
     f"**Verification Date:** {today}  ",
     "**Source Registry:** Official npm Registry (`https://registry.npmjs.org`)  ",
@@ -79,7 +79,7 @@ out_lines.extend([
     "- **Drizzle Adapter:** Built-in under `better-auth/adapters/drizzle`."
 ])
 
-with open(r"D:\Webzio\Tapzio\docs\audit\VERSIONS.md", "w", encoding="utf-8") as f:
+with open(r"D:\Webzio\taptch\docs\audit\VERSIONS.md", "w", encoding="utf-8") as f:
     f.write("\n".join(out_lines) + "\n")
 
 print("VERSIONS.md successfully generated")

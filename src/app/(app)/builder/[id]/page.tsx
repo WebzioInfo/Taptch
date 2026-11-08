@@ -510,7 +510,7 @@ export default function ProfileBuilderPage({
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 rounded-full border-2 border-gold border-t-transparent animate-spin" />
+          <div className="w-8 h-8 rounded-full border-2 border-blue-600 border-t-transparent animate-spin" />
           <p className="text-xs text-muted-foreground">Loading Profile Editor...</p>
         </div>
       </div>
@@ -520,7 +520,7 @@ export default function ProfileBuilderPage({
   if (!profile) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6 bg-background">
-        <div className="text-center max-w-md p-6 bg-card border border-border rounded-xl">
+        <div className="text-center max-w-md p-6 bg-white border border-slate-200 rounded-xl">
           <AlertCircle className="w-10 h-10 text-destructive mx-auto mb-3" />
           <h2 className="text-lg font-bold">Profile Unavailable</h2>
           <p className="text-xs text-muted-foreground mt-1">{errorMessage || 'Could not find profile.'}</p>
@@ -540,7 +540,7 @@ export default function ProfileBuilderPage({
   return (
     <div className="h-screen flex flex-col bg-background text-foreground overflow-hidden">
       {/* Top Navbar */}
-      <header className="h-14 border-b border-border/80 bg-card px-4 flex items-center justify-between shrink-0">
+      <header className="h-14 border-b border-slate-200 bg-white px-4 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
           <Link href="/dashboard" className="text-xs text-muted-foreground hover:text-foreground">
             ← Dashboard
@@ -595,7 +595,7 @@ export default function ProfileBuilderPage({
             size="sm"
             onClick={handlePublish}
             disabled={isPublishing}
-            className="text-xs h-8 bg-gold text-gold-foreground hover:bg-gold-light font-semibold"
+            className="text-xs h-8 bg-blue-600 text-white hover:bg-blue-700 font-semibold"
           >
             {isPublishing ? 'Publishing...' : 'Publish'}
           </Button>
@@ -614,8 +614,8 @@ export default function ProfileBuilderPage({
       {/* 3-Pane Body */}
       <div className="flex-1 flex overflow-hidden">
         {/* Pane 1: Left Sections Navigator */}
-        <aside className="w-64 border-r border-border/80 bg-card/60 flex flex-col shrink-0 overflow-y-auto">
-          <div className="p-4 border-b border-border/60">
+        <aside className="w-64 border-r border-slate-200 bg-white flex flex-col shrink-0 overflow-y-auto">
+          <div className="p-4 border-b border-slate-200">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
               Sections
             </span>
@@ -631,7 +631,7 @@ export default function ProfileBuilderPage({
                   onClick={() => setActiveTab(tab.id)}
                   className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all ${
                     isActive
-                      ? 'bg-gold/15 text-gold font-semibold shadow-sm'
+                      ? 'bg-blue-50 text-blue-700 font-semibold shadow-sm'
                       : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                   }`}
                 >
@@ -639,13 +639,13 @@ export default function ProfileBuilderPage({
                     <Icon className="w-4 h-4 shrink-0" />
                     <span>{tab.label}</span>
                   </div>
-                  <ChevronRight className={`w-3.5 h-3.5 transition-transform ${isActive ? 'rotate-90 text-gold' : 'opacity-40'}`} />
+                  <ChevronRight className={`w-3.5 h-3.5 transition-transform ${isActive ? 'rotate-90 text-blue-600' : 'opacity-40'}`} />
                 </button>
               );
             })}
           </nav>
 
-          <div className="mt-auto p-4 border-t border-border/60 bg-muted/20">
+          <div className="mt-auto p-4 border-t border-slate-200 bg-muted/20">
             <div className="text-[11px] text-muted-foreground">Public URL:</div>
             <div className="font-mono text-xs text-foreground truncate mt-0.5">
               /p/{profile.slug}
@@ -654,7 +654,7 @@ export default function ProfileBuilderPage({
         </aside>
 
         {/* Pane 2: Center Content & Form Editor */}
-        <main className="flex-1 overflow-y-auto p-6 sm:p-8 max-w-2xl border-r border-border/80">
+        <main className="flex-1 overflow-y-auto p-6 sm:p-8 max-w-2xl border-r border-slate-200">
           {/* Identity Tab */}
           {activeTab === 'identity' && (
             <div className="space-y-5">
@@ -708,7 +708,7 @@ export default function ProfileBuilderPage({
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-border/60 flex justify-end">
+                <div className="pt-4 border-t border-slate-200 flex justify-end">
                   <Button
                     size="sm"
                     onClick={() =>
@@ -721,7 +721,7 @@ export default function ProfileBuilderPage({
                       })
                     }
                     disabled={savingSection === 'Identity'}
-                    className="text-xs h-8 bg-gold text-gold-foreground hover:bg-gold-light font-semibold"
+                    className="text-xs h-8 bg-blue-600 text-white hover:bg-blue-700 font-semibold"
                   >
                     <Save className="w-3.5 h-3.5 mr-1" />
                     {savingSection === 'Identity' ? 'Saving...' : 'Save'}
@@ -749,7 +749,7 @@ export default function ProfileBuilderPage({
                           themeConfig: { ...profile.themeConfig, primaryColor: e.target.value },
                         })
                       }
-                      className="w-10 h-10 rounded-lg cursor-pointer border border-border"
+                      className="w-10 h-10 rounded-lg cursor-pointer border border-slate-200"
                     />
                     <Input
                       value={primaryColor}
@@ -766,7 +766,7 @@ export default function ProfileBuilderPage({
 
                 <div>
                   <label className="block text-xs font-semibold mb-1">Template</label>
-                  <div className="p-3 rounded-xl border border-border bg-card flex items-center justify-between">
+                  <div className="p-3 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
                     <span className="text-xs font-semibold uppercase font-mono">{profile.templateId}</span>
                     <Link href={`/templates`}>
                       <Button variant="outline" size="sm" className="text-xs h-7">
@@ -776,7 +776,7 @@ export default function ProfileBuilderPage({
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-border/60 flex justify-end">
+                <div className="pt-4 border-t border-slate-200 flex justify-end">
                   <Button
                     size="sm"
                     onClick={() =>
@@ -785,7 +785,7 @@ export default function ProfileBuilderPage({
                       })
                     }
                     disabled={savingSection === 'Theme'}
-                    className="text-xs h-8 bg-gold text-gold-foreground hover:bg-gold-light font-semibold"
+                    className="text-xs h-8 bg-blue-600 text-white hover:bg-blue-700 font-semibold"
                   >
                     <Save className="w-3.5 h-3.5 mr-1" />
                     {savingSection === 'Theme' ? 'Saving...' : 'Save'}
@@ -843,7 +843,7 @@ export default function ProfileBuilderPage({
                   />
                 </div>
 
-                <div className="pt-4 border-t border-border/60 flex justify-end">
+                <div className="pt-4 border-t border-slate-200 flex justify-end">
                   <Button
                     size="sm"
                     onClick={() =>
@@ -856,7 +856,7 @@ export default function ProfileBuilderPage({
                       })
                     }
                     disabled={savingSection === 'Contacts'}
-                    className="text-xs h-8 bg-gold text-gold-foreground hover:bg-gold-light font-semibold"
+                    className="text-xs h-8 bg-blue-600 text-white hover:bg-blue-700 font-semibold"
                   >
                     <Save className="w-3.5 h-3.5 mr-1" />
                     {savingSection === 'Contacts' ? 'Saving...' : 'Save'}
@@ -874,7 +874,7 @@ export default function ProfileBuilderPage({
                 <Button
                   size="sm"
                   onClick={() => handleOpenBizModal()}
-                  className="bg-gold text-gold-foreground hover:bg-gold-light text-xs font-semibold"
+                  className="bg-blue-600 text-white hover:bg-blue-700 text-xs font-semibold"
                 >
                   <Plus className="w-3.5 h-3.5 mr-1" />
                   Add
@@ -882,7 +882,7 @@ export default function ProfileBuilderPage({
               </div>
 
               {profile.businesses.length === 0 ? (
-                <div className="p-8 text-center border border-dashed border-border rounded-xl bg-card/40">
+                <div className="p-8 text-center border border-dashed border-slate-200 rounded-xl bg-slate-50">
                   <Building2 className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-50" />
                   <p className="text-xs text-muted-foreground">No businesses added.</p>
                   <Button
@@ -899,13 +899,13 @@ export default function ProfileBuilderPage({
                   {profile.businesses.map((biz) => (
                     <div
                       key={biz.id}
-                      className="p-4 rounded-xl border border-border bg-card flex items-start justify-between gap-4"
+                      className="p-4 rounded-xl border border-slate-200 bg-white flex items-start justify-between gap-4"
                     >
                       <div>
                         <h4 className="text-sm font-bold text-foreground">{biz.name}</h4>
                         {biz.tagline && <p className="text-xs text-muted-foreground mt-0.5">{biz.tagline}</p>}
                         {biz.website && (
-                          <span className="text-[11px] text-gold font-mono block mt-1">
+                          <span className="text-[11px] text-blue-600 font-mono block mt-1">
                             {biz.website}
                           </span>
                         )}
@@ -943,7 +943,7 @@ export default function ProfileBuilderPage({
                 <Button
                   size="sm"
                   onClick={() => handleOpenCatModal()}
-                  className="bg-gold text-gold-foreground hover:bg-gold-light text-xs font-semibold"
+                  className="bg-blue-600 text-white hover:bg-blue-700 text-xs font-semibold"
                 >
                   <Plus className="w-3.5 h-3.5 mr-1" />
                   Add
@@ -951,7 +951,7 @@ export default function ProfileBuilderPage({
               </div>
 
               {profile.catalogue.length === 0 ? (
-                <div className="p-8 text-center border border-dashed border-border rounded-xl bg-card/40">
+                <div className="p-8 text-center border border-dashed border-slate-200 rounded-xl bg-slate-50">
                   <Package className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-50" />
                   <p className="text-xs text-muted-foreground">No items added.</p>
                   <Button
@@ -968,7 +968,7 @@ export default function ProfileBuilderPage({
                   {profile.catalogue.map((cat) => (
                     <div
                       key={cat.id}
-                      className="p-4 rounded-xl border border-border bg-card flex items-start justify-between gap-4"
+                      className="p-4 rounded-xl border border-slate-200 bg-white flex items-start justify-between gap-4"
                     >
                       <div>
                         <div className="flex items-center gap-2">
@@ -981,7 +981,7 @@ export default function ProfileBuilderPage({
                           <p className="text-xs text-muted-foreground mt-0.5">{cat.description}</p>
                         )}
                         {cat.price && (
-                          <div className="text-xs font-semibold text-gold mt-1">
+                          <div className="text-xs font-semibold text-blue-600 mt-1">
                             {cat.price} {cat.currency}
                           </div>
                         )}
@@ -1083,7 +1083,7 @@ export default function ProfileBuilderPage({
                   />
                 </div>
 
-                <div className="pt-4 border-t border-border/60 flex justify-end">
+                <div className="pt-4 border-t border-slate-200 flex justify-end">
                   <Button
                     size="sm"
                     onClick={() =>
@@ -1092,7 +1092,7 @@ export default function ProfileBuilderPage({
                       })
                     }
                     disabled={savingSection === 'Social Networks'}
-                    className="text-xs h-8 bg-gold text-gold-foreground hover:bg-gold-light font-semibold"
+                    className="text-xs h-8 bg-blue-600 text-white hover:bg-blue-700 font-semibold"
                   >
                     <Save className="w-3.5 h-3.5 mr-1" />
                     {savingSection === 'Social Networks' ? 'Saving...' : 'Save'}
@@ -1125,7 +1125,7 @@ export default function ProfileBuilderPage({
                   />
                 </div>
 
-                <div className="pt-4 border-t border-border/60 flex justify-end">
+                <div className="pt-4 border-t border-slate-200 flex justify-end">
                   <Button
                     size="sm"
                     onClick={() =>
@@ -1137,7 +1137,7 @@ export default function ProfileBuilderPage({
                       })
                     }
                     disabled={savingSection === 'Reviews & Leads'}
-                    className="text-xs h-8 bg-gold text-gold-foreground hover:bg-gold-light font-semibold"
+                    className="text-xs h-8 bg-blue-600 text-white hover:bg-blue-700 font-semibold"
                   >
                     <Save className="w-3.5 h-3.5 mr-1" />
                     {savingSection === 'Reviews & Leads' ? 'Saving...' : 'Save'}
@@ -1149,7 +1149,7 @@ export default function ProfileBuilderPage({
         </main>
 
         {/* Pane 3: Right Live Preview Screen */}
-        <aside className="w-96 bg-neutral-950 p-6 flex flex-col items-center justify-center shrink-0 border-l border-border/80 overflow-y-auto">
+        <aside className="w-96 bg-neutral-950 p-6 flex flex-col items-center justify-center shrink-0 border-l border-slate-200 overflow-y-auto">
           <div className="text-[11px] text-muted-foreground mb-3 flex items-center gap-1.5 uppercase font-semibold">
             <Smartphone className="w-3.5 h-3.5" />
             Preview
@@ -1195,7 +1195,7 @@ export default function ProfileBuilderPage({
                 {/* Physical Location */}
                 {profile.address && (
                   <div className="flex items-center justify-center gap-1 text-[10px] opacity-75 mt-1">
-                    <MapPin className="w-3 h-3 text-gold shrink-0" />
+                    <MapPin className="w-3 h-3 text-blue-600 shrink-0" />
                     <span className="truncate max-w-[220px]">{profile.address}</span>
                   </div>
                 )}
@@ -1302,7 +1302,7 @@ export default function ProfileBuilderPage({
                     >
                       <div className="min-w-0 flex-1">
                         <div className="text-xs font-bold truncate">{c.title}</div>
-                        {c.price && <div className="text-[10px] text-gold font-mono">{c.price}</div>}
+                        {c.price && <div className="text-[10px] text-blue-600 font-mono">{c.price}</div>}
                       </div>
                       <span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-white/10 ml-2">
                         {c.type}
@@ -1374,11 +1374,11 @@ export default function ProfileBuilderPage({
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-border flex justify-end gap-2">
+              <div className="pt-3 border-t border-slate-200 flex justify-end gap-2">
                 <Button type="button" variant="outline" size="sm" onClick={() => setIsBizModalOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" size="sm" className="bg-gold text-gold-foreground hover:bg-gold-light">
+                <Button type="submit" size="sm" className="bg-blue-600 text-white hover:bg-blue-700">
                   Save
                 </Button>
               </div>
@@ -1461,11 +1461,11 @@ export default function ProfileBuilderPage({
                 />
               </div>
 
-              <div className="pt-3 border-t border-border flex justify-end gap-2">
+              <div className="pt-3 border-t border-slate-200 flex justify-end gap-2">
                 <Button type="button" variant="outline" size="sm" onClick={() => setIsCatModalOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" size="sm" className="bg-gold text-gold-foreground hover:bg-gold-light">
+                <Button type="submit" size="sm" className="bg-blue-600 text-white hover:bg-blue-700">
                   Save
                 </Button>
               </div>

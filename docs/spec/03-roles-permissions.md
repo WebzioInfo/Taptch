@@ -1,4 +1,4 @@
-# Tapzio Specification — 03 Roles & Permissions
+﻿# Taptch Specification — 03 Roles & Permissions
 
 > Source: Master Prompt Section 3
 

@@ -1,4 +1,4 @@
-# Tappzio 360° Master Project Audit — 06: Backend & API Engineering Audit
+﻿# Taptch 360° Master Project Audit — 06: Backend & API Engineering Audit
 
 **Focus:** Complete API Inventory (54 Endpoints), Request Validation, Error Envelopes, Rate-Limiting, Idempotency  
 **Auditor:** Principal Backend Engineer & API Architect  

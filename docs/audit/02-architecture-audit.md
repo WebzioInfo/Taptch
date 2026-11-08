@@ -1,4 +1,4 @@
-# Tappzio 360° Master Project Audit — 02: Architecture Audit
+﻿# Taptch 360° Master Project Audit — 02: Architecture Audit
 
 **Focus:** Enterprise System Architecture, Inward Dependency Flow, Module Boundaries, Separation of Concerns  
 **Auditor:** Principal Software Architect  
@@ -8,7 +8,7 @@
 
 ## 1. Architectural Style & Design Paradigm
 
-Tappzio is engineered as a **Modular Monolith** employing **Clean Hexagonal Architecture** principles. The directory topology is organized strictly by business domain and architectural responsibility rather than file type dumps:
+Taptch is engineered as a **Modular Monolith** employing **Clean Hexagonal Architecture** principles. The directory topology is organized strictly by business domain and architectural responsibility rather than file type dumps:
 
 ```
 src/
@@ -67,7 +67,7 @@ The codebase strictly enforces inward dependency direction:
 
 ### Finding AUD-ARCH-001 (P2 — Unused Legacy Supabase Wrappers)
 - **Affected Module**: `src/lib/supabase/*`, `src/utils/supabase/*`
-- **Evidence**: The codebase previously incorporated `@supabase/ssr` and `@supabase/supabase-js`. Tappzio’s current production architecture utilizes direct PostgreSQL via Drizzle ORM and Better Auth. The Supabase client files are largely dead code.
+- **Evidence**: The codebase previously incorporated `@supabase/ssr` and `@supabase/supabase-js`. Taptch’s current production architecture utilizes direct PostgreSQL via Drizzle ORM and Better Auth. The Supabase client files are largely dead code.
 - **Business Impact**: None directly, but presents developer confusion regarding the source of truth for database connections.
 - **Technical Impact**: Unnecessary bundle dependencies and maintenance overhead.
 - **Recommended Fix**: Remove or deprecate `src/utils/supabase` in favor of standard Drizzle DAL.

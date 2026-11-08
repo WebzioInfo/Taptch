@@ -3,6 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import QRCode from 'qrcode';
+import { brandConfig } from '@/config/brand';
 import { useSession } from '@/lib/auth/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -142,7 +143,7 @@ export default function CustomerQRPage() {
 
       const a = document.createElement('a');
       a.href = dataUrl;
-      a.download = `tappzio-qr-${qr.token}.png`;
+      a.download = `${brandConfig.name.toLowerCase()}-qr-${qr.token}.png`;
       a.click();
     } catch (err) {
       console.error('Failed to generate PNG:', err);
@@ -166,7 +167,7 @@ export default function CustomerQRPage() {
       const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = blobUrl;
-      a.download = `tappzio-qr-${qr.token}.svg`;
+      a.download = `${brandConfig.name.toLowerCase()}-qr-${qr.token}.svg`;
       a.click();
       URL.revokeObjectURL(blobUrl);
     } catch (err) {
@@ -336,13 +337,13 @@ export default function CustomerQRPage() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-12">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/60">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <QrCode className="h-5 w-5 text-primary" />
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+            <QrCode className="h-5 w-5 text-blue-600" />
             Dynamic QR Codes
           </h1>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <p className="text-xs text-slate-500 mt-0.5">
             Manage your high-speed smart redirect QR codes. Update destinations anytime without reprinting.
           </p>
         </div>
@@ -354,7 +355,7 @@ export default function CustomerQRPage() {
           </Button>
 
           <Button
-            variant="gold"
+            variant="default"
             size="sm"
             onClick={() => setIsCreateOpen(true)}
             className="h-8 text-xs font-semibold gap-1.5 px-3"
@@ -368,20 +369,20 @@ export default function CustomerQRPage() {
       {/* Main Content */}
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 space-y-3">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          <p className="text-xs text-muted-foreground">Loading your dynamic QR codes...</p>
+          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+          <p className="text-xs text-slate-500">Loading your dynamic QR codes...</p>
         </div>
       ) : qrList.length === 0 ? (
-        <Card className="border-border/60 bg-card/40 p-8 text-center max-w-lg mx-auto my-8">
-          <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mx-auto mb-4">
+        <Card className="border-slate-200 bg-white p-8 text-center max-w-lg mx-auto my-8">
+          <div className="h-12 w-12 rounded-2xl bg-blue-600/10 border border-blue-600/20 flex items-center justify-center text-blue-600 mx-auto mb-4">
             <QrCode className="h-6 w-6" />
           </div>
-          <h2 className="text-base font-bold text-foreground">No QR Codes Yet</h2>
-          <p className="text-xs text-muted-foreground mt-1 mb-6">
+          <h2 className="text-base font-bold text-slate-900">No QR Codes Yet</h2>
+          <p className="text-xs text-slate-500 mt-1 mb-6">
             Create a dynamic QR code for your digital profile, website, or WhatsApp. You can change where it points at any time.
           </p>
           <Button
-            variant="gold"
+            variant="default"
             size="sm"
             onClick={() => setIsCreateOpen(true)}
             className="text-xs font-semibold gap-1.5"
@@ -398,33 +399,33 @@ export default function CustomerQRPage() {
             const linkedProfile = isProfile ? profiles.find((p) => p.id === qr.profileId) : null;
 
             return (
-              <Card key={qr.id} className="border-border/60 bg-card/40 p-4 flex flex-col justify-between space-y-4">
+              <Card key={qr.id} className="border-slate-200 bg-white p-4 flex flex-col justify-between space-y-4">
                 {/* Header Strip */}
                 <div>
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <h3 className="text-sm font-semibold text-foreground truncate">
+                      <h3 className="text-sm font-semibold text-slate-900 truncate">
                         {qr.name || `Dynamic QR #${qr.token.slice(0, 8)}`}
                       </h3>
                       <div className="flex items-center gap-1.5 mt-1">
                         <Badge variant="outline" className="text-[10px] uppercase font-mono px-1.5 py-0">
                           {qr.destinationType}
                         </Badge>
-                        <Badge variant="gold" className="text-[9px] px-1 py-0">
+                        <Badge variant="default" className="text-[9px] px-1 py-0">
                           Dynamic
                         </Badge>
                       </div>
                     </div>
 
                     <div className="text-right shrink-0">
-                      <span className="text-[11px] font-mono text-muted-foreground block">
+                      <span className="text-[11px] font-mono text-slate-500 block">
                         {qr.totalScans} {qr.totalScans === 1 ? 'scan' : 'scans'}
                       </span>
                     </div>
                   </div>
 
                   {/* QR Canvas / Visual Preview */}
-                  <div className="my-3.5 p-3 rounded-xl bg-background/80 border border-border/40 flex items-center gap-3">
+                  <div className="my-3.5 p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-3">
                     <QRCanvasVisual
                       content={redirectUrl}
                       fgColor={qr.designConfig?.fgColor || '#000000'}
@@ -432,15 +433,15 @@ export default function CustomerQRPage() {
                     />
 
                     <div className="min-w-0 flex-1 space-y-1 text-xs">
-                      <div className="text-[11px] text-muted-foreground font-medium">Destination:</div>
-                      <p className="text-xs font-semibold text-foreground truncate">
+                      <div className="text-[11px] text-slate-500 font-medium">Destination:</div>
+                      <p className="text-xs font-semibold text-slate-900 truncate">
                         {isProfile
                           ? linkedProfile
                             ? linkedProfile.displayName
                             : 'Linked Digital Profile'
                           : qr.targetUrl || 'Unassigned URL'}
                       </p>
-                      <p className="text-[10px] text-muted-foreground font-mono truncate">
+                      <p className="text-[10px] text-slate-500 font-mono truncate">
                         {redirectUrl.replace(/^https?:\/\//, '')}
                       </p>
                     </div>
@@ -448,7 +449,7 @@ export default function CustomerQRPage() {
                 </div>
 
                 {/* Actions */}
-                <div className="space-y-2 pt-2 border-t border-border/40">
+                <div className="space-y-2 pt-2 border-t border-slate-100">
                   <div className="grid grid-cols-2 gap-1.5">
                     <Button
                       variant="outline"
@@ -465,7 +466,7 @@ export default function CustomerQRPage() {
                       onClick={() => openStylingModal(qr)}
                       className="h-7 text-xs px-2 gap-1"
                     >
-                      <Sparkles className="h-3 w-3 text-primary" />
+                      <Sparkles className="h-3 w-3 text-blue-600" />
                       <span>Styling</span>
                     </Button>
                   </div>
@@ -515,15 +516,15 @@ export default function CustomerQRPage() {
       {/* CREATE MODAL */}
       {isCreateOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-card border border-border/70 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl relative">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl relative">
             <button
               onClick={() => setIsCreateOpen(false)}
-              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
+              className="absolute top-4 right-4 text-slate-500 hover:text-slate-900"
             >
               <X className="h-4 w-4" />
             </button>
 
-            <h2 className="text-base font-bold text-foreground">Create Dynamic QR Code</h2>
+            <h2 className="text-base font-bold text-slate-900">Create Dynamic QR Code</h2>
 
             {createError && (
               <div className="p-2.5 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs">
@@ -533,18 +534,18 @@ export default function CustomerQRPage() {
 
             <form onSubmit={handleCreateSubmit} className="space-y-4 text-xs">
               <div>
-                <label className="block font-medium text-foreground mb-1">Name / Label (Optional)</label>
+                <label className="block font-medium text-slate-900 mb-1">Name / Label (Optional)</label>
                 <input
                   type="text"
                   placeholder="e.g. Desk Standee, Business Card, Conference"
                   value={createName}
                   onChange={(e) => setCreateName(e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground text-xs focus:outline-none focus:border-primary"
+                  className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
                 />
               </div>
 
               <div>
-                <label className="block font-medium text-foreground mb-1">Destination Type</label>
+                <label className="block font-medium text-slate-900 mb-1">Destination Type</label>
                 <div className="grid grid-cols-3 gap-1.5">
                   {(['profile', 'url', 'whatsapp'] as const).map((type) => (
                     <button
@@ -553,8 +554,8 @@ export default function CustomerQRPage() {
                       onClick={() => setCreateDestType(type)}
                       className={`py-1.5 px-2 rounded-lg text-xs font-medium capitalize border transition-all ${
                         createDestType === type
-                          ? 'bg-primary/20 text-primary border-primary font-semibold'
-                          : 'bg-background border-border/60 text-muted-foreground hover:text-foreground'
+                          ? 'bg-blue-600/20 text-blue-600 border-blue-600 font-semibold'
+                          : 'bg-white border-slate-200 text-slate-500 hover:text-slate-900'
                       }`}
                     >
                       {type}
@@ -565,16 +566,16 @@ export default function CustomerQRPage() {
 
               {createDestType === 'profile' && (
                 <div>
-                  <label className="block font-medium text-foreground mb-1">Select Digital Profile</label>
+                  <label className="block font-medium text-slate-900 mb-1">Select Digital Profile</label>
                   {profiles.length === 0 ? (
-                    <p className="text-[11px] text-muted-foreground">
-                      No profiles found. <Link href="/builder/new" className="text-primary underline">Create one first</Link>.
+                    <p className="text-[11px] text-slate-500">
+                      No profiles found. <Link href="/builder/new" className="text-blue-600 underline">Create one first</Link>.
                     </p>
                   ) : (
                     <select
                       value={createProfileId}
                       onChange={(e) => setCreateProfileId(e.target.value)}
-                      className="w-full px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
                     >
                       {profiles.map((p) => (
                         <option key={p.id} value={p.id}>
@@ -588,13 +589,13 @@ export default function CustomerQRPage() {
 
               {createDestType === 'url' && (
                 <div>
-                  <label className="block font-medium text-foreground mb-1">Website URL</label>
+                  <label className="block font-medium text-slate-900 mb-1">Website URL</label>
                   <input
                     type="url"
                     placeholder="https://example.com/promo"
                     value={createTargetUrl}
                     onChange={(e) => setCreateTargetUrl(e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground text-xs focus:outline-none focus:border-primary"
+                    className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
                     required
                   />
                 </div>
@@ -603,30 +604,30 @@ export default function CustomerQRPage() {
               {createDestType === 'whatsapp' && (
                 <div className="space-y-3">
                   <div>
-                    <label className="block font-medium text-foreground mb-1">WhatsApp Number (with country code)</label>
+                    <label className="block font-medium text-slate-900 mb-1">WhatsApp Number (with country code)</label>
                     <input
                       type="tel"
                       placeholder="+919876543210"
                       value={createPhone}
                       onChange={(e) => setCreatePhone(e.target.value)}
-                      className="w-full px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block font-medium text-foreground mb-1">Default Pre-filled Message</label>
+                    <label className="block font-medium text-slate-900 mb-1">Default Pre-filled Message</label>
                     <input
                       type="text"
-                      placeholder="Hi, I scanned your Tappzio QR code!"
+                      placeholder={`Hi, I scanned your ${brandConfig.name} QR code!`}
                       value={createMessage}
                       onChange={(e) => setCreateMessage(e.target.value)}
-                      className="w-full px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
                     />
                   </div>
                 </div>
               )}
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-border/40">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
                 <Button
                   type="button"
                   variant="outline"
@@ -639,7 +640,7 @@ export default function CustomerQRPage() {
                 </Button>
                 <Button
                   type="submit"
-                  variant="gold"
+                  variant="default"
                   size="sm"
                   disabled={submittingCreate}
                   className="h-8 text-xs font-semibold gap-1.5"
@@ -656,17 +657,17 @@ export default function CustomerQRPage() {
       {/* EDIT DESTINATION MODAL */}
       {editingQR && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-card border border-border/70 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl relative">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl relative">
             <button
               onClick={() => setEditingQR(null)}
-              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
+              className="absolute top-4 right-4 text-slate-500 hover:text-slate-900"
             >
               <X className="h-4 w-4" />
             </button>
 
             <div>
-              <h2 className="text-base font-bold text-foreground">Update Destination</h2>
-              <p className="text-[11px] text-muted-foreground mt-0.5">
+              <h2 className="text-base font-bold text-slate-900">Update Destination</h2>
+              <p className="text-[11px] text-slate-500 mt-0.5">
                 Physical QR code remains identical; traffic redirects instantly to the new target.
               </p>
             </div>
@@ -679,7 +680,7 @@ export default function CustomerQRPage() {
 
             <form onSubmit={handleEditSubmit} className="space-y-4 text-xs">
               <div>
-                <label className="block font-medium text-foreground mb-1">Destination Type</label>
+                <label className="block font-medium text-slate-900 mb-1">Destination Type</label>
                 <div className="grid grid-cols-3 gap-1.5">
                   {(['profile', 'url', 'whatsapp'] as const).map((type) => (
                     <button
@@ -688,8 +689,8 @@ export default function CustomerQRPage() {
                       onClick={() => setEditDestType(type)}
                       className={`py-1.5 px-2 rounded-lg text-xs font-medium capitalize border transition-all ${
                         editDestType === type
-                          ? 'bg-primary/20 text-primary border-primary font-semibold'
-                          : 'bg-background border-border/60 text-muted-foreground hover:text-foreground'
+                          ? 'bg-blue-600/20 text-blue-600 border-blue-600 font-semibold'
+                          : 'bg-white border-slate-200 text-slate-500 hover:text-slate-900'
                       }`}
                     >
                       {type}
@@ -700,11 +701,11 @@ export default function CustomerQRPage() {
 
               {editDestType === 'profile' && (
                 <div>
-                  <label className="block font-medium text-foreground mb-1">Select Digital Profile</label>
+                  <label className="block font-medium text-slate-900 mb-1">Select Digital Profile</label>
                   <select
                     value={editProfileId}
                     onChange={(e) => setEditProfileId(e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground text-xs focus:outline-none focus:border-primary"
+                    className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
                   >
                     {profiles.map((p) => (
                       <option key={p.id} value={p.id}>
@@ -717,13 +718,13 @@ export default function CustomerQRPage() {
 
               {editDestType === 'url' && (
                 <div>
-                  <label className="block font-medium text-foreground mb-1">Website URL</label>
+                  <label className="block font-medium text-slate-900 mb-1">Website URL</label>
                   <input
                     type="url"
                     placeholder="https://example.com/new-page"
                     value={editTargetUrl}
                     onChange={(e) => setEditTargetUrl(e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground text-xs focus:outline-none focus:border-primary"
+                    className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
                     required
                   />
                 </div>
@@ -732,30 +733,30 @@ export default function CustomerQRPage() {
               {editDestType === 'whatsapp' && (
                 <div className="space-y-3">
                   <div>
-                    <label className="block font-medium text-foreground mb-1">WhatsApp Number</label>
+                    <label className="block font-medium text-slate-900 mb-1">WhatsApp Number</label>
                     <input
                       type="tel"
                       placeholder="+919876543210"
                       value={editPhone}
                       onChange={(e) => setEditPhone(e.target.value)}
-                      className="w-full px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block font-medium text-foreground mb-1">Pre-filled Message</label>
+                    <label className="block font-medium text-slate-900 mb-1">Pre-filled Message</label>
                     <input
                       type="text"
                       placeholder="Hi there!"
                       value={editMessage}
                       onChange={(e) => setEditMessage(e.target.value)}
-                      className="w-full px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
                     />
                   </div>
                 </div>
               )}
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-border/40">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
                 <Button
                   type="button"
                   variant="outline"
@@ -768,7 +769,7 @@ export default function CustomerQRPage() {
                 </Button>
                 <Button
                   type="submit"
-                  variant="gold"
+                  variant="default"
                   size="sm"
                   disabled={submittingEdit}
                   className="h-8 text-xs font-semibold gap-1.5"
@@ -785,25 +786,25 @@ export default function CustomerQRPage() {
       {/* STYLING MODAL */}
       {stylingQR && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-card border border-border/70 rounded-2xl w-full max-w-sm p-6 space-y-4 shadow-2xl relative">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-sm p-6 space-y-4 shadow-2xl relative">
             <button
               onClick={() => setStylingQR(null)}
-              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
+              className="absolute top-4 right-4 text-slate-500 hover:text-slate-900"
             >
               <X className="h-4 w-4" />
             </button>
 
             <div>
-              <h2 className="text-base font-bold text-foreground flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-primary" />
+              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-blue-600" />
                 QR Customizer
               </h2>
-              <p className="text-[11px] text-muted-foreground mt-0.5">
+              <p className="text-[11px] text-slate-500 mt-0.5">
                 Customize colors while maintaining high-contrast scanning reliability.
               </p>
             </div>
 
-            <div className="flex justify-center p-4 bg-background/80 rounded-xl border border-border/40">
+            <div className="flex justify-center p-4 bg-slate-50 rounded-xl border border-slate-100">
               <QRCanvasVisual
                 content={getQRRedirectUrl(stylingQR)}
                 fgColor={fgColor}
@@ -815,43 +816,43 @@ export default function CustomerQRPage() {
             <form onSubmit={handleStyleSubmit} className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-medium text-foreground mb-1">Foreground Color</label>
+                  <label className="block font-medium text-slate-900 mb-1">Foreground Color</label>
                   <div className="flex items-center gap-2">
                     <input
                       type="color"
                       value={fgColor}
                       onChange={(e) => setFgColor(e.target.value)}
-                      className="h-8 w-8 rounded border border-border/60 bg-transparent cursor-pointer"
+                      className="h-8 w-8 rounded border border-slate-200 bg-transparent cursor-pointer"
                     />
                     <input
                       type="text"
                       value={fgColor}
                       onChange={(e) => setFgColor(e.target.value)}
-                      className="w-full px-2 py-1 rounded bg-background border border-border/60 text-xs font-mono uppercase"
+                      className="w-full px-2 py-1 rounded bg-white border border-slate-200 text-xs font-mono uppercase"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block font-medium text-foreground mb-1">Background Color</label>
+                  <label className="block font-medium text-slate-900 mb-1">Background Color</label>
                   <div className="flex items-center gap-2">
                     <input
                       type="color"
                       value={bgColor}
                       onChange={(e) => setBgColor(e.target.value)}
-                      className="h-8 w-8 rounded border border-border/60 bg-transparent cursor-pointer"
+                      className="h-8 w-8 rounded border border-slate-200 bg-transparent cursor-pointer"
                     />
                     <input
                       type="text"
                       value={bgColor}
                       onChange={(e) => setBgColor(e.target.value)}
-                      className="w-full px-2 py-1 rounded bg-background border border-border/60 text-xs font-mono uppercase"
+                      className="w-full px-2 py-1 rounded bg-white border border-slate-200 text-xs font-mono uppercase"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-border/40">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
                 <Button
                   type="button"
                   variant="outline"
@@ -864,7 +865,7 @@ export default function CustomerQRPage() {
                 </Button>
                 <Button
                   type="submit"
-                  variant="gold"
+                  variant="default"
                   size="sm"
                   disabled={submittingStyle}
                   className="h-8 text-xs font-semibold gap-1.5"
@@ -914,7 +915,7 @@ function QRCanvasVisual({
   }, [content, fgColor, bgColor, size]);
 
   return (
-    <div className="rounded-lg overflow-hidden border border-border/50 shrink-0 bg-white">
+    <div className="rounded-lg overflow-hidden border border-slate-200/50 shrink-0 bg-white">
       <canvas ref={canvasRef} style={{ width: size, height: size, display: 'block' }} />
     </div>
   );

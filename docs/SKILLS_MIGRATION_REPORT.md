@@ -1,12 +1,12 @@
-# Tapzio Skills Migration & Reorganization Report
+﻿# Taptch Skills Migration & Reorganization Report
 
 ## 1. Migration Overview & Historical Context
 
-This document provides the authoritative, unified record of the migration, expansion, and reorganization of skills within the Tapzio repository.
+This document provides the authoritative, unified record of the migration, expansion, and reorganization of skills within the Taptch repository.
 
 - **Initial Skills Migration**: October 31, 2026 (12 initial skills migrated from reference sources).
 - **Next.js & Domain Expansion**: November 02, 2026 (expansion to 44 production-grade specialist skills).
-- **Canonical Destination Directory**: `D:\Webzio\Tapzio\.agents\skills`
+- **Canonical Destination Directory**: `D:\Webzio\Taptch\.agents\skills`
 - **Total Registered Skills**: 44
 - **Discovery Architecture**: Flat single-level directory structure (`.agents/skills/<skill-name>/SKILL.md`) ensuring native discovery by Antigravity and Claude Code.
 
@@ -33,11 +33,11 @@ This document provides the authoritative, unified record of the migration, expan
 ## 3. Conflict Identification & Reconciliation Record
 
 1. **BullMQ Worker Decoupling vs. Trigger.dev / n8n**:
-   - *Analysis*: Imported skills emphasized Trigger.dev and n8n for background automation, while Tapzio architecture mandates BullMQ in a decoupled container for high-throughput NFC analytics ingestion and batching.
+   - *Analysis*: Imported skills emphasized Trigger.dev and n8n for background automation, while Taptch architecture mandates BullMQ in a decoupled container for high-throughput NFC analytics ingestion and batching.
    - *Resolution*: BullMQ remains the internal production workhorse for high-frequency redirects, analytics, and vCard export. Trigger.dev and n8n provide patterns for external third-party integrations, webhook relays, and cloud serverless jobs.
-2. **Generic Application Security vs. Tapzio Multi-Tenant RLS & Indian DPDP Act**:
+2. **Generic Application Security vs. Taptch Multi-Tenant RLS & Indian DPDP Act**:
    - *Analysis*: Generic `security` skill covers web/desktop vulnerabilities (XSS, CSRF, Tauri IPC), but lacks PostgreSQL transaction-scoped RLS (`prepare: false`) and Indian DPDP 2023 regulations (24h rotating salt IP hashing).
-   - *Resolution*: Preserved `security` as the comprehensive application security reference, while maintaining `security-auditing` and `database-engineering` as the Tapzio-specific operational standards.
+   - *Resolution*: Preserved `security` as the comprehensive application security reference, while maintaining `security-auditing` and `database-engineering` as the Taptch-specific operational standards.
 3. **Frontend Design Aesthetics vs. Frontend Implementation**:
    - *Analysis*: `frontend-design` focuses on creative direction and anti-slop guidelines, while `frontend-development` focuses on Next.js 15 App Router, React 19, Tailwind, and Zustand state.
    - *Resolution*: Maintained both as complementary skills: `frontend-design` provides aesthetic direction during layout and typography selection; `frontend-development` provides architectural and code-level implementation guidance.

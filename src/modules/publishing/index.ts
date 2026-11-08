@@ -1,5 +1,5 @@
 /**
- * TAPZIO PUBLISHING & ADMIN PLAN ASSIGNMENT DOMAIN MODULE
+ * TAPTCH PUBLISHING & ADMIN PLAN ASSIGNMENT DOMAIN MODULE
  *
  * Implements controlled profile publishing, admin review workflows,
  * manual plan assignment, payment verification, and plan-filtered snapshot compilation.

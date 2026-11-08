@@ -1,7 +1,7 @@
-# Tapzio — Security Requirements & Compliance Specification
+﻿# Taptch — Security Requirements & Compliance Specification
 
 ## 1. Security Architecture & Threat Model
-Tapzio operates as a multi-tenant platform handling both public networking and private corporate identities. Security is enforced through defense-in-depth across the network, application, and database tiers.
+Taptch operates as a multi-tenant platform handling both public networking and private corporate identities. Security is enforced through defense-in-depth across the network, application, and database tiers.
 
 ```mermaid
 flowchart TD

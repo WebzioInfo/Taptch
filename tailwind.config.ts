@@ -24,6 +24,7 @@ const config: Config = {
         },
         primary: {
           DEFAULT: 'var(--primary)',
+          hover: 'var(--primary-hover)',
           foreground: 'var(--primary-foreground)',
         },
         secondary: {
@@ -45,36 +46,29 @@ const config: Config = {
         border: 'var(--border)',
         input: 'var(--input)',
         ring: 'var(--ring)',
-        // Studio Themes Palette
-        gold: {
-          DEFAULT: '#D4AF37',
-          50: '#FAF6E6',
-          100: '#F5ECBE',
-          200: '#EBD88A',
-          300: '#E0C556',
-          400: '#D4AF37',
-          500: '#B89326',
-          600: '#8F711C',
-          700: '#665014',
-          800: '#3D300C',
-          900: '#141004',
-        },
-        obsidian: {
-          DEFAULT: '#0A0A0C',
-          canvas: '#0A0A0C',
-          card: '#141418',
-          border: '#26262F',
+        brand: {
+          50: '#EFF6FF',
+          100: '#DBEAFE',
+          200: '#BFDBFE',
+          300: '#93C5FD',
+          400: '#60A5FA',
+          500: '#3B82F6',
+          600: '#2563EB',
+          700: '#1D4ED8',
+          800: '#1E40AF',
+          900: '#1E3A8A',
         },
       },
       fontFamily: {
-        sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
-        heading: ['var(--font-heading)', 'serif'],
-        indic: ['var(--font-indic)', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'Geist', 'var(--font-sans)', 'system-ui', '-apple-system', 'sans-serif'],
+        heading: ['Inter', 'Geist', 'var(--font-heading)', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
+        DEFAULT: '0.375rem',
+        sm: '0.25rem',
+        md: '0.375rem',
+        lg: '0.5rem',
+        xl: '0.75rem',
       },
     },
   },
@@ -82,4 +76,3 @@ const config: Config = {
 };
 
 export default config;
-

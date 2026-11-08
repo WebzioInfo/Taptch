@@ -1,4 +1,4 @@
-# Tapzio — Next.js Reliability Analysis & Concurrency Protection Plan
+﻿# Taptch — Next.js Reliability Analysis & Concurrency Protection Plan
 
 **Document Version:** 1.0.0  
 **Author:** Principal Engineer & Technical Architect  
@@ -11,15 +11,15 @@
 
 Next.js is frequently blamed for collapsing at 50–100 concurrent users. In production reality, Next.js does not fail because of the Node.js V8 event loop; it fails because default conventions encourage antipatterns that trigger resource exhaustion cascades.
 
-Below is the definitive technical autopsy of why Next.js applications choke under load, and how Tapzio architecturally prevents each failure condition:
+Below is the definitive technical autopsy of why Next.js applications choke under load, and how Taptch architecturally prevents each failure condition:
 
-| # | Low-Concurrency Failure Mode | Failure Mechanism | How Tapzio Avoids It in Architecture & Code |
+| # | Low-Concurrency Failure Mode | Failure Mechanism | How Taptch Avoids It in Architecture & Code |
 | :-: | :--- | :--- | :--- |
 | **1** | **Running `next dev` in Production / Benchmarks** | `next dev` performs just-in-time TypeScript transpilation, sourcemap generation, and file-watching per request. RAM explodes to 1.5GB+ and CPU reaches 100% at ~30 concurrent requests. | **Production-Only Testing**: All performance benchmarks and Docker containers strictly execute optimized production bundles (`next build` + `next start`). |
 | **2** | **Unpooled Database Connections** | Every Server Component or Server Action instantiating a raw database client opens a new TCP connection. PostgreSQL hits `max_connections` (default 100), throws `FATAL: remaining connection slots are reserved`, and crashes all web processes. | **PgBouncer in Transaction Mode + postgres.js `prepare: false`**: PgBouncer multiplexes thousands of virtual client transactions over a fixed pool of 20–30 physical PostgreSQL connections. |
 | **3** | **Uncached Dynamic Rendering on Public Profiles** | Calling `cookies()`, `headers()`, or `searchParams` in root layouts or server components marks the entire route as dynamically rendered per request (`force-dynamic`). Under 100 concurrent taps, the server executes 100 React SSR renders and 100 DB queries simultaneously. | **Static ISR with Tag Revalidation**: Public profiles (`/p/[slug]`) are pre-rendered HTML snapshots served from cache. Zero database queries execute on page load. Dynamic headers are forbidden by CI linters. |
 | **4** | **Unbounded Database Queries in Server Components** | Unindexed `SELECT * FROM leads` or `profiles WHERE slug = ...` performs full sequential table scans, holding database worker locks and spiking p95 query times from 2ms to 4,000ms. | **Mandatory Unique Indexes & Bounded Pagination**: Every hot route query is indexed (`idx_cards_token`, `idx_profiles_slug`). All list endpoints strictly enforce `LIMIT` (maximum 50 items per query). |
-| **5** | **Serverless Cold Starts & Connection Multiplying** | Deploying on serverless platforms (e.g., AWS Lambda) spins up 100 isolated function instances during a spike, each initiating its own database handshake and TLS negotiation (150ms–300ms overhead). | **Persistent Container Architecture**: Tapzio runs as long-running Docker containers on Node.js runtime, keeping connections warm and eliminating cold starts entirely. |
+| **5** | **Serverless Cold Starts & Connection Multiplying** | Deploying on serverless platforms (e.g., AWS Lambda) spins up 100 isolated function instances during a spike, each initiating its own database handshake and TLS negotiation (150ms–300ms overhead). | **Persistent Container Architecture**: Taptch runs as long-running Docker containers on Node.js runtime, keeping connections warm and eliminating cold starts entirely. |
 | **6** | **Unbounded On-Demand Image Optimization (`_next/image`)** | Hundreds of concurrent visitors requesting unoptimized 5MB profile avatars triggers hundreds of simultaneous libvips/sharp CPU-bound transformations on the web server, starving the Node.js event loop. | **Upload-Time Compression Pipeline**: Avatars and banners are resized and converted to WebP/AVIF statically upon upload via `sharp`. Public profiles serve pre-sized static assets directly from Cloudflare R2 / CDN. |
 | **7** | **Synchronous Logging & Database Event Writes** | Writing page views or NFC taps directly to PostgreSQL inside the HTTP request handler blocks the response thread until the disk I/O flush completes. | **Asynchronous Queue Ingestion**: Inbound taps (`/n/*`) push a lightweight message to BullMQ Redis in < 1ms and immediately return HTTP 302. Workers batch writes to PostgreSQL in the background. |
 

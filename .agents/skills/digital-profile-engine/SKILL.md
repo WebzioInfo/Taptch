@@ -1,15 +1,15 @@
----
+﻿---
 name: digital-profile-engine
-description: "Master Tappzio's digital identity domain architecture: personal vs business profiles, multi-business association, dynamic section reordering, and pre-compiled JSON snapshots."
+description: "Master Taptch's digital identity domain architecture: personal vs business profiles, multi-business association, dynamic section reordering, and pre-compiled JSON snapshots."
 risk: safe
-source: Tappzio-core
+source: Taptch-core
 date_added: "2026-11-02"
 version: "1.0.0"
 ---
 
-# Tappzio Digital Profile Engine Architecture Skill
+# Taptch Digital Profile Engine Architecture Skill
 
-Domain engineering specification and implementation standard for Tappzio's core digital profile system, multi-business association architecture, and atomic snapshot compilation.
+Domain engineering specification and implementation standard for Taptch's core digital profile system, multi-business association architecture, and atomic snapshot compilation.
 
 ---
 
@@ -73,7 +73,7 @@ erDiagram
 
 ## 3. Personal vs Single Business vs Multi-Business Architecture
 
-Tappzio supports three distinct profile operational modes:
+Taptch supports three distinct profile operational modes:
 
 1. **Personal Executive Profile (`profile_type: 'personal'`)**:
    - Focuses on individual identity, executive bio, social/networking links, and direct vCard download.

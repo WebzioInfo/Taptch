@@ -1,4 +1,4 @@
-# Tapzio Specification — 12 Super Admin, Reseller, White-Label & Domains
+﻿# Taptch Specification — 12 Super Admin, Reseller, White-Label & Domains
 
 > Source: Master Prompt Section 12
 
@@ -28,14 +28,14 @@ A dedicated control cockpit (`(admin)` route group) granting complete operationa
 - Custom branding configuration:
   - System Brand Name, Logo, Favicon, Accent Colors, Typography.
   - Custom Support Email, Helpdesk URL, Terms of Service, and Privacy Policy links.
-  - Dynamic removal or replacement of "Powered by Tapzio" footer badges across public profiles and system emails.
+  - Dynamic removal or replacement of "Powered by Taptch" footer badges across public profiles and system emails.
 
 ## Custom Domain Verification Architecture
 Allows clients to host profiles on their own vanity domains (e.g., `card.acmecorp.com`, `connect.johndoe.in`):
 1. **Domain Registration**: User submits domain in profile settings.
 2. **DNS Verification**: System issues unique verification record:
-   - TXT record: `_tapzio-verify.[domain] = [random-token]`
-   - CNAME record: `[domain] -> cname.tapzio.com`
+   - TXT record: `_Taptch-verify.[domain] = [random-token]`
+   - CNAME record: `[domain] -> cname.Taptch.com`
 3. **Automated Verification Worker**: BullMQ job periodically queries DNS via Node `dns.promises.resolveTxt`.
 4. **Edge SSL Provisioning**:
    - Status tracked: `PENDING_DNS` → `DNS_VERIFIED` → `SSL_PROVISIONING` → `ACTIVE` → `FAILED`.

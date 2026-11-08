@@ -12,17 +12,18 @@ import {
   Users,
   Plus,
   Share2,
-  Sparkles,
   ArrowRight,
   ExternalLink,
   Edit3,
   Loader2,
   Palette,
   CheckCircle,
-  FileCheck2,
   Clock,
   Send,
   QrCode,
+  Smartphone,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { TemplatePreviewModal } from '@/components/templates/TemplatePreviewModal';
 
@@ -68,7 +69,7 @@ export default function DashboardPage() {
   const [isRequestingPublication, setIsRequestingPublication] = React.useState(false);
   const [publicationStatusMsg, setPublicationStatusMsg] = React.useState<string | null>(null);
 
-  const displayName = user?.name || user?.email?.split('@')[0] || 'Executive Member';
+  const displayName = user?.name || user?.email?.split('@')[0] || 'Member';
 
   React.useEffect(() => {
     async function loadDashboardData() {
@@ -104,340 +105,298 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-10">
-      {/* Header */}
-      <div className="flex items-center justify-between gap-4 pb-4 border-b border-border/60">
-        <h1 className="text-xl font-bold tracking-tight text-foreground truncate">
-          {displayName}
-        </h1>
+    <div className="space-y-8 max-w-6xl mx-auto pb-12 antialiased">
+      {/* 1. Page Header with Direct Action */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            Overview
+          </h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Welcome back, {displayName}
+          </p>
+        </div>
 
         <div className="flex items-center gap-2">
           <Link href="/builder/new">
-            <Button variant="gold" size="sm" className="h-8 text-xs font-semibold gap-1.5 px-3">
-              <Plus className="h-3.5 w-3.5" />
-              <span>Create</span>
+            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs h-9 gap-1.5 px-3.5">
+              <Plus className="h-4 w-4" />
+              <span>Create Profile</span>
             </Button>
           </Link>
         </div>
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        <div className="flex justify-center py-20">
+          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
         </div>
       ) : (
         <>
-          {/* KPI Metrics Overview */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <Card className="border-border/60 bg-card/40 p-4">
-              <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
+          {/* 2. Key Metrics - Clean & Professional */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-2xs">
+              <div className="flex items-center justify-between text-xs font-semibold text-slate-600">
                 <span>Profiles</span>
-                <Eye className="h-3.5 w-3.5" />
+                <Eye className="h-4 w-4 text-blue-600" />
               </div>
-              <div className="text-2xl font-bold text-foreground mt-2">{profiles.length}</div>
-              <div className="text-[11px] text-muted-foreground mt-0.5">
-                {profiles.filter((p) => p.status === 'published').length} live
+              <div className="text-2xl font-bold text-slate-900 mt-2">{profiles.length}</div>
+              <div className="text-xs text-slate-500 mt-1">
+                {profiles.filter((p) => p.status === 'published' || p.status === 'PUBLISHED').length} published and live
               </div>
-            </Card>
+            </div>
 
-            <Card className="border-border/60 bg-card/40 p-4">
-              <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
-                <span>Cards</span>
-                <CreditCard className="h-3.5 w-3.5" />
+            <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-2xs">
+              <div className="flex items-center justify-between text-xs font-semibold text-slate-600">
+                <span>Contacts & Leads</span>
+                <Users className="h-4 w-4 text-blue-600" />
               </div>
-              <div className="text-2xl font-bold text-foreground mt-2">{cards.length}</div>
-              <div className="text-[11px] text-muted-foreground mt-0.5">
-                {cards.filter((c) => c.status === 'active').length} active
+              <div className="text-2xl font-bold text-slate-900 mt-2">{leads.length}</div>
+              <div className="text-xs text-slate-500 mt-1">
+                Received via contact exchange
               </div>
-            </Card>
+            </div>
 
-            <Card className="border-border/60 bg-card/40 p-4">
-              <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
-                <span>Leads</span>
-                <Users className="h-3.5 w-3.5" />
+            <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-2xs">
+              <div className="flex items-center justify-between text-xs font-semibold text-slate-600">
+                <span>Connected Cards</span>
+                <CreditCard className="h-4 w-4 text-blue-600" />
               </div>
-              <div className="text-2xl font-bold text-foreground mt-2">{leads.length}</div>
-              <div className="text-[11px] text-muted-foreground mt-0.5">
-                Contacts captured
+              <div className="text-2xl font-bold text-slate-900 mt-2">{cards.length}</div>
+              <div className="text-xs text-slate-500 mt-1">
+                {cards.filter((c) => c.status === 'active' || c.profileId).length} active NFC cards
               </div>
-            </Card>
+            </div>
           </div>
 
-          {/* Multi-Profile Switcher (if > 1 profile) */}
-          {profiles.length > 1 && (
-            <div className="flex items-center gap-2 overflow-x-auto pb-1">
-              <span className="text-xs text-muted-foreground whitespace-nowrap font-medium mr-1">Select Profile:</span>
-              {profiles.map((p) => {
-                const isSelected = (activeProfile?.id === p.id);
-                return (
-                  <button
-                    key={p.id}
-                    onClick={() => setSelectedProfileId(p.id)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap flex items-center gap-1.5 ${
-                      isSelected
-                        ? 'bg-primary/20 text-primary border border-primary/40 font-semibold'
-                        : 'bg-card/40 text-muted-foreground border border-border/40 hover:text-foreground hover:bg-muted/30'
-                    }`}
-                  >
-                    <span className="truncate max-w-[130px]">{p.displayName}</span>
-                    <Badge variant={p.status === 'published' ? 'gold' : 'secondary'} className="text-[9px] px-1 py-0 h-3.5">
-                      {p.status === 'published' ? 'Live' : 'Draft'}
-                    </Badge>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Active Profile Spotlight */}
+          {/* 3. Primary Section: Profile Status & Sharing Card */}
           {activeProfile ? (
-            <Card className="border-border/70 bg-card/40 p-5 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-base shrink-0">
-                    {activeProfile.displayName.charAt(0)}
+            <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-xs space-y-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-bold text-slate-900">
+                      {activeProfile.displayName}
+                    </h2>
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold ${
+                        activeProfile.status === 'published' || activeProfile.status === 'PUBLISHED'
+                          ? 'bg-emerald-50 text-emerald-700'
+                          : 'bg-amber-50 text-amber-700'
+                      }`}
+                    >
+                      {activeProfile.status === 'published' || activeProfile.status === 'PUBLISHED' ? 'Published' : 'Draft'}
+                    </span>
                   </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-base text-foreground truncate">
-                        {activeProfile.displayName}
-                      </span>
-                      <Badge
-                        variant={activeProfile.status === 'published' ? 'gold' : 'secondary'}
-                        className="text-[10px] px-1.5 py-0 h-4 capitalize"
-                      >
-                        {activeProfile.status === 'published' ? 'Live' : activeProfile.status === 'review_pending' ? 'Pending' : 'Draft'}
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground font-mono truncate">
-                      /p/{activeProfile.slug}
-                    </p>
-                  </div>
+                  <p className="text-xs text-slate-500">
+                    {activeProfile.headline || 'Digital Identity Profile'}
+                  </p>
                 </div>
 
-                <div className="flex items-center gap-1.5 self-start sm:self-center flex-wrap">
-                  <Link href={`/qr`}>
-                    <Button variant="outline" size="sm" className="h-7 text-xs px-2.5 gap-1 border-primary/30 text-primary hover:bg-primary/10">
-                      <QrCode className="h-3 w-3" />
-                      <span>QR Code</span>
-                    </Button>
-                  </Link>
+                {/* Profile Selector if user has multiple profiles */}
+                {profiles.length > 1 && (
+                  <select
+                    value={activeProfile.id}
+                    onChange={(e) => setSelectedProfileId(e.target.value)}
+                    className="h-8 text-xs rounded-md border border-slate-200 bg-slate-50 px-2.5 text-slate-700 font-medium"
+                  >
+                    {profiles.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.displayName} ({p.slug})
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              {/* Profile Link Bar with Copy Action */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 rounded-md bg-slate-50 border border-slate-200">
+                <div className="flex items-center space-x-2 text-xs truncate">
+                  <span className="font-semibold text-slate-600">Profile Link:</span>
+                  <span className="font-mono text-blue-600 truncate">
+                    {typeof window !== 'undefined' ? `${window.location.origin}/p/${activeProfile.slug}` : `/p/${activeProfile.slug}`}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleCopyLink(activeProfile.slug)}
-                    className="h-7 text-xs px-2.5 gap-1"
+                    className="h-8 text-xs border-slate-300 text-slate-700 hover:bg-white gap-1.5"
                   >
                     {copiedSlug === activeProfile.slug ? (
-                      <CheckCircle className="h-3 w-3 text-emerald-400" />
+                      <>
+                        <Check className="h-3.5 w-3.5 text-emerald-600" />
+                        <span className="text-emerald-600">Copied</span>
+                      </>
                     ) : (
-                      <Share2 className="h-3 w-3" />
+                      <>
+                        <Copy className="h-3.5 w-3.5" />
+                        <span>Copy link</span>
+                      </>
                     )}
-                    <span>{copiedSlug === activeProfile.slug ? 'Copied' : 'Share'}</span>
                   </Button>
-                  <Link href={`/p/${activeProfile.slug}`} target="_blank">
-                    <Button variant="outline" size="sm" className="h-7 text-xs px-2.5 gap-1">
-                      <ExternalLink className="h-3 w-3" />
+
+                  <a
+                    href={`/p/${activeProfile.slug}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 text-xs border-slate-300 text-slate-700 hover:bg-white gap-1.5"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
                       <span>View</span>
                     </Button>
-                  </Link>
-                  <Link href={`/builder/${activeProfile.id}`}>
-                    <Button variant="gold" size="sm" className="h-7 text-xs px-2.5 gap-1 font-semibold">
-                      <Edit3 className="h-3 w-3" />
-                      <span>Edit</span>
-                    </Button>
-                  </Link>
+                  </a>
                 </div>
               </div>
 
-              {/* Template & Status Strip */}
-              <div className="pt-3 border-t border-border/50 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                <div className="flex items-center justify-between p-2.5 rounded-lg bg-background/60 border border-border/40">
-                  <div className="flex items-center gap-2">
-                    <Palette className="h-3.5 w-3.5 text-primary" />
-                    <span className="text-muted-foreground">Template:</span>
-                    <span className="font-medium text-foreground capitalize">
-                      {activeProfile.templateId.replace(/-/g, ' ')}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setIsPreviewOpen(true)}
-                      className="h-6 text-[11px] px-2 text-primary"
-                    >
-                      Preview
-                    </Button>
-                    <Link href="/templates">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 text-[11px] px-2 text-muted-foreground hover:text-foreground"
-                      >
-                        Change
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
+              {/* Action Toolbar */}
+              <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-100">
+                <Link href={`/builder/${activeProfile.id}`}>
+                  <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white text-xs h-8 gap-1.5 font-semibold">
+                    <Edit3 className="h-3.5 w-3.5" />
+                    <span>Edit Profile</span>
+                  </Button>
+                </Link>
 
-                <div className="flex items-center justify-between p-2.5 rounded-lg bg-background/60 border border-border/40">
-                  <div className="flex items-center gap-2">
-                    {activeProfile.status === 'published' ? (
-                      <CheckCircle className="h-3.5 w-3.5 text-emerald-400" />
-                    ) : activeProfile.status === 'review_pending' ? (
-                      <Clock className="h-3.5 w-3.5 text-amber-400" />
-                    ) : (
-                      <FileCheck2 className="h-3.5 w-3.5 text-primary" />
-                    )}
-                    <span className="text-muted-foreground">Status:</span>
-                    <span className="font-medium text-foreground capitalize">
-                      {activeProfile.status === 'published'
-                        ? 'Published'
-                        : activeProfile.status === 'review_pending'
-                        ? 'Under Review'
-                        : 'Draft'}
-                    </span>
-                  </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsPreviewOpen(true)}
+                  className="text-xs h-8 border-slate-300 text-slate-700 hover:bg-slate-50 gap-1.5"
+                >
+                  <Eye className="h-3.5 w-3.5" />
+                  <span>Profile Preview</span>
+                </Button>
 
-                  {activeProfile.status === 'draft' && (
-                    <Button
-                      size="sm"
-                      disabled={isRequestingPublication}
-                      onClick={async () => {
-                        try {
-                          setIsRequestingPublication(true);
-                          const res = await fetch(`/api/v1/profiles/${activeProfile.id}/request-publication`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({}),
-                          });
-                          if (!res.ok) {
-                            const err = await res.json();
-                            throw new Error(err.error?.message || 'Failed to submit.');
-                          }
-                          setPublicationStatusMsg('Submitted for review');
-                          setProfiles((prev) =>
-                            prev.map((p) =>
-                              p.id === activeProfile.id ? { ...p, status: 'review_pending' } : p
-                            )
-                          );
-                          setTimeout(() => setPublicationStatusMsg(null), 3000);
-                        } catch (e: unknown) {
-                          alert(e instanceof Error ? e.message : 'Error submitting request');
-                        } finally {
-                          setIsRequestingPublication(false);
-                        }
-                      }}
-                      className="h-6 text-[11px] px-2.5 font-semibold bg-gold text-neutral-950 hover:bg-gold-light gap-1"
-                    >
-                      {isRequestingPublication ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-2.5 h-2.5" />}
-                      <span>Submit</span>
-                    </Button>
-                  )}
-                </div>
+                <Link href="/qr">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-8 border-slate-300 text-slate-700 hover:bg-slate-50 gap-1.5"
+                  >
+                    <QrCode className="h-3.5 w-3.5" />
+                    <span>QR Code</span>
+                  </Button>
+                </Link>
+
+                <Link href="/cards">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-8 border-slate-300 text-slate-700 hover:bg-slate-50 gap-1.5"
+                  >
+                    <Smartphone className="h-3.5 w-3.5" />
+                    <span>Link NFC Card</span>
+                  </Button>
+                </Link>
               </div>
-
-              {publicationStatusMsg && (
-                <div className="p-2 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs flex items-center gap-2">
-                  <CheckCircle className="w-3.5 h-3.5 shrink-0" />
-                  <span>{publicationStatusMsg}</span>
-                </div>
-              )}
-            </Card>
+            </div>
           ) : (
-            <Card className="border-border/60 bg-card/40 text-center py-10">
-              <CardContent className="space-y-3 max-w-sm mx-auto">
-                <div className="mx-auto h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                  <Sparkles className="h-5 w-5" />
-                </div>
-                <h3 className="font-semibold text-base text-foreground">No Profile Created</h3>
-                <p className="text-xs text-muted-foreground">
-                  Create your digital profile to get started.
+            /* Clean Empty State */
+            <div className="rounded-lg border border-slate-200 bg-white p-12 text-center space-y-4 shadow-2xs">
+              <div className="h-12 w-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mx-auto">
+                <Plus className="h-6 w-6" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-bold text-slate-900 text-base">No profile created yet</h3>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                  Create your professional digital profile to start sharing your contact details and links.
                 </p>
-                <div className="pt-1">
-                  <Link href="/builder/new">
-                    <Button variant="gold" size="sm" className="h-8 text-xs font-semibold gap-1.5 px-3">
-                      <Plus className="h-3.5 w-3.5" />
-                      <span>Create Profile</span>
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+              <div className="pt-2">
+                <Link href="/builder/new">
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold h-9 px-4">
+                    Create Profile
+                  </Button>
+                </Link>
+              </div>
+            </div>
           )}
 
-          {/* Recent Leads or Quick Action Shortcuts */}
+          {/* 4. Recent Contacts or Quick Navigation */}
           {leads.length > 0 ? (
-            <Card className="border-border/60 bg-card/40 p-4 space-y-3">
+            <div className="rounded-lg border border-slate-200 bg-white p-5 space-y-4 shadow-2xs">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-foreground">Recent Leads</h3>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">Recent Contacts & Leads</h3>
+                  <p className="text-xs text-slate-500">People who exchanged their details with you</p>
+                </div>
                 <Link href="/leads">
-                  <Button variant="ghost" size="sm" className="text-xs h-7 text-primary hover:text-primary/90 gap-1 px-2">
+                  <Button variant="ghost" size="sm" className="text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 gap-1 px-2 h-7 font-semibold">
                     <span>View all ({leads.length})</span>
                     <ArrowRight className="h-3 w-3" />
                   </Button>
                 </Link>
               </div>
 
-              <div className="divide-y divide-border/40 text-xs">
+              <div className="divide-y divide-slate-100 text-xs">
                 {leads.slice(0, 4).map((lead) => (
-                  <div key={lead.id} className="py-2 flex items-center justify-between">
+                  <div key={lead.id} className="py-2.5 flex items-center justify-between">
                     <div>
-                      <span className="font-medium text-foreground">{lead.name}</span>
+                      <span className="font-semibold text-slate-900">{lead.name}</span>
                       {lead.company && (
-                        <span className="text-muted-foreground ml-2">({lead.company})</span>
+                        <span className="text-slate-500 ml-2">({lead.company})</span>
                       )}
                       {lead.email && (
-                        <span className="text-muted-foreground ml-2 font-mono text-[11px]">
+                        <span className="text-slate-500 ml-2 font-mono text-[11px]">
                           {lead.email}
                         </span>
                       )}
                     </div>
-                    <span className="text-muted-foreground text-[11px]">
+                    <span className="text-slate-400 text-[11px]">
                       {new Date(lead.createdAt).toLocaleDateString()}
                     </span>
                   </div>
                 ))}
               </div>
-            </Card>
+            </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Card className="border-border/60 bg-card/40 p-3.5 flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <Palette className="h-4 w-4 text-primary" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="rounded-lg border border-slate-200 bg-white p-4 flex items-center justify-between shadow-2xs">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center">
+                    <Palette className="h-4 w-4" />
+                  </div>
                   <div>
-                    <div className="text-xs font-medium text-foreground">Templates</div>
-                    <div className="text-[11px] text-muted-foreground">Explore designs</div>
+                    <div className="text-xs font-semibold text-slate-900">Profile Styles</div>
+                    <div className="text-[11px] text-slate-500">Choose your design</div>
                   </div>
                 </div>
                 <Link href="/templates">
-                  <Button variant="outline" size="sm" className="h-7 text-xs px-2.5">
+                  <Button variant="outline" size="sm" className="h-7 text-xs border-slate-200 text-slate-700 hover:bg-slate-50">
                     Browse
                   </Button>
                 </Link>
-              </Card>
+              </div>
 
-              <Card className="border-border/60 bg-card/40 p-3.5 flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <CreditCard className="h-4 w-4 text-primary" />
+              <div className="rounded-lg border border-slate-200 bg-white p-4 flex items-center justify-between shadow-2xs">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center">
+                    <CreditCard className="h-4 w-4" />
+                  </div>
                   <div>
-                    <div className="text-xs font-medium text-foreground">Cards</div>
-                    <div className="text-[11px] text-muted-foreground">Manage NFC hardware</div>
+                    <div className="text-xs font-semibold text-slate-900">NFC Cards</div>
+                    <div className="text-[11px] text-slate-500">Connect smart hardware</div>
                   </div>
                 </div>
                 <Link href="/cards">
-                  <Button variant="outline" size="sm" className="h-7 text-xs px-2.5">
+                  <Button variant="outline" size="sm" className="h-7 text-xs border-slate-200 text-slate-700 hover:bg-slate-50">
                     Manage
                   </Button>
                 </Link>
-              </Card>
+              </div>
             </div>
           )}
         </>
       )}
 
-      {/* Interactive Template Preview Modal with Customer Data */}
+      {/* Profile Preview Modal with User Data */}
       {isPreviewOpen && activeProfile && (
         <TemplatePreviewModal
           isOpen={isPreviewOpen}

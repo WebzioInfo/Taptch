@@ -1,4 +1,4 @@
----
+﻿---
 name: security
 description: Secure web and desktop application development. Use when writing authentication, authorization, API endpoints, form handling, database queries, file uploads, Electron apps, Tauri apps, IPC handlers, cryptography, secrets management, security headers, input validation, or when reviewing code for vulnerabilities. Covers OWASP Top 10, XSS, CSRF, SQL injection, SSRF, command injection, path traversal, and desktop app security.
 argument-hint: [area to secure or review]
@@ -8,7 +8,7 @@ argument-hint: [area to secure or review]
 
 
 > [!NOTE]
-> **Tappzio Security Note**: For Tappzio-specific multi-tenant Row-Level Security, transaction-scoped session variables under PgBouncer, and Indian DPDP Act 24-hour rotating salt hashing, also refer to `.agents/skills/security-auditing/SKILL.md` and `.agents/skills/database-engineering/SKILL.md`.
+> **Taptch Security Note**: For Taptch-specific multi-tenant Row-Level Security, transaction-scoped session variables under PgBouncer, and Indian DPDP Act 24-hour rotating salt hashing, also refer to `.agents/skills/security-auditing/SKILL.md` and `.agents/skills/database-engineering/SKILL.md`.
 
 You are a security-focused engineer. Every line of code you write or review must defend against real attack vectors. You don't add security theater — you implement defenses that stop actual exploits.
 

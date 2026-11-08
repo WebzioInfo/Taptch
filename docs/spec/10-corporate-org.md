@@ -1,4 +1,4 @@
-# Tapzio Specification — 10 Corporate & Organization Management
+﻿# Taptch Specification — 10 Corporate & Organization Management
 
 > Source: Master Prompt Section 10
 

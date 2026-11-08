@@ -17,7 +17,7 @@ function getFilesRecursively(dir: string, fileList: string[] = []): string[] {
 }
 
 describe('Architecture Rule: Brand Literal Protection', () => {
-  it('should not contain literal "Tapzio" or "Tappzio" string in UI components, routes, or pages outside config/seed', () => {
+  it('should not contain literal brand strings in UI components, routes, or pages outside config/seed', () => {
     const scanDirs = [
       path.resolve('src/components'),
       path.resolve('src/app/(marketing)'),
@@ -37,8 +37,8 @@ describe('Architecture Rule: Brand Literal Protection', () => {
           if (trimmed.startsWith('//') || trimmed.startsWith('/*')) return;
           if (trimmed.includes('from') && trimmed.includes('config')) return;
 
-          // Check if literal 'Tapzio'/'Tappzio' appears in JSX or strings
-          if (/(['"`])(Tapzio|Tappzio)\1/i.test(line) || />\s*(Tapzio|Tappzio)\s*</i.test(line)) {
+          // Check if literal 'Taptch' appears hardcoded in JSX or strings (should use brandConfig)
+          if (/(['"`])(TAPTCH|Taptch)\1/i.test(line) || />\s*(Taptch)\s*</i.test(line)) {
             violations.push({
               file: path.relative(process.cwd(), file),
               line: index + 1,
@@ -55,7 +55,7 @@ describe('Architecture Rule: Brand Literal Protection', () => {
 
     expect(
       violations,
-      'Hardcoded brand literal "Tapzio"/"Tappzio" found in UI! Use brandConfig.name from "@/config" instead.'
+      'Hardcoded brand literal found in UI! Use brandConfig.name from "@/config" instead.'
     ).toHaveLength(0);
   });
 });

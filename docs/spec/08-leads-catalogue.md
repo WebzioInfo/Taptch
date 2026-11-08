@@ -1,9 +1,9 @@
-# Tapzio Specification — 08 Contact Exchange, Leads & Catalogue
+﻿# Taptch Specification — 08 Contact Exchange, Leads & Catalogue
 
 > Source: Master Prompt Section 8
 
 ## Contact Exchange (Lead Capture Engine)
-Unlike traditional one-way cards, Tapzio facilitates bidirectional networking through an interactive modal on the public profile:
+Unlike traditional one-way cards, Taptch facilitates bidirectional networking through an interactive modal on the public profile:
 - Fields collected:
   - Full Name (required)
   - Mobile Number (required, E.164 validated)

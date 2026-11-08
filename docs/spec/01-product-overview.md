@@ -1,9 +1,9 @@
-# Tapzio Specification — 01 Product Overview
+﻿# Taptch Specification — 01 Product Overview
 
 > Source: Master Prompt Section 1
 
 ## Product Summary
-**Tapzio** is an NFC + QR **digital identity and smart-networking SaaS**. A physical card (PVC, metal, wood, custom; later wristbands/keychains/stickers) is only the hardware key. The product is the digital profile engine, contact exchange and lead capture, analytics, team/corporate management, ordering and card operations, billing, and a super-admin control plane. 
+**Taptch** is an NFC + QR **digital identity and smart-networking SaaS**. A physical card (PVC, metal, wood, custom; later wristbands/keychains/stickers) is only the hardware key. The product is the digital profile engine, contact exchange and lead capture, analytics, team/corporate management, ordering and card operations, billing, and a super-admin control plane. 
 
 - **Initial Product**: NFC Business Card / Personal Card.
 - **Scale Target**: Must serve one individual up to thousands of organizations and millions of profile visits.
@@ -22,7 +22,7 @@ Competitors to study: Vertu Cardz (demo: `https://tangerine-chaja-02bf37.netlify
 - No digital wallet / signature tooling.
 - Manual lost-card handling requiring reprinting or manual code rewrites.
 
-### Tapzio Competitive Advantage
+### Taptch Competitive Advantage
 We beat competitors on:
 1. UI/UX quality & speed (sub-second LCP, zero jank).
 2. Deep schema-driven profile customization with versioning and draft rollbacks.

@@ -1,4 +1,4 @@
-# Tappzio 360° Master Project Audit — 12: Prioritized Roadmap
+﻿# Taptch 360° Master Project Audit — 12: Prioritized Roadmap
 
 **Focus:** Actionable Engineering & Product Roadmap (P0 to P4), Complexity Estimates, Milestone Sequence  
 **Author:** CTO & Principal Software Architect  

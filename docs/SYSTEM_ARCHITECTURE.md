@@ -1,7 +1,7 @@
-# Tapzio — System Architecture Document
+﻿# Taptch — System Architecture Document
 ## Next-Gen Digital Identity & Template-Driven Platform Architecture
 
-**Product:** Tapzio  
+**Product:** Taptch  
 **Platform Owner:** Webzio Technology  
 **Architecture Style:** Modular Monolith with Decoupled Template Engine & Edge Redirects  
 **Document Version:** 2.0 (Product Vision Realignment)  
@@ -11,7 +11,7 @@
 
 ## 1. High-Level Architecture Overview
 
-Tapzio is architected around a central **Digital Profile & Template Engine**, with physical NFC smart cards acting as hardware edge gateways.
+Taptch is architected around a central **Digital Profile & Template Engine**, with physical NFC smart cards acting as hardware edge gateways.
 
 ```mermaid
 flowchart TD

@@ -1,5 +1,5 @@
 -- ====================================================================
--- ROW LEVEL SECURITY (RLS) POLICIES FOR TAPZIO MULTI-TENANCY
+-- ROW LEVEL SECURITY (RLS) POLICIES FOR TAPTCH MULTI-TENANCY
 -- Enforces strict isolation even if table owner or connection is pooled
 -- ====================================================================
 

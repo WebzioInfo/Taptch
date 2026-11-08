@@ -405,7 +405,7 @@ export async function assignQRInField(params: {
     } else {
       // Create new customer account
       const newCustomerId = `usr_cust_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-      const customerEmail = `${cleanMobile.replace(/[^0-9]/g, '')}@customer.tappzio.com`;
+      const customerEmail = `${cleanMobile.replace(/[^0-9]/g, '')}@customer.taptch.com`;
       const [newCustomer] = await db
         .insert(users)
         .values({

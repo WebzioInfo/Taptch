@@ -1,9 +1,9 @@
-# Tapzio — Competitor Analysis & Parity Matrix
+﻿# Taptch — Competitor Analysis & Parity Matrix
 
 ## 1. Executive Summary
 This document analyzes the current market landscape of NFC & smart digital business cards, auditing leading global players (*Popl, Blinq, Mobilo, HiHello, Linq, V1CE, Uniqode*) and regional/Indian competitors (*Vertu Cardz, TapOnn, TapMo, Card Ventures, 1Card, TapSticky, Cloud NFC Cards*).
 
-Based on direct inspection of real competitor profiles (including the live showcase demo at `https://tangerine-chaja-02bf37.netlify.app/` and individual profile sites), we have identified structural weaknesses across the market that Tapzio directly eliminates.
+Based on direct inspection of real competitor profiles (including the live showcase demo at `https://tangerine-chaja-02bf37.netlify.app/` and individual profile sites), we have identified structural weaknesses across the market that Taptch directly eliminates.
 
 ---
 
@@ -48,9 +48,9 @@ Based on direct inspection of real competitor profiles (including the live showc
 
 ## 3. Comprehensive Feature Parity & Superiority Matrix
 
-> Note: All metrics listed under **Tapzio** are **ENGINEERING TARGETS** subject to automated verification gates in Milestones 1–3, not pre-mature claims of achievement.
+> Note: All metrics listed under **Taptch** are **ENGINEERING TARGETS** subject to automated verification gates in Milestones 1–3, not pre-mature claims of achievement.
 
-| Capability / Feature | Vertu Cardz | Popl / Linq | Blinq / HiHello | Local Indian Brands | **Tapzio (Target Specification)** |
+| Capability / Feature | Vertu Cardz | Popl / Linq | Blinq / HiHello | Local Indian Brands | **Taptch (Target Specification)** |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Public Profile LCP Speed** | ~2.2s (Observed) | ~1.8s (Observed) | ~1.5s (Observed) | ~3.8s (Observed) | **TARGET: < 1.1s (Sub-second ISR edge)** |
 | **Mobile Viewport Optimization** | Basic | Good | Good | Average | **TARGET: Bespoke 390px Mobile-First Studio Design** |
@@ -73,9 +73,9 @@ Based on direct inspection of real competitor profiles (including the live showc
 
 ---
 
-## 4. Key Takeaways for Tapzio Engineering
+## 4. Key Takeaways for Taptch Engineering
 1. **Speed is King**: Public profile visitors arrive via a physical tap or quick QR scan; any delay past 1.5 seconds kills conversion. We must serve statically cached HTML with lazy hydration.
 2. **Decouple Hardware from Slugs**: We must never encode `/p/username` on a card. Always encode `/n/{token}`, enabling lifelong card utility.
-3. **Elevate Aesthetics**: Competitor templates are either generic corporate or amateurish. Tapzio's *Obsidian*, *Ivory*, and *Aurora* themes immediately establish executive credibility.
-4. **Solve the Indian SMB & Enterprise Pain**: Local competitors fail at automated GST invoices, corporate department hierarchies, and B2B order production tracking. Tapzio treats commerce and operations as first-class citizens.
+3. **Elevate Aesthetics**: Competitor templates are either generic corporate or amateurish. Taptch's *Obsidian*, *Ivory*, and *Aurora* themes immediately establish executive credibility.
+4. **Solve the Indian SMB & Enterprise Pain**: Local competitors fail at automated GST invoices, corporate department hierarchies, and B2B order production tracking. Taptch treats commerce and operations as first-class citizens.
 

@@ -1,6 +1,6 @@
-# Tappzio Brand Identity & Design System Guidelines
+# TAPTCH Brand Identity & Design System Guidelines
 
-**Version:** 1.0.0  
+**Version:** 2.0.0  
 **Status:** Approved & Implemented  
 **Date:** November 2026  
 **Classification:** Official Brand Manual  
@@ -9,7 +9,7 @@
 
 ## 1. Executive Summary & Brand Purpose
 
-**Tappzio** is an intelligent digital identity and smart networking ecosystem engineered for executives, founders, enterprises, and high-growth professionals. The platform bridges physical presence with persistent digital connection through contactless 13.56 MHz NFC hardware, dynamic dual-layer QR vectors, and high-performance digital identity profiles.
+**TAPTCH** is an intelligent digital identity and smart networking ecosystem engineered for executives, founders, enterprises, and high-growth professionals. The platform bridges physical presence with persistent digital connection through contactless 13.56 MHz NFC hardware, dynamic dual-layer QR vectors, and high-performance digital identity profiles.
 
 The brand identity represents:
 - **Instantaneous Connection:** Frictionless tap-and-connect interaction.
@@ -20,7 +20,7 @@ The brand identity represents:
 
 ## 2. Logo Concept & Symbol Geometry
 
-The Tappzio mark—the **Harmonic Nexus T**—is mathematically constructed on an 8-point geometric grid:
+The TAPTCH mark—the **Harmonic Nexus T**—is mathematically constructed on an 8-point geometric grid:
 
 ```
           ▲  [Apex Transmission Core / Direct Tap]
@@ -68,15 +68,15 @@ The Tappzio mark—the **Harmonic Nexus T**—is mathematically constructed on a
 ## 4. Typography
 
 ### 4.1 Wordmark Specifications
-The **TAPPZIO** wordmark is engineered with wide geometric letter-spacing (`letter-spacing: 0.18em`) and high-tension modern sans-serif geometry:
-- **Font Stack:** Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif
-- **Weight:** 800 (ExtraBold)
+The **TAPTCH** wordmark is engineered with wide geometric letter-spacing (`letter-spacing: 0.18em`) and high-tension modern sans-serif geometry:
+- **Font Stack:** 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif
+- **Weight:** 900 (ExtraBold)
 - **Tracking:** +180 (`tracking-[0.18em]`)
-- **Casing:** 100% Uppercase
+- **Casing:** 100% Uppercase: **TAPTCH**
 
 ### 4.2 UI & Body Typography
-- **Headings:** Inter / Outfit, SemiBold to ExtraBold (weights 600–800)
-- **Body:** Inter, Regular & Medium (weights 400 & 500)
+- **Headings:** Plus Jakarta Sans / Outfit, SemiBold to ExtraBold (weights 600–800)
+- **Body:** Plus Jakarta Sans / Inter, Regular & Medium (weights 400 & 500)
 - **Data & Serial IDs:** JetBrains Mono or monospace (weight 500)
 
 ---
@@ -88,13 +88,13 @@ The asset package is organized in `public/branding/`:
 ```
 public/branding/
 ├── logo/
-│   ├── tappzio-logo-primary.svg     # Symbol + Wordmark (Dark canvas optimized)
-│   ├── tappzio-logo-light.svg       # Symbol + Wordmark (Optimized for dark backgrounds)
-│   ├── tappzio-logo-dark.svg        # Symbol + Wordmark (Optimized for light backgrounds)
-│   ├── tappzio-logo-horizontal.svg  # Compact navbar lockup
-│   ├── tappzio-logo-stacked.svg     # Centered vertical lockup for splash / cards
-│   ├── tappzio-symbol.svg           # Standalone iconic mark
-│   └── tappzio-monochrome.svg       # 1-Color vector for physical engraving
+│   ├── taptch-logo-primary.svg     # Symbol + Wordmark (Dark canvas optimized)
+│   ├── taptch-logo-light.svg       # Symbol + Wordmark (Optimized for dark backgrounds)
+│   ├── taptch-logo-dark.svg        # Symbol + Wordmark (Optimized for light backgrounds)
+│   ├── taptch-logo-horizontal.svg  # Compact navbar lockup
+│   ├── taptch-logo-stacked.svg     # Centered vertical lockup for splash / cards
+│   ├── taptch-symbol.svg           # Standalone iconic mark
+│   └── taptch-monochrome.svg       # 1-Color vector for physical engraving
 └── icons/
     ├── favicon.svg                  # Vector browser favicon
     ├── icon-192.png                 # PWA and mobile home-screen icon (192x192)
@@ -126,13 +126,13 @@ No typography, photography, borders, or graphics may encroach within this bounda
 ## 7. Light & Dark Background Usage
 
 1. **Dark Backgrounds (`#000000` to `#1E1E24`):**
-   - **Recommended:** `tappzio-logo-primary.svg` or `tappzio-logo-light.svg`
+   - **Recommended:** `taptch-logo-primary.svg` or `taptch-logo-light.svg`
    - The symbol displays the metallic Champagne Gold gradient (`#D4AF37` to `#F3E5AB`), while the wordmark renders in crisp Platinum Pure (`#FFFFFF`).
 2. **Light Backgrounds (`#FFFFFF` to `#F3F4F6`):**
-   - **Recommended:** `tappzio-logo-dark.svg`
+   - **Recommended:** `taptch-logo-dark.svg`
    - The symbol retains rich Champagne Gold, and the wordmark renders in deep Charcoal Ink (`#0A0A0C`).
 3. **High-Contrast Monochrome & Engraving:**
-   - **Recommended:** `tappzio-monochrome.svg`
+   - **Recommended:** `taptch-monochrome.svg`
    - Applied in 100% white on dark card stock, or 100% black on white invoice/shipping stationery.
 
 ---
@@ -140,15 +140,15 @@ No typography, photography, borders, or graphics may encroach within this bounda
 ## 8. Physical NFC Card Application
 
 ### 8.1 Matte Black PVC Card
-- **Front:** Standalone `tappzio-symbol.svg` centered or lower-right corner, hot-stamped in brushed metallic gold foil or subtle gloss UV spot finish.
-- **Back:** Dynamic QR vector with center Tappzio micro-badge, card serial number in laser-etched monochrome.
+- **Front:** Standalone `taptch-symbol.svg` centered or lower-right corner, hot-stamped in brushed metallic gold foil or subtle gloss UV spot finish.
+- **Back:** Dynamic QR vector with center TAPTCH micro-badge, card serial number in laser-etched monochrome.
 
 ### 8.2 Anodized Matte Black Stainless Steel / Metal Card
-- **Laser Engraving:** Use `tappzio-monochrome.svg`.
+- **Laser Engraving:** Use `taptch-monochrome.svg`.
 - The laser exposes the raw silvery steel base under the anodized black coat with 0.1mm line precision.
 
 ### 8.3 Bamboo / Walnut Wood Cards
-- **Laser Pyrography:** `tappzio-monochrome.svg` vector depth-etched at 0.3mm into the natural grain.
+- **Laser Pyrography:** `taptch-monochrome.svg` vector depth-etched at 0.3mm into the natural grain.
 
 ---
 

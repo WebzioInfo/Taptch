@@ -1,4 +1,4 @@
-# Tappzio 360° Master Project Audit — 10: Integrations & DevOps Audit
+﻿# Taptch 360° Master Project Audit — 10: Integrations & DevOps Audit
 
 **Focus:** Containerization, Decoupled BullMQ Worker, Cloudinary Media Pipelines, Email Delivery, CI/CD  
 **Auditor:** DevOps & Infrastructure Engineer  
@@ -8,7 +8,7 @@
 
 ## 1. Containerization & Production Topologies
 
-Tappzio is configured for deterministic container deployment via Docker and Docker Compose:
+Taptch is configured for deterministic container deployment via Docker and Docker Compose:
 
 ```
 ┌────────────────────────────────────────────────────────┐
@@ -17,7 +17,7 @@ Tappzio is configured for deterministic container deployment via Docker and Dock
 └───────────┬────────────────────────────────┬───────────┘
             │                                │
 ┌───────────▼────────────┐       ┌───────────▼───────────┐
-│  tappzio-web (Next.js) │       │  tappzio-worker       │
+│  Taptch-web (Next.js) │       │  Taptch-worker       │
 │  Port 3000 (Stateless) │       │  (BullMQ Processor)   │
 └───────────┬────────────┘       └───────────┬───────────┘
             │                                │
@@ -30,7 +30,7 @@ Tappzio is configured for deterministic container deployment via Docker and Dock
 ```
 
 ### Key Architectural Discipline:
-- **Decoupled Worker Container**: High-load background tasks (profile snapshot compilation, bulk QR vector PDF rendering, analytics batching) run in `tappzio-worker`, completely isolated from user-facing Next.js web processes.
+- **Decoupled Worker Container**: High-load background tasks (profile snapshot compilation, bulk QR vector PDF rendering, analytics batching) run in `Taptch-worker`, completely isolated from user-facing Next.js web processes.
 - **Next.js Web Route Safety**: Web requests merely execute `queue.add()` (<5ms) and return immediately. The web server never blocks on image transformations or PDF compilation.
 
 ---

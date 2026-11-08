@@ -14,7 +14,7 @@ import {
 import { db } from '@/db';
 import { users } from '@/db/schema/auth';
 
-describe('Tappzio Dynamic QR Engine (Phase 1)', () => {
+describe('TAPTCH Dynamic QR Engine (Phase 1)', () => {
   const testUserId = `usr_qr_test_${Date.now()}`;
 
   beforeAll(async () => {
@@ -22,7 +22,7 @@ describe('Tappzio Dynamic QR Engine (Phase 1)', () => {
     await db.insert(users).values({
       id: testUserId,
       name: 'QR Architect Test',
-      email: `qr-test-${Date.now()}@tappzio.com`,
+      email: `qr-test-${Date.now()}@taptch.com`,
       systemRole: 'user',
     });
   });
@@ -64,7 +64,7 @@ describe('Tappzio Dynamic QR Engine (Phase 1)', () => {
       expect(scannable.isScannable).toBe(true);
     });
 
-    it('verifies Tappzio gold on dark obsidian has compliant contrast', () => {
+    it('verifies TAPTCH gold on dark obsidian has compliant contrast', () => {
       const scannable = isDesignScannable('#D4AF37', '#0A0A0C');
       expect(scannable.contrast).toBeGreaterThanOrEqual(4.5);
       expect(scannable.isScannable).toBe(true);
@@ -98,7 +98,7 @@ describe('Tappzio Dynamic QR Engine (Phase 1)', () => {
 
   describe('4. SVG Matrix Generation & Quiet Zone Enforcement', () => {
     it('generates valid vector SVG with quiet zones', async () => {
-      const svg = await generateQRSvg('https://tappzio.webziotech.in/q/test-token-123', {
+      const svg = await generateQRSvg('https://taptch.webziotech.in/q/test-token-123', {
         fgColor: '#000000',
         bgColor: '#FFFFFF',
       });
@@ -139,7 +139,7 @@ describe('Tappzio Dynamic QR Engine (Phase 1)', () => {
       // Update destination to WhatsApp direct
       const updated = await updateQRCode(qr.id, {
         destinationType: 'whatsapp',
-        destinationPayload: { phone: '+91 98765 43210', message: 'Hello from Tappzio QR' },
+        destinationPayload: { phone: '+91 98765 43210', message: 'Hello from TAPTCH QR' },
       });
 
       expect(updated.destinationType).toBe('whatsapp');
@@ -148,7 +148,7 @@ describe('Tappzio Dynamic QR Engine (Phase 1)', () => {
       const resolved = await resolveQRToken(qr.token);
       expect(resolved.status).toBe('assigned');
       expect(resolved.redirectUrl).toContain('https://wa.me/919876543210');
-      expect(resolved.redirectUrl).toContain('Hello%20from%20Tappzio%20QR');
+      expect(resolved.redirectUrl).toContain('Hello%20from%20TAPTCH%20QR');
     });
 
     it('honors disabled status on revoked QR codes', async () => {

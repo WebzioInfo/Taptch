@@ -1,4 +1,4 @@
-# Tapzio Specification — 13 Ecosystem Extras
+﻿# Taptch Specification — 13 Ecosystem Extras
 
 > Source: Master Prompt Section 13
 
@@ -16,7 +16,7 @@ These high-value auxiliary modules extend the core digital networking experience
 
 ### 2. Email Signature Generator
 - Interactive generator creating branded HTML email signatures.
-- Includes photo, designation, live clickable contact links, and a miniature QR code leading to the Tapzio profile.
+- Includes photo, designation, live clickable contact links, and a miniature QR code leading to the Taptch profile.
 - One-click copy for Gmail, Outlook, Apple Mail, and Thunderbird with bulletproof HTML table formatting.
 
 ### 3. Video-Call Virtual Background Generator

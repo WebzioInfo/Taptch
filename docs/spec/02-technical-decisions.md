@@ -1,4 +1,4 @@
-# Tapzio Specification — 02 Locked Technical Decisions
+﻿# Taptch Specification — 02 Locked Technical Decisions
 
 > Source: Master Prompt Section 2
 

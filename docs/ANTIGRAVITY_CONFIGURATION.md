@@ -1,15 +1,15 @@
-# Antigravity Agent Configuration & Discovery Guide
+﻿# Antigravity Agent Configuration & Discovery Guide
 
 ## 1. Overview
 
-This document specifies the exact configuration and discovery mechanisms utilized by **Antigravity** (and Claude Code / Gemini Code Assist) within the Tapzio repository.
+This document specifies the exact configuration and discovery mechanisms utilized by **Antigravity** (and Claude Code / Gemini Code Assist) within the Taptch repository.
 
 ---
 
 ## 2. Directory Hierarchy & Conventions
 
 ```text
-d:\Webzio\Tapzio\
+d:\Webzio\Taptch\
 ├── AGENTS.md                  # Authoritative workspace governance rules & all-skills mandate
 ├── skills-lock.json           # Cryptographic integrity manifest for all 44 skills
 ├── .agents/
@@ -49,7 +49,7 @@ Antigravity scans `.agents/skills/` at the start of every session:
    name: skill-name
    description: "Actionable summary of capabilities and triggers."
    risk: safe
-   source: tapzio-core
+   source: Taptch-core
    date_added: "2026-11-02"
    version: "1.0.0"
    ---

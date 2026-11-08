@@ -1,5 +1,5 @@
 -- 0007_dynamic_qr_engine.sql
--- Tappzio Dynamic QR Engine, Batch Inventory, and Scan Telemetry
+-- Taptch Dynamic QR Engine, Batch Inventory, and Scan Telemetry
 
 -- 1. QR Batches Table
 CREATE TABLE IF NOT EXISTS qr_batches (

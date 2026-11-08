@@ -1,4 +1,4 @@
-# Tappzio 360° Master Project Audit — 08: Security & Privacy Audit
+﻿# Taptch 360° Master Project Audit — 08: Security & Privacy Audit
 
 **Focus:** Application Security, OWASP Top 10, Multi-Tenant IDOR, Token Cryptography, DPDP Act Privacy  
 **Auditor:** Cybersecurity Auditor & Lead Security Architect  
@@ -25,7 +25,7 @@
 
 ## 2. Privacy & DPDP Act Compliance
 
-1. **IP Address Anonymization**: Tappzio does not store raw visitor IP addresses in analytics tables (`qr_scans` or `profile_views`). All IPs are salted with a 24-hour rotating secret and hashed via SHA-256 before persistence.
+1. **IP Address Anonymization**: Taptch does not store raw visitor IP addresses in analytics tables (`qr_scans` or `profile_views`). All IPs are salted with a 24-hour rotating secret and hashed via SHA-256 before persistence.
 2. **Dual-Consent Reciprocal Leads**: Lead capture forms on digital profiles explicitly incorporate consent checkboxes for data storage and contact follow-up.
 3. **Data Portability & Erasure**: Users can request complete profile export (vCard & CSV) or total account deletion with cascading removal across all relational tables.
 

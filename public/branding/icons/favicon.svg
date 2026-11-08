@@ -23,7 +23,7 @@
         <feComposite in="SourceGraphic" in2="blur" operator="over" />
       </filter>
     </defs>
-    <g class="tappzio-symbol-mark">
+    <g class="taptch-symbol-mark">
       <!-- Left Contactless Wave Wing of T -->
       <path
         d="M 14,24 L 46,24 C 47.1,24 48,24.9 48,26 L 48,38 C 48,39.1 47.1,40 46,40 L 26,40 C 23.8,40 21.8,38.8 20.8,36.9 L 14.8,26.9 C 14.1,25.7 14.9,24 16.4,24 Z"

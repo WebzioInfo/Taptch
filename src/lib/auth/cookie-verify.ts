@@ -26,7 +26,7 @@ export async function verifySignedSessionCookie(
   const authSecret =
     secret ||
     process.env.BETTER_AUTH_SECRET ||
-    'tappzio-development-better-auth-secret-min-32-chars-long';
+    'taptch-development-better-auth-secret-min-32-chars-long';
 
   // Decode URI component if percent-encoded
   let decoded = rawCookieValue;

@@ -52,7 +52,7 @@ export function getDatabase() {
   const connectionString =
     process.env.DATABASE_URL ||
     process.env.DATABASE_URL_POOLED ||
-    'postgres://tappzio_app:tappzio_app_pass@localhost:6432/tappzio_db?sslmode=disable';
+    'postgres://taptch_app:taptch_app_pass@localhost:6432/taptch_db?sslmode=disable';
 
   if (!rawPostgresClient) {
     // Warn if IPv6-only direct Supabase endpoint is detected in connection string

@@ -1,4 +1,4 @@
-# Tappzio 360° Master Project Audit — 09: Performance & Scalability Audit
+﻿# Taptch 360° Master Project Audit — 09: Performance & Scalability Audit
 
 **Focus:** Low-Latency Redirects, Zero Dynamic Profile Hot Path, Core Web Vitals, Database Indexing, Caching Strategies  
 **Auditor:** Principal Performance Engineer  
@@ -8,7 +8,7 @@
 
 ## 1. Zero Dynamic Hot Path Architecture on Public Profiles
 
-The highest-traffic route on Tappzio is the public digital profile page:
+The highest-traffic route on Taptch is the public digital profile page:
 ```
 GET /p/[slug]
 ```

@@ -1,8 +1,8 @@
-# Antigravity Customization System Audit & Acceptance Verification
+﻿# Antigravity Customization System Audit & Acceptance Verification
 
 **Audit Date:** October 31, 2026  
 **Auditor:** Principal AI Engineering Architect & Agent Configuration Engineer  
-**Workspace:** `D:\Webzio\Tapzio`  
+**Workspace:** `D:\Webzio\Taptch`  
 **Standard:** Native Antigravity Customization Architecture (`.agents/rules/`, `.agents/skills/`, `.agents/skills.json`)
 
 ---

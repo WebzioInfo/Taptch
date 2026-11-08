@@ -1,8 +1,8 @@
-# Tapzio — Critical Runtime, Save Draft & Worker Crash Fix Report
+﻿# Taptch — Critical Runtime, Save Draft & Worker Crash Fix Report
 
 **Report Date:** November 2, 2026  
 **Engineering Discipline:** Principal Next.js Architect, Production Reliability Engineer, Systems Runtime Specialist  
-**Project:** Tapzio (`D:\Webzio\Tapzio`)  
+**Project:** Taptch (`D:\Webzio\taptch`)  
 **Target Environments:** Node.js v24.15.0 / Next.js 15.5.28 / React 19.0.0 / PostgreSQL 17 / Redis / Drizzle ORM
 
 ---
@@ -41,7 +41,7 @@ All three issues have been resolved at the architectural and runtime levels. All
 ### Issue B: Next.js Worker Module Resolution Failure
 - **Observed Behavior**:
   ```text
-  Cannot find module 'D:\Webzio\Tapzio\.next\server\vendor-chunks\lib\worker.js' code: MODULE_NOT_FOUND
+  Cannot find module 'D:\Webzio\taptch\.next\server\vendor-chunks\lib\worker.js' code: MODULE_NOT_FOUND
   ```
 - **Root Cause**:
   - Next.js Webpack bundler bundled `pino-pretty` and `thread-stream` into `.next/server/vendor-chunks/`.
@@ -62,7 +62,7 @@ All three issues have been resolved at the architectural and runtime levels. All
   - When the logger transport stream failed, calling `logger.warn(...)` inside Redis's error handler threw an unhandled error.
 - **Architectural Solution**:
   1. **Crash-Proof Logging Dispatcher (`safeLog`)**: In `src/lib/logger/index.ts`, all logger methods (`info`, `warn`, `error`, `debug`) are wrapped with an isolated try-catch fallback that redirects directly to `console[method]` if any stream or worker issue arises.
-  2. **Singleton Resilience**: Bound logger to `globalThis.__tapzio_logger__` and Redis client to `globalThis.__tapzio_redis__`, preventing thread proliferation during Next.js Hot Module Replacement.
+  2. **Singleton Resilience**: Bound logger to `globalThis.__taptch_logger__` and Redis client to `globalThis.__taptch_redis__`, preventing thread proliferation during Next.js Hot Module Replacement.
   3. **Event Listener Protection**: Wrapped Redis event listeners in defensive try-catch handlers to guarantee Redis network connection dropouts or restarts never crash API endpoints or publishing flows.
   4. **Recoverable Secondary Operations**: In `publishProfile`, database persistence is strictly completed and verified first. Redis cache invalidation/sync runs in an isolated, non-blocking try-catch block.
 

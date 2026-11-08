@@ -27,7 +27,7 @@ export async function generatePrintPdf(options: GeneratePdfOptions): Promise<Uin
   const pdfDoc = await PDFDocument.create();
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-  const baseUrl = options.baseUrl || (options.appUrl ? `${options.appUrl}/dq` : 'https://tappzio.webziotech.in/dq');
+  const baseUrl = options.baseUrl || (options.appUrl ? `${options.appUrl}/dq` : 'https://taptch.webziotech.in/dq');
 
   if (options.layout === 'thermal_sticker') {
     // Single compact sticker per page (e.g. 50mm x 50mm => 141.7 x 141.7 pt)
@@ -64,7 +64,7 @@ export async function generatePrintPdf(options: GeneratePdfOptions): Promise<Uin
       const pngImage = await pdfDoc.embedPng(qrDataUrl);
 
       // Header branding
-      const header = options.companyName || 'TAPPZIO CONNECT';
+      const header = options.companyName || 'TAPTCH CONNECT';
       const headerWidth = fontBold.widthOfTextAtSize(header, 12);
       page.drawText(header, {
         x: (width - headerWidth) / 2,
@@ -133,7 +133,7 @@ export async function generatePrintPdf(options: GeneratePdfOptions): Promise<Uin
       const page = pdfDoc.addPage([pageWidth, pageHeight]);
 
       // Sheet Header
-      page.drawText(`${options.companyName || 'Tappzio'} — Dynamic QR Production Sheet`, {
+      page.drawText(`${options.companyName || 'TAPTCH'} — Dynamic QR Production Sheet`, {
         x: 30,
         y: pageHeight - 30,
         size: 10,

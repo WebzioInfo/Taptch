@@ -6,7 +6,7 @@ trigger: always_on
 
 ## 1. Absolute Policy: All Skills Must Be Inspected & Considered
 For EVERY new prompt, request, instruction, task, bug fix, feature, code change, audit, refactoring, documentation update, or implementation task:
-**YOU MUST INSPECT, READ, AND CONSIDER EVERY SKILL AVAILABLE IN THE TAPPZIO SKILLS LIBRARY (`.agents/skills/`) BEFORE STARTING THE TASK.**
+**YOU MUST INSPECT, READ, AND CONSIDER EVERY SKILL AVAILABLE IN THE TAPTCH SKILLS LIBRARY (`.agents/skills/`) BEFORE STARTING THE TASK.**
 
 No exceptions:
 - Do not skip skills because a task appears simple.
@@ -46,7 +46,7 @@ Every task must record a compliance checklist covering all discovered skills:
 ## 4. Conflict Resolution Hierarchy
 If skill instructions conflict:
 1. **System & Security Mandates**: High-priority security (RLS, token encryption, DPDP Act privacy, auth boundaries) strictly governs.
-2. **Approved Product Requirements**: Tappzio's approved scope in `docs/PRODUCT_REQUIREMENTS.md` (e.g. Phase 2 payments deferral, multi-business support, 4-tier plan matrix).
+2. **Approved Product Requirements**: Taptch's approved scope in `docs/PRODUCT_REQUIREMENTS.md` (e.g. Phase 2 payments deferral, multi-business support, 4-tier plan matrix).
 3. **Permanent Engineering Standards**: Rules in `AGENTS.md` (NPM exclusively, Brand only from config, zero dynamic hot path on `/p/[slug]`, worker decoupling).
 4. **Specialist Skill Reconciliation**: Resolve specialized recommendations explicitly and record any trade-offs in `docs/DECISIONS.md`.
 

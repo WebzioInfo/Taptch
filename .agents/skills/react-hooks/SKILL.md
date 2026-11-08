@@ -1,8 +1,8 @@
----
+﻿---
 name: react-hooks
 description: "Master React 19 hooks (use, useActionState, useOptimistic) and foundational hooks (useEffect, useCallback, useMemo) without stale closures."
 risk: safe
-source: Tappzio-core
+source: Taptch-core
 date_added: "2026-11-02"
 version: "1.0.0"
 ---

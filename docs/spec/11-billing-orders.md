@@ -1,4 +1,4 @@
-# Tapzio Specification — 11 Billing, Entitlements & Hardware Commerce
+﻿# Taptch Specification — 11 Billing, Entitlements & Hardware Commerce
 
 > Source: Master Prompt Section 11
 
@@ -13,7 +13,7 @@ Plan parameters and account limits are stored as dynamic data records in the dat
   - `max_catalogue_items`: Products/services limit.
   - `analytics_retention_days`: 30, 90, 365, or unlimited days.
   - `custom_domain_allowed`: Boolean.
-  - `white_label_enabled`: Remove Tapzio branding.
+  - `white_label_enabled`: Remove Taptch branding.
   - `api_access_enabled`: REST API keys enabled.
   - `premium_templates_allowed`: Access to luxury studio templates.
 - **Enforcement & Administration**:

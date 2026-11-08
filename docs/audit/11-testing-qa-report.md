@@ -1,4 +1,4 @@
-# Tappzio 360° Master Project Audit — 11: Testing & Quality Assurance Report
+﻿# Taptch 360° Master Project Audit — 11: Testing & Quality Assurance Report
 
 **Focus:** Automated Test Execution, Coverage, Vitest Test Suites, Architecture Rules, Local Determinism  
 **Auditor:** QA Director & Automation Lead  

@@ -33,7 +33,7 @@ trigger: always_on
 - Zero horizontal overflow. Zero unclipped overflowing text. Zero touch targets smaller than 44x44px.
 
 ## 4. Brand Token Source of Truth
-- Never hardcode "Tappzio" or any customer brand name in UI components.
+- Never hardcode "Taptch" or any customer brand name in UI components.
 - Always import brand copy, logos, and links from `@/config/brand` or database `system_settings`.
 - Enforced by automated architecture test `tests/architecture/brand-literal.test.ts`.
 

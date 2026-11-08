@@ -1,4 +1,4 @@
-# Tapzio Specification — 06 Profile Builder
+﻿# Taptch Specification — 06 Profile Builder
 
 > Source: Master Prompt Section 6
 

@@ -1,8 +1,8 @@
----
+﻿---
 name: nextjs-server-components
 description: "Master React Server Components (RSC), Client Component boundaries, data serialization, Suspense streaming, and server-only isolation."
 risk: safe
-source: Tappzio-core
+source: Taptch-core
 date_added: "2026-11-02"
 version: "1.0.0"
 ---

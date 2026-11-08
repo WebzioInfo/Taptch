@@ -124,7 +124,7 @@ export function CreativeAgencyTemplate({
                 className="flex-1 md:flex-none border-purple-500/30 bg-purple-950/40 text-purple-200 hover:bg-purple-900/50 text-xs h-10 px-5 gap-2"
               >
                 <Download className="h-4 w-4 text-purple-400" />
-                <span>Save Contact</span>
+                <span>Save this profile</span>
               </Button>
             </div>
           </div>

@@ -11,30 +11,30 @@ import { users } from '@/db/schema';
 
 describe('Cloudinary Media Service', () => {
   it('defines structured enterprise folder hierarchy', () => {
-    expect(CLOUDINARY_FOLDERS.personalAvatars).toBe('tappzio/profiles/personal');
-    expect(CLOUDINARY_FOLDERS.businessLogos).toBe('tappzio/businesses/logos');
-    expect(CLOUDINARY_FOLDERS.businessProducts).toBe('tappzio/businesses/products');
-    expect(CLOUDINARY_FOLDERS.personalGalleries).toBe('tappzio/profiles/galleries');
-    expect(CLOUDINARY_FOLDERS.videos).toBe('tappzio/videos');
-    expect(CLOUDINARY_FOLDERS.documents).toBe('tappzio/documents/brochures');
+    expect(CLOUDINARY_FOLDERS.personalAvatars).toBe('taptch/profiles/personal');
+    expect(CLOUDINARY_FOLDERS.businessLogos).toBe('taptch/businesses/logos');
+    expect(CLOUDINARY_FOLDERS.businessProducts).toBe('taptch/businesses/products');
+    expect(CLOUDINARY_FOLDERS.personalGalleries).toBe('taptch/profiles/galleries');
+    expect(CLOUDINARY_FOLDERS.videos).toBe('taptch/videos');
+    expect(CLOUDINARY_FOLDERS.documents).toBe('taptch/documents/brochures');
   });
 
   it('generates signed direct upload parameters with timestamp and folder', () => {
     const signatureData = generateSignedUploadParams(CLOUDINARY_FOLDERS.personalAvatars, [
-      'tappzio',
+      'taptch',
       'user_123',
     ]);
 
     expect(signatureData.timestamp).toBeGreaterThan(0);
-    expect(signatureData.folder).toBe('tappzio/profiles/personal');
+    expect(signatureData.folder).toBe('taptch/profiles/personal');
     expect(signatureData.cloudName).toBeDefined();
     expect(signatureData.apiKey).toBeDefined();
     expect(signatureData.signature).toBeDefined();
-    expect(signatureData.tags).toBe('tappzio,user_123');
+    expect(signatureData.tags).toBe('taptch,user_123');
   });
 
   it('generates optimized transformed image URLs with auto-format and crop', () => {
-    const publicId = 'tappzio/profiles/personal/avatar_12345';
+    const publicId = 'taptch/profiles/personal/avatar_12345';
     const transformedUrl = getTransformedImageUrl(publicId, {
       width: 400,
       height: 400,
@@ -74,7 +74,7 @@ describe('Cloudinary Media Service', () => {
 
     expect(asset.id).toBeDefined();
     expect(asset.secureUrl).toContain('cloudinary.com');
-    expect(asset.publicId).toContain('tappzio/profiles/personal');
+    expect(asset.publicId).toContain('taptch/profiles/personal');
 
     // Test asset deletion with actor verification
     const deleted = await deleteMediaAsset(asset.id, userId);

@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Check } from 'lucide-react';
+import { Check, ArrowRight, Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
 import type { Template } from '@/modules/templates';
 
 export default function NewProfilePage() {
@@ -13,6 +14,7 @@ export default function NewProfilePage() {
   const searchParams = useSearchParams();
   const templateSlugParam = searchParams.get('template') || 'obsidian-luxury';
 
+  const [step, setStep] = useState<1 | 2>(1);
   const [profileType, setProfileType] = useState<'personal' | 'business'>('personal');
   const [displayName, setDisplayName] = useState('');
   const [headline, setHeadline] = useState('');
@@ -43,11 +45,11 @@ export default function NewProfilePage() {
     loadTemplates();
   }, [templateSlugParam]);
 
-  // Auto-slugify when display name changes if slug hasn't been manually heavily customized
   const handleNameChange = (name: string) => {
     setDisplayName(name);
     const generated = name
       .toLowerCase()
+      .trim()
       .replace(/[^a-z0-9]/g, '-')
       .replace(/-+/g, '-')
       .replace(/^-|-$/g, '');
@@ -57,207 +59,219 @@ export default function NewProfilePage() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
-    if (!displayName.trim()) {
-      setError('Please enter a display name or business name.');
-      return;
-    }
-
-    if (!slug.trim()) {
-      setError('Please provide a unique profile URL slug.');
-      return;
-    }
+    setIsLoading(true);
 
     try {
-      setIsLoading(true);
+      const payload = {
+        displayName,
+        headline,
+        slug: slug || undefined,
+        profileType,
+        templateId: selectedTemplateId,
+      };
+
       const res = await fetch('/api/v1/profiles', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          displayName: displayName.trim(),
-          headline: headline.trim() || undefined,
-          slug: slug.trim(),
-          profileType,
-          templateId: selectedTemplateId,
-        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
       });
 
-      const json = await res.json();
+      const data = await res.json();
 
-      if (!res.ok || json.error) {
-        throw new Error(json.error?.message || 'Failed to create profile.');
+      if (!res.ok) {
+        throw new Error(data.error?.message || 'Failed to create profile');
       }
 
-      const created = json.data;
-      router.push(`/builder/${created.id}`);
+      router.push(`/builder/${data.data.id}`);
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('An unexpected error occurred.');
-      }
-    } finally {
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground py-8 px-4 sm:px-6">
-      <div className="max-w-xl mx-auto space-y-6">
-        {/* Title */}
-        <div className="border-b border-border/60 pb-4">
-          <h1 className="text-xl font-bold tracking-tight text-foreground">
-            Create Profile
-          </h1>
+    <div className="max-w-xl mx-auto py-8 px-4 antialiased">
+      {/* Onboarding Journey Progress Indicator */}
+      <div className="mb-8 space-y-2">
+        <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
+          <span>Step {step} of 2</span>
+          <span>{step === 1 ? 'Profile Details' : 'Select Style'}</span>
         </div>
+        <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-blue-600 transition-all duration-300"
+            style={{ width: step === 1 ? '50%' : '100%' }}
+          />
+        </div>
+      </div>
 
-        {/* Error Alert */}
-        {error && (
-          <div className="p-3 rounded-md bg-destructive/15 border border-destructive/30 text-destructive text-xs">
-            {error}
-          </div>
-        )}
+      <div className="text-center space-y-1 mb-8">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+          {step === 1 ? 'Build your profile' : 'Choose your profile style'}
+        </h1>
+        <p className="text-xs text-slate-500">
+          {step === 1
+            ? 'Enter your essential identity details to get started.'
+            : 'Select the visual presentation for your digital profile.'}
+        </p>
+      </div>
 
-        <form onSubmit={handleCreate} className="space-y-5 bg-card/40 border border-border/70 rounded-xl p-5 shadow-sm">
-          {/* Profile Type Selector */}
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Mode</label>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setProfileType('personal')}
-                className={`p-3 rounded-lg border text-left transition-all ${
-                  profileType === 'personal'
-                    ? 'border-gold bg-gold/10'
-                    : 'border-border/70 bg-background hover:bg-card'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="font-semibold text-xs text-foreground">Personal</div>
-                  {profileType === 'personal' && <Check className="w-3.5 h-3.5 text-gold" />}
+      {error && (
+        <div className="mb-6 p-3 rounded-md bg-red-50 border border-red-200 text-xs text-red-600">
+          {error}
+        </div>
+      )}
+
+      <Card className="border border-slate-200 bg-white shadow-xs rounded-lg overflow-hidden">
+        <CardContent className="p-6">
+          {step === 1 ? (
+            <div className="space-y-5">
+              {/* Profile Type Toggle */}
+              <div className="space-y-1.5 text-left">
+                <label className="text-xs font-semibold text-slate-700">Profile Type</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setProfileType('personal')}
+                    className={`py-2 px-3 text-xs font-medium rounded-md border text-center transition-colors ${
+                      profileType === 'personal'
+                        ? 'border-blue-600 bg-blue-50 text-blue-700 font-semibold'
+                        : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    Personal Identity
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setProfileType('business')}
+                    className={`py-2 px-3 text-xs font-medium rounded-md border text-center transition-colors ${
+                      profileType === 'business'
+                        ? 'border-blue-600 bg-blue-50 text-blue-700 font-semibold'
+                        : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    Business Identity
+                  </button>
                 </div>
-                <div className="text-[11px] text-muted-foreground mt-0.5">
-                  Individuals & executives
-                </div>
-              </button>
+              </div>
 
-              <button
-                type="button"
-                onClick={() => setProfileType('business')}
-                className={`p-3 rounded-lg border text-left transition-all ${
-                  profileType === 'business'
-                    ? 'border-gold bg-gold/10'
-                    : 'border-border/70 bg-background hover:bg-card'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="font-semibold text-xs text-foreground">Business</div>
-                  {profileType === 'business' && <Check className="w-3.5 h-3.5 text-gold" />}
-                </div>
-                <div className="text-[11px] text-muted-foreground mt-0.5">
-                  Standalone company
-                </div>
-              </button>
-            </div>
-          </div>
-
-          {/* Name & Headline */}
-          <div className="space-y-3">
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-muted-foreground">
-                {profileType === 'personal' ? 'Name' : 'Company Name'} *
-              </label>
-              <Input
-                type="text"
-                placeholder={profileType === 'personal' ? 'John Mathew' : 'ABC Tech'}
-                value={displayName}
-                onChange={(e) => handleNameChange(e.target.value)}
-                required
-                className="h-9 text-xs"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-muted-foreground">
-                Headline
-              </label>
-              <Input
-                type="text"
-                placeholder={profileType === 'personal' ? 'Managing Director' : 'Cloud Architecture'}
-                value={headline}
-                onChange={(e) => setHeadline(e.target.value)}
-                className="h-9 text-xs"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-muted-foreground">
-                Slug *
-              </label>
-              <div className="flex items-center">
-                <span className="inline-flex items-center px-2.5 h-9 rounded-l-md border border-r-0 border-border bg-muted/30 text-xs text-muted-foreground font-mono">
-                  /p/
-                </span>
+              {/* Display Name */}
+              <div className="space-y-1.5 text-left">
+                <label htmlFor="displayName" className="text-xs font-semibold text-slate-700">
+                  Full Name / Entity Name *
+                </label>
                 <Input
-                  type="text"
-                  placeholder="yourname"
-                  value={slug}
-                  onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '-'))}
+                  id="displayName"
+                  value={displayName}
+                  onChange={(e) => handleNameChange(e.target.value)}
+                  placeholder="e.g. Aditya Sharma"
                   required
-                  className="rounded-l-none h-9 font-mono text-xs"
+                  className="h-9 text-xs"
+                  autoFocus
                 />
               </div>
-            </div>
-          </div>
 
-          {/* Template Selection */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-medium text-muted-foreground">
-                Template
-              </label>
-              <Link href="/templates" className="text-xs text-primary hover:underline">
-                View all
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {templates.slice(0, 6).map((tpl) => (
-                <button
-                  key={tpl.id}
+              {/* Headline */}
+              <div className="space-y-1.5 text-left">
+                <label htmlFor="headline" className="text-xs font-semibold text-slate-700">
+                  Professional Title / Role
+                </label>
+                <Input
+                  id="headline"
+                  value={headline}
+                  onChange={(e) => setHeadline(e.target.value)}
+                  placeholder="e.g. Founder & Managing Director"
+                  className="h-9 text-xs"
+                />
+              </div>
+
+              {/* Profile Link Slug */}
+              <div className="space-y-1.5 text-left">
+                <label htmlFor="slug" className="text-xs font-semibold text-slate-700">
+                  Profile Link
+                </label>
+                <div className="flex rounded-md border border-slate-200 bg-slate-50 px-3 items-center text-xs">
+                  <span className="text-slate-400 select-none">taptch.com/p/</span>
+                  <input
+                    id="slug"
+                    value={slug}
+                    onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                    placeholder="your-name"
+                    className="flex-1 bg-transparent py-2 px-1 text-slate-900 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <Button
                   type="button"
-                  onClick={() => setSelectedTemplateId(tpl.id)}
-                  className={`p-2.5 rounded-lg border text-left transition-all ${
-                    selectedTemplateId === tpl.id
-                      ? 'border-gold bg-gold/10'
-                      : 'border-border/60 bg-background/50 hover:bg-card'
-                  }`}
+                  disabled={!displayName.trim()}
+                  onClick={() => setStep(2)}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs h-9 gap-1.5"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium truncate text-foreground">{tpl.name}</span>
-                    {selectedTemplateId === tpl.id && <Check className="w-3 h-3 text-gold shrink-0" />}
-                  </div>
-                </button>
-              ))}
+                  <span>Continue to style</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
-          </div>
+          ) : (
+            <form onSubmit={handleCreate} className="space-y-5">
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[340px] overflow-y-auto pr-1">
+                  {templates.map((tpl) => {
+                    const isSelected = selectedTemplateId === tpl.id || selectedTemplateId === tpl.slug;
+                    return (
+                      <div
+                        key={tpl.id}
+                        onClick={() => setSelectedTemplateId(tpl.id)}
+                        className={`cursor-pointer rounded-lg border p-3.5 text-left transition-all ${
+                          isSelected
+                            ? 'border-blue-600 ring-1 ring-blue-600 bg-blue-50/40'
+                            : 'border-slate-200 bg-white hover:border-slate-300'
+                        }`}
+                      >
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-xs font-bold text-slate-900">{tpl.name}</span>
+                          {isSelected && <Check className="h-4 w-4 text-blue-600" />}
+                        </div>
+                        <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">
+                          {tpl.description}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
 
-          {/* Submit */}
-          <div className="pt-3 border-t border-border/60 flex items-center justify-between gap-3">
-            <Link href="/dashboard">
-              <Button type="button" variant="outline" size="sm" className="h-8 text-xs">
-                Cancel
-              </Button>
-            </Link>
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="h-8 text-xs font-semibold bg-gold text-neutral-950 hover:bg-gold-light"
-            >
-              {isLoading ? 'Creating...' : 'Create'}
-            </Button>
-          </div>
-        </form>
-      </div>
+              <div className="flex items-center gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setStep(1)}
+                  disabled={isLoading}
+                  className="text-xs h-9 border-slate-300 text-slate-700"
+                >
+                  Back
+                </Button>
+
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs h-9"
+                >
+                  {isLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <span>Create Profile</span>
+                  )}
+                </Button>
+              </div>
+            </form>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -1,8 +1,8 @@
----
+﻿---
 name: react-state-management
 description: "Master React state management using Zustand, React Context, and URL search parameters without unnecessary re-renders."
 risk: safe
-source: Tappzio-core
+source: Taptch-core
 date_added: "2026-11-02"
 version: "1.0.0"
 ---

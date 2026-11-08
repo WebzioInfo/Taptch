@@ -1,11 +1,11 @@
-# Tapzio Skills Library Quality Audit
+﻿# Taptch Skills Library Quality Audit
 
 ## 1. Audit Methodology
 
 Every skill in `.agents/skills/` was audited across 5 quality dimensions:
 1. **Frontmatter Validity**: Valid YAML with `name` and `description`.
 2. **Framework Currency**: Accurate for Next.js 15.5+, React 19, TypeScript 5.8+.
-3. **Tapzio Stack Compatibility**: Aligned with Drizzle ORM, Better Auth, PostgreSQL 17, Tailwind CSS, and Phase 2 payment deferral.
+3. **Taptch Stack Compatibility**: Aligned with Drizzle ORM, Better Auth, PostgreSQL 17, Tailwind CSS, and Phase 2 payment deferral.
 4. **Actionable Depth**: Practical code examples and checklists rather than generic tutorials.
 5. **Security & Privacy Focus**: Compliance with DPDP Act, multi-tenant RLS, and server-side authorization.
 

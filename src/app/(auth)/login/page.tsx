@@ -6,9 +6,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { BrandLogo } from '@/components/brand';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { signIn, emailOtp } from '@/lib/auth/client';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Mail, Lock, KeyRound, ArrowRight } from 'lucide-react';
 import { getSafeRedirectUrl, buildAuthQueryString } from '@/lib/auth/redirect';
 
 function LoginContent() {
@@ -37,12 +37,12 @@ function LoginContent() {
       });
 
       if (res.error) {
-        setErrorMsg(res.error.message || 'Invalid credentials');
+        setErrorMsg(res.error.message || 'Invalid email or password.');
       } else {
         router.push(destination);
       }
     } catch {
-      setErrorMsg('Failed to sign in. Please verify your connection.');
+      setErrorMsg('Failed to sign in. Please check your connection.');
     } finally {
       setLoading(false);
     }
@@ -60,139 +60,154 @@ function LoginContent() {
       });
 
       if (res.error) {
-        setErrorMsg(res.error.message || 'Failed to send OTP');
+        setErrorMsg(res.error.message || 'Unable to send code.');
       } else {
-        const verifyQuery = buildAuthQueryString(templateParam, redirectParam, {
-          email,
-        });
-        router.push(`/verify${verifyQuery}`);
+        const query = buildAuthQueryString(templateParam, redirectParam, { email });
+        router.push(`/verify${query}`);
       }
     } catch {
-      setErrorMsg('Failed to send OTP. Please check your email.');
+      setErrorMsg('Failed to send verification code.');
     } finally {
       setLoading(false);
     }
   };
 
-  const registerHref = `/register${buildAuthQueryString(templateParam, redirectParam)}`;
-
   return (
-    <div className="min-h-screen bg-background flex flex-col justify-center items-center p-4">
-      <div className="w-full max-w-sm space-y-4">
+    <div className="min-h-screen flex flex-col justify-center items-center px-4 py-12 bg-slate-50 antialiased">
+      <div className="w-full max-w-sm space-y-6">
         <div className="text-center space-y-2">
-          <div className="flex justify-center mb-2">
-            <BrandLogo variant="symbol" size="lg" asLink href="/" />
+          <div className="inline-block">
+            <BrandLogo variant="horizontal" size="md" asLink href="/" />
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground">
-            Sign In
+          <h1 className="text-xl font-bold tracking-tight text-slate-900">
+            Sign in to your account
           </h1>
+          <p className="text-xs text-slate-500">
+            Manage and share your digital profiles
+          </p>
         </div>
 
-        <Card className="border-border/70 bg-card/60 p-5 shadow-sm space-y-4">
-          <div className="flex border-b border-border/60 pb-2 text-xs justify-center space-x-6">
-            <button
-              type="button"
-              onClick={() => setAuthMode('otp')}
-              className={`font-semibold pb-1 transition-colors ${
-                authMode === 'otp'
-                  ? 'text-primary border-b-2 border-primary'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              OTP
-            </button>
-            <button
-              type="button"
-              onClick={() => setAuthMode('password')}
-              className={`font-semibold pb-1 transition-colors ${
-                authMode === 'password'
-                  ? 'text-primary border-b-2 border-primary'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Password
-            </button>
-          </div>
-
-          {errorMsg && (
-            <div className="p-2.5 rounded-md bg-destructive/15 border border-destructive/30 text-destructive text-xs">
-              {errorMsg}
+        <Card className="border border-slate-200 bg-white shadow-xs rounded-lg overflow-hidden">
+          <CardContent className="p-6 space-y-4">
+            <div className="flex rounded-md border border-slate-200 p-0.5 bg-slate-100 text-xs">
+              <button
+                type="button"
+                onClick={() => { setAuthMode('otp'); setErrorMsg(null); }}
+                className={`flex-1 py-1.5 rounded-sm font-medium transition-colors ${
+                  authMode === 'otp'
+                    ? 'bg-white text-slate-900 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Sign in with Code
+              </button>
+              <button
+                type="button"
+                onClick={() => { setAuthMode('password'); setErrorMsg(null); }}
+                className={`flex-1 py-1.5 rounded-sm font-medium transition-colors ${
+                  authMode === 'password'
+                    ? 'bg-white text-slate-900 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Password
+              </button>
             </div>
-          )}
 
-          {authMode === 'otp' ? (
-            <form onSubmit={handleSendOtp} className="space-y-3">
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Email
-                </label>
-                <Input
-                  type="email"
-                  required
-                  placeholder="name@company.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="h-9 bg-card border-border text-xs text-foreground placeholder:text-muted-foreground focus:border-primary"
-                />
+            {errorMsg && (
+              <div className="p-2.5 rounded-md bg-red-50 text-red-600 text-xs border border-red-100 leading-relaxed">
+                {errorMsg}
               </div>
+            )}
 
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full h-8 text-xs bg-primary text-primary-foreground hover:bg-primary/90 font-semibold"
-              >
-                {loading && <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />}
-                <span>Send Code</span>
-              </Button>
-            </form>
-          ) : (
-            <form onSubmit={handlePasswordLogin} className="space-y-3">
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Email
-                </label>
-                <Input
-                  type="email"
-                  required
-                  placeholder="name@company.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="h-9 bg-card border-border text-xs text-foreground placeholder:text-muted-foreground focus:border-primary"
-                />
-              </div>
+            {authMode === 'otp' ? (
+              <form onSubmit={handleSendOtp} className="space-y-4">
+                <div className="space-y-1.5 text-left">
+                  <label htmlFor="email" className="text-xs font-semibold text-slate-700">
+                    Email address
+                  </label>
+                  <Input
+                    id="email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="name@company.com"
+                    className="h-9 text-xs"
+                    autoFocus
+                  />
+                </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Password
-                </label>
-                <Input
-                  type="password"
-                  required
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="h-9 bg-card border-border text-xs text-foreground placeholder:text-muted-foreground focus:border-primary"
-                />
-              </div>
+                <Button
+                  type="submit"
+                  disabled={loading || !email}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs h-9"
+                >
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <span>Continue with code</span>
+                  )}
+                </Button>
+              </form>
+            ) : (
+              <form onSubmit={handlePasswordLogin} className="space-y-4">
+                <div className="space-y-1.5 text-left">
+                  <label htmlFor="pwd-email" className="text-xs font-semibold text-slate-700">
+                    Email address
+                  </label>
+                  <Input
+                    id="pwd-email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="name@company.com"
+                    className="h-9 text-xs"
+                    autoFocus
+                  />
+                </div>
 
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full h-8 text-xs bg-primary text-primary-foreground hover:bg-primary/90 font-semibold"
-              >
-                {loading && <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />}
-                <span>Sign In</span>
-              </Button>
-            </form>
-          )}
+                <div className="space-y-1.5 text-left">
+                  <label htmlFor="password" className="text-xs font-semibold text-slate-700">
+                    Password
+                  </label>
+                  <Input
+                    id="password"
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="h-9 text-xs"
+                  />
+                </div>
 
-          <div className="pt-3 border-t border-border/40 text-center text-xs text-muted-foreground">
-            Don&apos;t have an account?{' '}
-            <Link href={registerHref} className="text-primary hover:underline font-semibold">
-              Create
-            </Link>
-          </div>
+                <Button
+                  type="submit"
+                  disabled={loading || !email || !password}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs h-9"
+                >
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <span>Sign In</span>
+                  )}
+                </Button>
+              </form>
+            )}
+          </CardContent>
         </Card>
+
+        <p className="text-center text-xs text-slate-500">
+          Don't have an account?{' '}
+          <Link
+            href={`/register${templateParam ? `?template=${templateParam}` : ''}`}
+            className="font-semibold text-blue-600 hover:text-blue-700"
+          >
+            Create your account
+          </Link>
+        </p>
       </div>
     </div>
   );
@@ -202,8 +217,8 @@ export default function LoginPage() {
   return (
     <React.Suspense
       fallback={
-        <div className="min-h-screen bg-background flex items-center justify-center p-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
         </div>
       }
     >

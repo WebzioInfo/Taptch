@@ -3,7 +3,7 @@ import { hash, compare } from 'bcryptjs';
 import { db } from '@/db';
 import { users } from '@/db/schema/auth';
 import { qrCodes } from '@/db/schema/qr';
-import { eq } from 'drizzle-orm';
+import { eq, asc } from 'drizzle-orm';
 import {
   generateQRToken,
   generateQRSerial,
@@ -29,14 +29,14 @@ describe('Enterprise Post-Print Activation & Field Staff Subsystem', () => {
       {
         id: staffUserId,
         name: 'Field Rep Test',
-        email: `field-rep-${Date.now()}@tappzio.com`,
+        email: `field-rep-${Date.now()}@taptch.com`,
         systemRole: 'sales_staff',
         status: 'active',
       },
       {
         id: adminUserId,
         name: 'Admin Test',
-        email: `admin-${Date.now()}@tappzio.com`,
+        email: `admin-${Date.now()}@taptch.com`,
         systemRole: 'admin',
         status: 'active',
       },
@@ -65,9 +65,9 @@ describe('Enterprise Post-Print Activation & Field Staff Subsystem', () => {
     });
 
     it('extracts tokens accurately from URLs, query strings, and raw text', () => {
-      expect(extractQRToken('https://tappzio.webziotech.in/dq/a1b2c3d4')).toBe('a1b2c3d4');
+      expect(extractQRToken('https://taptch.webziotech.in/dq/a1b2c3d4')).toBe('a1b2c3d4');
       expect(extractQRToken('https://example.com/q/fe98dcba?ref=camera')).toBe('fe98dcba');
-      expect(extractQRToken('https://tappzio.com/scan?token=00112233')).toBe('00112233');
+      expect(extractQRToken('https://taptch.com/scan?token=00112233')).toBe('00112233');
       expect(extractQRToken('  abcd1234  ')).toBe('abcd1234');
     });
 
@@ -100,7 +100,8 @@ describe('Enterprise Post-Print Activation & Field Staff Subsystem', () => {
       const items = await db
         .select()
         .from(qrCodes)
-        .where(eq(qrCodes.batchId, batchResult.batch.id));
+        .where(eq(qrCodes.batchId, batchResult.batch.id))
+        .orderBy(asc(qrCodes.batchSequence));
 
       expect(items.length).toBe(5);
       expect(items[0].status).toBe('unassigned');
@@ -126,7 +127,8 @@ describe('Enterprise Post-Print Activation & Field Staff Subsystem', () => {
       const items = await db
         .select()
         .from(qrCodes)
-        .where(eq(qrCodes.batchId, batchResult.batch.id));
+        .where(eq(qrCodes.batchId, batchResult.batch.id))
+        .orderBy(asc(qrCodes.batchSequence));
 
       expect(items.length).toBe(3);
       expect(items[0].status).toBe('assigned');
@@ -257,7 +259,7 @@ describe('Enterprise Post-Print Activation & Field Staff Subsystem', () => {
         batchCode: 'BAT-01',
         layout: 'branded_sheet',
         items,
-        appUrl: 'https://tappzio.webziotech.in',
+        appUrl: 'https://taptch.webziotech.in',
       });
 
       expect(pdfBytes).toBeInstanceOf(Uint8Array);
@@ -275,7 +277,7 @@ describe('Enterprise Post-Print Activation & Field Staff Subsystem', () => {
         batchCode: 'THM-01',
         layout: 'thermal_sticker',
         items,
-        appUrl: 'https://tappzio.webziotech.in',
+        appUrl: 'https://taptch.webziotech.in',
       });
 
       expect(pdfBytes).toBeInstanceOf(Uint8Array);
@@ -291,7 +293,7 @@ describe('Enterprise Post-Print Activation & Field Staff Subsystem', () => {
         batchCode: 'STN-01',
         layout: 'table_tent',
         items,
-        appUrl: 'https://tappzio.webziotech.in',
+        appUrl: 'https://taptch.webziotech.in',
       });
 
       expect(pdfBytes).toBeInstanceOf(Uint8Array);

@@ -2,7 +2,7 @@ import { pgTable, text, timestamp, boolean, jsonb, varchar } from 'drizzle-orm/p
 
 export const systemSettings = pgTable('system_settings', {
   id: varchar('id', { length: 64 }).primaryKey().default('default'),
-  brandName: varchar('brand_name', { length: 128 }).notNull().default('Tappzio'),
+  brandName: varchar('brand_name', { length: 128 }).notNull().default('TAPTCH'),
   brandTagline: text('brand_tagline').default('Intelligent Digital Identity & Smart Networking'),
   brandLogoUrl: text('brand_logo_url').default('/assets/brand/logo.svg'),
   brandColors: jsonb('brand_colors').$type<{
@@ -16,8 +16,8 @@ export const systemSettings = pgTable('system_settings', {
     accent: '#38BDF8',
     obsidianGold: '#D4AF37',
   }),
-  contactEmail: varchar('contact_email', { length: 255 }).default('support@tappzio.com'),
-  customDomainCname: varchar('custom_domain_cname', { length: 255 }).default('domains.tappzio.com'),
+  contactEmail: varchar('contact_email', { length: 255 }).default('support@taptch.com'),
+  customDomainCname: varchar('custom_domain_cname', { length: 255 }).default('domains.taptch.com'),
   featuresEnabled: jsonb('features_enabled').$type<{
     enablePublicRegistration: boolean;
     enableGoogleAuth: boolean;

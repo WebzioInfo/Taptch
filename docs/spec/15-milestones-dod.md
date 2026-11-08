@@ -1,4 +1,4 @@
-# Tapzio Specification — 15 Milestones & Definition of Done
+﻿# Taptch Specification — 15 Milestones & Definition of Done
 
 > Source: Master Prompt Sections 15 & 16
 

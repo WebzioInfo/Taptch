@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
+import { brandConfig } from '@/config/brand';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -106,7 +107,7 @@ export default function CardsPage() {
           records: [{ recordType: 'url', data: targetUrl }],
         });
         setNfcWriteStatus('success');
-        setNfcWriteMsg('Success! NFC tag has been encoded with your Tappzio redirect URL.');
+        setNfcWriteMsg(`Success! NFC tag has been encoded with your ${brandConfig.name} redirect URL.`);
       } catch (err: unknown) {
         setNfcWriteStatus('error');
         setNfcWriteMsg(err instanceof Error ? err.message : 'NFC write operation failed or was cancelled.');
@@ -214,8 +215,8 @@ export default function CardsPage() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-10">
       {/* Header Banner */}
-      <div className="flex items-center justify-between gap-4 pb-4 border-b border-border/60">
-        <h1 className="text-xl font-bold tracking-tight text-foreground">
+      <div className="flex items-center justify-between gap-4 pb-4 border-b border-slate-200">
+        <h1 className="text-xl font-bold tracking-tight text-slate-900">
           Cards
         </h1>
 
@@ -224,7 +225,7 @@ export default function CardsPage() {
             <Plus className="h-3.5 w-3.5" />
             <span>Activate</span>
           </Button>
-          <Button variant="gold" size="sm" onClick={() => setShowOrderModal(true)} className="h-8 text-xs font-semibold gap-1.5 px-3">
+          <Button variant="default" size="sm" onClick={() => setShowOrderModal(true)} className="h-8 text-xs font-semibold gap-1.5 px-3">
             <ShoppingBag className="h-3.5 w-3.5" />
             <span>Order</span>
           </Button>
@@ -233,34 +234,34 @@ export default function CardsPage() {
 
       {loading ? (
         <div className="flex justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
         </div>
       ) : (
         <>
           {/* Active Cards Grid */}
           <section className="space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-foreground">
+              <h2 className="text-sm font-semibold text-slate-900">
                 Linked Cards
               </h2>
-              <span className="text-xs text-muted-foreground">{cards.length} cards</span>
+              <span className="text-xs text-slate-500">{cards.length} cards</span>
             </div>
 
             {cards.length === 0 ? (
-              <Card className="border-border/60 bg-card/40 text-center py-10">
+              <Card className="border-slate-200 bg-white text-center py-10">
                 <CardContent className="space-y-3 max-w-sm mx-auto">
-                  <div className="mx-auto h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                  <div className="mx-auto h-10 w-10 rounded-xl bg-blue-600/10 flex items-center justify-center text-blue-600">
                     <CreditCard className="h-5 w-5" />
                   </div>
-                  <h3 className="font-semibold text-base text-foreground">No Cards Linked</h3>
-                  <p className="text-xs text-muted-foreground">
+                  <h3 className="font-semibold text-base text-slate-900">No Cards Linked</h3>
+                  <p className="text-xs text-slate-500">
                     Activate a card using its packaging code or order new hardware.
                   </p>
                   <div className="flex justify-center gap-2 pt-1">
                     <Button variant="outline" size="sm" onClick={() => setShowClaimModal(true)} className="h-7 text-xs px-2.5">
                       Activate
                     </Button>
-                    <Button variant="gold" size="sm" onClick={() => setShowOrderModal(true)} className="h-7 text-xs px-2.5 font-semibold">
+                    <Button variant="default" size="sm" onClick={() => setShowOrderModal(true)} className="h-7 text-xs px-2.5 font-semibold">
                       Order
                     </Button>
                   </div>
@@ -269,9 +270,9 @@ export default function CardsPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {cards.map((card) => (
-                  <Card key={card.id} className="border-border/70 bg-card/40 p-4 space-y-3 hover:border-primary/40 transition-colors">
+                  <Card key={card.id} className="border-slate-200 bg-white p-4 space-y-3 hover:border-blue-600/40 transition-colors">
                     <div className="flex items-center justify-between">
-                      <Badge variant="gold" className="text-[10px] tracking-wider uppercase px-1.5 py-0">
+                      <Badge variant="default" className="text-[10px] tracking-wider uppercase px-1.5 py-0">
                         {card.material}
                       </Badge>
                       <Badge variant={card.status === 'active' ? 'outline' : 'secondary'} className="text-[10px] capitalize px-1.5 py-0">
@@ -280,20 +281,20 @@ export default function CardsPage() {
                     </div>
 
                     <div>
-                      <div className="text-sm font-mono font-semibold text-foreground">
+                      <div className="text-sm font-mono font-semibold text-slate-900">
                         {card.serialNumber}
                       </div>
-                      <div className="text-[11px] text-muted-foreground font-mono">
+                      <div className="text-[11px] text-slate-500 font-mono">
                         Chip: {card.chipType.toUpperCase()}
                       </div>
                     </div>
 
-                    <div className="space-y-1.5 pt-2 border-t border-border/40 text-xs">
+                    <div className="space-y-1.5 pt-2 border-t border-slate-100 text-xs">
                       <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Profile:</span>
-                        <span className="font-medium text-foreground">
+                        <span className="text-slate-500">Profile:</span>
+                        <span className="font-medium text-slate-900">
                           {card.profileName ? (
-                            <Link href={`/p/${card.profileSlug}`} target="_blank" className="hover:text-primary transition-colors flex items-center gap-1">
+                            <Link href={`/p/${card.profileSlug}`} target="_blank" className="hover:text-blue-600 transition-colors flex items-center gap-1">
                               {card.profileName}
                               <ExternalLink className="h-3 w-3" />
                             </Link>
@@ -303,17 +304,17 @@ export default function CardsPage() {
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Tap:</span>
-                        <code className="text-[11px] text-primary">/n/{card.redirectToken.slice(0, 10)}...</code>
+                        <span className="text-slate-500">Tap:</span>
+                        <code className="text-[11px] text-blue-600">/n/{card.redirectToken.slice(0, 10)}...</code>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5 pt-2 border-t border-border/40">
+                    <div className="flex items-center gap-1.5 pt-2 border-t border-slate-100">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => handleStartNfcWrite(card)}
-                        className="h-6 text-[11px] px-2 gap-1 border-primary/30 text-primary hover:bg-primary/10 flex-1"
+                        className="h-6 text-[11px] px-2 gap-1 border-blue-600/30 text-blue-600 hover:bg-blue-600/10 flex-1"
                       >
                         <Radio className="h-3 w-3" />
                         <span>Write Tag</span>
@@ -322,7 +323,7 @@ export default function CardsPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleCopyNdefUrl(card)}
-                        className="h-6 text-[11px] px-2 gap-1 text-muted-foreground hover:text-foreground"
+                        className="h-6 text-[11px] px-2 gap-1 text-slate-500 hover:text-slate-900"
                         title="Copy NDEF URL"
                       >
                         {copiedToken === card.id ? (
@@ -341,22 +342,22 @@ export default function CardsPage() {
 
           {/* Orders Section */}
           <section className="space-y-3 pt-4">
-            <h2 className="text-sm font-semibold text-foreground">
+            <h2 className="text-sm font-semibold text-slate-900">
               Orders
             </h2>
 
             {orders.length === 0 ? (
-              <Card className="border-border/60 bg-card/20 py-6 text-center">
+              <Card className="border-slate-200 bg-white/20 py-6 text-center">
                 <CardContent>
-                  <p className="text-xs text-muted-foreground">No hardware orders.</p>
+                  <p className="text-xs text-slate-500">No hardware orders.</p>
                 </CardContent>
               </Card>
             ) : (
-              <Card className="border-border/70 bg-card/40 overflow-hidden">
+              <Card className="border-slate-200 bg-white overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="border-b border-border/60 bg-muted/20 text-muted-foreground text-[11px]">
+                      <tr className="border-b border-slate-200 bg-muted/20 text-slate-500 text-[11px]">
                         <th className="p-2.5">Order</th>
                         <th className="p-2.5">Material</th>
                         <th className="p-2.5">Qty</th>
@@ -382,10 +383,10 @@ export default function CardsPage() {
                               {ord.paymentStatus.replace('_', ' ')}
                             </Badge>
                           </td>
-                          <td className="p-2.5 font-mono text-[11px] text-muted-foreground">
+                          <td className="p-2.5 font-mono text-[11px] text-slate-500">
                             {ord.trackingNumber || '—'}
                           </td>
-                          <td className="p-2.5 text-muted-foreground text-[11px]">
+                          <td className="p-2.5 text-slate-500 text-[11px]">
                             {new Date(ord.createdAt).toLocaleDateString()}
                           </td>
                         </tr>
@@ -402,10 +403,10 @@ export default function CardsPage() {
       {/* Claim / Activate Card Modal */}
       {showClaimModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <Card className="w-full max-w-md border-border bg-card shadow-2xl">
-            <CardHeader className="border-b border-border/60 pb-4">
+          <Card className="w-full max-w-md border-slate-200 bg-white shadow-2xl">
+            <CardHeader className="border-b border-slate-200 pb-4">
               <CardTitle className="text-lg font-bold flex items-center gap-2">
-                <CreditCard className="h-5 w-5 text-primary" />
+                <CreditCard className="h-5 w-5 text-blue-600" />
                 Activate Physical Smart Card
               </CardTitle>
               <CardDescription>
@@ -438,21 +439,21 @@ export default function CardsPage() {
                       id="linkProfile"
                       value={claimProfileId}
                       onChange={(e) => setClaimProfileId(e.target.value)}
-                      className="w-full h-10 px-3 rounded-md bg-card border border-border text-xs text-foreground focus:outline-none focus:border-primary cursor-pointer"
+                      className="w-full h-10 px-3 rounded-md bg-white border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-blue-600 cursor-pointer"
                     >
                       {profiles.map((p) => (
-                        <option key={p.id} value={p.id} className="bg-card text-foreground">
+                        <option key={p.id} value={p.id} className="bg-white text-slate-900">
                           {p.displayName} (/{p.slug})
                         </option>
                       ))}
                     </select>
                   </div>
                 )}
-                <div className="flex justify-end gap-3 pt-4 border-t border-border/40">
+                <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
                   <Button type="button" variant="ghost" size="sm" onClick={() => setShowClaimModal(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit" variant="gold" size="sm" disabled={claiming} className="gap-2">
+                  <Button type="submit" variant="default" size="sm" disabled={claiming} className="gap-2">
                     {claiming && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                     Confirm Activation
                   </Button>
@@ -466,10 +467,10 @@ export default function CardsPage() {
       {/* Order Physical Card Modal */}
       {showOrderModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
-          <Card className="w-full max-w-lg border-border bg-card shadow-2xl my-8">
-            <CardHeader className="border-b border-border/60 pb-4">
+          <Card className="w-full max-w-lg border-slate-200 bg-white shadow-2xl my-8">
+            <CardHeader className="border-b border-slate-200 pb-4">
               <CardTitle className="text-lg font-bold flex items-center gap-2">
-                <ShoppingBag className="h-5 w-5 text-primary" />
+                <ShoppingBag className="h-5 w-5 text-blue-600" />
                 Request Physical Smart Card
               </CardTitle>
               <CardDescription>
@@ -494,13 +495,13 @@ export default function CardsPage() {
                       onClick={() => setOrderMaterial('pvc')}
                       className={`p-3 rounded-lg border text-left transition-all ${
                         orderMaterial === 'pvc'
-                          ? 'border-primary bg-primary/10 text-foreground ring-1 ring-primary'
-                          : 'border-border/60 bg-background/50 hover:border-border text-muted-foreground'
+                          ? 'border-blue-600 bg-blue-600/10 text-slate-900 ring-1 ring-primary'
+                          : 'border-slate-200 bg-white/50 hover:border-slate-200 text-slate-500'
                       }`}
                     >
-                      <div className="font-semibold text-xs text-foreground">Matte Black PVC</div>
-                      <div className="text-[11px] text-muted-foreground mt-0.5">NTAG216 • Waterproof</div>
-                      <div className="text-xs font-mono text-primary font-bold mt-2">₹999 / card</div>
+                      <div className="font-semibold text-xs text-slate-900">Matte Black PVC</div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">NTAG216 • Waterproof</div>
+                      <div className="text-xs font-mono text-blue-600 font-bold mt-2">₹999 / card</div>
                     </button>
 
                     <button
@@ -508,13 +509,13 @@ export default function CardsPage() {
                       onClick={() => setOrderMaterial('metal')}
                       className={`p-3 rounded-lg border text-left transition-all ${
                         orderMaterial === 'metal'
-                          ? 'border-primary bg-primary/10 text-foreground ring-1 ring-primary'
-                          : 'border-border/60 bg-background/50 hover:border-border text-muted-foreground'
+                          ? 'border-blue-600 bg-blue-600/10 text-slate-900 ring-1 ring-primary'
+                          : 'border-slate-200 bg-white/50 hover:border-slate-200 text-slate-500'
                       }`}
                     >
-                      <div className="font-semibold text-xs text-foreground">Brushed Stainless Metal</div>
-                      <div className="text-[11px] text-muted-foreground mt-0.5">Laser-engraved executive</div>
-                      <div className="text-xs font-mono text-primary font-bold mt-2">₹2,499 / card</div>
+                      <div className="font-semibold text-xs text-slate-900">Brushed Stainless Metal</div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">Laser-engraved executive</div>
+                      <div className="text-xs font-mono text-blue-600 font-bold mt-2">₹2,499 / card</div>
                     </button>
                   </div>
                 </div>
@@ -541,10 +542,10 @@ export default function CardsPage() {
                       id="orderProfile"
                       value={orderProfileId}
                       onChange={(e) => setOrderProfileId(e.target.value)}
-                      className="w-full h-9 px-3 rounded-md bg-card border border-border text-xs text-foreground focus:outline-none focus:border-primary cursor-pointer"
+                      className="w-full h-9 px-3 rounded-md bg-white border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-blue-600 cursor-pointer"
                     >
                       {profiles.map((p) => (
-                        <option key={p.id} value={p.id} className="bg-card text-foreground">
+                        <option key={p.id} value={p.id} className="bg-white text-slate-900">
                           {p.displayName} (/{p.slug})
                         </option>
                       ))}
@@ -553,11 +554,11 @@ export default function CardsPage() {
                 )}
 
                 {/* Shipping Details */}
-                <div className="space-y-3 pt-2 border-t border-border/40">
-                  <div className="text-xs font-semibold text-foreground">Shipping Delivery Address</div>
+                <div className="space-y-3 pt-2 border-t border-slate-100">
+                  <div className="text-xs font-semibold text-slate-900">Shipping Delivery Address</div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <Label className="text-[10px] text-muted-foreground">Recipient Full Name</Label>
+                      <Label className="text-[10px] text-slate-500">Recipient Full Name</Label>
                       <Input
                         value={shippingForm.recipientName}
                         onChange={(e) => setShippingForm({ ...shippingForm, recipientName: e.target.value })}
@@ -566,7 +567,7 @@ export default function CardsPage() {
                       />
                     </div>
                     <div>
-                      <Label className="text-[10px] text-muted-foreground">Contact Phone (+91)</Label>
+                      <Label className="text-[10px] text-slate-500">Contact Phone (+91)</Label>
                       <Input
                         value={shippingForm.phone}
                         onChange={(e) => setShippingForm({ ...shippingForm, phone: e.target.value })}
@@ -576,7 +577,7 @@ export default function CardsPage() {
                     </div>
                   </div>
                   <div>
-                    <Label className="text-[10px] text-muted-foreground">Street Address / Landmark</Label>
+                    <Label className="text-[10px] text-slate-500">Street Address / Landmark</Label>
                     <Input
                       value={shippingForm.street}
                       onChange={(e) => setShippingForm({ ...shippingForm, street: e.target.value })}
@@ -586,7 +587,7 @@ export default function CardsPage() {
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     <div>
-                      <Label className="text-[10px] text-muted-foreground">City</Label>
+                      <Label className="text-[10px] text-slate-500">City</Label>
                       <Input
                         value={shippingForm.city}
                         onChange={(e) => setShippingForm({ ...shippingForm, city: e.target.value })}
@@ -595,7 +596,7 @@ export default function CardsPage() {
                       />
                     </div>
                     <div>
-                      <Label className="text-[10px] text-muted-foreground">State</Label>
+                      <Label className="text-[10px] text-slate-500">State</Label>
                       <Input
                         value={shippingForm.state}
                         onChange={(e) => setShippingForm({ ...shippingForm, state: e.target.value })}
@@ -604,7 +605,7 @@ export default function CardsPage() {
                       />
                     </div>
                     <div>
-                      <Label className="text-[10px] text-muted-foreground">PIN Code</Label>
+                      <Label className="text-[10px] text-slate-500">PIN Code</Label>
                       <Input
                         value={shippingForm.postalCode}
                         onChange={(e) => setShippingForm({ ...shippingForm, postalCode: e.target.value })}
@@ -615,16 +616,16 @@ export default function CardsPage() {
                   </div>
                 </div>
 
-                <div className="p-2.5 rounded-lg bg-muted/30 border border-border/40 text-[11px] text-muted-foreground flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+                <div className="p-2.5 rounded-lg bg-muted/30 border border-slate-100 text-[11px] text-slate-500 flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-blue-600 shrink-0" />
                   <span>Physical order requests are reviewed by our production team. Payment settlement is confirmed offline or waived under enterprise subscriptions.</span>
                 </div>
 
-                <div className="flex justify-end gap-3 pt-3 border-t border-border/40">
+                <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
                   <Button type="button" variant="ghost" size="sm" onClick={() => setShowOrderModal(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit" variant="gold" size="sm" disabled={ordering} className="gap-2">
+                  <Button type="submit" variant="default" size="sm" disabled={ordering} className="gap-2">
                     {ordering && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                     Confirm Order Request
                   </Button>
@@ -637,35 +638,35 @@ export default function CardsPage() {
       {/* NFC Tag Writer & Hardware Diagnostic Modal */}
       {nfcWritingCard && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-          <Card className="border-border/70 bg-card w-full max-w-md p-6 space-y-4 shadow-2xl relative text-xs">
+          <Card className="border-slate-200 bg-white w-full max-w-md p-6 space-y-4 shadow-2xl relative text-xs">
             <button
               onClick={() => {
                 setNfcWritingCard(null);
                 setNfcWriteStatus('idle');
                 setNfcWriteMsg(null);
               }}
-              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
+              className="absolute top-4 right-4 text-slate-500 hover:text-slate-900"
             >
               <X className="h-4 w-4" />
             </button>
 
             <div className="flex items-center gap-2">
-              <Radio className="h-5 w-5 text-primary" />
-              <h2 className="text-base font-bold text-foreground">NFC Tag Writer & Diagnostic</h2>
+              <Radio className="h-5 w-5 text-blue-600" />
+              <h2 className="text-base font-bold text-slate-900">NFC Tag Writer & Diagnostic</h2>
             </div>
 
-            <div className="p-3 rounded-xl bg-background/80 border border-border/50 space-y-1 font-mono text-[11px]">
-              <div className="text-muted-foreground">Target Card: {nfcWritingCard.serialNumber}</div>
-              <div className="text-primary truncate font-semibold">
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/50 space-y-1 font-mono text-[11px]">
+              <div className="text-slate-500">Target Card: {nfcWritingCard.serialNumber}</div>
+              <div className="text-blue-600 truncate font-semibold">
                 {typeof window !== 'undefined' ? `${window.location.origin}/n/${nfcWritingCard.redirectToken}` : ''}
               </div>
             </div>
 
             {nfcWriteStatus === 'scanning' && (
-              <div className="p-4 rounded-xl bg-primary/10 border border-primary/30 text-center space-y-3">
-                <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-                <p className="font-semibold text-foreground">{nfcWriteMsg}</p>
-                <p className="text-[11px] text-muted-foreground">Ensure NFC is turned on in your device settings.</p>
+              <div className="p-4 rounded-xl bg-blue-600/10 border border-blue-600/30 text-center space-y-3">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto" />
+                <p className="font-semibold text-slate-900">{nfcWriteMsg}</p>
+                <p className="text-[11px] text-slate-500">Ensure NFC is turned on in your device settings.</p>
               </div>
             )}
 
@@ -698,17 +699,17 @@ export default function CardsPage() {
                     <Smartphone className="h-4 w-4" />
                     <span>Hardware & Browser Compatibility Notice</span>
                   </div>
-                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  <p className="text-[11px] text-slate-500 leading-relaxed">
                     Direct in-browser Web NFC writing is supported on <strong>Chromium on Android</strong> devices.
                   </p>
-                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  <p className="text-[11px] text-slate-500 leading-relaxed">
                     <strong>iOS Devices:</strong> Apple allows native NFC reading on all iPhones without an app, but restricts third-party web browsers from direct write access.
                   </p>
                 </div>
 
                 <div className="space-y-1.5">
-                  <span className="font-medium text-foreground">Write Manually with NFC Tools:</span>
-                  <p className="text-[11px] text-muted-foreground">
+                  <span className="font-medium text-slate-900">Write Manually with NFC Tools:</span>
+                  <p className="text-[11px] text-slate-500">
                     Copy the NDEF URL below and write it as a URL/URI record using the free &apos;NFC Tools&apos; app on iOS or Android:
                   </p>
                   <div className="flex items-center gap-2">
@@ -716,10 +717,10 @@ export default function CardsPage() {
                       type="text"
                       readOnly
                       value={typeof window !== 'undefined' ? `${window.location.origin}/n/${nfcWritingCard.redirectToken}` : ''}
-                      className="w-full px-2.5 py-1.5 rounded-lg bg-background border border-border/60 text-xs font-mono text-muted-foreground"
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-mono text-slate-500"
                     />
                     <Button
-                      variant="gold"
+                      variant="default"
                       size="sm"
                       onClick={() => handleCopyNdefUrl(nfcWritingCard)}
                       className="h-8 text-xs px-3 shrink-0 gap-1 font-semibold"
@@ -736,7 +737,7 @@ export default function CardsPage() {
               </div>
             )}
 
-            <div className="flex justify-end pt-2 border-t border-border/40">
+            <div className="flex justify-end pt-2 border-t border-slate-100">
               <Button
                 variant="outline"
                 size="sm"

@@ -1,4 +1,4 @@
-{
+﻿{
   "id": "ed1b6220-e6c5-4fa8-83ae-1b850909bb97",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
@@ -861,7 +861,7 @@
           "type": "varchar(128)",
           "primaryKey": false,
           "notNull": true,
-          "default": "'Tapzio'"
+          "default": "'Taptch'"
         },
         "brand_tagline": {
           "name": "brand_tagline",
@@ -889,14 +889,14 @@
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false,
-          "default": "'support@tapzio.com'"
+          "default": "'support@taptch.com'"
         },
         "custom_domain_cname": {
           "name": "custom_domain_cname",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false,
-          "default": "'domains.tapzio.com'"
+          "default": "'domains.taptch.com'"
         },
         "features_enabled": {
           "name": "features_enabled",

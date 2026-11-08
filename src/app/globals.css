@@ -4,71 +4,70 @@
 
 @layer base {
   :root {
-    /* Obsidian Luxury (Default Flagship) */
-    --background: #0A0A0C;
-    --foreground: #FAFAFA;
-    --card: #141418;
-    --card-foreground: #F4F4F5;
-    --popover: #141418;
-    --popover-foreground: #F4F4F5;
-    --primary: #D4AF37;
-    --primary-foreground: #0A0A0C;
-    --secondary: #1F2027;
-    --secondary-foreground: #FAFAFA;
-    --muted: #1A1B22;
-    --muted-foreground: #A1A1AA;
-    --accent: #26262F;
-    --accent-foreground: #D4AF37;
+    /* TAPTCH Modern Corporate SaaS Design Tokens */
+    --background: #FFFFFF;
+    --foreground: #111827;
+    --card: #FFFFFF;
+    --card-foreground: #111827;
+    --popover: #FFFFFF;
+    --popover-foreground: #111827;
+    --primary: #2563EB;
+    --primary-hover: #1D4ED8;
+    --primary-foreground: #FFFFFF;
+    --secondary: #F8FAFC;
+    --secondary-foreground: #111827;
+    --muted: #F1F5F9;
+    --muted-foreground: #64748B;
+    --accent: #EFF6FF;
+    --accent-foreground: #2563EB;
     --destructive: #EF4444;
     --destructive-foreground: #FFFFFF;
-    --border: #26262F;
-    --input: #26262F;
-    --ring: #D4AF37;
-    --radius: 0.5rem;
+    --border: #E5E7EB;
+    --input: #E5E7EB;
+    --ring: #2563EB;
+    --radius: 0.375rem;
+
+    /* Corporate Identity System Specifics */
+    --color-primary: #2563EB;
+    --color-primary-hover: #1D4ED8;
+    --color-text: #111827;
+    --color-background: #FFFFFF;
+    --color-surface: #F8FAFC;
+    --color-border: #E5E7EB;
+    --color-muted: #64748B;
   }
 
-  [data-theme="ivory"] {
-    --background: #FDFBF7;
-    --foreground: #18181B;
-    --card: #FFFFFF;
-    --card-foreground: #18181B;
-    --popover: #FFFFFF;
-    --popover-foreground: #18181B;
-    --primary: #8B4513;
-    --primary-foreground: #FFFFFF;
-    --secondary: #F4EFEA;
-    --secondary-foreground: #292524;
-    --muted: #F5F1EC;
-    --muted-foreground: #78716C;
-    --accent: #EFE8E0;
-    --accent-foreground: #8B4513;
-    --destructive: #DC2626;
-    --destructive-foreground: #FFFFFF;
-    --border: #E6DFD5;
-    --input: #E6DFD5;
-    --ring: #8B4513;
-  }
-
-  [data-theme="aurora"] {
-    --background: #080A12;
+  .dark,
+  [data-theme="dark"] {
+    --background: #0B0F19;
     --foreground: #F8FAFC;
-    --card: #0F1322;
+    --card: #111827;
     --card-foreground: #F8FAFC;
-    --popover: #0F1322;
+    --popover: #111827;
     --popover-foreground: #F8FAFC;
-    --primary: #0284C7;
+    --primary: #3B82F6;
+    --primary-hover: #2563EB;
     --primary-foreground: #FFFFFF;
-    --secondary: #181F38;
+    --secondary: #1E293B;
     --secondary-foreground: #F8FAFC;
-    --muted: #13192F;
+    --muted: #1E293B;
     --muted-foreground: #94A3B8;
-    --accent: #1E294B;
-    --accent-foreground: #38BDF8;
-    --destructive: #F43F5E;
+    --accent: #1E293B;
+    --accent-foreground: #60A5FA;
+    --destructive: #EF4444;
     --destructive-foreground: #FFFFFF;
-    --border: #1E2846;
-    --input: #1E2846;
-    --ring: #0284C7;
+    --border: #1F2937;
+    --input: #1F2937;
+    --ring: #3B82F6;
+    --radius: 0.375rem;
+
+    --color-primary: #3B82F6;
+    --color-primary-hover: #2563EB;
+    --color-text: #F8FAFC;
+    --color-background: #0B0F19;
+    --color-surface: #111827;
+    --color-border: #1F2937;
+    --color-muted: #94A3B8;
   }
 
   * {
@@ -164,11 +163,6 @@
     color: #78716C !important;
   }
 
-  [data-theme="aurora"] select option {
-    background-color: #0F1322 !important;
-    color: #F8FAFC !important;
-  }
-
   /* WebKit / Chromium (Chrome, Edge, Brave, Opera) & Safari Autofill Protection */
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
@@ -184,8 +178,8 @@
   select:-webkit-autofill:active {
     -webkit-box-shadow: 0 0 0 1000px #141418 inset !important;
     -webkit-text-fill-color: #FAFAFA !important;
-    caret-color: #D4AF37 !important;
-    border-color: #26262F !important;
+    caret-color: var(--primary) !important;
+    border-color: var(--border) !important;
     transition: background-color 5000s ease-in-out 0s;
   }
 
@@ -205,25 +199,6 @@
     -webkit-text-fill-color: #18181B !important;
     caret-color: #8B4513 !important;
     border-color: #E6DFD5 !important;
-    transition: background-color 5000s ease-in-out 0s;
-  }
-
-  [data-theme="aurora"] input:-webkit-autofill,
-  [data-theme="aurora"] input:-webkit-autofill:hover,
-  [data-theme="aurora"] input:-webkit-autofill:focus,
-  [data-theme="aurora"] input:-webkit-autofill:active,
-  [data-theme="aurora"] textarea:-webkit-autofill,
-  [data-theme="aurora"] textarea:-webkit-autofill:hover,
-  [data-theme="aurora"] textarea:-webkit-autofill:focus,
-  [data-theme="aurora"] textarea:-webkit-autofill:active,
-  [data-theme="aurora"] select:-webkit-autofill,
-  [data-theme="aurora"] select:-webkit-autofill:hover,
-  [data-theme="aurora"] select:-webkit-autofill:focus,
-  [data-theme="aurora"] select:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 1000px #0F1322 inset !important;
-    -webkit-text-fill-color: #F8FAFC !important;
-    caret-color: #0284C7 !important;
-    border-color: #1E2846 !important;
     transition: background-color 5000s ease-in-out 0s;
   }
 }

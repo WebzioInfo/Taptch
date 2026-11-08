@@ -1,4 +1,4 @@
-# Tapzio Specification — 07 NFC Cards, QR & Redirects
+﻿# Taptch Specification — 07 NFC Cards, QR & Redirects
 
 > Source: Master Prompt Section 7
 

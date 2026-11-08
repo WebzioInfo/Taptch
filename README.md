@@ -1,15 +1,15 @@
-# Tappzio — Production-Grade NFC Digital Identity SaaS
+# Taptch — Production-Grade NFC Digital Identity SaaS
 
-**Tappzio** is an intelligent digital identity, networking, and smart-hardware SaaS engineered by Webzio Technology. Tappzio replaces traditional paper business cards with studio-grade digital profiles that convert physical NFC taps and dynamic QR scans into qualified sales leads and actionable business relationships.
+**Taptch** (brand spelling: **T A P T C H**) is an intelligent digital identity, networking, and smart-hardware SaaS engineered by Webzio Technology. Taptch replaces traditional paper business cards with studio-grade digital profiles that convert physical NFC taps and dynamic QR scans into qualified sales leads and actionable business relationships.
 
 ---
 
 ## 1. Prerequisites (Windows Development)
 
 - **Node.js**: v22 LTS or v24 (Verified with v24.15.0 on Windows x64).
-- **npm**: v10+ (Exclusive mandatory package manager for Tappzio).
+- **npm**: v10+ (Exclusive mandatory package manager for Taptch).
 - **Docker Desktop**: Recommended for local PostgreSQL 16, PgBouncer, Redis, MinIO, and Mailpit.
-  *(Note: When Docker is not running, Tappzio automatically supports in-process embedded PostgreSQL via `@electric-sql/pglite` for running automated tests and local verification without external dependencies).*
+  *(Note: When Docker is not running, Taptch automatically supports in-process embedded PostgreSQL via `@electric-sql/pglite` for running automated tests and local verification without external dependencies).*
 - **PowerShell 7+** or Windows PowerShell 5.1.
 
 ---
@@ -19,7 +19,8 @@
 ### Step 1: Clone & Install Dependencies
 Open PowerShell in the project directory:
 ```powershell
-cd D:\Webzio\Tappzio
+git clone https://github.com/WebzioInfo/taptch.git
+cd taptch
 npm install
 ```
 
@@ -90,8 +91,8 @@ npm run build
 
 | Persona / Role | Email | Password | Role Details |
 | :--- | :--- | :--- | :--- |
-| **Super Admin** | `superadmin@tappzio.com` | `TappzioAdmin@2026!` | Global platform admin (TOTP 2FA enabled) |
-| **Support Admin**| `support@tappzio.com` | `TappzioSupport@2026!`| Customer support admin |
+| **Super Admin** | `superadmin@taptch.com` | `TaptchAdmin@2026!` | Global platform admin (TOTP 2FA enabled) |
+| **Support Admin**| `support@taptch.com` | `TaptchAdmin@2026!`| Customer support admin |
 | **Org Owner** | `rajesh@apexcap.in` | `ApexCapital@2026!` | Managing Partner, Apex Capital Partners |
 | **Org Admin** | `priya@apexcap.in` | `ApexCapital@2026!` | HR & Operations Director |
 | **Employee** | `arjun@apexcap.in` | `ApexCapital@2026!` | Investment Associate |
@@ -104,4 +105,4 @@ npm run build
 - **No Dynamic Profile Hot Path**: Public routes (`/p/[slug]`) must never import `cookies()` or `headers()` from `next/headers`.
 - **PgBouncer RLS Safety**: In pooled connections, tenant isolation is set per transaction via `SELECT set_config('app.current_user_id', $1, true)`.
 - **Worker Decoupling**: Web routes only push to Redis via `queue.add()`; BullMQ worker processes jobs in a dedicated container.
-- **Brand from Config**: Copy and branding derive from `src/config/brand.ts` and `system_settings`; hardcoding "Tappzio" in UI components is strictly prohibited.
+- **Brand from Config**: Copy and branding derive from `src/config/brand.ts` and `system_settings`; hardcoding brand literals in UI components is strictly prohibited.

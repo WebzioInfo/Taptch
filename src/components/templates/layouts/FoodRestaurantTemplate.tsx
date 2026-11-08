@@ -138,7 +138,7 @@ export function FoodRestaurantTemplate({
                 className="flex-1 md:flex-none border-zinc-700 bg-zinc-800 text-zinc-200 hover:bg-zinc-700 text-xs h-10 px-5 gap-2"
               >
                 <Download className="h-4 w-4 text-orange-400" />
-                <span>Save Contact</span>
+                <span>Save this profile</span>
               </Button>
             </div>
           </div>

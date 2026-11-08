@@ -1,8 +1,8 @@
-# Tapzio — Complete UI/UX Transformation & Engineering Report
+﻿# Taptch — Complete UI/UX Transformation & Engineering Report
 
 ## Executive Summary
 
-This report documents the end-to-end transformation of **Tapzio** from an initial profile concept into a world-class, premium international digital identity and smart NFC hardware platform.
+This report documents the end-to-end transformation of **Taptch** from an initial profile concept into a world-class, premium international digital identity and smart NFC hardware platform.
 
 The transformation strictly aligns with the **Obsidian Luxury design philosophy** (`#0A0A0C` background, `#D4AF37` metallic gold, `#121216` card surface), **WCAG 2.2 AA/AAA accessibility**, mobile-first responsiveness, and foundational software engineering standards (Clean Code, SOLID, defensive typing, zero dynamic SSR on profile hot path, brand derivation strictly from config).
 
@@ -99,7 +99,7 @@ The transformation strictly aligns with the **Obsidian Luxury design philosophy*
 | **Vitest Test Suite** | **42/42 PASSED** | 8 test files (tenant RLS, entitlements, profiles, templates, permissions, cards/leads/orders, brand literal protection, no direct DB in pages). |
 | **TypeScript Typecheck** | **0 ERRORS** | `tsc --noEmit` exited with code 0 across entire codebase. |
 | **ESLint Verification** | **0 WARNINGS / 0 ERRORS** | Clean lint execution (`✔ No ESLint warnings or errors`). |
-| **Architecture Assertions** | **PASSED** | Zero hardcoded "Tapzio" brand literals; zero direct `db` imports in UI pages. |
+| **Architecture Assertions** | **PASSED** | Zero hardcoded "Taptch" brand literals; zero direct `db` imports in UI pages. |
 | **Next.js Production Build** | **40/40 ROUTES COMPILED** | `next build` compiled all static and dynamic pages in 35.8s with exit code 0. |
 
 ---

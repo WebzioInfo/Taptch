@@ -180,7 +180,7 @@ export default function IndividualTemplatePage() {
                 <div className="w-2 h-2 rounded-full bg-emerald-500/80" />
               </div>
               <div className="flex-1 text-center text-[11px] text-neutral-400 font-mono bg-neutral-950/80 py-0.5 rounded max-w-xs mx-auto truncate px-2 border border-white/5">
-                https://{brandConfig.appUrl?.replace(/^https?:\/\//, '') || 'app.tappzio.com'}/p/{renderData.slug}
+                https://{brandConfig.appUrl?.replace(/^https?:\/\//, '') || 'app.taptch.com'}/p/{renderData.slug}
               </div>
             </div>
             {/* Desktop Screen Content */}

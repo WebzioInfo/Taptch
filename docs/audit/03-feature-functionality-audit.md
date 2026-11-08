@@ -1,4 +1,4 @@
-# Tappzio 360° Master Project Audit — 03: Feature & Functionality Audit
+﻿# Taptch 360° Master Project Audit — 03: Feature & Functionality Audit
 
 **Focus:** End-to-End Feature Verification, Functional Completeness, Business Logic Integrity  
 **Auditor:** Chief Product Officer & Senior Full-Stack Engineer  
@@ -40,7 +40,7 @@
   4. User authenticates, selects profile or destination URL -> card is activated instantly.
 
 ### C. Physical NFC Hardware Integration
-- **NDEF Encoding**: Standard URI Record (`https://tappzio.webziotech.in/n/[token]`).
+- **NDEF Encoding**: Standard URI Record (`https://Taptch.webziotech.in/n/[token]`).
 - **Hardware Materials**: Metal cards, Matte Black PVC, Bamboo/Wood eco-cards. Ferrite anti-metal shielding specifications documented in hardware handbook.
 
 ---
@@ -58,5 +58,5 @@
 ## 4. Feature Completeness Score
 
 - **Score: 8.8 / 10**
-- **Assessment**: All core functional promises of Tappzio are operational, verified by unit test assertions, and free of mock stubs or dead buttons.
+- **Assessment**: All core functional promises of Taptch are operational, verified by unit test assertions, and free of mock stubs or dead buttons.
 

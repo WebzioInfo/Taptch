@@ -1,7 +1,7 @@
-# Tapzio — Product Requirements Document (PRD)
+﻿# Taptch — Product Requirements Document (PRD)
 ## Comprehensive Product Vision & Architecture Directive
 
-**Product:** Tapzio  
+**Product:** Taptch  
 **Platform Owner:** Webzio Technology  
 **Classification:** Self-Service Digital Identity, Profile Creation & Smart-Hardware Platform  
 **Document Version:** 2.0 (Product Vision Realignment)  
@@ -11,11 +11,11 @@
 
 ## 1. Executive Product Vision & Core Principle
 
-**Tapzio is a self-service digital profile creation platform and customizable digital identity SaaS.**
+**Taptch is a self-service digital profile creation platform and customizable digital identity SaaS.**
 
 > [!IMPORTANT]
 > **Core Principle: Digital Profile is the Primary Product.**  
-> Physical NFC smart cards (matte PVC, executive metal, brushed gold, carbon finish) are optional premium physical accessories that instantly link people to their live digital profile. Tapzio is not merely an NFC card store or a collection of static web cards; it is an end-to-end digital identity creation platform where users choose how they look, showcase their personal brand and multiple businesses, publish live, and optionally connect physical NFC hardware.
+> Physical NFC smart cards (matte PVC, executive metal, brushed gold, carbon finish) are optional premium physical accessories that instantly link people to their live digital profile. Taptch is not merely an NFC card store or a collection of static web cards; it is an end-to-end digital identity creation platform where users choose how they look, showcase their personal brand and multiple businesses, publish live, and optionally connect physical NFC hardware.
 
 ### The 14-Step Core User Journey
 1. Register and sign in with email/phone OTP or password.
@@ -37,7 +37,7 @@
 
 ## 2. User Types & Profile Creation Modes
 
-Tapzio supports two distinct profile creation architectures designed for modern networking:
+Taptch supports two distinct profile creation architectures designed for modern networking:
 
 ### 2.1 Mode A: Personal Profile (with Multiple Business Support)
 
@@ -95,7 +95,7 @@ Designed for corporate companies, retail establishments, medical clinics, hospit
 
 ## 3. Subscription Plans & Feature Entitlements
 
-Tapzio implements a flexible, admin-managed entitlement system. Plans are data-driven in PostgreSQL, allowing administrators to dynamically alter pricing, feature flags, and limits without altering frontend code.
+Taptch implements a flexible, admin-managed entitlement system. Plans are data-driven in PostgreSQL, allowing administrators to dynamically alter pricing, feature flags, and limits without altering frontend code.
 
 ### 3.1 Initial Four-Tier Plan Architecture
 
@@ -118,7 +118,7 @@ Tapzio implements a flexible, admin-managed entitlement system. Plans are data-d
 | **Embedded YouTube Videos** | No | No | No | Yes |
 | **Google Review Quick Link** | No | No | No | Yes |
 | **Custom Domain Support** | No | No | No | Yes |
-| **White-Label (Remove Tapzio Badge)** | No | No | No | Yes |
+| **White-Label (Remove Taptch Badge)** | No | No | No | Yes |
 
 ### 3.2 Plan Administration Capabilities (Super Admin Console)
 Platform administrators can:
@@ -171,7 +171,7 @@ The self-service editor empowers non-technical users to build and style their di
 
 ## 6. Public Profile & Edge Rendering
 
-- **Public Route**: Published profiles are accessible via clean URLs: `https://tapzio.com/p/{slug}`.
+- **Public Route**: Published profiles are accessible via clean URLs: `https://taptch.com/p/{slug}`.
 - **Sub-50ms Hot Path**: Cached published JSON snapshot stored in Redis; zero dynamic server cookies or headers on the public read path.
 - **Dynamic QR Code**: High-resolution vector QR code generated on the fly, encoding the public profile URL with downloadable SVG and PNG formats.
 - **SEO & Social Open Graph**: Automated dynamic meta tags, page title, description, and OG image for sharing across WhatsApp, iMessage, and LinkedIn.
@@ -187,7 +187,7 @@ Physical NFC cards connect physical interactions to the digital profile.
 - **Executive Metal Smart Card**: Heavyweight stainless steel or titanium alloy with laser-engraved details and an integrated anti-metal ferrite shielding layer.
 
 ### 7.2 Hardware Lifecycle & Redirect Routing
-1. **Manufacturer Pre-Encoding**: Cards are pre-programmed with unguessable redirect URLs: `https://tapzio.com/n/{token}` for NFC, `https://tapzio.com/q/{token}` for QR.
+1. **Manufacturer Pre-Encoding**: Cards are pre-programmed with unguessable redirect URLs: `https://taptch.com/n/{token}` for NFC, `https://taptch.com/q/{token}` for QR.
 2. **Order Placement**: User selects card material, specifies quantity, and selects which published profile to link.
 3. **Admin Verification & Kanban**: Super admin reviews order, verifies offline payment status (`unpaid` | `paid_offline` | `waived`), assigns physical card inventory from stock, and dispatches the card.
 4. **Card Activation**: User taps card or scans welcome packaging QR, enters 6-digit activation code, and links the card to their active profile.

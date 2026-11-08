@@ -49,7 +49,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
     phone: '+91 484 290 8800',
     whatsapp: '+91 98460 12345',
     email: 'info@apexindustrial-demo.com',
-    website: 'https://apexindustrial.demo.tappzio.com',
+    website: 'https://apexindustrial.demo.taptch.com',
     address: 'Plot 42, Industrial Development Area, Kalamassery',
     location: 'Kochi, Kerala 683109',
     workingHours: 'Mon – Sat: 08:30 – 18:00 IST',
@@ -62,7 +62,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
     socialLinks: [
       { platform: 'linkedin', url: 'https://linkedin.com/company/apex-industrial-demo' },
       { platform: 'youtube', url: 'https://youtube.com/@apexindustrial-demo' },
-      { platform: 'website', url: 'https://apexindustrial.demo.tappzio.com' },
+      { platform: 'website', url: 'https://apexindustrial.demo.taptch.com' },
     ],
     businesses: [
       {
@@ -72,7 +72,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         roleTitle: 'Manufacturing Headquarters',
         industry: 'Industrial Engineering',
         description: 'Primary fabrication and CNC machining facility covering 45,000 sq ft.',
-        websiteUrl: 'https://apexindustrial.demo.tappzio.com',
+        websiteUrl: 'https://apexindustrial.demo.taptch.com',
         brochureUrl: '/docs/apex-machinery-specifications-demo.pdf',
         address: 'Kalamassery Industrial Estate, Kochi, Kerala',
       },
@@ -83,7 +83,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         roleTitle: 'Hydraulics Division',
         industry: 'Fluid Power',
         description: 'Specialized unit producing custom hydraulic cylinders, valves, and power units.',
-        websiteUrl: 'https://apexindustrial.demo.tappzio.com/hydraulics',
+        websiteUrl: 'https://apexindustrial.demo.taptch.com/hydraulics',
         brochureUrl: '/docs/apex-hydraulics-catalogue-demo.pdf',
         address: 'Phase II, Edayar Industrial Area, Kochi, Kerala',
       },
@@ -97,7 +97,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         price: '48,50,000',
         currency: '₹',
         imageUrl: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80',
-        actionUrl: 'https://apexindustrial.demo.tappzio.com/products/vmc-850',
+        actionUrl: 'https://apexindustrial.demo.taptch.com/products/vmc-850',
       },
       {
         id: 'cat-apex-2',
@@ -107,7 +107,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         price: '4,20,000',
         currency: '₹',
         imageUrl: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=600&auto=format&fit=crop&q=80',
-        actionUrl: 'https://apexindustrial.demo.tappzio.com/products/hpu-300',
+        actionUrl: 'https://apexindustrial.demo.taptch.com/products/hpu-300',
       },
       {
         id: 'cat-apex-3',
@@ -117,7 +117,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         price: '1,50,000',
         currency: '₹',
         imageUrl: 'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?w=600&auto=format&fit=crop&q=80',
-        actionUrl: 'https://apexindustrial.demo.tappzio.com/services/maintenance',
+        actionUrl: 'https://apexindustrial.demo.taptch.com/services/maintenance',
       },
       {
         id: 'cat-apex-4',
@@ -127,7 +127,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         price: '2,80,000',
         currency: '₹',
         imageUrl: 'https://images.unsplash.com/photo-1581092334651-ddf26d9a09d0?w=600&auto=format&fit=crop&q=80',
-        actionUrl: 'https://apexindustrial.demo.tappzio.com/services/automation',
+        actionUrl: 'https://apexindustrial.demo.taptch.com/services/automation',
       },
     ],
     gallery: [
@@ -160,7 +160,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
     phone: '+91 22 6190 4000',
     whatsapp: '+91 98200 44000',
     email: 'contact@singhoniacorp-demo.com',
-    website: 'https://singhoniacorp.demo.tappzio.com',
+    website: 'https://singhoniacorp.demo.taptch.com',
     address: '14th Floor, Maker Maxity, Bandra Kurla Complex',
     location: 'Mumbai, Maharashtra 400051',
     workingHours: 'Mon – Fri: 09:00 – 19:30 IST',
@@ -173,7 +173,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
     socialLinks: [
       { platform: 'linkedin', url: 'https://linkedin.com/company/singhoniacorp-demo' },
       { platform: 'twitter', url: 'https://x.com/singhoniacorp_demo' },
-      { platform: 'website', url: 'https://singhoniacorp.demo.tappzio.com' },
+      { platform: 'website', url: 'https://singhoniacorp.demo.taptch.com' },
     ],
     businesses: [
       {
@@ -183,7 +183,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         roleTitle: 'Corporate Headquarters',
         industry: 'Investment Banking & M&A',
         description: 'Lead transaction structuring and regulatory filings.',
-        websiteUrl: 'https://singhoniacorp.demo.tappzio.com',
+        websiteUrl: 'https://singhoniacorp.demo.taptch.com',
         address: 'Bandra Kurla Complex, Mumbai',
       },
     ],
@@ -196,7 +196,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         price: 'Custom Retainer',
         currency: '',
         imageUrl: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=600&auto=format&fit=crop&q=80',
-        actionUrl: 'https://singhoniacorp.demo.tappzio.com/practice/mergers',
+        actionUrl: 'https://singhoniacorp.demo.taptch.com/practice/mergers',
       },
       {
         id: 'cat-singhania-2',
@@ -206,7 +206,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         price: 'Annual Retainer',
         currency: '',
         imageUrl: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=600&auto=format&fit=crop&q=80',
-        actionUrl: 'https://singhoniacorp.demo.tappzio.com/practice/governance',
+        actionUrl: 'https://singhoniacorp.demo.taptch.com/practice/governance',
       },
     ],
     gallery: [
@@ -236,7 +236,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
     phone: '+91 80 4112 9090',
     whatsapp: '+91 99000 88221',
     email: 'hello@horizonstudio-demo.com',
-    website: 'https://horizonstudio.demo.tappzio.com',
+    website: 'https://horizonstudio.demo.taptch.com',
     address: '100 Feet Road, 2nd Stage, Indiranagar',
     location: 'Bengaluru, Karnataka 560038',
     workingHours: 'Mon – Fri: 10:00 – 19:30 IST',
@@ -260,7 +260,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         roleTitle: 'Design Flagship',
         industry: 'Digital Design',
         description: 'Main creative floor specializing in brand direction and UI/UX engineering.',
-        websiteUrl: 'https://horizonstudio.demo.tappzio.com',
+        websiteUrl: 'https://horizonstudio.demo.taptch.com',
         address: 'Indiranagar, Bengaluru',
       },
     ],
@@ -273,7 +273,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         price: '2,20,000',
         currency: '₹',
         imageUrl: 'https://images.unsplash.com/photo-1600132806370-bf17e65e942f?w=600&auto=format&fit=crop&q=80',
-        actionUrl: 'https://horizonstudio.demo.tappzio.com/services/brand',
+        actionUrl: 'https://horizonstudio.demo.taptch.com/services/brand',
       },
       {
         id: 'cat-horizon-2',
@@ -283,7 +283,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         price: '3,80,000',
         currency: '₹',
         imageUrl: 'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=600&auto=format&fit=crop&q=80',
-        actionUrl: 'https://horizonstudio.demo.tappzio.com/services/uiux',
+        actionUrl: 'https://horizonstudio.demo.taptch.com/services/uiux',
       },
     ],
     gallery: [
@@ -314,7 +314,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
     phone: '+91 11 2341 5500',
     whatsapp: '+91 98110 55000',
     email: 'chambers@veritaslegal-demo.com',
-    website: 'https://veritaslegal.demo.tappzio.com',
+    website: 'https://veritaslegal.demo.taptch.com',
     address: 'Gopaldas Bhawan, 28 Barakhamba Road',
     location: 'Connaught Place, New Delhi 110001',
     workingHours: 'Mon – Sat: 09:30 – 18:30 IST',
@@ -326,7 +326,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
     ],
     socialLinks: [
       { platform: 'linkedin', url: 'https://linkedin.com/company/veritas-legal-demo' },
-      { platform: 'website', url: 'https://veritaslegal.demo.tappzio.com' },
+      { platform: 'website', url: 'https://veritaslegal.demo.taptch.com' },
     ],
     businesses: [
       {
@@ -336,7 +336,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         roleTitle: 'New Delhi Chambers',
         industry: 'Legal Practice',
         description: 'Principal litigation and arbitration practice chambers.',
-        websiteUrl: 'https://veritaslegal.demo.tappzio.com',
+        websiteUrl: 'https://veritaslegal.demo.taptch.com',
         address: 'Barakhamba Road, New Delhi',
       },
     ],
@@ -349,7 +349,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         price: 'Professional Fee',
         currency: '',
         imageUrl: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600&auto=format&fit=crop&q=80',
-        actionUrl: 'https://veritaslegal.demo.tappzio.com/arbitration',
+        actionUrl: 'https://veritaslegal.demo.taptch.com/arbitration',
       },
       {
         id: 'cat-veritas-2',
@@ -359,7 +359,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         price: 'Advisory Retainer',
         currency: '',
         imageUrl: 'https://images.unsplash.com/photo-1450133064473-71024230f91b?w=600&auto=format&fit=crop&q=80',
-        actionUrl: 'https://veritaslegal.demo.tappzio.com/tax',
+        actionUrl: 'https://veritaslegal.demo.taptch.com/tax',
       },
     ],
     gallery: [
@@ -389,7 +389,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
     phone: '+91 495 272 1100',
     whatsapp: '+91 94470 11223',
     email: 'orders@malabarsilk-demo.com',
-    website: 'https://malabarsilk.demo.tappzio.com',
+    website: 'https://malabarsilk.demo.taptch.com',
     address: 'Sweet Meat Street (SM Street) Heritage Arcade',
     location: 'Kozhikode, Kerala 673001',
     workingHours: 'Mon – Sun: 10:00 – 21:00 IST',
@@ -412,7 +412,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         roleTitle: 'Kozhikode Flagship Store',
         industry: 'Luxury Textiles',
         description: 'Multi-storey showroom featuring bridal silks, kasavu dhotis, and ethnic menswear.',
-        websiteUrl: 'https://malabarsilk.demo.tappzio.com',
+        websiteUrl: 'https://malabarsilk.demo.taptch.com',
         address: 'SM Street, Kozhikode',
       },
     ],
@@ -425,7 +425,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         price: '28,500',
         currency: '₹',
         imageUrl: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600&auto=format&fit=crop&q=80',
-        actionUrl: 'https://malabarsilk.demo.tappzio.com/sarees/kanchipuram-crimson',
+        actionUrl: 'https://malabarsilk.demo.taptch.com/sarees/kanchipuram-crimson',
       },
       {
         id: 'cat-silk-2',
@@ -435,7 +435,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         price: '14,800',
         currency: '₹',
         imageUrl: 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=600&auto=format&fit=crop&q=80',
-        actionUrl: 'https://malabarsilk.demo.tappzio.com/sarees/kerala-kasavu',
+        actionUrl: 'https://malabarsilk.demo.taptch.com/sarees/kerala-kasavu',
       },
       {
         id: 'cat-silk-3',
@@ -445,7 +445,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         price: '9,200',
         currency: '₹',
         imageUrl: 'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?w=600&auto=format&fit=crop&q=80',
-        actionUrl: 'https://malabarsilk.demo.tappzio.com/mens/groom-ensemble',
+        actionUrl: 'https://malabarsilk.demo.taptch.com/mens/groom-ensemble',
       },
     ],
     gallery: [
@@ -476,7 +476,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
     phone: '+91 40 6820 7700',
     whatsapp: '+91 99880 77000',
     email: 'reservations@saffronspice-demo.com',
-    website: 'https://saffronspice.demo.tappzio.com',
+    website: 'https://saffronspice.demo.taptch.com',
     address: 'Road No. 36, Near Peddamma Temple, Jubilee Hills',
     location: 'Hyderabad, Telangana 500033',
     workingHours: 'Lunch: 12:00 – 15:30 | Dinner: 19:00 – 23:30 IST',
@@ -489,7 +489,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
     socialLinks: [
       { platform: 'instagram', url: 'https://instagram.com/saffronspice_demo' },
       { platform: 'facebook', url: 'https://facebook.com/saffronspice.demo' },
-      { platform: 'website', url: 'https://saffronspice.demo.tappzio.com' },
+      { platform: 'website', url: 'https://saffronspice.demo.taptch.com' },
     ],
     businesses: [
       {
@@ -499,7 +499,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         roleTitle: 'Jubilee Hills Flagship',
         industry: 'Hospitality & Dining',
         description: '140-cover dining hall with private mezzanine lounge and open tandoor kitchen.',
-        websiteUrl: 'https://saffronspice.demo.tappzio.com',
+        websiteUrl: 'https://saffronspice.demo.taptch.com',
         address: 'Road No. 36, Jubilee Hills, Hyderabad',
       },
     ],
@@ -512,7 +512,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         price: '745',
         currency: '₹',
         imageUrl: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=600&auto=format&fit=crop&q=80',
-        actionUrl: 'https://saffronspice.demo.tappzio.com/menu/dum-biryani',
+        actionUrl: 'https://saffronspice.demo.taptch.com/menu/dum-biryani',
       },
       {
         id: 'cat-food-2',
@@ -522,7 +522,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         price: '595',
         currency: '₹',
         imageUrl: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=600&auto=format&fit=crop&q=80',
-        actionUrl: 'https://saffronspice.demo.tappzio.com/menu/galouti-kebab',
+        actionUrl: 'https://saffronspice.demo.taptch.com/menu/galouti-kebab',
       },
       {
         id: 'cat-food-3',
@@ -532,7 +532,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         price: 'From 1,800/plate',
         currency: '₹',
         imageUrl: 'https://images.unsplash.com/photo-1555244162-803834f70033?w=600&auto=format&fit=crop&q=80',
-        actionUrl: 'https://saffronspice.demo.tappzio.com/catering',
+        actionUrl: 'https://saffronspice.demo.taptch.com/catering',
       },
     ],
     gallery: [
@@ -563,7 +563,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
     phone: '+91 20 6790 3300',
     whatsapp: '+91 97660 33000',
     email: 'architecture@nexacore-demo.com',
-    website: 'https://nexacore.demo.tappzio.com',
+    website: 'https://nexacore.demo.taptch.com',
     address: 'World Trade Center, Tower 2, Kharadi',
     location: 'Pune, Maharashtra 411014',
     workingHours: 'Mon – Fri: 09:00 – 18:30 IST (24/7 SRE Response)',
@@ -586,7 +586,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         roleTitle: 'Engineering Headquarters',
         industry: 'Cloud Computing',
         description: 'Core platform development and 24/7 site reliability operations center.',
-        websiteUrl: 'https://nexacore.demo.tappzio.com',
+        websiteUrl: 'https://nexacore.demo.taptch.com',
         address: 'WTC, Kharadi, Pune',
       },
     ],
@@ -599,7 +599,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         price: '3,50,000',
         currency: '₹',
         imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
-        actionUrl: 'https://nexacore.demo.tappzio.com/solutions/k8s',
+        actionUrl: 'https://nexacore.demo.taptch.com/solutions/k8s',
       },
       {
         id: 'cat-nexa-2',
@@ -609,7 +609,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         price: '4,80,000',
         currency: '₹',
         imageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80',
-        actionUrl: 'https://nexacore.demo.tappzio.com/solutions/ai-rag',
+        actionUrl: 'https://nexacore.demo.taptch.com/solutions/ai-rag',
       },
     ],
     gallery: [
@@ -639,7 +639,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
     phone: '+91 22 2288 9000',
     whatsapp: '+91 98210 90000',
     email: 'private@meridianestates-demo.com',
-    website: 'https://meridianestates.demo.tappzio.com',
+    website: 'https://meridianestates.demo.taptch.com',
     address: 'Chander Mukhi, Nariman Point',
     location: 'Mumbai, Maharashtra 400021',
     workingHours: 'Strictly by Prior Private Appointment',
@@ -652,7 +652,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
     socialLinks: [
       { platform: 'instagram', url: 'https://instagram.com/meridianestates_demo' },
       { platform: 'linkedin', url: 'https://linkedin.com/company/meridianestates-demo' },
-      { platform: 'website', url: 'https://meridianestates.demo.tappzio.com' },
+      { platform: 'website', url: 'https://meridianestates.demo.taptch.com' },
     ],
     businesses: [
       {
@@ -662,7 +662,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         roleTitle: 'Nariman Point Advisory',
         industry: 'Luxury Real Estate',
         description: 'Trophy asset procurement and off-market residential acquisitions.',
-        websiteUrl: 'https://meridianestates.demo.tappzio.com',
+        websiteUrl: 'https://meridianestates.demo.taptch.com',
         address: 'Nariman Point, Mumbai',
       },
     ],
@@ -675,7 +675,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         price: '48,00,00,000',
         currency: '₹',
         imageUrl: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&auto=format&fit=crop&q=80',
-        actionUrl: 'https://meridianestates.demo.tappzio.com/estates/bay-penthouse',
+        actionUrl: 'https://meridianestates.demo.taptch.com/estates/bay-penthouse',
       },
       {
         id: 'cat-meridian-2',
@@ -685,7 +685,7 @@ export const DEMO_BUSINESSES: DemoBusinessProfile[] = [
         price: '22,50,00,000',
         currency: '₹',
         imageUrl: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600&auto=format&fit=crop&q=80',
-        actionUrl: 'https://meridianestates.demo.tappzio.com/estates/goa-coastal-villa',
+        actionUrl: 'https://meridianestates.demo.taptch.com/estates/goa-coastal-villa',
       },
     ],
     gallery: [

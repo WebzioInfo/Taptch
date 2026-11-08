@@ -1,4 +1,4 @@
-# Tapzio — WCAG 2.2 Color Contrast Audit & Verification Output
+﻿# Taptch — WCAG 2.2 Color Contrast Audit & Verification Output
 
 **Measurement Date:** October 31, 2026  
 **Methodology:** Measured programmatically using `scripts/compute-contrast.js` implementing the standard W3C relative luminance formula: $(L_1 + 0.05) / (L_2 + 0.05)$.  
