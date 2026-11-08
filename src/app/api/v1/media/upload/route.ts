@@ -3,8 +3,8 @@ import { getActorFromRequest } from '@/lib/auth/session';
 import { apiSuccess, apiError } from '@/lib/api/response';
 import {
   uploadMediaBuffer,
-  CLOUDINARY_FOLDERS,
-} from '@/lib/cloudinary';
+  STORAGE_FOLDERS,
+} from '@/lib/storage';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,18 +26,18 @@ const ALLOWED_MIME_TYPES = new Set([
 ]);
 
 const FOLDER_MAP: Record<string, string> = {
-  avatar: CLOUDINARY_FOLDERS.personalAvatars,
-  cover: CLOUDINARY_FOLDERS.personalCovers,
-  gallery: CLOUDINARY_FOLDERS.personalGalleries,
-  logo: CLOUDINARY_FOLDERS.businessLogos,
-  business_cover: CLOUDINARY_FOLDERS.businessCovers,
-  product: CLOUDINARY_FOLDERS.businessProducts,
-  service: CLOUDINARY_FOLDERS.businessServices,
-  business_gallery: CLOUDINARY_FOLDERS.businessGalleries,
-  brochure: CLOUDINARY_FOLDERS.documents,
-  video: CLOUDINARY_FOLDERS.videos,
-  template: CLOUDINARY_FOLDERS.templates,
-  nfc_product: CLOUDINARY_FOLDERS.nfcProducts,
+  avatar: STORAGE_FOLDERS.personalAvatars,
+  cover: STORAGE_FOLDERS.personalCovers,
+  gallery: STORAGE_FOLDERS.personalGalleries,
+  logo: STORAGE_FOLDERS.businessLogos,
+  business_cover: STORAGE_FOLDERS.businessCovers,
+  product: STORAGE_FOLDERS.businessProducts,
+  service: STORAGE_FOLDERS.businessServices,
+  business_gallery: STORAGE_FOLDERS.businessGalleries,
+  brochure: STORAGE_FOLDERS.documents,
+  video: STORAGE_FOLDERS.videos,
+  template: STORAGE_FOLDERS.templates,
+  nfc_product: STORAGE_FOLDERS.nfcProducts,
 };
 
 export async function POST(req: NextRequest) {
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const folder = FOLDER_MAP[mediaCategory] || 'taptch/uploads';
+    const folder = FOLDER_MAP[mediaCategory] || 'uploads';
     const resourceType: 'image' | 'video' | 'raw' = isVideo ? 'video' : isPdf ? 'raw' : 'image';
 
     const arrayBuffer = await file.arrayBuffer();
@@ -90,6 +90,8 @@ export async function POST(req: NextRequest) {
       ownerId: actor.userId,
       profileId,
       businessId,
+      fileName: file.name,
+      mimeType: file.type,
     });
 
     return apiSuccess(result, undefined, 201);

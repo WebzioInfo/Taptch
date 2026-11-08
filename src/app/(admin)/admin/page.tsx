@@ -98,7 +98,9 @@ interface MediaItem {
   profileSlug: string | null;
   resourceType: string;
   mediaCategory: string;
-  cloudinaryPublicId: string;
+  storageKey?: string | null;
+  storageProvider?: string | null;
+  cloudinaryPublicId?: string | null;
   secureUrl: string;
   format: string | null;
   fileSize: number | null;
@@ -779,21 +781,21 @@ export default function SuperAdminPage() {
         </div>
       )}
 
-      {/* Cloudinary Media Inspection Tab */}
+      {/* Cloudflare Media Inspection Tab */}
       {activeTab === 'media' && (
         <Card className="border-border/80 bg-card">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold">Media</CardTitle>
+              <CardTitle className="text-sm font-semibold">Media Registry (Cloudflare Images & R2)</CardTitle>
               <Badge variant="outline" className="border-[#D4AF37]/40 text-[#D4AF37] text-xs">
-                Cloud: {process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dhydmxcq2'}
+                Storage: Cloudflare
               </Badge>
             </div>
           </CardHeader>
           <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {mediaList.length === 0 ? (
               <div className="col-span-full p-8 text-center text-muted-foreground text-xs">
-                No Cloudinary media assets registered yet.
+                No Cloudflare media assets registered yet.
               </div>
             ) : (
               mediaList.map((m) => (
@@ -801,7 +803,7 @@ export default function SuperAdminPage() {
                   <div className="aspect-square flex items-center justify-center bg-white/5 overflow-hidden">
                     {m.resourceType === 'image' ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
-                      <img src={m.secureUrl} alt={m.cloudinaryPublicId} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                      <img src={m.secureUrl} alt={m.storageKey || m.cloudinaryPublicId || m.id} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                     ) : m.resourceType === 'video' ? (
                       <video src={m.secureUrl} className="w-full h-full object-cover" />
                     ) : (
@@ -814,7 +816,7 @@ export default function SuperAdminPage() {
                   <div className="p-2 text-[10px]">
                     <div className="font-semibold text-white/90 truncate">{m.ownerName || 'User'}</div>
                     <div className="text-white/40 capitalize">{m.mediaCategory}</div>
-                    <div className="text-[9px] text-[#D4AF37] mt-0.5 truncate">{m.cloudinaryPublicId}</div>
+                    <div className="text-[9px] text-[#D4AF37] mt-0.5 truncate">{m.storageKey || m.cloudinaryPublicId || m.id}</div>
                   </div>
                 </div>
               ))

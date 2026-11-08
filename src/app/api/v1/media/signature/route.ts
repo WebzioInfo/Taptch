@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { getActorFromRequest } from '@/lib/auth/session';
 import { apiSuccess, apiError } from '@/lib/api/response';
-import { generateSignedUploadParams, CLOUDINARY_FOLDERS } from '@/lib/cloudinary';
+import { generateSignedUploadParams, STORAGE_FOLDERS } from '@/lib/storage';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,21 +17,20 @@ export async function POST(req: NextRequest) {
 
     const folder =
       category === 'avatar'
-        ? CLOUDINARY_FOLDERS.personalAvatars
+        ? STORAGE_FOLDERS.personalAvatars
         : category === 'logo'
-        ? CLOUDINARY_FOLDERS.businessLogos
+        ? STORAGE_FOLDERS.businessLogos
         : category === 'video'
-        ? CLOUDINARY_FOLDERS.videos
+        ? STORAGE_FOLDERS.videos
         : category === 'brochure'
-        ? CLOUDINARY_FOLDERS.documents
-        : CLOUDINARY_FOLDERS.personalGalleries;
+        ? STORAGE_FOLDERS.documents
+        : STORAGE_FOLDERS.personalGalleries;
 
-    const signatureData = generateSignedUploadParams(folder, ['taptch', `user_${actor.userId}`]);
+    const uploadParams = await generateSignedUploadParams(folder, ['taptch', `user_${actor.userId}`]);
 
-    return apiSuccess(signatureData);
+    return apiSuccess(uploadParams);
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : String(err);
-    return apiError('INTERNAL_ERROR', `Failed to generate upload signature: ${errorMsg}`, 500);
+    return apiError('INTERNAL_ERROR', `Failed to generate direct upload URL: ${errorMsg}`, 500);
   }
 }
-

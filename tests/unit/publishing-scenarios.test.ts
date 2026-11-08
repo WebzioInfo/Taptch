@@ -87,14 +87,14 @@ describe('TAPTCH Controlled Publishing & Plan Assignment System (Scenarios A - H
         { platform: 'instagram', url: 'https://instagram.com/aarav' },
       ],
       gallery: [
-        { url: 'https://res.cloudinary.com/taptch/image/upload/sample1.jpg', caption: 'Flagship Event 2025' },
-        { url: 'https://res.cloudinary.com/taptch/image/upload/sample2.jpg', caption: 'Keynote Demo' },
+        { url: 'https://imagedelivery.net/taptch/sample1.jpg/public', caption: 'Flagship Event 2025' },
+        { url: 'https://imagedelivery.net/taptch/sample2.jpg/public', caption: 'Keynote Demo' },
       ],
       videos: [
         { videoUrl: 'https://youtube.com/watch?v=demo123', title: 'Product Launch 2026' },
       ],
       brochures: [
-        { title: 'Corporate Brochure 2026', fileUrl: 'https://res.cloudinary.com/taptch/raw/upload/brochure.pdf', fileSize: '1MB' },
+        { title: 'Corporate Brochure 2026', fileUrl: 'https://assets.taptch.com/brochures/brochure.pdf', fileSize: '1MB' },
       ],
     });
 
@@ -201,7 +201,7 @@ describe('TAPTCH Controlled Publishing & Plan Assignment System (Scenarios A - H
       headline: 'Independent Consultant',
       phone: '+919998887776',
       gallery: [
-        { url: 'https://res.cloudinary.com/taptch/image/upload/consulting.jpg' },
+        { url: 'https://imagedelivery.net/taptch/consulting.jpg/public' },
       ],
     });
 
@@ -265,14 +265,14 @@ describe('TAPTCH Controlled Publishing & Plan Assignment System (Scenarios A - H
       displayName: 'Neha Singhal',
       headline: 'Jewelry Designer & Gemologist',
       gallery: [
-        { url: 'https://res.cloudinary.com/taptch/image/upload/diamond1.jpg', caption: 'Solitaire Ring' },
-        { url: 'https://res.cloudinary.com/taptch/image/upload/diamond2.jpg', caption: 'Emerald Necklace' },
+        { url: 'https://imagedelivery.net/taptch/diamond1.jpg/public', caption: 'Solitaire Ring' },
+        { url: 'https://imagedelivery.net/taptch/diamond2.jpg/public', caption: 'Emerald Necklace' },
       ],
       videos: [
         { videoUrl: 'https://youtube.com/watch?v=craftsmanship', title: 'Atelier Behind the Scenes' },
       ],
       brochures: [
-        { title: 'Bridal Collection 2026', fileUrl: 'https://res.cloudinary.com/taptch/raw/upload/bridal.pdf' },
+        { title: 'Bridal Collection 2026', fileUrl: 'https://assets.taptch.com/brochures/bridal.pdf' },
       ],
     });
 
@@ -331,7 +331,7 @@ describe('TAPTCH Controlled Publishing & Plan Assignment System (Scenarios A - H
     const profile = await createProfile(customer, {
       slug,
       displayName: 'Rohan Mehta',
-      gallery: [{ url: 'https://res.cloudinary.com/taptch/image/upload/sample.jpg' }],
+      gallery: [{ url: 'https://imagedelivery.net/taptch/sample.jpg/public' }],
     });
     await addBusiness(customer, profile.id, { name: 'Mehta Logistics' });
     await addBusiness(customer, profile.id, { name: 'Mehta Warehousing' });

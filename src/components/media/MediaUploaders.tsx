@@ -48,7 +48,7 @@ export interface BaseUploaderProps {
 }
 
 /**
- * Universal Media Uploader supporting Cloudinary images, videos, and PDF documents.
+ * Universal Media Uploader supporting Cloudflare images, videos, and PDF documents.
  */
 export function MediaUploader({
   label,
@@ -117,7 +117,7 @@ export function MediaUploader({
         <label className="text-sm font-medium text-white/90">{label}</label>
         {previewUrl && (
           <Badge variant="outline" className="text-xs border-emerald-500/30 text-emerald-400 bg-emerald-500/10">
-            <CheckCircle2 className="w-3 h-3 mr-1 inline" /> Cloudinary Hosted
+            <CheckCircle2 className="w-3 h-3 mr-1 inline" /> Cloudflare Hosted
           </Badge>
         )}
       </div>
@@ -210,7 +210,7 @@ export function MediaUploader({
             )}
           </div>
           <div className="text-sm font-medium text-white/90">
-            {isUploading ? 'Uploading to Cloudinary...' : `Click or drag ${isVideo ? 'video' : isDocument ? 'PDF' : 'image'} to upload`}
+            {isUploading ? 'Uploading to Cloudflare...' : `Click or drag ${isVideo ? 'video' : isDocument ? 'PDF' : 'image'} to upload`}
           </div>
           <p className="text-xs text-white/40">
             {isVideo ? 'MP4, WebM (up to 50MB)' : isDocument ? 'PDF document (up to 20MB)' : 'PNG, JPG, WebP, SVG (up to 10MB)'}

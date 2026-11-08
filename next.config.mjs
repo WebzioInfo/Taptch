@@ -30,7 +30,12 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'res.cloudinary.com',
+        hostname: 'imagedelivery.net',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'assets.taptch.com',
         pathname: '/**',
       },
       {

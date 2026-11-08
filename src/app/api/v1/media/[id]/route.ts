@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { getActorFromRequest } from '@/lib/auth/session';
 import { apiSuccess, apiError } from '@/lib/api/response';
-import { deleteMediaAsset } from '@/lib/cloudinary';
+import { deleteMediaAsset } from '@/lib/storage';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,4 +31,3 @@ export async function DELETE(
     return apiError('INTERNAL_ERROR', `Deletion failed: ${errorMsg}`, 500);
   }
 }
-
