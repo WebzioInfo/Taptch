@@ -8,7 +8,7 @@ TAPTCH is deployed as containerized services orchestrated via Docker Compose, Co
 2. **Worker Container:** Node.js BullMQ background processor for async draft saves, PDF invoice rendering, and email dispatch.
 3. **Database Cluster:** PostgreSQL 16 with PgBouncer connection pooler in transaction mode.
 4. **Cache & Queue:** Redis 7.2 with persistent AOF/RDB volume.
-5. **Object Storage:** AWS S3 / Cloudinary / MinIO S3-compatible bucket.
+5. **Object Storage:** Cloudflare Images & Cloudflare R2 / MinIO S3-compatible bucket.
 
 ---
 
@@ -33,10 +33,14 @@ REDIS_URL=redis://:REDIS_SECRET_PASSWORD@redis:6379/0
 BETTER_AUTH_SECRET=LONG_RANDOM_HEX_SECRET_STRING_MIN_32_BYTES
 BETTER_AUTH_URL=https://taptch.com
 
-# Cloudinary / S3 Storage
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
+# Cloudflare Images & R2 Storage
+CLOUDFLARE_ACCOUNT_ID=your_cloudflare_account_id
+CLOUDFLARE_IMAGES_API_TOKEN=your_cloudflare_images_api_token
+CLOUDFLARE_IMAGES_ACCOUNT_HASH=your_account_hash
+CLOUDFLARE_R2_ACCESS_KEY_ID=your_r2_access_key_id
+CLOUDFLARE_R2_SECRET_ACCESS_KEY=your_r2_secret_access_key
+CLOUDFLARE_R2_BUCKET_NAME=taptch-assets
+CLOUDFLARE_R2_PUBLIC_URL=https://assets.taptch.com
 
 # Campaign Configuration (Optional overrides)
 NEXT_PUBLIC_CAMPAIGN_BRAND_NAME="Smart NFC Profile Card"

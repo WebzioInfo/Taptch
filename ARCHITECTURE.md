@@ -6,7 +6,7 @@ TAPTCH is an enterprise-grade digital identity platform engineered to bridge phy
 ```
 +-------------------------------------------------------------------------------+
 |                             CLIENT APPLICATION                                |
-|  Next.js 15 App Router • React 19 • Tailwind CSS • Framer Motion • Lucide     |
+|  Next.js 15 App Router • React 19 • Tailwind CSS • Lucide Icons       |
 +-------------------------------------------------------------------------------+
                                       |
                                       v
@@ -56,6 +56,10 @@ TAPTCH is an enterprise-grade digital identity platform engineered to bridge phy
 - Commercial sales campaigns (such as the Instagram NFC Card Campaign under `src/campaigns/`) are architecturally isolated modules.
 - Independent configuration (`campaignBrandConfig`) prevents coupling with the parent platform.
 
+### Pillar 5: Cloudflare Edge & Unified Storage
+- Storage is unified under `src/lib/storage/` with Cloudflare Images (Direct Creator Upload v2 and delivery variants) and Cloudflare R2 (S3 SigV4 direct upload for non-image assets).
+- Fully decoupled from proprietary SDKs with built-in offline mock provider for automated testing and CI/CD pipelines.
+
 ---
 
 ## 3. Database Schema Overview
@@ -68,6 +72,7 @@ TAPTCH is an enterprise-grade digital identity platform engineered to bridge phy
 | `profiles` | Personal and business digital profiles | `user_id`, `org_id` |
 | `profile_sections` | Dynamic modular profile sections | `profile_id` |
 | `qr_codes` | Dynamic short tokens and redirect destinations | `user_id`, `org_id` |
+| `media_assets` | Provider-neutral media registry (Cloudflare Images & R2) | `user_id`, `org_id` |
 | `campaign_products` | Commercial campaign catalog items | `campaign_key` |
 | `campaign_orders` | Physical card orders, payments, shipments | `campaign_key` |
 

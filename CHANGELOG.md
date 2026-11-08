@@ -4,7 +4,27 @@ All notable changes to the TAPTCH platform are documented here.
 
 ---
 
-## [Unreleased] — 2026-11-08
+## [Unreleased] — 2026-11-09
+
+### Added
+- **Cloudflare Infrastructure Integration:** Replaced Cloudinary with native Cloudflare Images (Direct Creator Upload v2 and delivery variants) and Cloudflare R2 (S3 SigV4 direct uploads for PDFs and documents).
+- **Unified Storage Architecture:** Implemented provider-neutral storage service in `src/lib/storage/` with offline test mock fallback.
+- **Cloudflare Schema Migration:** Applied database migration `0012_cloudflare_storage.sql` to live Supabase and local test database, adding provider-neutral metadata columns (`storage_provider`, `storage_key`, `storage_object_id`, `asset_url`).
+- **Cloudinary-to-Cloudflare Migration Script:** Created automated migration utility `scripts/migrate-cloudinary-to-cloudflare.ts` with `--dry-run`, exponential retry, and audit logging.
+- **Native ESLint Flat Config Execution:** Modernized `package.json` linting script to native `eslint src` using `eslint.config.mjs`, eliminating deprecated `next lint` CLI invocation.
+
+### Removed
+- **Cloudinary SDK Purged:** Completely removed `cloudinary@2.11.0` dependency and removed legacy client wrappers.
+- **Dependency Pruning:** Removed 12 unused/redundant packages (`@dnd-kit/core`, `@dnd-kit/modifiers`, `@dnd-kit/sortable`, `@tanstack/react-query`, `zustand`, `framer-motion`, `react-hook-form`, `@hookform/resolvers`, `@fontsource/noto-sans-devanagari`, `@fontsource/noto-sans-malayalam`, `@fontsource/plus-jakarta-sans`, `bullmq`), trimming shared First Load JS to 103 kB.
+
+### Verified
+- **100% Test Pass Rate:** Verified 173/173 tests passing across 22 test files in Vitest.
+- **Production Build:** Verified Next.js 15.5.28 production build successfully compiles all 35 routes.
+- **Zero Vulnerabilities:** Verified `npm audit` reports 0 vulnerabilities.
+
+---
+
+## [0.1.0] — 2026-11-08
 
 ### Added
 - **Apple-Inspired Instagram NFC Campaign Redesign:** Completely redesigned the public storefront (`/campaigns/instagram-card`) into a minimalist, product-focused experience with interactive 3D card hardware visualizer, asymmetric collection layout, and phone tap simulator.

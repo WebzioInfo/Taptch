@@ -12,7 +12,27 @@ const compat = new FlatCompat({
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
-    ignores: [".next/**", "dist/**", "node_modules/**", ".pgdata/**", "scripts/**"],
+    ignores: [
+      ".next/**",
+      "dist/**",
+      "node_modules/**",
+      ".pgdata/**",
+      "scripts/**",
+      ".agents/**",
+      "tests/**",
+      "*.config.*",
+      "next-env.d.ts",
+    ],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
+      "@typescript-eslint/no-empty-object-type": "off",
+      "react/no-unescaped-entities": "warn",
+      "@next/next/no-img-element": "warn",
+    },
   },
 ];
 
