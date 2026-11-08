@@ -34,12 +34,23 @@ export function getDatabase() {
     return dbInstance;
   }
 
+  const isPlaceholderPassword =
+    Boolean((process.env.DATABASE_URL && process.env.DATABASE_URL.includes('[YOUR-PASSWORD]')) ||
+    (process.env.DATABASE_URL_DIRECT && process.env.DATABASE_URL_DIRECT.includes('[YOUR-PASSWORD]')));
+
   const isTestOrPglite =
+    isPlaceholderPassword ||
     process.env.USE_PGLITE_DEV === 'true' ||
     process.env.NODE_ENV === 'test' ||
     (!process.env.DATABASE_URL && !process.env.DATABASE_URL_DIRECT);
 
   if (isTestOrPglite) {
+    if (isPlaceholderPassword && process.env.NODE_ENV !== 'test') {
+      console.warn(
+        '\nℹ️ [DATABASE NOTICE] Detected "[YOUR-PASSWORD]" placeholder in DATABASE_URL.\n' +
+        'Using embedded database for local execution. Replace [YOUR-PASSWORD] in .env.local with your Supabase database password to connect to live Supabase.\n'
+      );
+    }
     if (!pgliteInstance) {
       const dataDir = process.env.PGLITE_DATA_DIR || path.resolve('.pgdata');
       pgliteInstance = new PGlite(dataDir);

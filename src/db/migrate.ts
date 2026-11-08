@@ -19,7 +19,12 @@ export async function runMigrations() {
     .filter((f) => f.endsWith('.sql'))
     .sort();
 
+  const isPlaceholderPassword =
+    Boolean((process.env.DATABASE_URL && process.env.DATABASE_URL.includes('[YOUR-PASSWORD]')) ||
+    (process.env.DATABASE_URL_DIRECT && process.env.DATABASE_URL_DIRECT.includes('[YOUR-PASSWORD]')));
+
   const isPglite =
+    isPlaceholderPassword ||
     process.env.USE_PGLITE_DEV === 'true' ||
     (!process.env.DATABASE_URL && !process.env.DATABASE_URL_DIRECT);
 
