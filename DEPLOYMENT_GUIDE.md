@@ -67,3 +67,4 @@ npm run worker
 ## 4. Health Checks & Monitoring
 - **Liveness Probe:** `GET /api/health` — returns HTTP 200 `{ status: "ok" }`.
 - **Readiness Probe:** `GET /api/ready` — verifies database and Redis connectivity.
+

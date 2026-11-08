@@ -87,3 +87,4 @@ Infrastructure Layer (Drizzle ORM, PostgreSQL, Redis, Cloudinary)
 2. **IP Anonymization:** Public visitor IPs are hashed using a 24-hour rotating salt, complying with DPDP Act standards.
 3. **Sensitive Data Redaction:** Passwords, OTPs, and API credentials are automatically masked from Pino logger outputs.
 4. **Adversarial Security Verification:** 7 adversarial test cases pass in `tests/integration/adversarial-security.test.ts`.
+

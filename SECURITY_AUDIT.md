@@ -22,3 +22,4 @@ TAPTCH implements a defense-in-depth, zero-trust security architecture. Frontend
 
 ## 3. Automated Security Verification
 Automated test `tests/integration/adversarial-security.test.ts` executes 7 adversarial test cases against API endpoints to verify the rejection of expired tokens, invalid signatures, manipulated parameters, and unauthorized access.
+

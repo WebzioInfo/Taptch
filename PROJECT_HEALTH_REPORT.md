@@ -58,3 +58,4 @@ Duration:   89.77s
 - **Lockfile Exclusivity:** `package-lock.json` is maintained as the sole authoritative lockfile.
 - **Next.js Tracing Root:** Configured with `outputFileTracingRoot` in `next.config.mjs` to eliminate multi-lockfile root inference warnings.
 - **Production Bundling:** `@electric-sql/pglite` and `postgres` are safely externalized via `serverExternalPackages`.
+

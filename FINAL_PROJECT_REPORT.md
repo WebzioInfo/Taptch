@@ -46,3 +46,4 @@
 - **Remote:** `origin` -> `https://github.com/WebzioInfo/taptch.git` (GitHub: `https://github.com/WebzioInfo/Taptch.git`)
 - **Branch:** `main`
 - **Integrity:** Zero credentials, `.env` files, or transient binaries committed.
+

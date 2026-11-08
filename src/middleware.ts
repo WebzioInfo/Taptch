@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { verifySignedSessionCookie } from '@/lib/auth/cookie-verify';
+import { createClient as createSupabaseClient } from '@/utils/supabase/middleware';
 
 /**
  * Routes that strictly require an active authenticated user session.
@@ -78,6 +79,15 @@ export async function middleware(request: NextRequest) {
   const isAuthPage = AUTH_PAGES.some((authPath) => pathname === authPath || pathname.startsWith(`${authPath}/`));
   if (isAuthPage && isAuthenticated) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+
+  // 6. Supabase Session Refresh: Maintain active Supabase session cookies
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
+    try {
+      return createSupabaseClient(request);
+    } catch {
+      // Fallback to standard response if Supabase client refresh encounters edge error
+    }
   }
 
   return NextResponse.next();

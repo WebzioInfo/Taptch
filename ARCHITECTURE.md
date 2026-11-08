@@ -70,3 +70,4 @@ TAPTCH is an enterprise-grade digital identity platform engineered to bridge phy
 | `qr_codes` | Dynamic short tokens and redirect destinations | `user_id`, `org_id` |
 | `campaign_products` | Commercial campaign catalog items | `campaign_key` |
 | `campaign_orders` | Physical card orders, payments, shipments | `campaign_key` |
+

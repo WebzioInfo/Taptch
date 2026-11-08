@@ -81,3 +81,4 @@ npm run build
   - Scans JSX and UI code to ensure zero hardcoded brand literals exist outside configuration files.
 - `tests/architecture/no-direct-db-in-pages.test.ts`:
   - Enforces Clean Architecture: Route handlers and page components must not directly import raw database clients.
+

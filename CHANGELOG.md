@@ -25,3 +25,4 @@ All notable changes to the TAPTCH platform are documented here.
 - Purged all legacy brand variations from application code and documentation.
 - Verified 0 brand literal leaks with automated architecture tests.
 - Re-verified zero vulnerabilities across all dependencies (`npm audit`).
+
