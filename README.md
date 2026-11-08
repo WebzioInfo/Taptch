@@ -8,8 +8,9 @@
 
 - **Node.js**: v22 LTS or v24 (Verified with v24.15.0 on Windows x64).
 - **npm**: v10+ (Exclusive mandatory package manager for Taptch).
-- **Docker Desktop**: Recommended for local PostgreSQL 16, PgBouncer, Redis, MinIO, and Mailpit.
-  *(Note: When Docker is not running, Taptch automatically supports in-process embedded PostgreSQL via `@electric-sql/pglite` for running automated tests and local verification without external dependencies).*
+- **Supabase PostgreSQL**: Sole application database across development, staging, and production (`DATABASE_URL` with SSL required).
+- **Docker Desktop**: Recommended for local auxiliary services (Redis 7.2, MinIO S3, Mailpit SMTP).
+  *(Note: Testing uses an isolated in-process embedded PostgreSQL instance via `@electric-sql/pglite` for running automated unit and integration tests without external database dependencies).*
 - **PowerShell 7+** or Windows PowerShell 5.1.
 
 ---
@@ -25,29 +26,30 @@ npm install
 ```
 
 ### Step 2: Configure Environment
-Copy the example environment configuration:
+Copy the example environment configuration and supply your Supabase credentials:
 ```powershell
 Copy-Item .env.example .env.local
 ```
+Ensure `DATABASE_URL` and `DATABASE_URL_DIRECT` point to your Supabase PostgreSQL instance with `?sslmode=require`.
 
-### Step 3: Start Infrastructure Services (Docker Compose)
-Launch the local containerized stack:
+### Step 3: Start Auxiliary Infrastructure Services (Docker Compose)
+Launch local supporting services (Redis caching, MinIO media emulator, Mailpit test inbox):
 ```powershell
 docker compose up -d
 ```
 This provisions:
-- **PostgreSQL 16**: Port `5432` (Direct migration access)
-- **PgBouncer** (Transaction Mode): Port `6432` (Application pooled access)
 - **Redis 7.2**: Port `6379` (In-memory cache & BullMQ queues)
 - **MinIO**: Port `9000` (S3 API) & Port `9001` (Web Console: `minioadmin` / `minioadmin`)
 - **Mailpit**: Port `1025` (SMTP) & Port `8025` (Web UI for viewing outgoing test emails)
+*(Note: Local PostgreSQL and PgBouncer containers have been deprecated and removed in favor of Supabase PostgreSQL).*
 
-### Step 4: Run Migrations & Seed Indian Demo Data
-Execute Drizzle migrations and populate the database with realistic demo accounts:
+### Step 4: Run Migrations & Seed Essential Data
+Execute Drizzle migrations and populate Supabase with essential seed data and development accounts:
 ```powershell
 npm run db:migrate
 npm run db:seed
 ```
+This applies all 13 Drizzle schema migrations to Supabase and seeds functional development accounts (`admin@taptch.local`, `manager@taptch.local`, `user@taptch.local`) with randomly generated secure passwords recorded locally in `DEV_LOGIN_CREDENTIALS.md` (gitignored).
 
 ### Step 5: Start Development Servers
 Start the Next.js App Router server:

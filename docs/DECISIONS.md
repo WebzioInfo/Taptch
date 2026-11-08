@@ -539,5 +539,37 @@
   - Can be deactivated via configuration toggle (`enabled: false`) or completely archived without touching core SaaS models.
   - Verified with 6 dedicated domain unit tests passing cleanly.
 
+---
+
+## ADR-031: Supabase PostgreSQL as the Sole Application Database & Elimination of Local Database Infrastructure
+
+- **Date**: 2026-11-09
+- **Status**: Accepted & Implemented
+- **Context**: TAPTCH previously supported dual database options: a local containerized PostgreSQL + PgBouncer stack in Docker Compose, and remote Supabase PostgreSQL. Maintaining duplicate local database containers, PgBouncer sidecars, and local initialization scripts increased local system resource overhead, introduced configuration drift, and risked test-vs-runtime discrepancy. The goal was to eliminate all local database infrastructure and establish Supabase PostgreSQL as the sole runtime application database across all non-test environments.
+- **Decision**:
+  1. **Supabase PostgreSQL Sole Database**: Configured runtime connection strings (`DATABASE_URL` and `DATABASE_URL_DIRECT`) pointing directly to Supabase (`db.nvrcgauxafpxsaufjtha.supabase.co:5432`) with mandatory SSL encryption (`?sslmode=require`).
+  2. **Removal of Local Database Containers**:
+     - Removed `postgres` (port 5432) and `pgbouncer` (port 6432) services along with `postgres_data` volume from `docker-compose.yml`.
+     - Preserved only auxiliary development containers: Redis 7.2 (caching/queues), MinIO (S3 emulator), and Mailpit (SMTP tester).
+     - Deleted obsolete local database initialization scripts (`infra/docker/postgres-init/01-init-roles.sql`).
+  3. **Purge of Localhost Connection Fallbacks**:
+     - Updated `src/db/index.ts` to strictly require `DATABASE_URL` outside tests and enforce `ssl: 'require'` for remote connections.
+     - Updated `src/db/migrate.ts` to remove `localhost:5432` fallback and enforce `ssl: 'require'`.
+  4. **Idempotent Development Seeding & Better Auth**:
+     - Updated `src/db/seed.ts` with `seedDevelopmentAccounts(db)` utilizing Better Auth (`auth.api.signUpEmail`).
+     - Provisioned 3 functional development accounts: `admin@taptch.local` (`super_admin`), `manager@taptch.local` (`admin`), and `user@taptch.local` (`user`).
+     - Passwords generated cryptographically and saved to gitignored `DEV_LOGIN_CREDENTIALS.md`.
+  5. **In-Memory Testing Isolation**:
+     - Maintained `@electric-sql/pglite` embedded in-process database exclusively for automated unit and integration tests (`npm test`), preventing remote database pollution.
+- **Verification**:
+  - `npm run db:migrate`: Verified 13/13 migrations applied in Supabase `drizzle` schema.
+  - `npm run db:seed`: Idempotently executed twice without errors or duplicate conflicts.
+  - `npx tsx scripts/verify-supabase-app.ts`: 15/15 tests passed across auth, profiles, dynamic QR, and media assets.
+  - `npm test`: 22 test files passed, 173/173 tests passed.
+  - `npm run typecheck`: 0 errors.
+  - `npm run lint`: 0 errors.
+  - `npm run build`: Next.js 16.4.5 (Turbopack) compiled 34 static and dynamic routes cleanly.
+
+
 
 

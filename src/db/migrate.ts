@@ -19,18 +19,11 @@ export async function runMigrations() {
     .filter((f) => f.endsWith('.sql'))
     .sort();
 
-  const isPlaceholderPassword =
-    Boolean((process.env.DATABASE_URL && process.env.DATABASE_URL.includes('[YOUR-PASSWORD]')) ||
-    (process.env.DATABASE_URL_DIRECT && process.env.DATABASE_URL_DIRECT.includes('[YOUR-PASSWORD]')));
+  const isTestOrExplicitPglite = process.env.NODE_ENV === 'test' || process.env.USE_PGLITE_DEV === 'true';
 
-  const isPglite =
-    isPlaceholderPassword ||
-    process.env.USE_PGLITE_DEV === 'true' ||
-    (!process.env.DATABASE_URL && !process.env.DATABASE_URL_DIRECT);
-
-  if (isPglite) {
+  if (isTestOrExplicitPglite) {
     const dataDir = process.env.PGLITE_DATA_DIR || path.resolve('.pgdata');
-    console.log(`[MIGRATIONS] Executing migrations on embedded PGlite (${dataDir})...`);
+    console.log(`[MIGRATIONS] Executing migrations on isolated testing database (${dataDir})...`);
     const client = new PGlite(dataDir);
 
     // Ensure migrations ledger exists
@@ -56,18 +49,34 @@ export async function runMigrations() {
       await client.exec(sql);
       await client.exec(`INSERT INTO __taptch_migrations (name) VALUES ('${file}') ON CONFLICT DO NOTHING`);
     }
-    console.log('[MIGRATIONS] Embedded PGlite migrations completed successfully.');
+    console.log('[MIGRATIONS] Isolated testing migrations completed successfully.');
     return;
   }
 
-  // Connect via DIRECT migrator connection (taptch_migrator or fallback)
-  const connectionString =
-    process.env.DATABASE_URL_DIRECT ||
-    process.env.DATABASE_URL ||
-    'postgres://taptch_migrator:taptch_migrator_pass@localhost:5432/taptch_db?sslmode=disable';
+  // Connect via Supabase PostgreSQL connection
+  const connectionString = process.env.DATABASE_URL_DIRECT || process.env.DATABASE_URL;
 
-  console.log(`[MIGRATIONS] Connecting to ${connectionString.replace(/:[^:@]+@/, ':***@')}...`);
-  const sqlClient = postgres(connectionString, { max: 1 });
+  if (!connectionString) {
+    throw new Error(
+      '[MIGRATIONS ERROR] DATABASE_URL (or DATABASE_URL_DIRECT) is not configured. ' +
+      'Supabase PostgreSQL is the sole application runtime database.'
+    );
+  }
+
+  if (connectionString.includes('[YOUR-PASSWORD]')) {
+    throw new Error(
+      '[MIGRATIONS ERROR] Detected placeholder "[YOUR-PASSWORD]" in connection string. ' +
+      'Please replace [YOUR-PASSWORD] with your actual Supabase database password.'
+    );
+  }
+
+  console.log(`[MIGRATIONS] Connecting to Supabase: ${connectionString.replace(/:[^:@]+@/, ':***@')}...`);
+  const isRemote = connectionString.includes('supabase.co') || connectionString.includes('pooler.supabase.com');
+  const sqlClient = postgres(connectionString, {
+    max: 1,
+    prepare: false,
+    ssl: isRemote ? 'require' : undefined,
+  });
 
   try {
     await sqlClient.unsafe(`

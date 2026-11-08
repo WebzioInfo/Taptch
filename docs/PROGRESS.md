@@ -84,3 +84,16 @@
     - Added `Team` to main customer navigation (`src/app/(app)/layout.tsx`).
   - **NFC Tag Writer & Honest Compatibility Guidance (`/cards`)**: Implemented in-browser Web NFC writing (`NDEFReader`) on supported Android Chromium devices, and honest hardware guidance for iOS/desktop with one-click NDEF URL copying and NFC Tools recommendations.
   - **Verification Gate**: **19/19 test suites passed (141/141 tests)**, `tsc --noEmit` 0 errors, `next lint` 0 warnings/errors, and Next.js 15 production build compiled clean (24 static, 54 dynamic routes).
+- **Supabase Cloud PostgreSQL Migration & Local Database Infrastructure Retirement (ADR 031)**:
+  - **Supabase As Sole Database**: Transitioned runtime and migration database access exclusively to Supabase PostgreSQL (`db.nvrcgauxafpxsaufjtha.supabase.co:5432`) with mandatory SSL encryption (`?sslmode=require`).
+  - **Local Database Cleanups**: Removed `postgres` and `pgbouncer` services and `postgres_data` volume from `docker-compose.yml`. Removed obsolete `infra/docker/postgres-init/01-init-roles.sql`.
+  - **Connection Engine Hardening**: Purged `localhost:6432` and `localhost:5432` fallbacks from `src/db/index.ts` and `src/db/migrate.ts`. Enforced TLS 1.3 `ssl: 'require'` for remote PostgreSQL connections.
+  - **Drizzle Migrations**: Successfully applied/verified 13 SQL migrations on Supabase `drizzle` schema.
+  - **Idempotent Development Seeding**: Modernized `src/db/seed.ts` with Better Auth account creation (`admin@taptch.local`, `manager@taptch.local`, `user@taptch.local`), generating cryptographically secure passwords saved locally to gitignored `DEV_LOGIN_CREDENTIALS.md`.
+  - **Verification Gate**:
+    - `scripts/verify-supabase-app.ts`: 15/15 assertions passed on live Supabase.
+    - `npm test`: 22 test files passed (173/173 tests) using isolated in-memory PGlite.
+    - `npm run typecheck`: 0 errors.
+    - `npm run lint`: 0 errors.
+    - `npm run build`: Next.js 16.4.5 (Turbopack) production build compiled clean.
+    - Reports: Generated `DATABASE_MIGRATION_AUDIT.md`, `SUPABASE_DATABASE_MIGRATION_REPORT.md`, `SUPABASE_MIGRATION_TEST_REPORT.md`, and `docs/DATABASE_SETUP.md`.

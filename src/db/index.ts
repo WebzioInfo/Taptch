@@ -34,23 +34,10 @@ export function getDatabase() {
     return dbInstance;
   }
 
-  const isPlaceholderPassword =
-    Boolean((process.env.DATABASE_URL && process.env.DATABASE_URL.includes('[YOUR-PASSWORD]')) ||
-    (process.env.DATABASE_URL_DIRECT && process.env.DATABASE_URL_DIRECT.includes('[YOUR-PASSWORD]')));
+  // Automated test suite or explicit isolated PGlite execution
+  const isTestEnvironment = process.env.NODE_ENV === 'test' || process.env.USE_PGLITE_DEV === 'true';
 
-  const isTestOrPglite =
-    isPlaceholderPassword ||
-    process.env.USE_PGLITE_DEV === 'true' ||
-    process.env.NODE_ENV === 'test' ||
-    (!process.env.DATABASE_URL && !process.env.DATABASE_URL_DIRECT);
-
-  if (isTestOrPglite) {
-    if (isPlaceholderPassword && process.env.NODE_ENV !== 'test') {
-      console.warn(
-        '\nℹ️ [DATABASE NOTICE] Detected "[YOUR-PASSWORD]" placeholder in DATABASE_URL.\n' +
-        'Using embedded database for local execution. Replace [YOUR-PASSWORD] in .env.local with your Supabase database password to connect to live Supabase.\n'
-      );
-    }
+  if (isTestEnvironment) {
     if (!pgliteInstance) {
       const dataDir = process.env.PGLITE_DATA_DIR || path.resolve('.pgdata');
       pgliteInstance = new PGlite(dataDir);
@@ -59,29 +46,35 @@ export function getDatabase() {
     return dbInstance;
   }
 
-  // Production or Docker Compose PostgreSQL via PgBouncer
-  const connectionString =
-    process.env.DATABASE_URL ||
-    process.env.DATABASE_URL_POOLED ||
-    'postgres://taptch_app:taptch_app_pass@localhost:6432/taptch_db?sslmode=disable';
+  // Runtime / Production: Supabase PostgreSQL is the sole application database
+  const connectionString = process.env.DATABASE_URL || process.env.DATABASE_URL_POOLED;
+
+  if (!connectionString) {
+    throw new Error(
+      '[DATABASE CONFIG ERROR] DATABASE_URL is not configured. ' +
+      'Supabase PostgreSQL is the sole application runtime database. ' +
+      'Please configure DATABASE_URL in your environment or .env.local.'
+    );
+  }
+
+  if (connectionString.includes('[YOUR-PASSWORD]')) {
+    throw new Error(
+      '[DATABASE CONFIG ERROR] Detected placeholder "[YOUR-PASSWORD]" in DATABASE_URL. ' +
+      'Please replace [YOUR-PASSWORD] with your actual Supabase database password in .env.local.'
+    );
+  }
 
   if (!rawPostgresClient) {
-    // Warn if IPv6-only direct Supabase endpoint is detected in connection string
-    if (connectionString.includes('db.') && connectionString.includes('.supabase.co')) {
-      console.warn(
-        '\n⚠️ [DATABASE CONFIG WARNING] Detected direct Supabase host ("db.*.supabase.co").\n' +
-        'Direct Supabase endpoints are IPv6-only. If running in an IPv4-only environment (such as Docker or VPS),\n' +
-        'queries will fail with "getaddrinfo ENOTFOUND".\n' +
-        'Please switch DATABASE_URL to the Supabase Connection Pooler host (aws-0-[region].pooler.supabase.com:6543).\n'
-      );
-    }
+    const isRemoteHost = connectionString.includes('supabase.co') || connectionString.includes('pooler.supabase.com');
+    const isSslRequired = isRemoteHost || connectionString.includes('sslmode=require');
 
-    // prepare: false is strictly MANDATORY behind PgBouncer transaction pooling
+    // prepare: false is strictly mandatory for PgBouncer / Supabase pooling safety
     rawPostgresClient = postgres(connectionString, {
       prepare: false,
       max: 20,
       idle_timeout: 30,
       connect_timeout: 10,
+      ssl: isSslRequired ? 'require' : undefined,
     });
   }
 

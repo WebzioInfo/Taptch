@@ -451,7 +451,110 @@ export async function seedDatabase() {
     })
     .onConflictDoNothing({ target: schema.systemSettings.id });
 
+  // 8. Seed Functional Development Login Accounts (Phase 7)
+  await seedDevelopmentAccounts(db);
+
   console.log('[SEED] Demo data seed completed successfully!');
+}
+
+async function seedDevelopmentAccounts(db: ReturnType<typeof getDatabase>) {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const enableDevSeed = process.env.ENABLE_DEV_SEED_ACCOUNTS === 'true';
+
+  if (isProduction && !enableDevSeed) {
+    console.log('[SEED] Production environment detected; skipping development accounts.');
+    return;
+  }
+
+  console.log('[SEED] Provisioning functional development login accounts...');
+
+  const devAccounts = [
+    {
+      email: 'admin@taptch.local',
+      name: 'Development Super Admin',
+      role: 'super_admin',
+      systemRole: 'super_admin',
+    },
+    {
+      email: 'manager@taptch.local',
+      name: 'Development Admin Manager',
+      role: 'admin',
+      systemRole: 'admin',
+    },
+    {
+      email: 'user@taptch.local',
+      name: 'Development Demo User',
+      role: 'user',
+      systemRole: 'user',
+    },
+  ];
+
+  const credentialsOutput: string[] = [
+    '# TAPTCH — Development Login Credentials',
+    '',
+    '> **SECURITY NOTICE**: This file contains local development credentials generated for local testing. It is automatically gitignored and MUST NEVER be committed or used in production.',
+    '',
+    `**Generated Date:** ${new Date().toISOString()}`,
+    `**Target Database:** Supabase PostgreSQL`,
+    '',
+    '| Role | Email | Password | Status |',
+    '|---|---|---|---|',
+  ];
+
+  for (const account of devAccounts) {
+    const existing = await db.query.users.findFirst({
+      where: eq(schema.users.email, account.email),
+    });
+
+    if (existing) {
+      console.log(`[SEED] Preserving existing account: ${account.email} (${account.role})`);
+      credentialsOutput.push(`| **${account.role.toUpperCase()}** | \`${account.email}\` | *(Preserved existing password)* | **Active (Preserved)** |`);
+      continue;
+    }
+
+    // Generate cryptographically strong random password
+    const password = `TaptchDev!${crypto.randomBytes(8).toString('hex')}@2026`;
+
+    try {
+      // Create user through Better Auth API
+      const { auth } = await import('@/lib/auth');
+      await auth.api.signUpEmail({
+        body: {
+          email: account.email,
+          password: password,
+          name: account.name,
+        },
+      });
+
+      // Update role and verification status in database
+      await db.update(schema.users)
+        .set({
+          systemRole: account.systemRole,
+          emailVerified: true,
+        })
+        .where(eq(schema.users.email, account.email));
+
+      // Verify sign in
+      const signInRes = await auth.api.signInEmail({
+        body: {
+          email: account.email,
+          password: password,
+        },
+      });
+
+      const loginOk = Boolean(signInRes);
+      console.log(`[SEED] Created ${account.email} -> Login verification: ${loginOk ? 'SUCCESS' : 'FAILED'}`);
+      credentialsOutput.push(`| **${account.role.toUpperCase()}** | \`${account.email}\` | \`${password}\` | **Verified (${loginOk ? 'SUCCESS' : 'FAILED'})** |`);
+    } catch (err: any) {
+      console.error(`[SEED ERROR] Failed to create ${account.email}:`, err.message);
+      credentialsOutput.push(`| **${account.role.toUpperCase()}** | \`${account.email}\` | *(Error creating)* | Error: ${err.message} |`);
+    }
+  }
+
+  // Write DEV_LOGIN_CREDENTIALS.md (gitignored)
+  const credsPath = path.resolve('DEV_LOGIN_CREDENTIALS.md');
+  fs.writeFileSync(credsPath, credentialsOutput.join('\n') + '\n', 'utf-8');
+  console.log(`[SEED] Saved credentials to gitignored ${credsPath}`);
 }
 
 // Allow direct execution: tsx src/db/seed.ts

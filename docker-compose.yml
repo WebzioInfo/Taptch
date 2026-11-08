@@ -1,48 +1,5 @@
 services:
-  # 1. Primary PostgreSQL 16 Instance
-  postgres:
-    image: postgres:16-alpine
-    container_name: taptch-postgres
-    restart: unless-stopped
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_DB: taptch_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres_root_pass
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./infra/docker/postgres-init:/docker-entrypoint-initdb.d
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d taptch_db"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  # 2. PgBouncer Connection Pooler (Transaction Mode)
-  pgbouncer:
-    image: edoburu/pgbouncer:latest
-    container_name: taptch-pgbouncer
-    restart: unless-stopped
-    ports:
-      - "6432:6432"
-    environment:
-      DB_USER: taptch_app
-      DB_PASSWORD: taptch_app_pass
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: taptch_db
-      POOL_MODE: transaction
-      MAX_CLIENT_CONN: 5000
-      DEFAULT_POOL_SIZE: 25
-      RESERVE_POOL_SIZE: 5
-      SERVER_RESET_QUERY: "DISCARD ALL"
-      AUTH_TYPE: scram-sha-256
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-  # 3. Redis In-Memory Cache & Message Broker
+  # 1. Redis In-Memory Cache & Message Broker
   redis:
     image: redis:7.2-alpine
     container_name: taptch-redis
@@ -58,7 +15,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # 4. MinIO S3-Compatible Local Object Storage
+  # 2. MinIO S3-Compatible Local Object Storage (Optional Dev Asset Mirror)
   minio:
     image: minio/minio:latest
     container_name: taptch-minio
@@ -78,7 +35,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # 5. MinIO Initialization (Create Public Media Bucket)
+  # 3. MinIO Initialization (Create Public Media Bucket)
   minio-init:
     image: minio/mc:latest
     container_name: taptch-minio-init
@@ -93,7 +50,7 @@ services:
       exit 0;
       "
 
-  # 6. Mailpit Transactional Email Testing UI
+  # 4. Mailpit Transactional Email Testing UI
   mailpit:
     image: axllent/mailpit:latest
     container_name: taptch-mailpit
@@ -105,7 +62,5 @@ services:
       MP_MAX_MESSAGES: 500
 
 volumes:
-  postgres_data:
   redis_data:
   minio_data:
-
