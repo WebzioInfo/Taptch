@@ -76,3 +76,4 @@ A thorough dependency audit verified:
 1. **`pdf-lib`**: While used by campaign document generation, `pdf-lib` is also used by `src/modules/qr/print-engine.ts` for dynamic QR batch printing. It was therefore safely retained in `package.json`.
 2. **`users` table foreign keys**: `campaign_orders`, `campaign_payments`, `campaign_refunds`, `campaign_expenses`, and `campaign_inventory_movements` maintained nullable foreign keys to `users.id`. Dropping the campaign tables severed no foreign keys that other core tables rely upon.
 3. **Core modules (Profiles, Cards, Leads, Organizations, QR, Better Auth)**: Possess **zero** dependencies on any campaign schema or code.
+

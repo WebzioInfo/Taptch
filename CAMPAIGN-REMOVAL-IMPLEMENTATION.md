@@ -64,3 +64,4 @@
 7. `.env.local`: Removed campaign environment variables.
 8. `.env.production.example`: Removed campaign environment variables.
 9. `ENVIRONMENT_VARIABLES.md`: Removed campaign environment documentation.
+

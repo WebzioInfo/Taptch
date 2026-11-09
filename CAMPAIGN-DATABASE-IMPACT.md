@@ -65,3 +65,4 @@ DROP TABLE IF EXISTS "campaign_settings" CASCADE;
 ```
 
 **Testing Result:** Executed against local isolated test database (`.pgdata`). All 9 tables were dropped without errors. Post-migration schema integrity check confirmed 0 campaign tables remaining.
+
