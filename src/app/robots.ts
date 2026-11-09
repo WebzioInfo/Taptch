@@ -19,7 +19,6 @@ export default function robots(): MetadataRoute.Robots {
           '/contact',
           '/templates',
           '/templates/*',
-          '/campaigns/instagram-card',
           '/p/*',
         ],
         disallow: [
@@ -59,3 +58,4 @@ export default function robots(): MetadataRoute.Robots {
     host: baseUrl,
   };
 }
+

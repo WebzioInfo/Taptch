@@ -70,12 +70,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       priority: 0.8,
     },
-    {
-      url: `${baseUrl}/campaigns/instagram-card`,
-      lastModified: now,
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
   ];
 
   // 2. Individual Template Showcase Routes
@@ -128,3 +122,4 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [...staticRoutes, ...templateRoutes, ...profileRoutes];
 }
+

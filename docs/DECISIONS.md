@@ -724,6 +724,28 @@
   - `npm run build`: Next.js 16.4.5 Turbopack compiled clean with 45 static and dynamic routes.
   - Verified programmatic execution of `robots()` and `sitemap()` via standalone script.
 
+---
+
+## ADR-037: Complete Campaign Module Removal & Codebase Cleanup
+
+- **Date**: 2026-11-09
+- **Status**: Accepted & Implemented
+- **Context**: TAPTCH is an independent NFC-enabled digital identity, profile, and team workspace platform. The experimental sales campaign module (`campaigns`, `campaign_orders`, `campaign_products`, `instagram-card`) was deemed out of scope and required complete purge across the database, backend APIs, frontend storefronts, admin screens, test files, and configuration. Additionally, the root directory had accumulated obsolete audit markdown files, and mock seed files (`src/db/seed.ts`) needed deletion.
+- **Decision**:
+  1. **Database Schema & Migration (`0013_remove_campaign_module.sql`)**: Dropped all 9 campaign tables (`campaign_documents`, `campaign_inventory_movements`, `campaign_expenses`, `campaign_refunds`, `campaign_payments`, `campaign_designs`, `campaign_orders`, `campaign_products`, `campaign_settings`) in reverse foreign-key order using `CASCADE`. Removed `src/db/schema/campaigns.ts` and unexported it from `src/db/schema/index.ts`.
+  2. **Backend Domain & APIs**: Purged `src/campaigns/` (13 service/config files) and `src/app/api/v1/campaigns/` (7 endpoint routes).
+  3. **Frontend Routes & Navigation**: Purged `src/app/campaigns/` and `src/app/admin/campaigns/`. Removed all campaign references from `robots.ts`, `sitemap.ts`, and `MarketingFooter.tsx`.
+  4. **Seed & Script Removal**: Deleted `src/db/seed.ts` and removed `"db:seed"` from `package.json`.
+  5. **Root Markdown Cleanup**: Purged 26 obsolete audit report markdown files from the repository root, retaining only `README.md`, `AGENTS.md`, `ENVIRONMENT_VARIABLES.md`, and the 5 new campaign removal audit reports.
+  6. **Configuration Sanitization**: Purged all `CAMPAIGN_*` and `NEXT_PUBLIC_CAMPAIGN_*` environment variables from `.env.example`, `.env.local`, `.env.production.example`, and `ENVIRONMENT_VARIABLES.md`.
+- **Verification**:
+  - `tests/architecture/brand-literal.test.ts`: Passed.
+  - `npm test`: 24/24 test suites passed, 214/214 tests passed.
+  - `npm run typecheck`: 0 errors (`tsc --noEmit`).
+  - `npm run lint`: 0 errors.
+  - `npm run build`: Next.js 16.4.5 Turbopack compiled clean with 36 static and dynamic routes (0 campaign routes).
+
+
 
 
 

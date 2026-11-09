@@ -34,11 +34,6 @@ export function MarketingFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/campaigns/instagram-card" className="hover:text-foreground transition-colors">
-                  Instagram Smart Card
-                </Link>
-              </li>
-              <li>
                 <Link href="/templates" className="hover:text-foreground transition-colors">
                   Template Showcase
                 </Link>

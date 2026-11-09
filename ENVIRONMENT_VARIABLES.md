@@ -25,7 +25,6 @@ This document provides a comprehensive, variable-by-variable specification for a
 | `NEXT_PUBLIC_SUPABASE_URL` | **Yes** | All | Client & Backend | Canonical Supabase project HTTPS URL (`https://<project-ref>.supabase.co`). | Public / Safe |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | **Yes** | All | Client & Backend | Supabase public anonymous / publishable key for client SDK initialization. | Public / Safe |
 | `SUPABASE_SERVICE_ROLE_KEY` | Optional | Staging, Prod | Backend Admin | Supabase Service Role key for administrative operations bypassing RLS (used only in backend services). | **Critical Secret** |
-| `CAMPAIGN_STORAGE_BUCKET` | Optional | All | Storage | Storage bucket name for Instagram NFC card campaign assets (`campaign-assets`). | Internal Config |
 | `CLOUDFLARE_ACCOUNT_ID` | Optional | Staging, Prod | Cloudflare Media | Cloudflare Account ID for Cloudflare Images and R2 API operations. | Server Secret |
 | `CLOUDFLARE_IMAGES_API_TOKEN` | Optional | Staging, Prod | Cloudflare Images | Cloudflare Images API Bearer token with upload and transformation privileges. | **Critical Secret** |
 | `CLOUDFLARE_IMAGES_ACCOUNT_HASH` | Optional | Staging, Prod | Cloudflare Images | Cloudflare Images customer account hash for constructing public image delivery URLs. | Server Secret |
@@ -53,27 +52,7 @@ This document provides a comprehensive, variable-by-variable specification for a
 
 ---
 
-## 3. Campaign & Commercial NFC Card Settings
-
-These variables configure the Instagram Contactless NFC card order and payment routing:
-
-| Variable Name | Type | Description |
-|---|---|---|
-| `NEXT_PUBLIC_CAMPAIGN_BRAND_NAME` | Public | Brand title for card landing pages (`Smart NFC Profile Card`). |
-| `NEXT_PUBLIC_CAMPAIGN_TAGLINE` | Public | Tagline for card orders (`Your Instagram. One Tap Away.`). |
-| `NEXT_PUBLIC_CAMPAIGN_DOMAIN` | Public | Landing domain for NFC campaign cards (`https://taptch.com`). |
-| `CAMPAIGN_SUPPORT_EMAIL` | Server | Customer support email for physical card fulfillment (`support@taptch.com`). |
-| `CAMPAIGN_SUPPORT_PHONE` | Server | Customer support phone number for orders (`+91 98765 43210`). |
-| `CAMPAIGN_SUPPORT_WHATSAPP` | Server | WhatsApp business contact for order tracking (`+919876543210`). |
-| `CAMPAIGN_UPI_VPA` | Server | Master corporate UPI VPA for offline card payment verification (`pay@taptch`). |
-| `CAMPAIGN_BANK_NAME` | Server | Corporate settlement bank name for NEFT/IMPS card payments. |
-| `CAMPAIGN_BANK_ACCOUNT` | Server | Corporate settlement account number. |
-| `CAMPAIGN_BANK_IFSC` | Server | Corporate IFSC settlement code. |
-| `CAMPAIGN_BANK_HOLDER` | Server | Corporate beneficiary name. |
-
----
-
-## 4. Environment-Specific Profiles
+## 3. Environment-Specific Profiles
 
 ### Development (`.env.local`)
 ```bash
