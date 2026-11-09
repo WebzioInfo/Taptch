@@ -13,29 +13,107 @@ import { signIn, emailOtp } from '@/lib/auth/client';
 import { AlertCircle } from 'lucide-react';
 import { getSafeRedirectUrl, buildAuthQueryString } from '@/lib/auth/redirect';
 
-function formatLoginError(rawMessage?: string, code?: string): string {
-  if (code === 'INVALID_EMAIL_OR_PASSWORD' || (rawMessage && /invalid email or password/i.test(rawMessage))) {
-    return 'Invalid email address or password. Please verify your credentials and try again.';
+export interface LoginErrorDetails {
+  message?: string;
+  code?: string;
+  status?: number;
+}
+
+export function formatLoginError(error?: LoginErrorDetails | string | null, statusOrCode?: string | number): string {
+  if (!error) {
+    return "We couldn't complete sign-in. Please try again or contact support if the problem continues.";
   }
-  if (code === 'USER_NOT_FOUND' || (rawMessage && /user not found/i.test(rawMessage))) {
-    return 'No account was found with this email address. Please create an account.';
+
+  const rawMessage = typeof error === 'object' ? error.message : String(error);
+  const code = typeof error === 'object' ? error.code : (typeof statusOrCode === 'string' ? statusOrCode : undefined);
+  const status = typeof error === 'object' ? error.status : (typeof statusOrCode === 'number' ? statusOrCode : undefined);
+
+  // 1. Rate limiting (429)
+  if (
+    status === 429 ||
+    code === 'TOO_MANY_REQUESTS' ||
+    /too many (?:requests|attempts)|rate limit/i.test(rawMessage || '')
+  ) {
+    return 'Too many attempts. Please wait before trying again.';
   }
-  if (code === 'ACCOUNT_SUSPENDED' || (rawMessage && /suspended/i.test(rawMessage))) {
-    return 'Your account is currently unavailable. Please contact support.';
+
+  // 2. Account temporarily locked / suspended
+  if (
+    code === 'ACCOUNT_LOCKED' ||
+    code === 'ACCOUNT_SUSPENDED' ||
+    /locked|suspended/i.test(rawMessage || '')
+  ) {
+    return 'Sign-in is temporarily restricted. Please try again later.';
   }
-  if (code === 'INVALID_ORIGIN') {
-    return 'Security validation failed due to an untrusted origin. Please reload the page.';
+
+  // 3. Email verification required
+  if (
+    code === 'EMAIL_NOT_VERIFIED' ||
+    code === 'EMAIL_VERIFICATION_REQUIRED' ||
+    /verify your email|email.*not.*verified/i.test(rawMessage || '')
+  ) {
+    return 'Verify your email address before signing in.';
   }
-  if (rawMessage && /405|method not allowed/i.test(rawMessage)) {
-    return 'Authentication service configuration error (HTTP 405). Please verify domain routing or contact support.';
+
+  // 4. Session creation failure
+  if (
+    code === 'SESSION_CREATION_FAILED' ||
+    code === 'FAILED_TO_CREATE_SESSION' ||
+    /session.*fail|could not establish session/i.test(rawMessage || '')
+  ) {
+    return "Your credentials were accepted, but we couldn't establish your session. Please try again.";
   }
-  if (rawMessage && /500|internal server error/i.test(rawMessage)) {
-    return 'Authentication service temporarily unavailable. Please try again in a few moments.';
+
+  // 5. Invalid credentials (protects against user enumeration)
+  if (
+    status === 401 ||
+    code === 'INVALID_EMAIL_OR_PASSWORD' ||
+    code === 'USER_NOT_FOUND' ||
+    code === 'INVALID_CREDENTIALS' ||
+    /invalid email or password|invalid credentials|user not found/i.test(rawMessage || '')
+  ) {
+    return 'Email or password is incorrect. Check your details and try again.';
   }
-  if (rawMessage && typeof rawMessage === 'string' && rawMessage.length < 120) {
-    return rawMessage;
+
+  // 6. Invalid email format
+  if (
+    code === 'INVALID_EMAIL' ||
+    code === 'INVALID_EMAIL_FORMAT' ||
+    /valid email/i.test(rawMessage || '')
+  ) {
+    return 'Enter a valid email address.';
   }
-  return 'Unable to sign in right now. Please verify your connection or try again in a moment.';
+
+  // 7. Empty email or password
+  if (code === 'EMPTY_EMAIL' || /enter your email/i.test(rawMessage || '')) {
+    return 'Enter your email address.';
+  }
+  if (code === 'EMPTY_PASSWORD' || /enter your password/i.test(rawMessage || '')) {
+    return 'Enter your password.';
+  }
+
+  // 8. Network failure / Reachability
+  if (
+    /failed to fetch|network error|unable to reach|econnrefused|err_quic|err_connection|connection refused|network connection/i.test(rawMessage || '')
+  ) {
+    return 'Unable to reach TAPTCH. Check your connection and try again.';
+  }
+
+  // 9. Server error (500, 502, 503, 504, 405)
+  if (
+    status === 500 ||
+    status === 502 ||
+    status === 503 ||
+    status === 504 ||
+    status === 405 ||
+    code === 'INTERNAL_SERVER_ERROR' ||
+    /internal server error|server error|method not allowed/i.test(rawMessage || '')
+  ) {
+    return 'Sign-in is temporarily unavailable. Please try again shortly.';
+  }
+
+  // 10. Unexpected response fallback
+  return "We couldn't complete sign-in. Please try again or contact support if the problem continues.";
 }
 
 function LoginContent() {
@@ -60,13 +138,13 @@ function LoginContent() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!trimmedEmail) {
-      errors.email = 'Please enter your email address.';
+      errors.email = 'Enter your email address.';
     } else if (!emailRegex.test(trimmedEmail)) {
-      errors.email = 'Please enter a valid email address.';
+      errors.email = 'Enter a valid email address.';
     }
 
     if (!password) {
-      errors.password = 'Please enter your password.';
+      errors.password = 'Enter your password.';
     }
 
     setFieldErrors(errors);
@@ -79,9 +157,9 @@ function LoginContent() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!trimmedEmail) {
-      errors.email = 'Please enter your email address.';
+      errors.email = 'Enter your email address.';
     } else if (!emailRegex.test(trimmedEmail)) {
-      errors.email = 'Please enter a valid email address.';
+      errors.email = 'Enter a valid email address.';
     }
 
     setFieldErrors(errors);
@@ -90,6 +168,7 @@ function LoginContent() {
 
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return; // Prevent duplicate submissions
     setErrorMsg(null);
 
     if (!validatePasswordForm()) {
@@ -107,7 +186,7 @@ function LoginContent() {
       });
 
       if (res.error) {
-        setErrorMsg(formatLoginError(res.error.message, res.error.code));
+        setErrorMsg(formatLoginError(res.error));
       } else {
         router.push(destination);
       }
