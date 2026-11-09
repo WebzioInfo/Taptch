@@ -105,8 +105,70 @@ export default function HomePage() {
     },
   ];
 
+  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://taptch.com';
+
+  const softwareSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: `${brandConfig.name} Digital Business Card & Identity Platform`,
+    operatingSystem: 'Any (Web, iOS, Android)',
+    applicationCategory: 'BusinessApplication',
+    url: siteUrl,
+    offers: [
+      {
+        '@type': 'Offer',
+        name: 'Nano',
+        price: '0',
+        priceCurrency: 'INR',
+        description: 'Free forever digital business card with standard theme and vCard download.',
+      },
+      {
+        '@type': 'Offer',
+        name: 'Micro',
+        price: '499',
+        priceCurrency: 'INR',
+        description: 'Annual solo professional plan with 1 linked business profile and gallery.',
+      },
+      {
+        '@type': 'Offer',
+        name: 'Mini',
+        price: '1499',
+        priceCurrency: 'INR',
+        description: 'Most popular growing business plan with 5 profiles, catalogues, and lead capture.',
+      },
+      {
+        '@type': 'Offer',
+        name: 'Max',
+        price: '3999',
+        priceCurrency: 'INR',
+        description: 'Multi-brand executive and enterprise plan with 20 profiles and custom domains.',
+      },
+    ],
+  };
+
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: f.a,
+      },
+    })),
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-white text-slate-900 antialiased selection:bg-blue-600 selection:text-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       {/* 1. Header Navigation */}
       <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/95 backdrop-blur-xs">
         <div className="container mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">

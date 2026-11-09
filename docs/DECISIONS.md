@@ -678,21 +678,52 @@
 
 ---
 
-## ADR-035: Production Authentication Transport & Origin Routing Resolution
+## ADR-036: Enterprise Technical SEO, Dynamic Metadata & Multi-Domain Canonicalization Architecture
 
 - **Date**: 2026-11-09
 - **Status**: Accepted & Implemented
-- **Context**: Users reported `net::ERR_QUIC_PROTOCOL_ERROR` and "Failed to sign in. Please check your connection." when attempting to sign in on `https://taptch.com`. Controlled network diagnostics revealed the apex domain `taptch.com` was routing via Cloudflare proxy to a legacy GitHub Pages static host (`webzioinfo.github.io` / Fastly) rather than the active Vercel Next.js application deployment (`taptch.webziotech.in`). GitHub Pages static edge rejected `POST` requests with HTTP 405 Method Not Allowed and closed QUIC streams abruptly.
+- **Context**: The TAPTCH digital identity platform requires a comprehensive organic search engine presence for high-intent search terms (e.g. "nfc business card", "digital business card", "smart visiting card india", "executive digital identity"). Search engines needed clear discovery signals, structured Schema.org data, dynamic XML sitemaps, and strict crawl gating of private/admin surfaces, while maintaining sub-50ms edge rendering and zero request-bound dynamic imports on public profiles (`/p/[slug]`). Furthermore, with `taptch.com` as the canonical public marketing domain and `taptch.webziotech.in` as the active SaaS host, explicit canonical URL hygiene is required to prevent cross-domain duplicate content penalties.
 - **Decision**:
-  1. **Dynamic Client Origin (`src/lib/auth/client.ts`)**: Derives Better Auth client `baseURL` from `window.location.origin` in the browser, eliminating cross-domain CORS rejections and ensuring cookies stay aligned with the active hostname.
-  2. **Serverless In-Memory Redis Fallback (`src/lib/redis/index.ts`)**: Safe in-memory mock fallback when `REDIS_URL` is omitted, preventing lambda execution timeouts (`504 FUNCTION_INVOCATION_TIMEOUT`) from hanging localhost Redis socket retries.
-  3. **Diagnostic Logging & Error Clarity (`src/app/api/auth/[...all]/route.ts`, `src/app/(auth)/login/page.tsx`)**: Formatted login errors to distinguish HTTP 405 routing issues from network or credential failures.
-  4. **Git Production Synchronization**: Merged `modernization/stack-upgrade` into `main` and pushed to `origin/main` to trigger automated deployment on Vercel.
-  5. **Cloudflare Routing Runbook (`docs/PRODUCTION_INCIDENT_REPORT.md`)**: Documented the necessary DNS update to point `taptch.com` A record to Vercel (`76.76.21.21`) and `www` CNAME to `cname.vercel-dns.com`.
+  1. **Root Next.js 16 Metadata API Architecture (`src/app/layout.tsx`)**:
+     - Configured `metadataBase` to `new URL(siteUrl)` (`https://taptch.com`).
+     - Standardized title template: `%s | ${brandConfig.name}` with default `${brandConfig.name} — ${brandConfig.tagline}`.
+     - Injected Open Graph (1200x630 large summary card) and Twitter Card tags.
+     - Embedded global `Organization` and `WebSite` JSON-LD schemas (with `SearchAction` pointing to `/templates?search={q}`).
+  2. **Dynamic Robots Directives (`src/app/robots.ts`)**:
+     - Explicitly allowed crawl access to public landing pages, templates, campaigns, and `/p/*`.
+     - Explicitly blocked authenticated workspaces (`/dashboard`, `/builder`, `/cards`, `/leads`, `/qr`, `/settings`, `/team`), administrative consoles (`/admin`, `/portal-x`, `/staff`), API routes (`/api/*`), development previews (`/dev/*`), and internal dynamic redirects (`/dq/*`, `/n/*`, `/q/*`).
+     - Declared canonical host and sitemap target `https://taptch.com/sitemap.xml`.
+  3. **Dynamic XML Sitemap Generator (`src/app/sitemap.ts`)**:
+     - Automatically indexes 11 static marketing landing pages with calibrated change frequencies.
+     - Programmatically maps standard template showcase deep links from `STANDARD_TEMPLATES`.
+     - Dynamically queries Supabase database for published profiles (`status IN ('PUBLISHED', 'published', 'APPROVED')`), filtering out any user-opted-out profiles (`customFields.seoIndexing === false`) to ensure compliance with the DPDP Act. Guarded by a build-time defensive fallback.
+  4. **Zero Dynamic Profile Hot Path & Public Profile Schema (`src/app/(profile)/p/[slug]/page.tsx`)**:
+     - Strictly maintained Zero Dynamic Profile Hot Path without importing `cookies()`, `headers()`, or `connection()`.
+     - Emits explicit canonical `https://taptch.com/p/${slug}`, OpenGraph profile image metadata, and `robots: { index: false, follow: false }` for unpublished or opted-out cards.
+     - Injected `Person` JSON-LD schema into rendered public profile output.
+  5. **Homepage Rich Snippets (`src/app/page.tsx`)**:
+     - Embedded `SoftwareApplication` JSON-LD schema with live pricing tier breakdown (Nano ₹0, Micro ₹499, Mini ₹1,499, Max ₹3,999).
+     - Embedded `FAQPage` schema mapping top customer questions for Google SERP accordion visibility.
+  6. **Eight Dedicated High-Intent SEO Marketing Pages**:
+     - Created `/nfc-business-card` (hardware specs, NTAG216, anti-metal ferrite, PVC/wood/metal finishes, `Product` schema).
+     - Created `/digital-business-card` (vCard phonebook download, multi-business support, `SoftwareApplication` schema).
+     - Created `/pricing` (full tier matrix, billing FAQ, `FAQPage` schema).
+     - Created `/features` (deep dive into profiles, dynamic QR, privacy analytics, `SoftwareApplication` schema).
+     - Created `/how-it-works` (3-step explainer with `HowTo` schema).
+     - Created `/faq` (10 categorized technical and buyer FAQs with `FAQPage` schema).
+     - Created `/about` (Webzio Technology mission and sustainability principles with `AboutPage` schema).
+     - Created `/contact` (sales inquiries, bulk orders, customer support with `ContactPage` schema).
+     - Added metadata layouts for `/templates` and `/campaigns/instagram-card`.
+  7. **Comprehensive Deliverable Reports**:
+     - Authored `SEO-AUDIT.md`, `SEO-KEYWORD-STRATEGY.md`, `SEO-IMPLEMENTATION-REPORT.md`, `SEO-CONTENT-ROADMAP.md`, `SEO-TECHNICAL-CHECKLIST.md`, and `SEO-DOMAIN-MIGRATION-PLAN.md`.
 - **Verification**:
-  - Direct local API verification against live Supabase PostgreSQL returned HTTP 200 with valid session token and cookie headers.
-  - Full test suite passed (24/24 files, 208/208 tests).
-  - TypeScript strict compilation: 0 errors.
+  - `tests/architecture/brand-literal.test.ts`: Passed (0 hardcoded brand literals).
+  - `npm test`: 25/25 test suites passed, 224/224 tests passed.
+  - `npm run typecheck`: 0 errors (`tsc --noEmit`).
+  - `npm run lint`: 0 errors.
+  - `npm run build`: Next.js 16.4.5 Turbopack compiled clean with 45 static and dynamic routes.
+  - Verified programmatic execution of `robots()` and `sitemap()` via standalone script.
+
 
 
 
