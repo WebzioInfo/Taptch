@@ -66,3 +66,13 @@ DROP TABLE IF EXISTS "campaign_settings" CASCADE;
 
 **Testing Result:** Executed against local isolated test database (`.pgdata`). All 9 tables were dropped without errors. Post-migration schema integrity check confirmed 0 campaign tables remaining.
 
+**Live Supabase Execution Result:**
+- **Host**: `db.nvrcgauxafpxsaufjtha.supabase.co:5432/postgres`
+- **Execution Date**: 2026-11-09T22:06:07+05:30
+- **Campaign Tables Before**: 9 (`campaign_designs`, `campaign_documents`, `campaign_expenses`, `campaign_inventory_movements`, `campaign_orders`, `campaign_payments`, `campaign_products`, `campaign_refunds`, `campaign_settings`)
+- **Action**: Dropped all 9 tables in reverse-FK dependency order using `CASCADE`. Dropped obsolete custom campaign types.
+- **Campaign Tables Remaining**: **0**
+- **Migration Ledger**: Recorded `0013_remove_campaign_module.sql` in `__taptch_migrations`.
+- **Core Tables Verified Intact (38 total)**: `users`, `accounts`, `sessions`, `verifications`, `two_factor`, `organizations`, `members`, `departments`, `permissions`, `role_permissions`, `invitations`, `profiles`, `profile_sections`, `profile_businesses`, `profile_catalogue_items`, `publication_requests`, `templates`, `cards`, `card_batches`, `card_assignments`, `card_events`, `activation_attempts`, `leads`, `orders`, `plans`, `plan_entitlements`, `plan_assignment_history`, `tenant_subscriptions`, `qr_batches`, `qr_categories`, `qr_groups`, `qr_codes`, `qr_scan_events`, `media_assets`, `feature_flags`, `system_settings`, `audit_logs`, `__taptch_migrations`.
+
+
