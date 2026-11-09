@@ -64,3 +64,4 @@ Supported platforms with automatic URL normalization:
 - Standard URI format: `upi://pay?pa={vpa}&pn={payeeName}&cu=INR&tn={note}&am={amount}`
 - Strict VPA Regex: `^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$`
 - Security Notice: Generating a UPI QR code creates an intent payload; it does not claim settlement verification.
+

@@ -71,3 +71,4 @@ The Profile Builder Studio (`/builder/[id]`) is a feature-rich, interactive SPA 
 
 1. **k6 Load Testing**: Concurrency test scripts in `load/` simulate sustained traffic on `/p/[slug]` to ensure low latency under high load.
 2. **Lighthouse CI**: Regular audits ensure performance regressions are detected before deployment to production.
+

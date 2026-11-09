@@ -87,3 +87,4 @@ A comprehensive architectural and empirical audit of the TAPTCH platform was con
 3. **Input Affordances**:
    - Missing drag-and-drop file uploaders in the builder forced users to host images elsewhere and paste URLs.
    - Fix: Integrate `MediaUploader` and `ImageUploadOrUrl` components directly into the builder form.
+

@@ -202,3 +202,4 @@ describe('Profile Completion & Pre-Publish Validation Engine', () => {
     expect(result.score).toBeGreaterThanOrEqual(80);
   });
 });
+

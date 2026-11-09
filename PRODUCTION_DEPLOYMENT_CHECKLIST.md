@@ -147,3 +147,4 @@ Before triggering any production build or deployment, all local gates must pass 
 
 ### Scenario C: Cloudflare Media Storage Outage
 1. Enable fallback URL mode in `src/components/media/ImageUploadOrUrl.tsx` allowing direct image URLs while R2 API restores.
+

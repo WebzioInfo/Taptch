@@ -47,3 +47,4 @@ Inside the builder's right pane:
 
 - Integrated `UpiPaymentCard` into all 6 templates, showing Payee Name, VPA address with copy button, QR code preview/download, and mobile UPI app intent link.
 - Integrated `SOCIAL_PLATFORMS` supporting 13 networks with automatic `@username` normalization into canonical destination URLs.
+

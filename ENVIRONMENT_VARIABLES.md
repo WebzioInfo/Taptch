@@ -116,3 +116,4 @@ CLOUDFLARE_R2_BUCKET_NAME=taptch-media
 CLOUDFLARE_R2_ENDPOINT=https://[CF-ACCOUNT-ID].r2.cloudflarestorage.com
 CLOUDFLARE_R2_PUBLIC_BASE_URL=https://assets.taptch.com
 ```
+

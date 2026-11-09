@@ -73,3 +73,4 @@ All system logs emitted through `src/lib/logger.ts` pass through automated redac
 1. **Brand Literal Governance**: `tests/architecture/brand-literal.test.ts` ensures zero customer names or unauthorized brand identifiers are hardcoded in application templates.
 2. **Access Control & Permissions**: Vitest test suites (`tests/unit/can.test.ts`, `tests/unit/entitlements.test.ts`) verify that resource limits, plan tiers, and role-based actions are strictly enforced.
 3. **Profile Validation Pre-flight**: `tests/unit/profile-design-studio.test.ts` verifies that incomplete profiles, invalid VPAs, or malformed social URLs are rejected before publishing.
+

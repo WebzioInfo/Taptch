@@ -55,3 +55,4 @@ Digital identity cards must not be identical templates with different background
 - **Typography:** Prestige serif and modern high-ticket hierarchy.
 - **Key Components:** Off-market portfolio showcase, escrow concierge, private wealth advisory inquiry.
 - **Target Audience:** Luxury real estate developers, private equity partners, and hedge funds.
+
