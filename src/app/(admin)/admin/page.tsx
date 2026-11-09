@@ -26,6 +26,9 @@ import {
 } from 'lucide-react';
 import { TemplatePreviewModal } from '@/components/templates/TemplatePreviewModal';
 import type { ProfileRenderData } from '@/components/templates/ProfileRenderer';
+import { SearchInput } from '@/components/ui/search-input';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { useToast } from '@/components/ui/use-toast';
 
 interface AdminStats {
   totalUsers: number;
@@ -111,6 +114,7 @@ interface MediaItem {
 
 export default function SuperAdminPage() {
   const { data: session, isPending: sessionLoading } = useSession();
+  const { toast } = useToast();
   const [stats, setStats] = React.useState<AdminStats | null>(null);
   const [publications, setPublications] = React.useState<PublicationItem[]>([]);
   const [orders, setOrders] = React.useState<AdminOrder[]>([]);
@@ -118,9 +122,16 @@ export default function SuperAdminPage() {
   const [mediaList, setMediaList] = React.useState<MediaItem[]>([]);
   const [mediaStats, setMediaStats] = React.useState<{ totalCount: number; totalBytes: number }>({ totalCount: 0, totalBytes: 0 });
   const [loading, setLoading] = React.useState(true);
+  const [searchQuery, setSearchQuery] = React.useState('');
   const [activeTab, setActiveTab] = React.useState<'publications' | 'orders' | 'templates' | 'media'>('publications');
   const [reviewingId, setReviewingId] = React.useState<string | null>(null);
   const [updatingOrderId, setUpdatingOrderId] = React.useState<string | null>(null);
+  const [confirmModal, setConfirmModal] = React.useState<{
+    requestId: string;
+    action: 'APPROVE' | 'REJECT' | 'REQUEST_CORRECTIONS' | 'SUSPEND' | 'UNPUBLISH';
+    title: string;
+    description: string;
+  } | null>(null);
 
   // Form state for publication approval
   const [planSelections, setPlanSelections] = React.useState<Record<string, string>>({});
@@ -162,6 +173,55 @@ export default function SuperAdminPage() {
     loadAdminData();
   }, [loadAdminData]);
 
+  const filteredPublications = React.useMemo(() => {
+    if (!searchQuery.trim()) return publications;
+    const q = searchQuery.toLowerCase();
+    return publications.filter(
+      (p) =>
+        p.customerName.toLowerCase().includes(q) ||
+        p.customerEmail.toLowerCase().includes(q) ||
+        p.profileName.toLowerCase().includes(q) ||
+        p.profileSlug.toLowerCase().includes(q) ||
+        (p.contactPhone && p.contactPhone.includes(q))
+    );
+  }, [publications, searchQuery]);
+
+  const filteredOrders = React.useMemo(() => {
+    if (!searchQuery.trim()) return orders;
+    const q = searchQuery.toLowerCase();
+    return orders.filter(
+      (o) =>
+        (o.userName && o.userName.toLowerCase().includes(q)) ||
+        (o.userEmail && o.userEmail.toLowerCase().includes(q)) ||
+        o.material.toLowerCase().includes(q) ||
+        o.orderStatus.toLowerCase().includes(q) ||
+        (o.trackingNumber && o.trackingNumber.toLowerCase().includes(q))
+    );
+  }, [orders, searchQuery]);
+
+  const filteredTemplates = React.useMemo(() => {
+    if (!searchQuery.trim()) return templates;
+    const q = searchQuery.toLowerCase();
+    return templates.filter(
+      (t) =>
+        t.name.toLowerCase().includes(q) ||
+        t.category.toLowerCase().includes(q) ||
+        t.requiredPlanId.toLowerCase().includes(q)
+    );
+  }, [templates, searchQuery]);
+
+  const filteredMedia = React.useMemo(() => {
+    if (!searchQuery.trim()) return mediaList;
+    const q = searchQuery.toLowerCase();
+    return mediaList.filter(
+      (m) =>
+        (m.ownerName && m.ownerName.toLowerCase().includes(q)) ||
+        (m.ownerEmail && m.ownerEmail.toLowerCase().includes(q)) ||
+        (m.storageKey && m.storageKey.toLowerCase().includes(q)) ||
+        m.mediaCategory.toLowerCase().includes(q)
+    );
+  }, [mediaList, searchQuery]);
+
   const handleReviewPublication = async (
     requestId: string,
     action: 'APPROVE' | 'REJECT' | 'REQUEST_CORRECTIONS' | 'SUSPEND' | 'UNPUBLISH'
@@ -189,10 +249,11 @@ export default function SuperAdminPage() {
         throw new Error(errorData.error?.message || 'Review failed');
       }
 
+      toast.success(`Publication request ${action.toLowerCase()}ed successfully`);
       await loadAdminData();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      alert(`Review action failed: ${msg}`);
+      toast.error(`Review action failed: ${msg}`);
     } finally {
       setReviewingId(null);
     }
@@ -208,9 +269,11 @@ export default function SuperAdminPage() {
       });
 
       if (!res.ok) throw new Error('Failed to update order');
+      toast.success('Order status updated');
       await loadAdminData();
     } catch (err) {
       console.error(err);
+      toast.error('Failed to update order');
     } finally {
       setUpdatingOrderId(null);
     }
@@ -239,7 +302,7 @@ export default function SuperAdminPage() {
       setAdminPreviewTemplateId(pub.templateId || profile.templateId);
     } catch (err) {
       console.error('Failed to preview customer profile:', err);
-      alert('Could not load profile preview for this customer.');
+      toast.error('Could not load profile preview for this customer.');
     } finally {
       setLoadingProfilePreview(null);
     }
@@ -253,10 +316,11 @@ export default function SuperAdminPage() {
         body: JSON.stringify(updates),
       });
       if (!res.ok) throw new Error('Failed to update template configuration');
+      toast.success('Template updated successfully');
       await loadAdminData();
     } catch (err) {
       console.error('Error updating template:', err);
-      alert('Failed to update template configuration.');
+      toast.error('Failed to update template configuration.');
     }
   };
 
@@ -400,6 +464,15 @@ export default function SuperAdminPage() {
         </button>
       </div>
 
+      {/* Admin Global Search Bar */}
+      <div className="max-w-md">
+        <SearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder={`Search ${activeTab}...`}
+        />
+      </div>
+
       {/* Publications Queue Tab */}
       {activeTab === 'publications' && (
         <Card className="border-border/80 bg-card">
@@ -426,8 +499,14 @@ export default function SuperAdminPage() {
                       No publication requests submitted yet.
                     </td>
                   </tr>
+                ) : filteredPublications.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="p-8 text-center text-muted-foreground">
+                      No publication requests match &ldquo;{searchQuery}&rdquo;.
+                    </td>
+                  </tr>
                 ) : (
-                  publications.map((pub) => {
+                  filteredPublications.map((pub) => {
                     const phoneClean = (pub.contactPhone || pub.contactWhatsapp || '').replace(/[^0-9]/g, '');
                     const waLink = phoneClean ? `https://wa.me/${phoneClean}?text=Hi%20${encodeURIComponent(pub.customerName)},%20I%20am%20reviewing%20your%20${brandConfig.name}%20profile%20request.` : null;
 
@@ -556,7 +635,14 @@ export default function SuperAdminPage() {
                               <Button
                                 size="sm"
                                 variant="gold"
-                                onClick={() => handleReviewPublication(pub.id, 'APPROVE')}
+                                onClick={() =>
+                                  setConfirmModal({
+                                    requestId: pub.id,
+                                    action: 'APPROVE',
+                                    title: 'Approve & Publish Profile',
+                                    description: `Are you sure you want to approve and publish "${pub.profileName}" for customer ${pub.customerName}? It will become immediately live at /p/${pub.profileSlug}.`,
+                                  })
+                                }
                                 disabled={reviewingId === pub.id}
                                 className="h-7 text-xs font-semibold px-2.5"
                               >
@@ -567,7 +653,14 @@ export default function SuperAdminPage() {
                               <Button
                                 size="sm"
                                 variant="destructive"
-                                onClick={() => handleReviewPublication(pub.id, 'SUSPEND')}
+                                onClick={() =>
+                                  setConfirmModal({
+                                    requestId: pub.id,
+                                    action: 'SUSPEND',
+                                    title: 'Suspend Digital Profile',
+                                    description: `Are you sure you want to suspend "${pub.profileName}"? The public profile will immediately display a suspended status.`,
+                                  })
+                                }
                                 disabled={reviewingId === pub.id}
                                 className="h-7 text-xs px-2"
                               >
@@ -579,7 +672,14 @@ export default function SuperAdminPage() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => handleReviewPublication(pub.id, 'REJECT')}
+                                onClick={() =>
+                                  setConfirmModal({
+                                    requestId: pub.id,
+                                    action: 'REJECT',
+                                    title: 'Reject Publication Request',
+                                    description: `Are you sure you want to reject this publication request for "${pub.profileName}"?`,
+                                  })
+                                }
                                 disabled={reviewingId === pub.id}
                                 className="h-7 text-xs text-destructive hover:bg-destructive/10 px-2"
                               >
@@ -623,8 +723,14 @@ export default function SuperAdminPage() {
                       No card orders in queue.
                     </td>
                   </tr>
+                ) : filteredOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="p-8 text-center text-muted-foreground">
+                      No card orders match &ldquo;{searchQuery}&rdquo;.
+                    </td>
+                  </tr>
                 ) : (
-                  orders.map((ord) => (
+                  filteredOrders.map((ord) => (
                     <tr key={ord.id} className="hover:bg-muted/10">
                       <td className="p-3 font-mono">
                         <div className="font-semibold text-foreground">{ord.userName || 'User'}</div>
@@ -699,7 +805,16 @@ export default function SuperAdminPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {templates.map((tpl) => (
+            {templates.length === 0 ? (
+              <div className="col-span-full p-8 text-center text-muted-foreground text-xs">
+                No templates configured in registry.
+              </div>
+            ) : filteredTemplates.length === 0 ? (
+              <div className="col-span-full p-8 text-center text-muted-foreground text-xs">
+                No templates match &ldquo;{searchQuery}&rdquo;.
+              </div>
+            ) : (
+              filteredTemplates.map((tpl) => (
               <Card key={tpl.id} className="border-border/80 bg-card overflow-hidden flex flex-col justify-between">
                 {tpl.thumbnailUrl && (
                   <div className="aspect-[16/9] w-full bg-neutral-900 relative overflow-hidden">
@@ -776,7 +891,8 @@ export default function SuperAdminPage() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            ))
+          )}
           </div>
         </div>
       )}
@@ -797,8 +913,12 @@ export default function SuperAdminPage() {
               <div className="col-span-full p-8 text-center text-muted-foreground text-xs">
                 No Cloudflare media assets registered yet.
               </div>
+            ) : filteredMedia.length === 0 ? (
+              <div className="col-span-full p-8 text-center text-muted-foreground text-xs">
+                No media assets match &ldquo;{searchQuery}&rdquo;.
+              </div>
             ) : (
-              mediaList.map((m) => (
+              filteredMedia.map((m) => (
                 <div key={m.id} className="rounded-xl border border-white/10 overflow-hidden bg-black/40 group relative">
                   <div className="aspect-square flex items-center justify-center bg-white/5 overflow-hidden">
                     {m.resourceType === 'image' ? (
@@ -824,6 +944,24 @@ export default function SuperAdminPage() {
           </div>
         </Card>
       )}
+
+      {/* Admin Action Confirmation Dialog */}
+      <ConfirmDialog
+        open={!!confirmModal}
+        onOpenChange={(open) => !open && setConfirmModal(null)}
+        title={confirmModal?.title || 'Confirm Action'}
+        description={confirmModal?.description || 'Are you sure you want to proceed?'}
+        confirmLabel={confirmModal?.action === 'APPROVE' ? 'Approve & Publish' : confirmModal?.action === 'SUSPEND' ? 'Suspend Profile' : 'Confirm'}
+        variant={confirmModal?.action === 'REJECT' || confirmModal?.action === 'SUSPEND' ? 'destructive' : 'default'}
+        onConfirm={async () => {
+          if (confirmModal) {
+            const { requestId, action } = confirmModal;
+            setConfirmModal(null);
+            await handleReviewPublication(requestId, action);
+          }
+        }}
+        loading={!!reviewingId}
+      />
 
       {/* Admin Template Preview Modal (For Customer Profile Review or Demo Business Inspection) */}
       {adminPreviewTemplateId && (

@@ -19,6 +19,12 @@ import {
   X,
   Briefcase,
 } from 'lucide-react';
+import { SearchInput } from '@/components/ui/search-input';
+import { DeleteDialog } from '@/components/ui/confirm-dialog';
+import { LoadingButton } from '@/components/ui/loading-button';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/components/ui/use-toast';
 import type { StaffMemberRecord, InvitationRecord, OrgRole } from '@/modules/orgs/types';
 
 interface UserOrg {
@@ -44,6 +50,7 @@ interface AuditLogItem {
 export default function TeamStaffManagementPage() {
   const { data: session } = useSession();
   const user = session?.user;
+  const { toast } = useToast();
 
   const [orgs, setOrgs] = React.useState<UserOrg[]>([]);
   const [selectedOrgId, setSelectedOrgId] = React.useState<string | null>(null);
@@ -53,6 +60,9 @@ export default function TeamStaffManagementPage() {
   const [invitationsList, setInvitationsList] = React.useState<InvitationRecord[]>([]);
   const [auditLogs, setAuditLogs] = React.useState<AuditLogItem[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [memberToRemove, setMemberToRemove] = React.useState<StaffMemberRecord | null>(null);
+  const [isRemoving, setIsRemoving] = React.useState(false);
 
   // Modal states
   const [showInviteModal, setShowInviteModal] = React.useState(false);
@@ -132,6 +142,41 @@ export default function TeamStaffManagementPage() {
   const activeOrg = orgs.find((o) => o.orgId === selectedOrgId);
   const isOwnerOrAdmin = activeOrg?.role === 'owner' || activeOrg?.role === 'admin';
 
+  const filteredStaff = React.useMemo(() => {
+    if (!searchQuery.trim()) return staffList;
+    const q = searchQuery.toLowerCase();
+    return staffList.filter(
+      (m) =>
+        m.name.toLowerCase().includes(q) ||
+        m.email.toLowerCase().includes(q) ||
+        m.role.toLowerCase().includes(q) ||
+        (m.assignedResponsibilities && m.assignedResponsibilities.toLowerCase().includes(q))
+    );
+  }, [staffList, searchQuery]);
+
+  const filteredInvitations = React.useMemo(() => {
+    if (!searchQuery.trim()) return invitationsList;
+    const q = searchQuery.toLowerCase();
+    return invitationsList.filter(
+      (inv) =>
+        inv.email.toLowerCase().includes(q) ||
+        inv.role.toLowerCase().includes(q) ||
+        (inv.phoneNumber && inv.phoneNumber.includes(q))
+    );
+  }, [invitationsList, searchQuery]);
+
+  const filteredAuditLogs = React.useMemo(() => {
+    if (!searchQuery.trim()) return auditLogs;
+    const q = searchQuery.toLowerCase();
+    return auditLogs.filter(
+      (log) =>
+        log.action.toLowerCase().includes(q) ||
+        log.actorName.toLowerCase().includes(q) ||
+        log.actorEmail.toLowerCase().includes(q) ||
+        log.resourceType.toLowerCase().includes(q)
+    );
+  }, [auditLogs, searchQuery]);
+
   const handleCreateOrg = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newOrgName.trim()) return;
@@ -148,10 +193,11 @@ export default function TeamStaffManagementPage() {
 
       setNewOrgName('');
       setShowCreateOrgModal(false);
+      toast.success('Organization created successfully');
       await loadUserOrgs();
       if (data.data?.id) setSelectedOrgId(data.data.id);
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Error creating organization');
+      toast.error(err instanceof Error ? err.message : 'Error creating organization');
     } finally {
       setCreatingOrg(false);
     }
@@ -182,6 +228,7 @@ export default function TeamStaffManagementPage() {
       setInviteEmail('');
       setInvitePhone('');
       setInviteResponsibilities('');
+      toast.success(`Invitation sent to ${inviteEmail.trim()}`);
       await loadOrgData(selectedOrgId);
     } catch (err: unknown) {
       setInviteError(err instanceof Error ? err.message : 'Error inviting staff');
@@ -219,6 +266,7 @@ export default function TeamStaffManagementPage() {
       if (!res.ok) throw new Error(data.error?.message || 'Failed to update staff member');
 
       setEditingMember(null);
+      toast.success('Staff member updated successfully');
       await loadOrgData(selectedOrgId);
     } catch (err: unknown) {
       setEditError(err instanceof Error ? err.message : 'Error updating staff member');
@@ -227,22 +275,23 @@ export default function TeamStaffManagementPage() {
     }
   };
 
-  const handleRemoveMember = async (member: StaffMemberRecord) => {
-    if (!selectedOrgId) return;
-    if (!confirm(`Are you sure you want to remove ${member.name} (${member.email}) from this organization?`)) {
-      return;
-    }
-
+  const handleConfirmRemoveMember = async () => {
+    if (!selectedOrgId || !memberToRemove) return;
     try {
-      const res = await fetch(`/api/v1/orgs/${selectedOrgId}/staff/${member.id}`, {
+      setIsRemoving(true);
+      const res = await fetch(`/api/v1/orgs/${selectedOrgId}/staff/${memberToRemove.id}`, {
         method: 'DELETE',
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error?.message || 'Failed to remove member');
 
+      toast.success(`Removed ${memberToRemove.name} from organization`);
+      setMemberToRemove(null);
       await loadOrgData(selectedOrgId);
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Error removing member');
+      toast.error(err instanceof Error ? err.message : 'Error removing member');
+    } finally {
+      setIsRemoving(false);
     }
   };
 
@@ -358,30 +407,46 @@ export default function TeamStaffManagementPage() {
         </button>
       </div>
 
+      {/* Search Input */}
+      <div className="max-w-md">
+        <SearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder={`Search ${activeTab === 'staff' ? 'team members' : activeTab === 'invitations' ? 'invitations' : 'audit logs'}...`}
+        />
+      </div>
+
       {/* Content Area */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-20 space-y-3">
-          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-          <p className="text-xs text-slate-500">Loading staff roster and permissions...</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <Skeleton className="h-32 rounded-xl" />
+          <Skeleton className="h-32 rounded-xl" />
+          <Skeleton className="h-32 rounded-xl" />
+          <Skeleton className="h-32 rounded-xl" />
         </div>
       ) : activeTab === 'staff' ? (
         <div className="space-y-3">
           {staffList.length === 0 ? (
-            <Card className="border-slate-200 bg-white p-8 text-center max-w-md mx-auto my-6">
-              <Users className="h-8 w-8 text-slate-500 mx-auto mb-3" />
-              <h3 className="text-sm font-bold text-slate-900">No Staff Members</h3>
-              <p className="text-xs text-slate-500 mt-1 mb-4">
-                Invite team members to collaborate on digital profiles and dynamic QRs.
-              </p>
-              {isOwnerOrAdmin && (
-                <Button variant="default" size="sm" onClick={() => setShowInviteModal(true)} className="text-xs font-semibold">
-                  Invite Staff
-                </Button>
-              )}
-            </Card>
+            <EmptyState
+              icon={Users}
+              title="No Staff Members"
+              description="Invite team members to collaborate on digital profiles and dynamic QRs."
+              actionLabel={isOwnerOrAdmin ? 'Invite Staff' : undefined}
+              onAction={isOwnerOrAdmin ? () => setShowInviteModal(true) : undefined}
+              className="py-12"
+            />
+          ) : filteredStaff.length === 0 ? (
+            <EmptyState
+              icon={Users}
+              title="No matching staff members"
+              description={`No members match "${searchQuery}".`}
+              actionLabel="Clear Search"
+              onAction={() => setSearchQuery('')}
+              className="py-12"
+            />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {staffList.map((member) => {
+              {filteredStaff.map((member) => {
                 const isMemberOwner = member.role === 'owner';
                 const isSuspended = member.status === 'suspended';
 
@@ -440,8 +505,10 @@ export default function TeamStaffManagementPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleRemoveMember(member)}
+                            onClick={() => setMemberToRemove(member)}
                             className="h-6 text-[11px] px-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            title="Remove Member"
+                            aria-label="Remove Member"
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>
@@ -457,16 +524,24 @@ export default function TeamStaffManagementPage() {
       ) : activeTab === 'invitations' ? (
         <div className="space-y-3">
           {invitationsList.length === 0 ? (
-            <Card className="border-slate-200 bg-white p-8 text-center max-w-md mx-auto my-6">
-              <Mail className="h-8 w-8 text-slate-500 mx-auto mb-3" />
-              <h3 className="text-sm font-bold text-slate-900">No Pending Invitations</h3>
-              <p className="text-xs text-slate-500 mt-1">
-                All invitations have been accepted or no new invitations have been sent.
-              </p>
-            </Card>
+            <EmptyState
+              icon={Mail}
+              title="No Pending Invitations"
+              description="All invitations have been accepted or no new invitations have been sent."
+              className="py-12"
+            />
+          ) : filteredInvitations.length === 0 ? (
+            <EmptyState
+              icon={Mail}
+              title="No matching invitations"
+              description={`No invitations match "${searchQuery}".`}
+              actionLabel="Clear Search"
+              onAction={() => setSearchQuery('')}
+              className="py-12"
+            />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {invitationsList.map((inv) => (
+              {filteredInvitations.map((inv) => (
                 <Card key={inv.id} className="border-slate-200 bg-white p-4 space-y-2.5">
                   <div className="flex items-start justify-between gap-2">
                     <div>
@@ -499,16 +574,24 @@ export default function TeamStaffManagementPage() {
         /* AUDIT & ACTIVITY LOGS TAB */
         <div className="space-y-3">
           {auditLogs.length === 0 ? (
-            <Card className="border-slate-200 bg-white p-8 text-center max-w-md mx-auto my-6">
-              <History className="h-8 w-8 text-slate-500 mx-auto mb-3" />
-              <h3 className="text-sm font-bold text-slate-900">No Activity Recorded</h3>
-              <p className="text-xs text-slate-500 mt-1">
-                Organization and staff actions will automatically appear here.
-              </p>
-            </Card>
+            <EmptyState
+              icon={History}
+              title="No Activity Recorded"
+              description="Organization and staff actions will automatically appear here."
+              className="py-12"
+            />
+          ) : filteredAuditLogs.length === 0 ? (
+            <EmptyState
+              icon={History}
+              title="No matching activity"
+              description={`No audit logs match "${searchQuery}".`}
+              actionLabel="Clear Search"
+              onAction={() => setSearchQuery('')}
+              className="py-12"
+            />
           ) : (
             <div className="rounded-xl border border-slate-200 bg-white overflow-hidden divide-y divide-border/40 text-xs">
-              {auditLogs.map((log) => (
+              {filteredAuditLogs.map((log) => (
                 <div key={log.id} className="p-3 flex items-center justify-between gap-3 hover:bg-muted/10 transition-colors">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
@@ -535,6 +618,16 @@ export default function TeamStaffManagementPage() {
           )}
         </div>
       )}
+
+      {/* Remove Member Confirmation Dialog */}
+      <DeleteDialog
+        open={!!memberToRemove}
+        onOpenChange={(open) => !open && setMemberToRemove(null)}
+        title="Remove Staff Member"
+        description={`Are you sure you want to remove ${memberToRemove?.name} (${memberToRemove?.email}) from this organization? Their access to manage profiles and team resources will be terminated immediately.`}
+        onConfirm={handleConfirmRemoveMember}
+        loading={isRemoving}
+      />
 
       {/* INVITE STAFF MODAL */}
       {showInviteModal && (
@@ -615,16 +708,14 @@ export default function TeamStaffManagementPage() {
                 >
                   Cancel
                 </Button>
-                <Button
+                <LoadingButton
                   type="submit"
-                  variant="default"
                   size="sm"
-                  disabled={submittingInvite}
-                  className="h-8 text-xs font-semibold gap-1.5"
+                  loading={submittingInvite}
+                  className="h-8 text-xs font-semibold"
                 >
-                  {submittingInvite && <Loader2 className="h-3 w-3 animate-spin" />}
                   Send Invitation
-                </Button>
+                </LoadingButton>
               </div>
             </form>
           </div>
@@ -701,16 +792,14 @@ export default function TeamStaffManagementPage() {
                 >
                   Cancel
                 </Button>
-                <Button
+                <LoadingButton
                   type="submit"
-                  variant="default"
                   size="sm"
-                  disabled={submittingEdit}
-                  className="h-8 text-xs font-semibold gap-1.5"
+                  loading={submittingEdit}
+                  className="h-8 text-xs font-semibold"
                 >
-                  {submittingEdit && <Loader2 className="h-3 w-3 animate-spin" />}
                   Save Changes
-                </Button>
+                </LoadingButton>
               </div>
             </form>
           </div>
@@ -754,16 +843,14 @@ export default function TeamStaffManagementPage() {
                 >
                   Cancel
                 </Button>
-                <Button
+                <LoadingButton
                   type="submit"
-                  variant="default"
                   size="sm"
-                  disabled={creatingOrg}
-                  className="h-8 text-xs font-semibold gap-1.5"
+                  loading={creatingOrg}
+                  className="h-8 text-xs font-semibold"
                 >
-                  {creatingOrg && <Loader2 className="h-3 w-3 animate-spin" />}
                   Create Org
-                </Button>
+                </LoadingButton>
               </div>
             </form>
           </div>

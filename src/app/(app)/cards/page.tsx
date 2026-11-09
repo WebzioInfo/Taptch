@@ -4,6 +4,11 @@ import * as React from 'react';
 import Link from 'next/link';
 import { brandConfig } from '@/config/brand';
 import { Button } from '@/components/ui/button';
+import { LoadingButton } from '@/components/ui/loading-button';
+import { CopyButton } from '@/components/ui/copy-button';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { EmptyState } from '@/components/ui/empty-state';
+import { toast } from '@/components/ui/use-toast';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -175,9 +180,12 @@ export default function CardsPage() {
 
       setShowClaimModal(false);
       setActivationCode('');
+      toast.success('Card activated and paired successfully');
       await fetchData();
     } catch (err: unknown) {
-      setClaimError(err instanceof Error ? err.message : 'Error claiming card.');
+      const msg = err instanceof Error ? err.message : 'Error claiming card.';
+      setClaimError(msg);
+      toast.error(msg);
     } finally {
       setClaiming(false);
     }
@@ -204,9 +212,12 @@ export default function CardsPage() {
       if (!res.ok) throw new Error(data.error?.message || 'Failed to submit order.');
 
       setShowOrderModal(false);
+      toast.success('Card order placed successfully');
       await fetchData();
     } catch (err: unknown) {
-      setOrderError(err instanceof Error ? err.message : 'Error placing order.');
+      const msg = err instanceof Error ? err.message : 'Error placing order.';
+      setOrderError(msg);
+      toast.error(msg);
     } finally {
       setOrdering(false);
     }
@@ -248,36 +259,30 @@ export default function CardsPage() {
             </div>
 
             {cards.length === 0 ? (
-              <Card className="border-slate-200 bg-white text-center py-10">
-                <CardContent className="space-y-3 max-w-sm mx-auto">
-                  <div className="mx-auto h-10 w-10 rounded-xl bg-blue-600/10 flex items-center justify-center text-blue-600">
-                    <CreditCard className="h-5 w-5" />
-                  </div>
-                  <h3 className="font-semibold text-base text-slate-900">No Cards Linked</h3>
-                  <p className="text-xs text-slate-500">
-                    Activate a card using its packaging code or order new hardware.
-                  </p>
-                  <div className="flex justify-center gap-2 pt-1">
-                    <Button variant="outline" size="sm" onClick={() => setShowClaimModal(true)} className="h-7 text-xs px-2.5">
+              <EmptyState
+                icon={CreditCard}
+                title="No NFC Cards Linked"
+                description="Activate an NFC card using its packaging code or order luxury metal or PVC smart cards."
+                actionNode={
+                  <div className="flex justify-center gap-2 pt-2">
+                    <Button variant="outline" size="sm" onClick={() => setShowClaimModal(true)} className="h-8 text-xs px-3">
                       Activate
                     </Button>
-                    <Button variant="default" size="sm" onClick={() => setShowOrderModal(true)} className="h-7 text-xs px-2.5 font-semibold">
-                      Order
+                    <Button variant="default" size="sm" onClick={() => setShowOrderModal(true)} className="h-8 text-xs px-3 font-semibold">
+                      Order Cards
                     </Button>
                   </div>
-                </CardContent>
-              </Card>
+                }
+              />
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {cards.map((card) => (
-                  <Card key={card.id} className="border-slate-200 bg-white p-4 space-y-3 hover:border-blue-600/40 transition-colors">
+                  <Card key={card.id} className="border-slate-200 bg-white p-4 space-y-3 hover:border-blue-600/40 transition-colors shadow-2xs">
                     <div className="flex items-center justify-between">
-                      <Badge variant="default" className="text-[10px] tracking-wider uppercase px-1.5 py-0">
+                      <Badge variant="default" className="text-[10px] tracking-wider uppercase px-1.5 py-0 bg-slate-900 text-white">
                         {card.material}
                       </Badge>
-                      <Badge variant={card.status === 'active' ? 'outline' : 'secondary'} className="text-[10px] capitalize px-1.5 py-0">
-                        {card.status}
-                      </Badge>
+                      <StatusBadge status={card.status} />
                     </div>
 
                     <div>
@@ -299,12 +304,12 @@ export default function CardsPage() {
                               <ExternalLink className="h-3 w-3" />
                             </Link>
                           ) : (
-                            <span className="text-amber-400">Unlinked</span>
+                            <span className="text-amber-500 font-medium">Unlinked</span>
                           )}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-slate-500">Tap:</span>
+                        <span className="text-slate-500">Tap Redirect:</span>
                         <code className="text-[11px] text-blue-600">/n/{card.redirectToken.slice(0, 10)}...</code>
                       </div>
                     </div>
@@ -314,25 +319,20 @@ export default function CardsPage() {
                         variant="outline"
                         size="sm"
                         onClick={() => handleStartNfcWrite(card)}
-                        className="h-6 text-[11px] px-2 gap-1 border-blue-600/30 text-blue-600 hover:bg-blue-600/10 flex-1"
+                        className="h-7 text-xs px-2 gap-1 border-blue-600/30 text-blue-600 hover:bg-blue-600/10 flex-1"
                       >
                         <Radio className="h-3 w-3" />
                         <span>Write Tag</span>
                       </Button>
-                      <Button
-                        variant="ghost"
+                      <CopyButton
+                        value={typeof window !== 'undefined' ? `${window.location.origin}/n/${card.redirectToken}` : `/n/${card.redirectToken}`}
+                        label="Copy URL"
+                        successLabel="Copied"
+                        toastMessage="NFC redirect link copied to clipboard"
                         size="sm"
-                        onClick={() => handleCopyNdefUrl(card)}
-                        className="h-6 text-[11px] px-2 gap-1 text-slate-500 hover:text-slate-900"
-                        title="Copy NDEF URL"
-                      >
-                        {copiedToken === card.id ? (
-                          <CheckCircle className="h-3 w-3 text-emerald-400" />
-                        ) : (
-                          <Copy className="h-3 w-3" />
-                        )}
-                        <span>{copiedToken === card.id ? 'Copied' : 'URL'}</span>
-                      </Button>
+                        variant="ghost"
+                        className="h-7 text-xs px-2"
+                      />
                     </div>
                   </Card>
                 ))}
@@ -347,46 +347,42 @@ export default function CardsPage() {
             </h2>
 
             {orders.length === 0 ? (
-              <Card className="border-slate-200 bg-white/20 py-6 text-center">
-                <CardContent>
-                  <p className="text-xs text-slate-500">No hardware orders.</p>
-                </CardContent>
-              </Card>
+              <EmptyState
+                icon={ShoppingBag}
+                title="No hardware orders"
+                description="Orders for physical metal or PVC smart cards will be tracked here with delivery updates."
+              />
             ) : (
-              <Card className="border-slate-200 bg-white overflow-hidden">
+              <Card className="border-slate-200 bg-white overflow-hidden shadow-2xs">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="border-b border-slate-200 bg-muted/20 text-slate-500 text-[11px]">
-                        <th className="p-2.5">Order</th>
-                        <th className="p-2.5">Material</th>
-                        <th className="p-2.5">Qty</th>
-                        <th className="p-2.5">Status</th>
-                        <th className="p-2.5">Payment</th>
-                        <th className="p-2.5">Tracking</th>
-                        <th className="p-2.5">Date</th>
+                      <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 text-[11px] font-semibold">
+                        <th className="p-3">Order ID</th>
+                        <th className="p-3">Material</th>
+                        <th className="p-3">Qty</th>
+                        <th className="p-3">Status</th>
+                        <th className="p-3">Payment</th>
+                        <th className="p-3">Tracking</th>
+                        <th className="p-3">Date</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-border/40">
+                    <tbody className="divide-y divide-slate-100">
                       {orders.map((ord) => (
-                        <tr key={ord.id} className="hover:bg-muted/10">
-                          <td className="p-2.5 font-mono font-medium">{ord.id.slice(0, 10)}...</td>
-                          <td className="p-2.5 capitalize">{ord.material}</td>
-                          <td className="p-2.5">{ord.quantity}</td>
-                          <td className="p-2.5">
-                            <Badge variant="outline" className="capitalize text-[10px] px-1.5 py-0">
-                              {ord.orderStatus.replace('_', ' ')}
-                            </Badge>
+                        <tr key={ord.id} className="hover:bg-slate-50/60 transition-colors">
+                          <td className="p-3 font-mono font-medium text-slate-800">{ord.id.slice(0, 10)}...</td>
+                          <td className="p-3 capitalize font-medium">{ord.material}</td>
+                          <td className="p-3">{ord.quantity}</td>
+                          <td className="p-3">
+                            <StatusBadge status={ord.orderStatus} />
                           </td>
-                          <td className="p-2.5">
-                            <Badge variant={ord.paymentStatus === 'paid_offline' || ord.paymentStatus === 'waived' ? 'gold' : 'secondary'} className="text-[10px] capitalize px-1.5 py-0">
-                              {ord.paymentStatus.replace('_', ' ')}
-                            </Badge>
+                          <td className="p-3">
+                            <StatusBadge status={ord.paymentStatus} />
                           </td>
-                          <td className="p-2.5 font-mono text-[11px] text-slate-500">
+                          <td className="p-3 font-mono text-[11px] text-slate-500">
                             {ord.trackingNumber || '—'}
                           </td>
-                          <td className="p-2.5 text-slate-500 text-[11px]">
+                          <td className="p-3 text-slate-500 text-[11px]">
                             {new Date(ord.createdAt).toLocaleDateString()}
                           </td>
                         </tr>
@@ -453,10 +449,9 @@ export default function CardsPage() {
                   <Button type="button" variant="ghost" size="sm" onClick={() => setShowClaimModal(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit" variant="default" size="sm" disabled={claiming} className="gap-2">
-                    {claiming && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  <LoadingButton type="submit" variant="default" size="sm" loading={claiming} loadingText="Activating card..." className="gap-2">
                     Confirm Activation
-                  </Button>
+                  </LoadingButton>
                 </div>
               </form>
             </CardContent>
@@ -625,10 +620,9 @@ export default function CardsPage() {
                   <Button type="button" variant="ghost" size="sm" onClick={() => setShowOrderModal(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit" variant="default" size="sm" disabled={ordering} className="gap-2">
-                    {ordering && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  <LoadingButton type="submit" variant="default" size="sm" loading={ordering} loadingText="Submitting order..." className="gap-2">
                     Confirm Order Request
-                  </Button>
+                  </LoadingButton>
                 </div>
               </form>
             </CardContent>

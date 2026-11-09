@@ -2,11 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
 import { Check, ArrowRight, Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { LoadingButton } from '@/components/ui/loading-button';
+import { FormField, FormLabel, FormError } from '@/components/ui/form-field';
+import { useToast } from '@/components/ui/use-toast';
 import type { Template } from '@/modules/templates';
 
 export default function NewProfilePage() {
@@ -119,9 +121,7 @@ export default function NewProfilePage() {
       </div>
 
       {error && (
-        <div className="mb-6 p-3 rounded-md bg-red-50 border border-red-200 text-xs text-red-600">
-          {error}
-        </div>
+        <FormError message={error} className="mb-6 p-3 rounded-md bg-red-50 border border-red-200" />
       )}
 
       <Card className="border border-slate-200 bg-white shadow-xs rounded-lg overflow-hidden">
@@ -130,7 +130,7 @@ export default function NewProfilePage() {
             <div className="space-y-5">
               {/* Profile Type Toggle */}
               <div className="space-y-1.5 text-left">
-                <label className="text-xs font-semibold text-slate-700">Profile Type</label>
+                <FormLabel>Profile Type</FormLabel>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
@@ -158,10 +158,10 @@ export default function NewProfilePage() {
               </div>
 
               {/* Display Name */}
-              <div className="space-y-1.5 text-left">
-                <label htmlFor="displayName" className="text-xs font-semibold text-slate-700">
-                  Full Name / Entity Name *
-                </label>
+              <FormField>
+                <FormLabel htmlFor="displayName" required>
+                  Full Name / Entity Name
+                </FormLabel>
                 <Input
                   id="displayName"
                   value={displayName}
@@ -171,13 +171,13 @@ export default function NewProfilePage() {
                   className="h-9 text-xs"
                   autoFocus
                 />
-              </div>
+              </FormField>
 
               {/* Headline */}
-              <div className="space-y-1.5 text-left">
-                <label htmlFor="headline" className="text-xs font-semibold text-slate-700">
+              <FormField>
+                <FormLabel htmlFor="headline">
                   Professional Title / Role
-                </label>
+                </FormLabel>
                 <Input
                   id="headline"
                   value={headline}
@@ -185,15 +185,15 @@ export default function NewProfilePage() {
                   placeholder="e.g. Founder & Managing Director"
                   className="h-9 text-xs"
                 />
-              </div>
+              </FormField>
 
               {/* Profile Link Slug */}
-              <div className="space-y-1.5 text-left">
-                <label htmlFor="slug" className="text-xs font-semibold text-slate-700">
+              <FormField>
+                <FormLabel htmlFor="slug">
                   Profile Link
-                </label>
+                </FormLabel>
                 <div className="flex rounded-md border border-slate-200 bg-slate-50 px-3 items-center text-xs">
-                  <span className="text-slate-400 select-none">taptch.com/p/</span>
+                  <span className="text-slate-400 select-none">/p/</span>
                   <input
                     id="slug"
                     value={slug}
@@ -202,7 +202,7 @@ export default function NewProfilePage() {
                     className="flex-1 bg-transparent py-2 px-1 text-slate-900 focus:outline-none"
                   />
                 </div>
-              </div>
+              </FormField>
 
               <div className="pt-2">
                 <Button
@@ -256,17 +256,13 @@ export default function NewProfilePage() {
                   Back
                 </Button>
 
-                <Button
+                <LoadingButton
                   type="submit"
-                  disabled={isLoading}
+                  loading={isLoading}
                   className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs h-9"
                 >
-                  {isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <span>Create Profile</span>
-                  )}
-                </Button>
+                  Create Profile
+                </LoadingButton>
               </div>
             </form>
           )}

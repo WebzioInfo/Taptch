@@ -11,15 +11,22 @@ import { Badge } from '@/components/ui/badge';
 import {
   QrCode,
   Plus,
-  Copy,
-  CheckCircle,
   Download,
   Loader2,
   RefreshCw,
   Sparkles,
   Sliders,
+  Trash2,
   X,
 } from 'lucide-react';
+import { SearchInput } from '@/components/ui/search-input';
+import { CopyButton } from '@/components/ui/copy-button';
+import { DeleteDialog } from '@/components/ui/confirm-dialog';
+import { LoadingButton } from '@/components/ui/loading-button';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Skeleton } from '@/components/ui/skeleton';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { useToast } from '@/components/ui/use-toast';
 
 interface QRCodeItem {
   id: string;
@@ -53,11 +60,14 @@ interface ProfileOption {
 export default function CustomerQRPage() {
   const { data: session } = useSession();
   const user = session?.user;
+  const { toast } = useToast();
 
   const [qrList, setQrList] = React.useState<QRCodeItem[]>([]);
   const [profiles, setProfiles] = React.useState<ProfileOption[]>([]);
   const [loading, setLoading] = React.useState(true);
-  const [copiedId, setCopiedId] = React.useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [deletingQR, setDeletingQR] = React.useState<QRCodeItem | null>(null);
+  const [isDeleting, setIsDeleting] = React.useState(false);
 
   // Modal states
   const [isCreateOpen, setIsCreateOpen] = React.useState(false);
@@ -116,16 +126,37 @@ export default function CustomerQRPage() {
     }
   }, [user, loadData]);
 
+  const filteredQRs = React.useMemo(() => {
+    if (!searchQuery.trim()) return qrList;
+    const q = searchQuery.toLowerCase();
+    return qrList.filter(
+      (item) =>
+        (item.name && item.name.toLowerCase().includes(q)) ||
+        item.token.toLowerCase().includes(q) ||
+        (item.targetUrl && item.targetUrl.toLowerCase().includes(q)) ||
+        item.destinationType.toLowerCase().includes(q)
+    );
+  }, [qrList, searchQuery]);
+
+  const handleDelete = async () => {
+    if (!deletingQR) return;
+    try {
+      setIsDeleting(true);
+      const res = await fetch(`/api/v1/qr/${deletingQR.id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete QR code.');
+      toast.success('QR Code deleted successfully');
+      setDeletingQR(null);
+      await loadData();
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Deletion failed');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const getQRRedirectUrl = (qr: QRCodeItem) => {
     if (typeof window === 'undefined') return '';
     return `${window.location.origin}/dq/${qr.token}`;
-  };
-
-  const handleCopy = (qr: QRCodeItem) => {
-    const url = getQRRedirectUrl(qr);
-    navigator.clipboard.writeText(url);
-    setCopiedId(qr.id);
-    setTimeout(() => setCopiedId(null), 2500);
   };
 
   const handleDownloadPng = async (qr: QRCodeItem) => {
@@ -225,6 +256,7 @@ export default function CustomerQRPage() {
       setCreateTargetUrl('');
       setCreatePhone('');
       setCreateMessage('');
+      toast.success('Dynamic QR created successfully');
       await loadData();
     } catch (err: unknown) {
       setCreateError(err instanceof Error ? err.message : 'An error occurred.');
@@ -290,6 +322,7 @@ export default function CustomerQRPage() {
       }
 
       setEditingQR(null);
+      toast.success('Destination updated successfully');
       await loadData();
     } catch (err: unknown) {
       setEditError(err instanceof Error ? err.message : 'An error occurred.');
@@ -325,10 +358,11 @@ export default function CustomerQRPage() {
       if (!res.ok) throw new Error('Failed to update styling.');
 
       setStylingQR(null);
+      toast.success('QR style saved successfully');
       await loadData();
     } catch (err) {
       console.error(err);
-      alert('Failed to save QR style configuration.');
+      toast.error('Failed to save QR style configuration.');
     } finally {
       setSubmittingStyle(false);
     }
@@ -366,34 +400,45 @@ export default function CustomerQRPage() {
         </div>
       </div>
 
+      {/* Search Bar */}
+      {qrList.length > 0 && (
+        <div className="max-w-md">
+          <SearchInput
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Search by name, destination, or token..."
+          />
+        </div>
+      )}
+
       {/* Main Content */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-20 space-y-3">
-          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-          <p className="text-xs text-slate-500">Loading your dynamic QR codes...</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Skeleton className="h-64 rounded-xl" />
+          <Skeleton className="h-64 rounded-xl" />
+          <Skeleton className="h-64 rounded-xl" />
         </div>
       ) : qrList.length === 0 ? (
-        <Card className="border-slate-200 bg-white p-8 text-center max-w-lg mx-auto my-8">
-          <div className="h-12 w-12 rounded-2xl bg-blue-600/10 border border-blue-600/20 flex items-center justify-center text-blue-600 mx-auto mb-4">
-            <QrCode className="h-6 w-6" />
-          </div>
-          <h2 className="text-base font-semibold tracking-tight text-slate-900">No QR Codes Yet</h2>
-          <p className="text-xs text-slate-500 mt-1 mb-6">
-            Create a dynamic QR code for your digital profile, website, or WhatsApp. You can change where it points at any time.
-          </p>
-          <Button
-            variant="default"
-            size="sm"
-            onClick={() => setIsCreateOpen(true)}
-            className="text-xs font-medium gap-1.5"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            Create Your First QR
-          </Button>
-        </Card>
+        <EmptyState
+          icon={QrCode}
+          title="No QR codes yet"
+          description="Create a dynamic QR code for your digital profile, website, or WhatsApp. You can change where it points at any time without reprinting."
+          actionLabel="Create Your First QR"
+          onAction={() => setIsCreateOpen(true)}
+          className="py-12"
+        />
+      ) : filteredQRs.length === 0 ? (
+        <EmptyState
+          icon={QrCode}
+          title="No matching QR codes"
+          description={`No dynamic QR codes match "${searchQuery}". Try a different keyword.`}
+          actionLabel="Clear Search"
+          onAction={() => setSearchQuery('')}
+          className="py-12"
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {qrList.map((qr) => {
+          {filteredQRs.map((qr) => {
             const redirectUrl = getQRRedirectUrl(qr);
             const isProfile = qr.destinationType === 'profile';
             const linkedProfile = isProfile ? profiles.find((p) => p.id === qr.profileId) : null;
@@ -417,10 +462,20 @@ export default function CustomerQRPage() {
                       </div>
                     </div>
 
-                    <div className="text-right shrink-0">
+                    <div className="flex items-center gap-2 shrink-0">
                       <span className="text-[11px] font-mono text-slate-500 block">
                         {qr.totalScans} {qr.totalScans === 1 ? 'scan' : 'scans'}
                       </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setDeletingQR(qr)}
+                        className="h-6 w-6 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50"
+                        title="Delete QR Code"
+                        aria-label="Delete QR Code"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
                     </div>
                   </div>
 
@@ -472,19 +527,11 @@ export default function CustomerQRPage() {
                   </div>
 
                   <div className="flex items-center gap-1.5">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleCopy(qr)}
-                      className="h-7 text-xs px-2 gap-1 flex-1"
-                    >
-                      {copiedId === qr.id ? (
-                        <CheckCircle className="h-3 w-3 text-emerald-400" />
-                      ) : (
-                        <Copy className="h-3 w-3" />
-                      )}
-                      <span>{copiedId === qr.id ? 'Copied' : 'Copy'}</span>
-                    </Button>
+                    <CopyButton
+                      value={redirectUrl}
+                      label="Copy"
+                      className="h-7 text-xs px-2 flex-1"
+                    />
                     <Button
                       variant="outline"
                       size="sm"
@@ -512,6 +559,16 @@ export default function CustomerQRPage() {
           })}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteDialog
+        open={!!deletingQR}
+        onOpenChange={(open) => !open && setDeletingQR(null)}
+        title="Delete Dynamic QR Code"
+        description={`Are you sure you want to delete ${deletingQR?.name ? `"${deletingQR.name}"` : 'this dynamic QR code'}? All scans and traffic to this redirect link will stop resolving immediately.`}
+        onConfirm={handleDelete}
+        loading={isDeleting}
+      />
 
       {/* CREATE MODAL */}
       {isCreateOpen && (
@@ -638,16 +695,14 @@ export default function CustomerQRPage() {
                 >
                   Cancel
                 </Button>
-                <Button
+                <LoadingButton
                   type="submit"
-                  variant="default"
                   size="sm"
-                  disabled={submittingCreate}
-                  className="h-8 text-xs font-semibold gap-1.5"
+                  loading={submittingCreate}
+                  className="h-8 text-xs font-semibold"
                 >
-                  {submittingCreate && <Loader2 className="h-3 w-3 animate-spin" />}
                   Create Dynamic QR
-                </Button>
+                </LoadingButton>
               </div>
             </form>
           </div>
@@ -767,16 +822,14 @@ export default function CustomerQRPage() {
                 >
                   Cancel
                 </Button>
-                <Button
+                <LoadingButton
                   type="submit"
-                  variant="default"
                   size="sm"
-                  disabled={submittingEdit}
-                  className="h-8 text-xs font-semibold gap-1.5"
+                  loading={submittingEdit}
+                  className="h-8 text-xs font-semibold"
                 >
-                  {submittingEdit && <Loader2 className="h-3 w-3 animate-spin" />}
                   Save Destination
-                </Button>
+                </LoadingButton>
               </div>
             </form>
           </div>
@@ -863,16 +916,14 @@ export default function CustomerQRPage() {
                 >
                   Cancel
                 </Button>
-                <Button
+                <LoadingButton
                   type="submit"
-                  variant="default"
                   size="sm"
-                  disabled={submittingStyle}
-                  className="h-8 text-xs font-semibold gap-1.5"
+                  loading={submittingStyle}
+                  className="h-8 text-xs font-semibold"
                 >
-                  {submittingStyle && <Loader2 className="h-3 w-3 animate-spin" />}
                   Save Styling
-                </Button>
+                </LoadingButton>
               </div>
             </form>
           </div>

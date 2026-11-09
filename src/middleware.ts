@@ -15,6 +15,7 @@ const PROTECTED_PREFIXES = [
   '/builder',
   '/portal-x',
   '/admin',
+  '/settings',
 ];
 
 /**
@@ -28,7 +29,7 @@ const STAFF_PROTECTED_PREFIXES = [
 /**
  * Authentication pages where already-authenticated users should be redirected to /dashboard.
  */
-const AUTH_PAGES = ['/login', '/register'];
+const AUTH_PAGES = ['/login', '/register', '/forgot-password', '/reset-password'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

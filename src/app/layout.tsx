@@ -3,6 +3,7 @@ import { brandConfig } from '@/config/brand';
 import { geistSans, geistMono } from '@/config/fonts';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
+import { Toaster } from '@/components/ui/toaster';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -50,6 +51,7 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           {children}
         </NextIntlClientProvider>
+        <Toaster />
       </body>
     </html>
   );

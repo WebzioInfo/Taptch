@@ -24,7 +24,12 @@ import {
   Smartphone,
   Copy,
   Check,
+  User,
 } from 'lucide-react';
+import { CopyButton, ShareButton } from '@/components/ui/copy-button';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Skeleton } from '@/components/ui/skeleton';
 import { TemplatePreviewModal } from '@/components/templates/TemplatePreviewModal';
 
 interface ProfileData {
@@ -128,8 +133,14 @@ export default function DashboardPage() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-20">
-          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Skeleton className="h-28 rounded-lg" />
+            <Skeleton className="h-28 rounded-lg" />
+            <Skeleton className="h-28 rounded-lg" />
+          </div>
+          <Skeleton className="h-64 rounded-lg" />
+          <Skeleton className="h-48 rounded-lg" />
         </div>
       ) : (
         <>
@@ -178,15 +189,7 @@ export default function DashboardPage() {
                     <h2 className="text-lg font-semibold tracking-tight text-slate-900">
                       {activeProfile.displayName}
                     </h2>
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold ${
-                        activeProfile.status === 'published' || activeProfile.status === 'PUBLISHED'
-                          ? 'bg-emerald-50 text-emerald-700'
-                          : 'bg-amber-50 text-amber-700'
-                      }`}
-                    >
-                      {activeProfile.status === 'published' || activeProfile.status === 'PUBLISHED' ? 'Published' : 'Draft'}
-                    </span>
+                    <StatusBadge status={activeProfile.status} />
                   </div>
                   <p className="text-xs text-slate-500">
                     {activeProfile.headline || 'Digital Identity Profile'}
@@ -219,25 +222,18 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleCopyLink(activeProfile.slug)}
-                    className="h-8 text-xs border-slate-300 text-slate-700 hover:bg-white gap-1.5"
-                  >
-                    {copiedSlug === activeProfile.slug ? (
-                      <>
-                        <Check className="h-3.5 w-3.5 text-emerald-600" />
-                        <span className="text-emerald-600">Copied</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="h-3.5 w-3.5" />
-                        <span>Copy link</span>
-                      </>
-                    )}
-                  </Button>
-
+                  <CopyButton
+                    value={typeof window !== 'undefined' ? `${window.location.origin}/p/${activeProfile.slug}` : `/p/${activeProfile.slug}`}
+                    label="Copy link"
+                    className="h-8 text-xs"
+                  />
+                  <ShareButton
+                    url={typeof window !== 'undefined' ? `${window.location.origin}/p/${activeProfile.slug}` : `/p/${activeProfile.slug}`}
+                    title={activeProfile.displayName}
+                    text={activeProfile.headline || `Connect with ${activeProfile.displayName}`}
+                    label="Share"
+                    className="h-8 text-xs"
+                  />
                   <a
                     href={`/p/${activeProfile.slug}`}
                     target="_blank"
@@ -298,25 +294,15 @@ export default function DashboardPage() {
               </div>
             </div>
           ) : (
-            /* Clean Empty State */
-            <div className="rounded-lg border border-slate-200 bg-white p-12 text-center space-y-4 shadow-2xs">
-              <div className="h-12 w-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mx-auto">
-                <Plus className="h-6 w-6" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="font-bold text-slate-900 text-base">No profile created yet</h3>
-                <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  Create your professional digital profile to start sharing your contact details and links.
-                </p>
-              </div>
-              <div className="pt-2">
-                <Link href="/builder/new">
-                  <Button className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold h-9 px-4">
-                    Create Profile
-                  </Button>
-                </Link>
-              </div>
-            </div>
+            /* Clean Standard Empty State */
+            <EmptyState
+              icon={User}
+              title="No profile created yet"
+              description="Create your professional digital profile to start sharing your contact details, portfolio, and NFC links."
+              actionLabel="Create Profile"
+              actionHref="/builder/new"
+              className="py-12"
+            />
           )}
 
           {/* 4. Recent Contacts or Quick Navigation */}

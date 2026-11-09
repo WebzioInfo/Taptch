@@ -26,6 +26,7 @@ import {
   QrCode,
   ShieldCheck,
   User,
+  Settings,
 } from 'lucide-react';
 
 interface AppLayoutProps {
@@ -156,6 +157,12 @@ export default function AppLayout({ children }: AppLayoutProps) {
                     <span>Create Profile</span>
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/settings" className="cursor-pointer flex items-center py-2 px-3 text-xs text-slate-700 hover:text-slate-900 hover:bg-slate-50">
+                    <Settings className="mr-2 h-3.5 w-3.5" />
+                    <span>Settings & Security</span>
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator className="bg-slate-100" />
                 <DropdownMenuItem
                   onClick={handleSignOut}
@@ -201,7 +208,15 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 </Link>
               );
             })}
-            <div className="pt-2 border-t border-slate-100">
+            <div className="pt-2 border-t border-slate-100 space-y-1">
+              <Link
+                href="/settings"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-md font-medium"
+              >
+                <Settings className="h-4 w-4" />
+                <span>Settings & Security</span>
+              </Link>
               <button
                 type="button"
                 onClick={handleSignOut}

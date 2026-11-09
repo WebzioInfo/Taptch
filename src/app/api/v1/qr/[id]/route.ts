@@ -1,5 +1,9 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
+import { eq } from 'drizzle-orm';
+import { db } from '@/db';
+import { qrCodes } from '@/db/schema/qr';
+import { redis } from '@/lib/redis';
 import { getActorFromRequest } from '@/lib/auth/session';
 import { getQRCodeById, updateQRCode, QRNotFoundError, InvalidDestinationError } from '@/modules/qr';
 import { apiSuccess, apiError, handleApiError } from '@/lib/api/response';
@@ -86,6 +90,40 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       }
       if (err instanceof InvalidDestinationError) {
         return apiError('BAD_REQUEST', err.message, 400);
+      }
+      throw err;
+    }
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  try {
+    const actor = await getActorFromRequest(request.headers);
+    if (!actor) {
+      return apiError('UNAUTHORIZED', 'Authentication required.', 401);
+    }
+
+    const { id } = await params;
+    try {
+      const existing = await getQRCodeById(id);
+      if (existing.ownerUserId && existing.ownerUserId !== actor.userId && !actor.isAdmin) {
+        return apiError('FORBIDDEN', 'You do not have permission to delete this QR code.', 403);
+      }
+
+      await db.delete(qrCodes).where(eq(qrCodes.id, id));
+
+      try {
+        await redis.del(`qr:token:${existing.token}`);
+      } catch {
+        // Ignore redis failure
+      }
+
+      return apiSuccess({ deleted: true, id });
+    } catch (err) {
+      if (err instanceof QRNotFoundError) {
+        return apiError('NOT_FOUND', err.message, 404);
       }
       throw err;
     }

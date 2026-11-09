@@ -23,4 +23,13 @@ export const {
   twoFactor,
   phoneNumber,
   emailOtp,
+  forgetPassword,
+  resetPassword,
+  changePassword,
 } = authClient;
+
+export const requestPasswordReset = async (data: { email: string; redirectTo?: string }) => {
+  return (authClient as unknown as {
+    forgetPassword: (data: { email: string; redirectTo?: string }) => Promise<{ data?: unknown; error?: { message?: string } }>;
+  }).forgetPassword(data);
+};

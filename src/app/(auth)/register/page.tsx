@@ -4,11 +4,14 @@ import * as React from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { BrandLogo } from '@/components/brand';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
+import { ConfirmPasswordInput, PasswordStrengthMeter } from '@/components/ui/confirm-password-input';
+import { FormField, FormLabel, FormError } from '@/components/ui/form-field';
+import { LoadingButton } from '@/components/ui/loading-button';
 import { signUp } from '@/lib/auth/client';
-import { Loader2, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { getSafeRedirectUrl } from '@/lib/auth/redirect';
 
 function formatRegisterError(rawMessage?: string, code?: string): string {
@@ -39,15 +42,20 @@ function RegisterContent() {
   const [name, setName] = React.useState('');
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
-  const [showPassword, setShowPassword] = React.useState(false);
+  const [confirmPassword, setConfirmPassword] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = React.useState<{ name?: string; email?: string; password?: string }>({});
+  const [fieldErrors, setFieldErrors] = React.useState<{
+    name?: string;
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+  }>({});
 
   const destination = getSafeRedirectUrl(templateParam, redirectParam);
 
   const validateForm = (): boolean => {
-    const errors: { name?: string; email?: string; password?: string } = {};
+    const errors: { name?: string; email?: string; password?: string; confirmPassword?: string } = {};
 
     const trimmedName = name.trim();
     if (!trimmedName) {
@@ -66,6 +74,12 @@ function RegisterContent() {
       errors.password = 'Please enter a password.';
     } else if (password.length < 8) {
       errors.password = 'Password must be at least 8 characters.';
+    }
+
+    if (!confirmPassword) {
+      errors.confirmPassword = 'Please confirm your password.';
+    } else if (confirmPassword !== password) {
+      errors.confirmPassword = 'Passwords do not match.';
     }
 
     setFieldErrors(errors);
@@ -130,10 +144,10 @@ function RegisterContent() {
             )}
 
             <form onSubmit={handleRegister} className="space-y-4">
-              <div className="space-y-1.5 text-left">
-                <label htmlFor="name" className="text-xs font-medium text-slate-700">
+              <FormField>
+                <FormLabel htmlFor="name" required>
                   Full name
-                </label>
+                </FormLabel>
                 <Input
                   id="name"
                   type="text"
@@ -148,15 +162,13 @@ function RegisterContent() {
                   className={`h-9 text-xs ${fieldErrors.name ? 'border-red-400 focus-visible:ring-red-400' : ''}`}
                   autoFocus
                 />
-                {fieldErrors.name && (
-                  <p className="text-[11px] text-red-600 font-medium">{fieldErrors.name}</p>
-                )}
-              </div>
+                <FormError>{fieldErrors.name}</FormError>
+              </FormField>
 
-              <div className="space-y-1.5 text-left">
-                <label htmlFor="reg-email" className="text-xs font-medium text-slate-700">
+              <FormField>
+                <FormLabel htmlFor="reg-email" required>
                   Email address
-                </label>
+                </FormLabel>
                 <Input
                   id="reg-email"
                   type="email"
@@ -170,66 +182,64 @@ function RegisterContent() {
                   placeholder="name@company.com"
                   className={`h-9 text-xs ${fieldErrors.email ? 'border-red-400 focus-visible:ring-red-400' : ''}`}
                 />
-                {fieldErrors.email && (
-                  <p className="text-[11px] text-red-600 font-medium">{fieldErrors.email}</p>
-                )}
-              </div>
+                <FormError>{fieldErrors.email}</FormError>
+              </FormField>
 
-              <div className="space-y-1.5 text-left">
+              <FormField>
                 <div className="flex items-center justify-between">
-                  <label htmlFor="reg-password" className="text-xs font-medium text-slate-700">
+                  <FormLabel htmlFor="reg-password" required>
                     Password
-                  </label>
+                  </FormLabel>
                   <span className="text-[11px] text-slate-400">At least 8 characters</span>
                 </div>
-                <div className="relative">
-                  <Input
-                    id="reg-password"
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    minLength={8}
-                    disabled={loading}
-                    value={password}
-                    onChange={(e) => {
-                      setPassword(e.target.value);
-                      if (fieldErrors.password) setFieldErrors((prev) => ({ ...prev, password: undefined }));
-                    }}
-                    placeholder="••••••••"
-                    className={`h-9 text-xs pr-9 ${fieldErrors.password ? 'border-red-400 focus-visible:ring-red-400' : ''}`}
-                  />
-                  <button
-                    type="button"
-                    tabIndex={-1}
-                    onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded transition-colors"
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-                {fieldErrors.password && (
-                  <p className="text-[11px] text-red-600 font-medium">{fieldErrors.password}</p>
-                )}
-              </div>
+                <PasswordInput
+                  id="reg-password"
+                  required
+                  minLength={8}
+                  disabled={loading}
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (fieldErrors.password) setFieldErrors((prev) => ({ ...prev, password: undefined }));
+                  }}
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                  error={Boolean(fieldErrors.password)}
+                />
+                <PasswordStrengthMeter password={password} />
+                <FormError>{fieldErrors.password}</FormError>
+              </FormField>
 
-              <Button
+              <FormField>
+                <FormLabel htmlFor="reg-confirm-password" required>
+                  Confirm password
+                </FormLabel>
+                <ConfirmPasswordInput
+                  id="reg-confirm-password"
+                  required
+                  disabled={loading}
+                  primaryPassword={password}
+                  confirmPassword={confirmPassword}
+                  onConfirmChange={(val) => {
+                    setConfirmPassword(val);
+                    if (fieldErrors.confirmPassword) {
+                      setFieldErrors((prev) => ({ ...prev, confirmPassword: undefined }));
+                    }
+                  }}
+                  error={Boolean(fieldErrors.confirmPassword)}
+                />
+                <FormError>{fieldErrors.confirmPassword}</FormError>
+              </FormField>
+
+              <LoadingButton
                 type="submit"
-                disabled={loading || !name || !email || !password}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs h-9 transition-colors"
+                loading={loading}
+                loadingText="Creating account..."
+                disabled={!name || !email || !password || !confirmPassword || password !== confirmPassword}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs h-9 transition-colors mt-2"
               >
-                {loading ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Creating account...</span>
-                  </div>
-                ) : (
-                  <span>Create Account</span>
-                )}
-              </Button>
+                Create Account
+              </LoadingButton>
             </form>
           </CardContent>
         </Card>
@@ -253,7 +263,7 @@ export default function RegisterPage() {
     <React.Suspense
       fallback={
         <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
         </div>
       }
     >

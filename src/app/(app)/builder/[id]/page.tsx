@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, use } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   User,
   Palette,
@@ -34,6 +35,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { LoadingButton } from '@/components/ui/loading-button';
+import { DeleteDialog } from '@/components/ui/confirm-dialog';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { useToast } from '@/components/ui/use-toast';
 
 interface BusinessItem {
   id: string;
@@ -127,6 +132,8 @@ export default function ProfileBuilderPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const router = useRouter();
+  const { toast } = useToast();
 
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [originalProfile, setOriginalProfile] = useState<ProfileData | null>(null);
@@ -137,6 +144,10 @@ export default function ProfileBuilderPage({
   const [isPublishing, setIsPublishing] = useState(false);
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [bizToDelete, setBizToDelete] = useState<string | null>(null);
+  const [catToDelete, setCatToDelete] = useState<string | null>(null);
+  const [showExitWarning, setShowExitWarning] = useState(false);
+  const [isDeletingItem, setIsDeletingItem] = useState(false);
 
   // Business Modal State
   const [isBizModalOpen, setIsBizModalOpen] = useState(false);
@@ -199,6 +210,21 @@ export default function ProfileBuilderPage({
     }
     loadProfile();
   }, [id]);
+
+  const hasChanges = Boolean(
+    profile && originalProfile && JSON.stringify(profile) !== JSON.stringify(originalProfile)
+  );
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasChanges]);
 
   // Reset changes to last saved state
   const handleResetChanges = () => {
@@ -285,13 +311,12 @@ export default function ProfileBuilderPage({
 
       setOriginalProfile(JSON.parse(JSON.stringify(profile)));
       setSaveStatus('Draft saved successfully');
+      toast.success('Profile draft saved successfully');
       setTimeout(() => setSaveStatus(null), 3000);
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setErrorMessage(err.message);
-      } else {
-        setErrorMessage('An error occurred while saving.');
-      }
+      const msg = err instanceof Error ? err.message : 'An error occurred while saving.';
+      setErrorMessage(msg);
+      toast.error(msg);
     } finally {
       setIsSaving(false);
     }
@@ -315,13 +340,12 @@ export default function ProfileBuilderPage({
 
       setProfile((prev) => (prev ? { ...prev, status: 'published' } : null));
       setSaveStatus('Profile published successfully!');
+      toast.success(`Profile published successfully! Live at /p/${profile.slug}`);
       setTimeout(() => setSaveStatus(null), 4000);
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setErrorMessage(err.message);
-      } else {
-        setErrorMessage('Failed to publish profile.');
-      }
+      const msg = err instanceof Error ? err.message : 'Failed to publish profile.';
+      setErrorMessage(msg);
+      toast.error(msg);
     } finally {
       setIsPublishing(false);
     }
@@ -397,28 +421,36 @@ export default function ProfileBuilderPage({
       }
 
       setIsBizModalOpen(false);
+      toast.success(editingBizId ? 'Business updated successfully' : 'Business added successfully');
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        alert(err.message);
-      }
+      const msg = err instanceof Error ? err.message : 'Failed to save business.';
+      toast.error(msg);
     }
   };
 
-  const handleDeleteBusiness = async (bizId: string) => {
-    if (!profile || !confirm('Are you sure you want to remove this business?')) return;
+  const confirmDeleteBusiness = async () => {
+    if (!profile || !bizToDelete) return;
     try {
-      const res = await fetch(`/api/v1/profiles/${id}/businesses/${bizId}`, {
+      setIsDeletingItem(true);
+      const res = await fetch(`/api/v1/profiles/${id}/businesses/${bizToDelete}`, {
         method: 'DELETE',
       });
-      if (res.ok) {
-        setProfile({
-          ...profile,
-          businesses: profile.businesses.filter((b) => b.id !== bizId),
-        });
-      }
-    } catch (err) {
-      console.error(err);
+      if (!res.ok) throw new Error('Failed to delete business');
+      setProfile({
+        ...profile,
+        businesses: profile.businesses.filter((b) => b.id !== bizToDelete),
+      });
+      toast.success('Business removed successfully');
+      setBizToDelete(null);
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Error removing business');
+    } finally {
+      setIsDeletingItem(false);
     }
+  };
+
+  const handleDeleteBusiness = (bizId: string) => {
+    setBizToDelete(bizId);
   };
 
   // Catalogue Handlers
@@ -482,28 +514,36 @@ export default function ProfileBuilderPage({
       }
 
       setIsCatModalOpen(false);
+      toast.success(editingCatId ? 'Catalogue item updated' : 'Catalogue item added');
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        alert(err.message);
-      }
+      const msg = err instanceof Error ? err.message : 'Failed to save catalogue item.';
+      toast.error(msg);
     }
   };
 
-  const handleDeleteCatalogue = async (catId: string) => {
-    if (!profile || !confirm('Are you sure you want to delete this catalogue item?')) return;
+  const confirmDeleteCatalogue = async () => {
+    if (!profile || !catToDelete) return;
     try {
-      const res = await fetch(`/api/v1/profiles/${id}/catalogue/${catId}`, {
+      setIsDeletingItem(true);
+      const res = await fetch(`/api/v1/profiles/${id}/catalogue/${catToDelete}`, {
         method: 'DELETE',
       });
-      if (res.ok) {
-        setProfile({
-          ...profile,
-          catalogue: profile.catalogue.filter((c) => c.id !== catId),
-        });
-      }
-    } catch (err) {
-      console.error(err);
+      if (!res.ok) throw new Error('Failed to delete catalogue item');
+      setProfile({
+        ...profile,
+        catalogue: profile.catalogue.filter((c) => c.id !== catToDelete),
+      });
+      toast.success('Catalogue item deleted');
+      setCatToDelete(null);
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Error deleting item');
+    } finally {
+      setIsDeletingItem(false);
     }
+  };
+
+  const handleDeleteCatalogue = (catId: string) => {
+    setCatToDelete(catId);
   };
 
   if (isLoading) {
@@ -533,18 +573,25 @@ export default function ProfileBuilderPage({
   }
 
   const primaryColor = profile.themeConfig?.primaryColor || '#D4AF37';
-  const hasChanges = Boolean(
-    profile && originalProfile && JSON.stringify(profile) !== JSON.stringify(originalProfile)
-  );
 
   return (
     <div className="h-screen flex flex-col bg-background text-foreground overflow-hidden">
       {/* Top Navbar */}
       <header className="h-14 border-b border-slate-200 bg-white px-4 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
-          <Link href="/dashboard" className="text-xs text-muted-foreground hover:text-foreground">
-            ← Dashboard
-          </Link>
+          {hasChanges ? (
+            <button
+              type="button"
+              onClick={() => setShowExitWarning(true)}
+              className="text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+            >
+              ← Dashboard
+            </button>
+          ) : (
+            <Link href="/dashboard" className="text-xs text-muted-foreground hover:text-foreground">
+              ← Dashboard
+            </Link>
+          )}
           <span className="text-muted-foreground">/</span>
           <span className="text-xs font-semibold truncate max-w-[180px]">{profile.displayName}</span>
           <Badge variant={profile.status === 'published' ? 'gold' : 'secondary'} className="text-[10px]">
@@ -580,25 +627,25 @@ export default function ProfileBuilderPage({
             </Button>
           )}
 
-          <Button
+          <LoadingButton
             variant="outline"
             size="sm"
             onClick={handleSaveDraft}
-            disabled={isSaving}
+            loading={isSaving}
             className="text-xs h-8"
           >
             <Save className="w-3.5 h-3.5 mr-1" />
-            {isSaving ? 'Saving...' : 'Save'}
-          </Button>
+            Save
+          </LoadingButton>
 
-          <Button
+          <LoadingButton
             size="sm"
             onClick={handlePublish}
-            disabled={isPublishing}
+            loading={isPublishing}
             className="text-xs h-8 bg-blue-600 text-white hover:bg-blue-700 font-semibold"
           >
-            {isPublishing ? 'Publishing...' : 'Publish'}
-          </Button>
+            Publish
+          </LoadingButton>
 
           {profile.status === 'published' && (
             <Link href={`/p/${profile.slug}`} target="_blank">
@@ -1473,6 +1520,36 @@ export default function ProfileBuilderPage({
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Unsaved Changes Confirmation Dialog */}
+      <UnsavedChangesDialog
+        open={showExitWarning}
+        onOpenChange={setShowExitWarning}
+        onDiscard={() => {
+          setShowExitWarning(false);
+          router.push('/dashboard');
+        }}
+      />
+
+      {/* Delete Business Confirmation Dialog */}
+      <DeleteDialog
+        open={!!bizToDelete}
+        onOpenChange={(open) => !open && setBizToDelete(null)}
+        title="Remove Business"
+        description="Are you sure you want to remove this business? Contact info and services linked to this business will be removed from your digital profile."
+        onConfirm={confirmDeleteBusiness}
+        loading={isDeletingItem}
+      />
+
+      {/* Delete Catalogue Item Confirmation Dialog */}
+      <DeleteDialog
+        open={!!catToDelete}
+        onOpenChange={(open) => !open && setCatToDelete(null)}
+        title="Delete Catalogue Item"
+        description="Are you sure you want to delete this catalogue product or service? This action cannot be undone."
+        onConfirm={confirmDeleteCatalogue}
+        loading={isDeletingItem}
+      />
     </div>
   );
 }

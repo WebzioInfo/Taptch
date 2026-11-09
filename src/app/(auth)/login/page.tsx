@@ -4,11 +4,13 @@ import * as React from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { BrandLogo } from '@/components/brand';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
+import { FormField, FormLabel, FormError } from '@/components/ui/form-field';
+import { LoadingButton } from '@/components/ui/loading-button';
 import { signIn, emailOtp } from '@/lib/auth/client';
-import { Loader2, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { getSafeRedirectUrl, buildAuthQueryString } from '@/lib/auth/redirect';
 
 function formatLoginError(rawMessage?: string, code?: string): string {
@@ -39,7 +41,7 @@ function LoginContent() {
   const [authMode, setAuthMode] = React.useState<'password' | 'otp'>('password');
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
-  const [showPassword, setShowPassword] = React.useState(false);
+  const [rememberMe, setRememberMe] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = React.useState<{ email?: string; password?: string }>({});
@@ -95,6 +97,7 @@ function LoginContent() {
       const res = await signIn.email({
         email: cleanEmail,
         password,
+        rememberMe,
       });
 
       if (res.error) {
@@ -199,10 +202,10 @@ function LoginContent() {
 
             {authMode === 'password' ? (
               <form onSubmit={handlePasswordLogin} className="space-y-4">
-                <div className="space-y-1.5 text-left">
-                  <label htmlFor="pwd-email" className="text-xs font-medium text-slate-700">
+                <FormField>
+                  <FormLabel htmlFor="pwd-email" required>
                     Email address
-                  </label>
+                  </FormLabel>
                   <Input
                     id="pwd-email"
                     type="email"
@@ -217,71 +220,65 @@ function LoginContent() {
                     className={`h-9 text-xs ${fieldErrors.email ? 'border-red-400 focus-visible:ring-red-400' : ''}`}
                     autoFocus
                   />
-                  {fieldErrors.email && (
-                    <p className="text-[11px] text-red-600 font-medium">{fieldErrors.email}</p>
-                  )}
-                </div>
+                  <FormError>{fieldErrors.email}</FormError>
+                </FormField>
 
-                <div className="space-y-1.5 text-left">
+                <FormField>
                   <div className="flex items-center justify-between">
-                    <label htmlFor="password" className="text-xs font-medium text-slate-700">
+                    <FormLabel htmlFor="password" required>
                       Password
-                    </label>
-                  </div>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? 'text' : 'password'}
-                      required
-                      disabled={loading}
-                      value={password}
-                      onChange={(e) => {
-                        setPassword(e.target.value);
-                        if (fieldErrors.password) setFieldErrors((prev) => ({ ...prev, password: undefined }));
-                      }}
-                      placeholder="••••••••"
-                      className={`h-9 text-xs pr-9 ${fieldErrors.password ? 'border-red-400 focus-visible:ring-red-400' : ''}`}
-                    />
-                    <button
-                      type="button"
-                      tabIndex={-1}
-                      onClick={() => setShowPassword((prev) => !prev)}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded transition-colors"
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    </FormLabel>
+                    <Link
+                      href="/forgot-password"
+                      className="text-[11px] font-medium text-blue-600 hover:text-blue-700 transition-colors"
                     >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </button>
+                      Forgot password?
+                    </Link>
                   </div>
-                  {fieldErrors.password && (
-                    <p className="text-[11px] text-red-600 font-medium">{fieldErrors.password}</p>
-                  )}
+                  <PasswordInput
+                    id="password"
+                    required
+                    disabled={loading}
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (fieldErrors.password) setFieldErrors((prev) => ({ ...prev, password: undefined }));
+                    }}
+                    placeholder="••••••••"
+                    autoComplete="current-password"
+                    error={Boolean(fieldErrors.password)}
+                  />
+                  <FormError>{fieldErrors.password}</FormError>
+                </FormField>
+
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-xs text-slate-600">Remember this device</span>
+                  </label>
                 </div>
 
-                <Button
+                <LoadingButton
                   type="submit"
-                  disabled={loading || !email || !password}
+                  loading={loading}
+                  loadingText="Signing in..."
+                  disabled={!email || !password}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs h-9 transition-colors"
                 >
-                  {loading ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>Signing in...</span>
-                    </div>
-                  ) : (
-                    <span>Sign In</span>
-                  )}
-                </Button>
+                  Sign In
+                </LoadingButton>
               </form>
             ) : (
               <form onSubmit={handleSendOtp} className="space-y-4">
-                <div className="space-y-1.5 text-left">
-                  <label htmlFor="email" className="text-xs font-medium text-slate-700">
+                <FormField>
+                  <FormLabel htmlFor="email" required>
                     Email address
-                  </label>
+                  </FormLabel>
                   <Input
                     id="email"
                     type="email"
@@ -296,25 +293,18 @@ function LoginContent() {
                     className={`h-9 text-xs ${fieldErrors.email ? 'border-red-400 focus-visible:ring-red-400' : ''}`}
                     autoFocus
                   />
-                  {fieldErrors.email && (
-                    <p className="text-[11px] text-red-600 font-medium">{fieldErrors.email}</p>
-                  )}
-                </div>
+                  <FormError>{fieldErrors.email}</FormError>
+                </FormField>
 
-                <Button
+                <LoadingButton
                   type="submit"
-                  disabled={loading || !email}
+                  loading={loading}
+                  loadingText="Sending code..."
+                  disabled={!email}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs h-9 transition-colors"
                 >
-                  {loading ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>Sending code...</span>
-                    </div>
-                  ) : (
-                    <span>Continue with code</span>
-                  )}
-                </Button>
+                  Continue with code
+                </LoadingButton>
               </form>
             )}
           </CardContent>
@@ -339,7 +329,7 @@ export default function LoginPage() {
     <React.Suspense
       fallback={
         <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
         </div>
       }
     >

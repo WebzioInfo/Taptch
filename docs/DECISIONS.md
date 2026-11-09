@@ -597,6 +597,46 @@
   - `npm test`: 22 test files passed, 173/173 tests passed.
   - `npm run build`: Next.js 16.4.5 (Turbopack) production build compiled all 32 static and dynamic routes cleanly.
 
+---
+
+## ADR-033: Universal Product Experience, Common Interaction Components & Flow Standardization
+
+- **Date**: 2026-11-09
+- **Status**: Accepted & Implemented
+- **Context**: Across SaaS applications, missing baseline interaction affordances (password visibility toggles, real-time confirmation validation, strength meters, double-submit protection, toast notifications, clipboard copy feedback, filter bars, pagination, and unsaved changes confirmation) degrade user confidence and product polish. The user requested a comprehensive, project-wide audit and implementation of all common, expected, and professional product features across every page and workflow.
+- **Decision**:
+  1. **Reusable Interaction Primitives (`src/components/ui/`)**:
+     - `PasswordInput`: Built accessible eye toggle (`showPassword` state) with `aria-label` and `aria-pressed`.
+     - `ConfirmPasswordInput` & `PasswordStrengthMeter`: Real-time match checking, entropy-based 4-tier score calculation (Weak, Fair, Good, Strong) with visual color bars and requirement pills.
+     - `FormField`, `FormLabel`, `FormError`, `FormSuccess`, `FormHelperText`: Unified form container supporting required asterisks and descriptive errors.
+     - `LoadingButton` & `SubmitButton`: Single-action enforcement disabling double clicks with spinner animation and custom loading text.
+     - `CopyButton` & `ShareButton`: Clipboard API with legacy fallback (`document.execCommand`), visual checkmark transition, and toast confirmation; Web Share API with copy fallback.
+     - `SearchInput`, `FilterBar`, `Pagination`, `DataTable`: Debounced query handling, render-phase prop sync, instant `X` clear button, accessible pagination controls, and sortable data tables.
+     - `EmptyState`, `ErrorState`, `StatusBadge`, `Skeleton`: State handling for lists, tables, and async metrics.
+     - `ConfirmDialog`, `DeleteDialog`, `UnsavedChangesDialog`: Radix Alert Dialog wrappers for destructive operations, profile draft protection (`beforeunload` + in-app transitions).
+     - `ToastSystem`: Radix UI Toast system with `useToast` hook mounted globally at application root.
+  2. **Authentication & Account Lifecycle Upgrades**:
+     - Upgraded `/register` with `ConfirmPasswordInput`, `PasswordStrengthMeter`, and `LoadingButton`.
+     - Upgraded `/login` with `PasswordInput`, "Forgot password?" link, and "Remember this device" checkbox.
+     - Built `/forgot-password` route invoking Better Auth password reset with confirmation screen.
+     - Built `/reset-password` route with token extraction, new password strength meter, and confirmation validation.
+     - Built `/settings` page supporting password changes, session revocation, and security posture overviews.
+  3. **Application Pages Modernization**:
+     - Upgraded `/dashboard`: Replaced raw text copy with `CopyButton`, `ShareButton`, `StatusBadge`, `Skeleton` cards, and `EmptyState`.
+     - Upgraded `/leads`: Integrated debounced `SearchInput`, pagination slice math (9 items/page), copy-to-clipboard for email/phone, and toast for CSV export.
+     - Upgraded `/cards`: Added redirect URL copying, hardware status badges, loading states for claim modals, and toast alerts.
+     - Upgraded `/qr`: Integrated search, filter, `DeleteDialog` wired to `DELETE /api/v1/qr/[id]`, and copy buttons.
+     - Upgraded `/team`: Added staff member deletion dialog, search filtering across members and audit logs.
+     - Upgraded `/builder/[id]`: Added `hasChanges` dirty tracking, `beforeunload` window protection, and `UnsavedChangesDialog`.
+     - Upgraded `/admin`: Added publication review confirmation dialogs (`ConfirmDialog`), media filtering, and order search.
+- **Verification**:
+  - `npm test -- tests/unit/common-interactions.test.ts`: 16/16 tests passed.
+  - `npm test`: 23 test suites passed, 189/189 tests passed.
+  - `npm run typecheck`: 0 errors.
+  - `npm run lint`: 0 errors.
+  - `npm run build`: Next.js 16.4.5 (Turbopack) production build compiled cleanly across all 35 static and dynamic routes.
+
+
 
 
 

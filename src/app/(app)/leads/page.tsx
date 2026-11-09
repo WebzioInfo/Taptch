@@ -2,17 +2,21 @@
 
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { SearchInput } from '@/components/ui/search-input';
+import { CopyButton } from '@/components/ui/copy-button';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Pagination } from '@/components/ui/pagination';
+import { toast } from '@/components/ui/use-toast';
 import {
   Users,
-  Search,
   Download,
   Mail,
   Phone,
   Calendar,
-  Loader2,
+  Building2,
 } from 'lucide-react';
 
 interface Lead {
@@ -29,10 +33,14 @@ interface Lead {
   createdAt: string;
 }
 
+const PAGE_SIZE = 9;
+
 export default function LeadsPage() {
   const [leads, setLeads] = React.useState<Lead[]>([]);
   const [search, setSearch] = React.useState('');
   const [loading, setLoading] = React.useState(true);
+  const [exporting, setExporting] = React.useState(false);
+  const [currentPage, setCurrentPage] = React.useState(1);
 
   React.useEffect(() => {
     fetch('/api/v1/leads')
@@ -42,7 +50,9 @@ export default function LeadsPage() {
           setLeads(data.data);
         }
       })
-      .catch(() => {})
+      .catch(() => {
+        toast.error('Unable to fetch leads. Please check your connection.');
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -58,123 +68,200 @@ export default function LeadsPage() {
     );
   }, [leads, search]);
 
+  // Reset to page 1 when search changes
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
+
+  const totalPages = Math.ceil(filteredLeads.length / PAGE_SIZE) || 1;
+  const paginatedLeads = React.useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredLeads.slice(start, start + PAGE_SIZE);
+  }, [filteredLeads, currentPage]);
+
   const handleExportCsv = () => {
     if (leads.length === 0) return;
-    const headers = ['Name', 'Email', 'Phone', 'Company', 'Job Title', 'Profile', 'Notes', 'Date'];
-    const rows = leads.map((l) => [
-      `"${l.name}"`,
-      `"${l.email || ''}"`,
-      `"${l.phone || ''}"`,
-      `"${l.company || ''}"`,
-      `"${l.jobTitle || ''}"`,
-      `"${l.profileName || ''}"`,
-      `"${(l.notes || '').replace(/"/g, '""')}"`,
-      `"${new Date(l.createdAt).toLocaleDateString()}"`,
-    ]);
+    setExporting(true);
 
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `leads-${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      const headers = ['Name', 'Email', 'Phone', 'Company', 'Job Title', 'Profile', 'Notes', 'Date'];
+      const rows = leads.map((l) => [
+        `"${l.name}"`,
+        `"${l.email || ''}"`,
+        `"${l.phone || ''}"`,
+        `"${l.company || ''}"`,
+        `"${l.jobTitle || ''}"`,
+        `"${l.profileName || ''}"`,
+        `"${(l.notes || '').replace(/"/g, '""')}"`,
+        `"${new Date(l.createdAt).toLocaleDateString()}"`,
+      ]);
+
+      const csvContent =
+        'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `taptch-leads-${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success(`Exported ${leads.length} leads to CSV`);
+    } catch {
+      toast.error('Failed to export leads');
+    } finally {
+      setExporting(false);
+    }
   };
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-10">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4 pb-4 border-b border-slate-200">
-        <h1 className="text-xl sm:text-2xl font-semibold tracking-[-0.02em] text-slate-900">
-          Leads
-        </h1>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
+            Contacts & Leads
+          </h1>
+          <p className="text-xs text-slate-500 mt-1">
+            Exchange contacts effortlessly via your smart NFC cards and profiles
+          </p>
+        </div>
 
         <Button
           variant="outline"
           size="sm"
           onClick={handleExportCsv}
-          disabled={leads.length === 0}
+          disabled={leads.length === 0 || exporting}
           className="h-8 text-xs gap-1.5 px-3"
         >
-          <Download className="h-3.5 w-3.5" />
-          <span>Export CSV</span>
+          <Download className="h-3.5 w-3.5" aria-hidden="true" />
+          <span>{exporting ? 'Exporting...' : 'Export CSV'}</span>
         </Button>
       </div>
 
-      {/* Search & Filter Bar */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search leads..."
-            className="pl-8 h-8 bg-white border-slate-200 text-slate-900 placeholder:text-slate-500 focus:border-blue-600 text-xs"
-          />
-        </div>
+      {/* Search & Stats Bar */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder="Search by name, email, company..."
+          className="w-full sm:max-w-xs"
+        />
+
         <div className="text-xs text-slate-500">
-          {filteredLeads.length} leads
+          Showing <strong className="font-semibold text-slate-800">{filteredLeads.length}</strong> of{' '}
+          <strong className="font-semibold text-slate-800">{leads.length}</strong> total leads
         </div>
       </div>
 
+      {/* Content Area */}
       {loading ? (
-        <div className="flex justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-        </div>
-      ) : filteredLeads.length === 0 ? (
-        <Card className="border-slate-200 bg-white text-center py-12">
-          <CardContent className="space-y-3 max-w-sm mx-auto">
-            <div className="mx-auto h-10 w-10 rounded-xl bg-blue-600/10 flex items-center justify-center text-blue-600">
-              <Users className="h-5 w-5" />
-            </div>
-            <h3 className="font-semibold text-base text-slate-900">
-              {search ? 'No Matches' : 'No Leads'}
-            </h3>
-            <p className="text-xs text-slate-500">
-              Contacts exchanged through cards and profiles will appear here.
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredLeads.map((lead) => (
-            <Card key={lead.id} className="border-slate-200/70 bg-white p-4 space-y-3 hover:border-blue-600/40 transition-colors">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i} className="p-4 space-y-3 bg-white border-slate-200">
               <div className="flex items-center justify-between">
-                <div className="font-semibold text-sm text-slate-900 truncate">
-                  {lead.name}
-                </div>
-                <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                  {lead.profileName || 'Profile'}
-                </Badge>
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-4 w-16" />
               </div>
-
-              {(lead.jobTitle || lead.company) && (
-                <div className="text-xs text-slate-500 truncate">
-                  {[lead.jobTitle, lead.company].filter(Boolean).join(' • ')}
-                </div>
-              )}
-
-              <div className="space-y-1 pt-2 border-t border-slate-100 text-xs">
-                {lead.email && (
-                  <div className="flex items-center gap-2 text-slate-500 truncate">
-                    <Mail className="h-3 w-3 shrink-0" />
-                    <span className="truncate">{lead.email}</span>
-                  </div>
-                )}
-                {lead.phone && (
-                  <div className="flex items-center gap-2 text-slate-500">
-                    <Phone className="h-3 w-3 shrink-0" />
-                    <span>{lead.phone}</span>
-                  </div>
-                )}
-                <div className="flex items-center gap-2 text-slate-500 text-[11px] pt-1">
-                  <Calendar className="h-3 w-3 shrink-0" />
-                  <span>{new Date(lead.createdAt).toLocaleDateString()}</span>
-                </div>
+              <Skeleton className="h-3 w-44" />
+              <div className="pt-2 border-t border-slate-100 space-y-2">
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-28" />
               </div>
             </Card>
           ))}
+        </div>
+      ) : filteredLeads.length === 0 ? (
+        <EmptyState
+          icon={Users}
+          title={search ? 'No matching contacts' : 'No leads captured yet'}
+          description={
+            search
+              ? `No contacts match "${search}". Try searching by another keyword.`
+              : 'Contacts exchanged via your digital profiles and NFC cards will automatically appear here.'
+          }
+          actionLabel={search ? 'Clear search' : undefined}
+          onAction={search ? () => setSearch('') : undefined}
+        />
+      ) : (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {paginatedLeads.map((lead) => (
+              <Card
+                key={lead.id}
+                className="border-slate-200/80 bg-white p-4 space-y-3 hover:border-blue-500/50 hover:shadow-xs transition-all"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="font-semibold text-sm text-slate-900 truncate">
+                    {lead.name}
+                  </div>
+                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 shrink-0 bg-slate-50 text-slate-600">
+                    {lead.profileName || 'Default'}
+                  </Badge>
+                </div>
+
+                {(lead.jobTitle || lead.company) && (
+                  <div className="flex items-center gap-1.5 text-xs text-slate-500 truncate">
+                    <Building2 className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                    <span className="truncate">
+                      {[lead.jobTitle, lead.company].filter(Boolean).join(' • ')}
+                    </span>
+                  </div>
+                )}
+
+                <div className="space-y-1.5 pt-2 border-t border-slate-100 text-xs">
+                  {lead.email && (
+                    <div className="flex items-center justify-between gap-2 text-slate-600">
+                      <div className="flex items-center gap-1.5 truncate">
+                        <Mail className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                        <span className="truncate">{lead.email}</span>
+                      </div>
+                      <CopyButton
+                        value={lead.email}
+                        label="Copy"
+                        successLabel="Copied"
+                        toastMessage="Email copied"
+                        size="sm"
+                        variant="ghost"
+                        className="h-6 px-1.5 text-[11px]"
+                      />
+                    </div>
+                  )}
+
+                  {lead.phone && (
+                    <div className="flex items-center justify-between gap-2 text-slate-600">
+                      <div className="flex items-center gap-1.5">
+                        <Phone className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                        <span>{lead.phone}</span>
+                      </div>
+                      <CopyButton
+                        value={lead.phone}
+                        label="Copy"
+                        successLabel="Copied"
+                        toastMessage="Phone number copied"
+                        size="sm"
+                        variant="ghost"
+                        className="h-6 px-1.5 text-[11px]"
+                      />
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-1.5 text-slate-400 text-[11px] pt-1">
+                    <Calendar className="h-3 w-3 shrink-0" />
+                    <span>Connected on {new Date(lead.createdAt).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            totalItems={filteredLeads.length}
+            pageSize={PAGE_SIZE}
+          />
         </div>
       )}
     </div>
