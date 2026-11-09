@@ -676,6 +676,25 @@
   - `npm run lint`: 0 errors.
   - `npm run build`: Next.js 16.4.5 Turbopack compiled clean.
 
+---
+
+## ADR-035: Production Authentication Transport & Origin Routing Resolution
+
+- **Date**: 2026-11-09
+- **Status**: Accepted & Implemented
+- **Context**: Users reported `net::ERR_QUIC_PROTOCOL_ERROR` and "Failed to sign in. Please check your connection." when attempting to sign in on `https://taptch.com`. Controlled network diagnostics revealed the apex domain `taptch.com` was routing via Cloudflare proxy to a legacy GitHub Pages static host (`webzioinfo.github.io` / Fastly) rather than the active Vercel Next.js application deployment (`taptch.webziotech.in`). GitHub Pages static edge rejected `POST` requests with HTTP 405 Method Not Allowed and closed QUIC streams abruptly.
+- **Decision**:
+  1. **Dynamic Client Origin (`src/lib/auth/client.ts`)**: Derives Better Auth client `baseURL` from `window.location.origin` in the browser, eliminating cross-domain CORS rejections and ensuring cookies stay aligned with the active hostname.
+  2. **Serverless In-Memory Redis Fallback (`src/lib/redis/index.ts`)**: Safe in-memory mock fallback when `REDIS_URL` is omitted, preventing lambda execution timeouts (`504 FUNCTION_INVOCATION_TIMEOUT`) from hanging localhost Redis socket retries.
+  3. **Diagnostic Logging & Error Clarity (`src/app/api/auth/[...all]/route.ts`, `src/app/(auth)/login/page.tsx`)**: Formatted login errors to distinguish HTTP 405 routing issues from network or credential failures.
+  4. **Git Production Synchronization**: Merged `modernization/stack-upgrade` into `main` and pushed to `origin/main` to trigger automated deployment on Vercel.
+  5. **Cloudflare Routing Runbook (`docs/PRODUCTION_INCIDENT_REPORT.md`)**: Documented the necessary DNS update to point `taptch.com` A record to Vercel (`76.76.21.21`) and `www` CNAME to `cname.vercel-dns.com`.
+- **Verification**:
+  - Direct local API verification against live Supabase PostgreSQL returned HTTP 200 with valid session token and cookie headers.
+  - Full test suite passed (24/24 files, 208/208 tests).
+  - TypeScript strict compilation: 0 errors.
+
+
 
 
 

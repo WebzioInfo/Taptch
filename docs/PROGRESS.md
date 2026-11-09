@@ -128,3 +128,11 @@
     - `npm run typecheck`: 0 errors (`tsc --noEmit`).
     - `npm run lint`: 0 errors.
     - `npm run build`: Next.js 16.4.5 Turbopack compiled clean.
+- **Production Authentication Incident Investigation & Resolution (INC-2026-11-AUTH-001 / ADR 035)**:
+  - **Root Cause Isolated**: Diagnosed `net::ERR_QUIC_PROTOCOL_ERROR` on `POST https://taptch.com/api/auth/sign-in/email`. Discovered Cloudflare DNS for `taptch.com` was pointing to GitHub Pages (`webzioinfo.github.io` / Fastly) rather than the Next.js Vercel deployment (`taptch.webziotech.in`). GitHub Pages static server rejects POST with HTTP 405 Method Not Allowed and terminates the QUIC stream abruptly.
+  - **Dynamic Auth Client BaseURL**: Updated `src/lib/auth/client.ts` to derive `baseURL` dynamically from `window.location.origin` in the browser, eliminating hardcoded cross-domain calls and cross-site cookie rejections.
+  - **Serverless Redis Safety**: Hardened `src/lib/redis/index.ts` to immediately use `InMemoryRedisMock()` when `REDIS_URL` is omitted, eliminating infinite retry loops and `504 FUNCTION_INVOCATION_TIMEOUT` crashes.
+  - **Clean Error Diagnostics**: Refactored `formatLoginError` in `src/app/(auth)/login/page.tsx` to detect HTTP 405 and server 500 errors distinctly, replacing deceptive "check your connection" messages.
+  - **Main Branch Deployment Synchronization**: Merged all 9 modernization milestones from `modernization/stack-upgrade` into `main` and pushed to `origin/main` (`commit e382611`), synchronizing Vercel's automated git deployment pipeline.
+  - **Documented Cloudflare Runbook**: Authored `docs/PRODUCTION_INCIDENT_REPORT.md` providing step-by-step DNS record updates (pointing `@` to `76.76.21.21` and `www` to `cname.vercel-dns.com`).
+  - **Verification Gate**: 24/24 test suites passed (208/208 tests), TypeScript 0 errors, ESLint 0 errors, direct Supabase auth test verified 200 OK.
