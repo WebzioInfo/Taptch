@@ -18,6 +18,8 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import type { TemplateLayoutProps } from './types';
+import { UpiPaymentCard } from '@/components/profile/UpiPaymentCard';
+import type { UpiPaymentConfig } from '@/lib/upi';
 
 export function ModernBusinessTemplate({
   profile,
@@ -32,6 +34,9 @@ export function ModernBusinessTemplate({
   const catalogue = profile.catalogue || [];
   const primaryBusiness = businesses[0];
   const isNano = previewPlanId === 'nano';
+
+  const rawUpi = (profile as unknown as { customFields?: { upiConfig?: UpiPaymentConfig } }).customFields?.upiConfig;
+  const upiConfig: UpiPaymentConfig | null = rawUpi?.isEnabled && rawUpi.upiId ? rawUpi : null;
 
   const filteredCatalogue = catalogue.filter((item) => {
     if (activeTab === 'all') return true;
@@ -154,6 +159,14 @@ export function ModernBusinessTemplate({
             </div>
           </div>
         </div>
+
+        {/* Direct UPI Payment Section */}
+        {upiConfig && (
+          <UpiPaymentCard
+            config={upiConfig}
+            className="bg-[#064E3B] border-emerald-500/30 text-white"
+          />
+        )}
 
         {/* Business Highlights */}
         {profile.highlights && profile.highlights.length > 0 && (

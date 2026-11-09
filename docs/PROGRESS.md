@@ -105,3 +105,26 @@
   - **Selective Monospace**: Applied Geist Mono to numeric KPI counters, pricing figures, order numbers, barcode strings, and transaction tracking.
   - **Email Modernization**: Updated transactional HTML email templates (`src/lib/email/index.ts`) with Geist Sans and Geist Mono fallbacks.
   - **Verification Gate**: `npm run typecheck` (0 errors), `npm run lint` (0 errors), `npm test` (173/173 tests passed), `npm run build` (Next.js 16.4.5 Turbopack compiled clean).
+- **Profile Design Studio, 6 Luxury Templates, Unified Renderer & Production Readiness (ADR 034)**:
+  - **Single Shared Rendering Pipeline**: Fixed builder preview vs published profile discrepancy by establishing `ProfileRenderer` (`src/components/templates/ProfileRenderer.tsx`) as the single authoritative rendering engine across both builder preview and public profile routes (`/p/[slug]`).
+  - **6 Distinct Luxury Template Layouts**:
+    - `Obsidian Luxury` (`obsidian-luxury`): Deep obsidian (`#0A0A0C`), brushed metallic gold (`#D4AF37`), matte charcoal surfaces (`#121216`).
+    - `Ivory Minimalist` (`ivory-minimal`): Warm editorial paper (`#FAF9F5`), charcoal type, hairline brass borders (`#E5E0D8`).
+    - `Aurora Creator` (`aurora-creator`): Violet-indigo neon mesh gradients (`#0F0728` to `#2E0854`), frosted glassmorphic cards, emerald badges.
+    - `Zenith Corporate` (`zenith-corporate`): Slate navy executive aesthetic (`#0A1128` to `#001F54`), sapphire badges, high-contrast credibility typography.
+    - `Catalyst Business` (`catalyst-business`): High-energy carbon dark (`#111827`), electric amber/orange highlights (`#F59E0B`), bold action CTAs.
+    - `Apex Capital` (`apex-capital`): Dedicated private wealth layout featuring deep emerald (`#021A14`, `#062D24`), platinum dividers, and luxury portfolio showcase.
+  - **Visual Style Studio (`/builder/[id]`)**: Replaced basic dropdown with 6-card interactive visual switcher with live viewport previews (Mobile 375px frame, Tablet 440px, Desktop full width), custom primary & accent color pickers with hex inputs and swatches, instant template reset, and zero data loss across switches.
+  - **Template Gallery Bi-directional Flow**: Added `profileId` state preservation to `/templates` and `/templates/[id]` with visual return banner, direct template mutation via `PATCH /api/v1/profiles/${profileId}`, and redirection back to `/builder/${profileId}`.
+  - **Dual-Mode Media Upload (`ImageUploadOrUrl`)**: Reusable drag-and-drop file upload to Cloudflare storage with direct URL fallback for profile avatar, cover, business logo, and catalogue products.
+  - **13-Platform Social Media Suite (`src/lib/socials.ts`)**: Added support for 13 global platforms (LinkedIn, Instagram, X/Twitter, WhatsApp, Telegram, YouTube, GitHub, Facebook, Threads, TikTok, Discord, Medium, Website) with `@username` normalization and display handle formatting.
+  - **Native UPI Payment Feature (`src/lib/upi.ts`, `UpiPaymentCard.tsx`)**: Strict VPA regex validation, `upi://pay` NPCI URI builder, dynamic QR code generation/download, and mobile UPI app intent triggers (`Google Pay`, `PhonePe`, `Paytm`, `BHIM`) across all luxury templates.
+  - **Pre-Flight Profile Completion & Validation Engine (`src/lib/validation/profile-completion.ts`)**: Built pre-publication validator analyzing required fields, invalid formats, warnings, and completion percentage score with one-click jump-to-tab navigation and celebratory publish modal.
+  - **Comprehensive Production Deliverables**: Authored `TAPTCH_MASTER_AUDIT.md`, `TAPTCH_ARCHITECTURE_REPORT.md`, `TAPTCH_IMPLEMENTATION_PLAN.md`, `PROFILE_THEME_DESIGN_REPORT.md`, `PROFILE_THEME_IMPLEMENTATION_REPORT.md`, `PROFILE_THEME_TEST_REPORT.md`, `SECURITY_AUDIT_REPORT.md`, `PERFORMANCE_REPORT.md`, `ENVIRONMENT_VARIABLES.md`, and `PRODUCTION_DEPLOYMENT_CHECKLIST.md`.
+  - **Live URL Verification**: Verified production DNS and HTTP endpoints on `https://taptch.com` (HTTP 200), `https://www.taptch.com` (HTTP 301), and `https://taptch.webziotech.in` (HTTP 200).
+  - **Verification Gate**:
+    - `npm test -- tests/unit/profile-design-studio.test.ts`: 19/19 tests passed.
+    - `npm test`: 24 test suites passed, 208/208 tests passed.
+    - `npm run typecheck`: 0 errors (`tsc --noEmit`).
+    - `npm run lint`: 0 errors.
+    - `npm run build`: Next.js 16.4.5 Turbopack compiled clean.

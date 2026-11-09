@@ -22,6 +22,7 @@ import { ModernBusinessTemplate } from './layouts/ModernBusinessTemplate';
 import { PremiumBrandTemplate } from './layouts/PremiumBrandTemplate';
 import { ProfessionalServicesTemplate } from './layouts/ProfessionalServicesTemplate';
 import { CreativeAgencyTemplate } from './layouts/CreativeAgencyTemplate';
+import { ApexCapitalTemplate } from './layouts/ApexCapitalTemplate';
 
 export interface BusinessItem {
   id: string;
@@ -76,6 +77,8 @@ export interface ProfileRenderData {
   brochures?: Array<{ title: string; fileUrl: string; fileSize?: string }>;
   isDemo?: boolean;
   previewPlanId?: string;
+  customFields?: Record<string, unknown> | null;
+  themeConfig?: Record<string, unknown> | null;
 }
 
 export function ProfileRenderer({ profile }: { profile: ProfileRenderData }) {
@@ -214,13 +217,15 @@ export function ProfileRenderer({ profile }: { profile: ProfileRenderData }) {
         return <ModernBusinessTemplate {...layoutProps} />;
       case 'professional-services':
       case 'ivory-minimal':
+      case 'ivory-minimalist':
         return <ProfessionalServicesTemplate {...layoutProps} />;
       case 'creative-agency':
       case 'aurora-creator':
         return <CreativeAgencyTemplate {...layoutProps} />;
+      case 'apex-capital':
+        return <ApexCapitalTemplate {...layoutProps} />;
       case 'premium-brand':
       case 'obsidian-luxury':
-      case 'apex-capital':
       default:
         return <PremiumBrandTemplate {...layoutProps} />;
     }

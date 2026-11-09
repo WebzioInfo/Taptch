@@ -636,6 +636,47 @@
   - `npm run lint`: 0 errors.
   - `npm run build`: Next.js 16.4.5 (Turbopack) production build compiled cleanly across all 35 static and dynamic routes.
 
+---
+
+## ADR-034: Profile Design Studio, 6 Luxury Themes, Unified Renderer & Production Readiness
+
+- **Date**: 2026-11-09
+- **Status**: Accepted & Implemented
+- **Context**: The Profile Builder previously had a custom mockup preview pane that drifted from the published profile layout on `/p/[slug]`, only 5 luxury templates had dedicated layout implementations (`apex-capital` fell back to `PremiumBrandTemplate`), template switching lacked visual cards and custom color overrides, file uploads lacked Cloudflare dual-mode support, social media links lacked `@username` normalization, and Indian business profiles lacked native UPI payment QR/intent capability.
+- **Decision**:
+  1. **Single Shared Rendering Engine (`src/components/templates/ProfileRenderer.tsx`)**:
+     - Standardized `ProfileRenderer` as the sole authoritative layout engine for both the Profile Builder live preview (`/builder/[id]`) and public profile routes (`/p/[slug]`).
+     - Replaced hardcoded builder `<aside>` mockup with reactive `<ProfileRenderer profile={renderProfileData} />`.
+     - Integrated realistic viewport frame toggle (Mobile 375px device frame, Tablet 440px, Desktop full width) without remounting the component tree.
+  2. **6 Genuinely Distinct Luxury Themes**:
+     - `Obsidian Luxury` (`obsidian-luxury`): Deep obsidian (`#0A0A0C`), brushed metallic gold (`#D4AF37`), matte charcoal surfaces (`#121216`).
+     - `Ivory Minimalist` (`ivory-minimal`): Warm editorial paper (`#FAF9F5`), charcoal type, hairline brass borders (`#E5E0D8`).
+     - `Aurora Creator` (`aurora-creator`): Violet-indigo neon mesh gradients (`#0F0728` to `#2E0854`), frosted glassmorphic cards, emerald badges.
+     - `Zenith Corporate` (`zenith-corporate`): Slate navy executive aesthetic (`#0A1128` to `#001F54`), sapphire badges, high-contrast credibility typography.
+     - `Catalyst Business` (`catalyst-business`): High-energy carbon dark (`#111827`), electric amber/orange highlights (`#F59E0B`), bold action CTAs.
+     - `Apex Capital` (`apex-capital`): Dedicated layout authored in `ApexCapitalTemplate.tsx` featuring deep emerald (`#021A14`, `#062D24`), platinum dividers, and luxury portfolio showcase.
+  3. **Visual Style Studio & Zero Data Loss Customization**:
+     - Built 6-card interactive visual switcher with live theme preview cards.
+     - Added Primary & Accent color pickers supporting curated presets and custom Hex inputs, persisted to `profile.themeConfig` without data loss.
+     - Provided "Restore Theme Defaults" button to reset colors instantly.
+  4. **Template Gallery Bi-directional Flow**:
+     - Added `profileId` state preservation to `/templates` and `/templates/[id]` with visual return banner, direct template mutation via `PATCH /api/v1/profiles/${profileId}`, and redirection back to `/builder/${profileId}`.
+  5. **Dual-Mode Media Upload (`ImageUploadOrUrl.tsx`)**:
+     - Drag-and-drop file upload to Cloudflare storage API (`/api/v1/media/upload`) with direct URL input fallback for avatar, cover, business logo, and catalogue products.
+  6. **13-Platform Social Media Suite (`src/lib/socials.ts`)**:
+     - Added support for 13 global platforms (LinkedIn, Instagram, X/Twitter, WhatsApp, Telegram, YouTube, GitHub, Facebook, Threads, TikTok, Discord, Medium, Website) with `@username` normalization and display handle formatting.
+  7. **Native UPI Payment Feature (`src/lib/upi.ts`, `UpiPaymentCard.tsx`)**:
+     - Strict VPA regex validation, `upi://pay` NPCI URI builder, dynamic QR code generation/download, and mobile UPI app intent triggers (`Google Pay`, `PhonePe`, `Paytm`, `BHIM`) across all luxury templates.
+  8. **Pre-Flight Profile Completion & Validation Engine (`src/lib/validation/profile-completion.ts`)**:
+     - Built pre-publication validator analyzing required fields, invalid formats, warnings, and completion percentage score with one-click jump-to-tab navigation and celebratory publish modal.
+- **Verification**:
+  - `npm test -- tests/unit/profile-design-studio.test.ts`: 19/19 tests passed.
+  - `npm test`: 24 test suites passed, 208/208 tests passed.
+  - `npm run typecheck`: 0 errors (`tsc --noEmit`).
+  - `npm run lint`: 0 errors.
+  - `npm run build`: Next.js 16.4.5 Turbopack compiled clean.
+
+
 
 
 

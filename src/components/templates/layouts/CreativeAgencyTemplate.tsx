@@ -17,6 +17,8 @@ import {
   Layers,
 } from 'lucide-react';
 import type { TemplateLayoutProps } from './types';
+import { UpiPaymentCard } from '@/components/profile/UpiPaymentCard';
+import type { UpiPaymentConfig } from '@/lib/upi';
 
 export function CreativeAgencyTemplate({
   profile,
@@ -28,6 +30,9 @@ export function CreativeAgencyTemplate({
 }: TemplateLayoutProps) {
   const catalogue = profile.catalogue || [];
   const isNano = previewPlanId === 'nano';
+
+  const rawUpi = (profile as unknown as { customFields?: { upiConfig?: UpiPaymentConfig } }).customFields?.upiConfig;
+  const upiConfig: UpiPaymentConfig | null = rawUpi?.isEnabled && rawUpi.upiId ? rawUpi : null;
 
   return (
     <div className="w-full min-h-screen bg-[#0B0D1B] text-slate-100 flex flex-col items-center">
@@ -108,6 +113,12 @@ export function CreativeAgencyTemplate({
                   {profile.headline}
                 </p>
               )}
+              {profile.businesses?.[0]?.companyName && (
+                <p className="text-xs text-purple-300 font-medium">
+                  {profile.businesses[0].companyName}
+                  {profile.businesses[0].roleTitle && ` • ${profile.businesses[0].roleTitle}`}
+                </p>
+              )}
             </div>
 
             <div className="flex flex-row md:flex-col gap-2.5 w-full md:w-auto shrink-0 mt-4 md:mt-0">
@@ -129,6 +140,14 @@ export function CreativeAgencyTemplate({
             </div>
           </div>
         </div>
+
+        {/* Direct UPI Payment Section */}
+        {upiConfig && (
+          <UpiPaymentCard
+            config={upiConfig}
+            className="bg-[#151833]/80 border-purple-500/30 text-white backdrop-blur-md"
+          />
+        )}
 
         {/* Bio / Studio Manifesto */}
         {profile.bio && (

@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import {
   ArrowLeft,
   Smartphone,
@@ -21,10 +21,13 @@ import { STANDARD_TEMPLATES } from '@/modules/templates/constants';
 export default function IndividualTemplatePage() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const templateIdParam = (params.id as string) || '';
+  const profileIdParam = searchParams.get('profileId');
 
   const { data: session } = useSession();
   const isAuthenticated = Boolean(session?.user);
+  const [isApplying, setIsApplying] = React.useState(false);
 
   const [previewDevice, setPreviewDevice] = React.useState<'mobile' | 'tablet' | 'desktop'>('desktop');
 
@@ -48,12 +51,32 @@ export default function IndividualTemplatePage() {
     };
   }, [demoBusiness, template.id]);
 
-  const handleUseTemplate = () => {
+  const handleUseTemplate = async () => {
     if (!isAuthenticated) {
       router.push(`/register?template=${encodeURIComponent(template.id)}`);
-    } else {
-      router.push(`/builder/new?template=${encodeURIComponent(template.id)}`);
+      return;
     }
+
+    if (profileIdParam) {
+      try {
+        setIsApplying(true);
+        const res = await fetch(`/api/v1/profiles/${profileIdParam}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ templateId: template.id }),
+        });
+        if (res.ok) {
+          router.push(`/builder/${profileIdParam}`);
+          return;
+        }
+      } catch (e) {
+        console.error('Failed to apply template', e);
+      } finally {
+        setIsApplying(false);
+      }
+    }
+
+    router.push(`/builder/new?template=${encodeURIComponent(template.id)}`);
   };
 
   return (
@@ -64,11 +87,11 @@ export default function IndividualTemplatePage() {
           {/* Left: Back & Template Meta */}
           <div className="flex items-center gap-3 min-w-0">
             <Link
-              href="/templates"
+              href={profileIdParam ? `/builder/${profileIdParam}` : '/templates'}
               className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors shrink-0"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Templates</span>
+              <span>{profileIdParam ? 'Editor' : 'Templates'}</span>
             </Link>
 
             <div className="h-4 w-px bg-border/60 hidden sm:block shrink-0" />
@@ -133,7 +156,7 @@ export default function IndividualTemplatePage() {
               onClick={handleUseTemplate}
               className="bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-semibold h-8 px-3.5 gap-1.5 shadow-sm"
             >
-              <span>{isAuthenticated ? 'Use Template' : 'Get Started'}</span>
+              <span>{isApplying ? 'Applying...' : profileIdParam ? 'Apply to Profile' : isAuthenticated ? 'Use Template' : 'Get Started'}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Button>
           </div>

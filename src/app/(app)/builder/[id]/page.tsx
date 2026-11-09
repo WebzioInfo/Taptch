@@ -24,6 +24,13 @@ import {
   Mail,
   Globe,
   MapPin,
+  IndianRupee,
+  Tablet,
+  Monitor,
+  Check,
+  QrCode,
+  Copy,
+  Sparkles,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,6 +46,11 @@ import { LoadingButton } from '@/components/ui/loading-button';
 import { DeleteDialog } from '@/components/ui/confirm-dialog';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useToast } from '@/components/ui/use-toast';
+import { ProfileRenderer } from '@/components/templates/ProfileRenderer';
+import { ImageUploadOrUrl } from '@/components/media/ImageUploadOrUrl';
+import { SOCIAL_PLATFORMS, normalizeSocialUrl, extractSocialHandle } from '@/lib/socials';
+import { isValidUpiId, generateUpiQrDataUrl, type UpiPaymentConfig } from '@/lib/upi';
+import { validateProfileForPublishing, type ProfileValidationResult } from '@/lib/validation/profile-completion';
 
 interface BusinessItem {
   id: string;
@@ -110,6 +122,10 @@ interface ProfileData {
     fontFamily?: string;
     [key: string]: unknown;
   };
+  customFields?: {
+    upiConfig?: UpiPaymentConfig;
+    [key: string]: unknown;
+  };
   status: 'draft' | 'published';
   businesses: BusinessItem[];
   catalogue: CatalogueItem[];
@@ -118,12 +134,76 @@ interface ProfileData {
 
 const SECTION_TABS = [
   { id: 'identity', label: 'Identity', icon: User },
-  { id: 'theme', label: 'Theme', icon: Palette },
+  { id: 'theme', label: 'Styles', icon: Palette },
   { id: 'contacts', label: 'Contact', icon: Phone },
-  { id: 'businesses', label: 'Businesses', icon: Building2 },
+  { id: 'businesses', label: 'Ventures', icon: Building2 },
   { id: 'catalogue', label: 'Catalogue', icon: Package },
   { id: 'socials', label: 'Socials', icon: Share2 },
+  { id: 'upi', label: 'UPI Payment', icon: IndianRupee },
   { id: 'reviews', label: 'Extras', icon: Star },
+];
+
+export const LUXURY_TEMPLATES = [
+  {
+    id: 'obsidian-luxury',
+    name: 'Obsidian Luxury',
+    tagline: 'Executive High-Contrast',
+    description: 'Deep charcoal and matte black with brushed gold accents, VIP verified shield, and prestige typography.',
+    target: 'C-Suite executives, partners, enterprise founders',
+    plan: 'Free',
+    palette: ['#0A0A0C', '#121216', '#D4AF37'],
+    defaultTheme: { primaryColor: '#D4AF37', background: '#0A0A0C', cardBg: '#121216' },
+  },
+  {
+    id: 'ivory-minimal',
+    name: 'Ivory Minimalist',
+    tagline: 'Warm Editorial Paper',
+    description: 'Warm alabaster and ivory with timeless editorial serif headings, fine dividers, and supreme legibility.',
+    target: 'Architects, consultants, physicians, attorneys',
+    plan: 'Free',
+    palette: ['#FAF8F5', '#FFFFFF', '#8C6D3B'],
+    defaultTheme: { primaryColor: '#8C6D3B', background: '#FAF8F5', cardBg: '#FFFFFF' },
+  },
+  {
+    id: 'aurora-creator',
+    name: 'Aurora Creator',
+    tagline: 'Neon Glassmorphism',
+    description: 'Vibrant neon purple gradients, subtle backdrop blurs, creative compositions, and portfolio showcase.',
+    target: 'Creators, artists, designers, digital agencies',
+    plan: 'Micro',
+    palette: ['#0B0D1B', '#151833', '#A855F7'],
+    defaultTheme: { primaryColor: '#A855F7', background: '#0B0D1B', cardBg: '#151833' },
+  },
+  {
+    id: 'zenith-corporate',
+    name: 'Zenith Corporate',
+    tagline: 'Precision Titanium Grid',
+    description: 'Enterprise titanium navy with structured information hierarchy, multi-venture tabs, and corporate precision.',
+    target: 'B2B executives, M&A advisors, corporate directors',
+    plan: 'Mini',
+    palette: ['#0B0F19', '#111827', '#2563EB'],
+    defaultTheme: { primaryColor: '#2563EB', background: '#0B0F19', cardBg: '#111827' },
+  },
+  {
+    id: 'catalyst-business',
+    name: 'Catalyst Business',
+    tagline: 'High-Conversion Commerce',
+    description: 'Commercial showcase with dedicated product shelves, service cards, and quick lead capture.',
+    target: 'Retailers, product founders, showroom directors',
+    plan: 'Mini',
+    palette: ['#064E3B', '#065F46', '#059669'],
+    defaultTheme: { primaryColor: '#059669', background: '#064E3B', cardBg: '#065F46' },
+  },
+  {
+    id: 'apex-capital',
+    name: 'Apex Capital & Wealth',
+    tagline: 'Prestige Wealth & Property',
+    description: 'Deep emerald and dark graphite tailored for luxury real estate developers, venture capital, and private wealth.',
+    target: 'Luxury real estate, private equity, hedge funds',
+    plan: 'Max',
+    palette: ['#021A14', '#062D24', '#10B981'],
+    defaultTheme: { primaryColor: '#10B981', background: '#021A14', cardBg: '#062D24' },
+  },
 ];
 
 export default function ProfileBuilderPage({
@@ -148,6 +228,13 @@ export default function ProfileBuilderPage({
   const [catToDelete, setCatToDelete] = useState<string | null>(null);
   const [showExitWarning, setShowExitWarning] = useState(false);
   const [isDeletingItem, setIsDeletingItem] = useState(false);
+  const [previewDevice, setPreviewDevice] = useState<'mobile' | 'tablet' | 'desktop'>('mobile');
+  const [validationResult, setValidationResult] = useState<ProfileValidationResult | null>(null);
+  const [showValidationModal, setShowValidationModal] = useState(false);
+  const [showPublishSuccessModal, setShowPublishSuccessModal] = useState(false);
+  const [newSocialPlatform, setNewSocialPlatform] = useState('instagram');
+  const [newSocialInput, setNewSocialInput] = useState('');
+  const [copiedLiveLink, setCopiedLiveLink] = useState(false);
 
   // Business Modal State
   const [isBizModalOpen, setIsBizModalOpen] = useState(false);
@@ -156,6 +243,7 @@ export default function ProfileBuilderPage({
     name: '',
     tagline: '',
     description: '',
+    logoUrl: '',
     website: '',
     email: '',
     phone: '',
@@ -173,6 +261,7 @@ export default function ProfileBuilderPage({
     title: '',
     description: '',
     price: '',
+    imageUrl: '',
     actionUrl: '',
     actionLabel: 'Enquire',
   });
@@ -194,6 +283,7 @@ export default function ProfileBuilderPage({
             address: json.data.address || '',
             location: json.data.location || '',
             socialLinks: json.data.socialLinks || {},
+            customFields: json.data.customFields || {},
             googleReviewUrl: json.data.customFields?.googleReviewUrl || '',
             brochureUrl: json.data.customFields?.brochureUrl || '',
           };
@@ -214,6 +304,52 @@ export default function ProfileBuilderPage({
   const hasChanges = Boolean(
     profile && originalProfile && JSON.stringify(profile) !== JSON.stringify(originalProfile)
   );
+
+  const renderProfileData = React.useMemo(() => {
+    if (!profile) return null;
+    return {
+      id: profile.id,
+      slug: profile.slug,
+      displayName: profile.displayName || 'Your Name',
+      headline: profile.headline,
+      bio: profile.bio,
+      avatarUrl: profile.avatarUrl,
+      coverUrl: profile.coverUrl,
+      phone: profile.phone,
+      whatsapp: profile.whatsapp,
+      email: profile.email,
+      website: profile.website,
+      address: profile.address,
+      location: profile.location,
+      templateId: profile.templateId || 'obsidian-luxury',
+      themeConfig: profile.themeConfig,
+      customFields: profile.customFields,
+      businesses: profile.businesses.map((b) => ({
+        id: b.id,
+        companyName: b.name,
+        tagline: b.tagline,
+        roleTitle: b.tagline,
+        description: b.description,
+        websiteUrl: b.website,
+        address: b.address,
+      })),
+      catalogue: profile.catalogue.map((c) => ({
+        id: c.id,
+        title: c.title,
+        itemType: c.type,
+        description: c.description,
+        price: c.price,
+        currency: c.currency,
+        imageUrl: c.imageUrl,
+        actionUrl: c.actionUrl,
+      })),
+      socialLinks: profile.socialLinks
+        ? Object.entries(profile.socialLinks)
+            .filter(([, url]) => Boolean(url))
+            .map(([platform, url]) => ({ platform, url: url as string }))
+        : [],
+    };
+  }, [profile]);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -293,6 +429,7 @@ export default function ProfileBuilderPage({
         templateId: profile.templateId,
         themeConfig: profile.themeConfig,
         customFields: {
+          ...profile.customFields,
           googleReviewUrl: profile.googleReviewUrl || null,
           brochureUrl: profile.brochureUrl || null,
         },
@@ -322,12 +459,25 @@ export default function ProfileBuilderPage({
     }
   };
 
-  // Publish profile
-  const handlePublish = async () => {
+  // Pre-flight check and initiate publishing
+  const handleInitiatePublish = () => {
+    if (!profile) return;
+    const result = validateProfileForPublishing(profile);
+    setValidationResult(result);
+    setShowValidationModal(true);
+  };
+
+  // Confirm publish after validation check
+  const handleConfirmPublish = async () => {
     if (!profile) return;
     try {
       setIsPublishing(true);
       setErrorMessage(null);
+
+      // Save draft first if there are dirty changes
+      if (hasChanges) {
+        await handleSaveDraft();
+      }
 
       const res = await fetch(`/api/v1/profiles/${id}/publish`, {
         method: 'POST',
@@ -340,6 +490,8 @@ export default function ProfileBuilderPage({
 
       setProfile((prev) => (prev ? { ...prev, status: 'published' } : null));
       setSaveStatus('Profile published successfully!');
+      setShowValidationModal(false);
+      setShowPublishSuccessModal(true);
       toast.success(`Profile published successfully! Live at /p/${profile.slug}`);
       setTimeout(() => setSaveStatus(null), 4000);
     } catch (err: unknown) {
@@ -359,6 +511,7 @@ export default function ProfileBuilderPage({
         name: biz.name || '',
         tagline: biz.tagline || '',
         description: biz.description || '',
+        logoUrl: (biz as { logoUrl?: string | null }).logoUrl || '',
         website: biz.website || '',
         email: biz.email || '',
         phone: biz.phone || '',
@@ -373,6 +526,7 @@ export default function ProfileBuilderPage({
         name: '',
         tagline: '',
         description: '',
+        logoUrl: '',
         website: '',
         email: '',
         phone: '',
@@ -462,6 +616,7 @@ export default function ProfileBuilderPage({
         title: cat.title,
         description: cat.description || '',
         price: cat.price || '',
+        imageUrl: cat.imageUrl || '',
         actionUrl: cat.actionUrl || '',
         actionLabel: cat.actionLabel || 'Enquire',
       });
@@ -472,6 +627,7 @@ export default function ProfileBuilderPage({
         title: '',
         description: '',
         price: '',
+        imageUrl: '',
         actionUrl: '',
         actionLabel: 'Enquire',
       });
@@ -640,7 +796,7 @@ export default function ProfileBuilderPage({
 
           <LoadingButton
             size="sm"
-            onClick={handlePublish}
+            onClick={handleInitiatePublish}
             loading={isPublishing}
             className="text-xs h-8 bg-blue-600 text-white hover:bg-blue-700 font-semibold"
           >
@@ -736,24 +892,25 @@ export default function ProfileBuilderPage({
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold mb-1">Avatar URL</label>
-                    <Input
-                      value={profile.avatarUrl || ''}
-                      onChange={(e) => setProfile({ ...profile, avatarUrl: e.target.value })}
-                      placeholder="https://..."
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold mb-1">Cover URL</label>
-                    <Input
-                      value={profile.coverUrl || ''}
-                      onChange={(e) => setProfile({ ...profile, coverUrl: e.target.value })}
-                      placeholder="https://..."
-                    />
-                  </div>
-                </div>
+                <ImageUploadOrUrl
+                  label="Profile Avatar"
+                  description="Recommended: 400x400 square portrait"
+                  value={profile.avatarUrl}
+                  onChange={(url) => setProfile({ ...profile, avatarUrl: url })}
+                  mediaCategory="avatar"
+                  aspectRatio="square"
+                  profileId={profile.id}
+                />
+
+                <ImageUploadOrUrl
+                  label="Cover Banner"
+                  description="Recommended: 1200x400 wide banner highlighting your brand or practice"
+                  value={profile.coverUrl}
+                  onChange={(url) => setProfile({ ...profile, coverUrl: url })}
+                  mediaCategory="cover"
+                  aspectRatio="banner"
+                  profileId={profile.id}
+                />
 
                 <div className="pt-4 border-t border-slate-200 flex justify-end">
                   <Button
@@ -778,14 +935,91 @@ export default function ProfileBuilderPage({
             </div>
           )}
 
-          {/* Theme Tab */}
+          {/* Theme / Styles Studio Tab */}
           {activeTab === 'theme' && (
-            <div className="space-y-5">
-              <h2 className="text-sm font-semibold">Theme</h2>
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-sm font-semibold">Luxury Style Studio</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Select an art-directed aesthetic. Your profile information, contacts, and businesses are 100% preserved.
+                </p>
+              </div>
 
-              <div className="space-y-4">
+              {/* 6 Luxury Style Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                {LUXURY_TEMPLATES.map((tpl) => {
+                  const isSelected = (profile.templateId || 'obsidian-luxury') === tpl.id;
+                  return (
+                    <div
+                      key={tpl.id}
+                      onClick={() => {
+                        setProfile({
+                          ...profile,
+                          templateId: tpl.id,
+                          themeConfig: {
+                            ...profile.themeConfig,
+                            primaryColor: tpl.defaultTheme.primaryColor,
+                            background: tpl.defaultTheme.background,
+                            cardBg: tpl.defaultTheme.cardBg,
+                          },
+                        });
+                        toast.success(`Applied ${tpl.name} style`);
+                      }}
+                      className={`p-3.5 rounded-2xl border-2 transition-all cursor-pointer relative flex flex-col justify-between gap-3 ${
+                        isSelected
+                          ? 'border-blue-600 bg-blue-50/40 shadow-sm'
+                          : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-bold text-foreground">{tpl.name}</span>
+                            {isSelected && (
+                              <Badge variant="default" className="text-[9px] px-1.5 py-0 bg-blue-600 text-white font-semibold">
+                                Active
+                              </Badge>
+                            )}
+                          </div>
+                          <span className="text-[11px] text-muted-foreground font-medium block mt-0.5">
+                            {tpl.tagline}
+                          </span>
+                        </div>
+
+                        {/* Palette Swatches */}
+                        <div className="flex items-center -space-x-1.5 shrink-0">
+                          {tpl.palette.map((c, i) => (
+                            <div
+                              key={i}
+                              className="w-4 h-4 rounded-full border border-white shadow-xs"
+                              style={{ backgroundColor: c }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2">
+                        {tpl.description}
+                      </p>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[10px]">
+                        <span className="text-slate-500 truncate max-w-[150px]">{tpl.target}</span>
+                        <span className="font-semibold text-slate-700 uppercase font-mono">{tpl.plan}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Curated Customization Controls */}
+              <div className="p-4 rounded-2xl border border-slate-200 bg-white space-y-4">
+                <h3 className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                  <Palette className="w-3.5 h-3.5 text-blue-600" />
+                  Customization Controls
+                </h3>
+
                 <div>
-                  <label className="block text-xs font-semibold mb-2">Accent Color</label>
+                  <label className="block text-xs font-semibold mb-2">Primary Accent Color</label>
                   <div className="flex items-center gap-3">
                     <input
                       type="color"
@@ -796,7 +1030,7 @@ export default function ProfileBuilderPage({
                           themeConfig: { ...profile.themeConfig, primaryColor: e.target.value },
                         })
                       }
-                      className="w-10 h-10 rounded-lg cursor-pointer border border-slate-200"
+                      className="w-9 h-9 rounded-lg cursor-pointer border border-slate-200"
                     />
                     <Input
                       value={primaryColor}
@@ -806,28 +1040,53 @@ export default function ProfileBuilderPage({
                           themeConfig: { ...profile.themeConfig, primaryColor: e.target.value },
                         })
                       }
-                      className="w-32 font-mono text-xs"
+                      className="w-28 font-mono text-xs h-8"
                     />
+
+                    {/* Quick Preset Swatches */}
+                    <div className="flex items-center gap-1.5 ml-2">
+                      {['#D4AF37', '#8C6D3B', '#A855F7', '#2563EB', '#059669', '#10B981'].map((hex) => (
+                        <button
+                          key={hex}
+                          type="button"
+                          onClick={() =>
+                            setProfile({
+                              ...profile,
+                              themeConfig: { ...profile.themeConfig, primaryColor: hex },
+                            })
+                          }
+                          className="w-6 h-6 rounded-full border border-slate-200 hover:scale-110 transition-transform cursor-pointer"
+                          style={{ backgroundColor: hex }}
+                          title={hex}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold mb-1">Template</label>
-                  <div className="p-3 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
-                    <span className="text-xs font-semibold uppercase font-mono">{profile.templateId}</span>
-                    <Link href={`/templates`}>
-                      <Button variant="outline" size="sm" className="text-xs h-7">
-                        Change
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
+                <div className="pt-2 flex items-center justify-between">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      const cur = LUXURY_TEMPLATES.find((t) => t.id === profile.templateId) || LUXURY_TEMPLATES[0];
+                      setProfile({
+                        ...profile,
+                        themeConfig: { ...cur.defaultTheme },
+                      });
+                      toast.success('Restored style defaults');
+                    }}
+                    className="text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    Restore Defaults
+                  </Button>
 
-                <div className="pt-4 border-t border-slate-200 flex justify-end">
                   <Button
                     size="sm"
                     onClick={() =>
                       handleSaveSection('Theme', {
+                        templateId: profile.templateId,
                         themeConfig: profile.themeConfig,
                       })
                     }
@@ -835,7 +1094,7 @@ export default function ProfileBuilderPage({
                     className="text-xs h-8 bg-blue-600 text-white hover:bg-blue-700 font-semibold"
                   >
                     <Save className="w-3.5 h-3.5 mr-1" />
-                    {savingSection === 'Theme' ? 'Saving...' : 'Save'}
+                    {savingSection === 'Theme' ? 'Saving...' : 'Save Style'}
                   </Button>
                 </div>
               </div>
@@ -1061,88 +1320,289 @@ export default function ProfileBuilderPage({
           {/* Socials Tab */}
           {activeTab === 'socials' && (
             <div className="space-y-5">
-              <h2 className="text-sm font-semibold">Socials</h2>
+              <div>
+                <h2 className="text-sm font-semibold">Social Networks & Links</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Connect your networking channels. Enter your username (e.g. @sanoof) or full profile URL.
+                </p>
+              </div>
 
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs font-semibold mb-1">LinkedIn</label>
-                  <Input
-                    value={profile.socialLinks?.linkedin || ''}
-                    onChange={(e) =>
+              {/* Add / Update Social Form */}
+              <div className="p-4 rounded-2xl border border-slate-200 bg-white space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">Platform</label>
+                    <select
+                      value={newSocialPlatform}
+                      onChange={(e) => setNewSocialPlatform(e.target.value)}
+                      className="w-full h-8 text-xs rounded-lg border border-slate-200 px-2.5 bg-white text-slate-900 focus:border-blue-600 focus:outline-hidden"
+                    >
+                      {Object.values(SOCIAL_PLATFORMS).map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      Username or Profile URL
+                    </label>
+                    <div className="flex gap-2">
+                      <Input
+                        value={newSocialInput}
+                        onChange={(e) => setNewSocialInput(e.target.value)}
+                        placeholder={SOCIAL_PLATFORMS[newSocialPlatform]?.placeholder || 'username or URL'}
+                        className="text-xs h-8 flex-1"
+                      />
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => {
+                          if (!newSocialInput.trim()) return;
+                          const normalized = normalizeSocialUrl(newSocialPlatform, newSocialInput);
+                          setProfile({
+                            ...profile,
+                            socialLinks: {
+                              ...profile.socialLinks,
+                              [newSocialPlatform]: normalized,
+                            },
+                          });
+                          setNewSocialInput('');
+                          toast.success(`Linked ${SOCIAL_PLATFORMS[newSocialPlatform]?.name}`);
+                        }}
+                        className="text-xs h-8 bg-blue-600 text-white hover:bg-blue-700 px-3 shrink-0 font-semibold"
+                      >
+                        <Plus className="w-3.5 h-3.5 mr-1" />
+                        Add Link
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {newSocialInput.trim() && (
+                  <div className="text-[11px] text-muted-foreground font-mono bg-muted/40 p-2 rounded-lg">
+                    Destination URL: {normalizeSocialUrl(newSocialPlatform, newSocialInput)}
+                  </div>
+                )}
+              </div>
+
+              {/* Linked Accounts List */}
+              <div className="space-y-2">
+                <span className="text-xs font-semibold text-foreground">
+                  Linked Channels ({Object.values(profile.socialLinks || {}).filter(Boolean).length})
+                </span>
+                {profile.socialLinks && Object.entries(profile.socialLinks).filter(([, url]) => Boolean(url)).length > 0 ? (
+                  <div className="space-y-2">
+                    {Object.entries(profile.socialLinks)
+                      .filter(([, url]) => Boolean(url))
+                      .map(([platform, url]) => {
+                        const platConfig = SOCIAL_PLATFORMS[platform];
+                        const handle = extractSocialHandle(platform, url as string);
+                        return (
+                          <div
+                            key={platform}
+                            className="p-3 rounded-xl border border-slate-200 bg-white flex items-center justify-between gap-3 shadow-xs"
+                          >
+                            <div className="min-w-0 flex items-center gap-2.5">
+                              <span className="text-xs font-bold text-foreground capitalize">
+                                {platConfig?.name || platform}
+                              </span>
+                              <span className="text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-muted text-foreground truncate max-w-[180px]">
+                                {handle}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <a
+                                href={url as string}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground"
+                                title="Open profile"
+                              >
+                                <ExternalLink className="w-3.5 h-3.5" />
+                              </a>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const updated = { ...profile.socialLinks };
+                                  delete updated[platform];
+                                  setProfile({ ...profile, socialLinks: updated });
+                                  toast.success(`Removed ${platConfig?.name || platform}`);
+                                }}
+                                className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive cursor-pointer"
+                                title="Remove link"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                ) : (
+                  <div className="p-6 rounded-2xl border border-dashed border-slate-200 text-center text-xs text-muted-foreground bg-slate-50">
+                    No social profiles linked yet. Select a platform above to connect.
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-4 border-t border-slate-200 flex justify-end">
+                <Button
+                  size="sm"
+                  onClick={() =>
+                    handleSaveSection('Social Networks', {
+                      socialLinks: profile.socialLinks || {},
+                    })
+                  }
+                  disabled={savingSection === 'Social Networks'}
+                  className="text-xs h-8 bg-blue-600 text-white hover:bg-blue-700 font-semibold"
+                >
+                  <Save className="w-3.5 h-3.5 mr-1" />
+                  {savingSection === 'Social Networks' ? 'Saving...' : 'Save Socials'}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* UPI Payment Tab */}
+          {activeTab === 'upi' && (
+            <div className="space-y-5">
+              <div>
+                <h2 className="text-sm font-semibold">UPI Payment & Direct Settlement</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Configure direct bank payments via Indian UPI protocol. Visitors can scan or tap to transfer funds directly.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-2xl border border-slate-200 bg-white space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="text-xs font-bold text-foreground">Enable UPI Payment on Profile</label>
+                    <p className="text-[11px] text-muted-foreground">Show payment action and QR code on your live card</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={Boolean(profile.customFields?.upiConfig?.isEnabled)}
+                    onChange={(e) => {
+                      const cur = profile.customFields?.upiConfig || { upiId: '' };
                       setProfile({
                         ...profile,
-                        socialLinks: { ...profile.socialLinks, linkedin: e.target.value },
-                      })
-                    }
-                    placeholder="https://linkedin.com/in/username"
+                        customFields: {
+                          ...profile.customFields,
+                          upiConfig: { ...cur, isEnabled: e.target.checked },
+                        },
+                      });
+                    }}
+                    className="w-4 h-4 rounded text-blue-600 cursor-pointer"
                   />
                 </div>
+
                 <div>
-                  <label className="block text-xs font-semibold mb-1">X (Twitter)</label>
+                  <label className="block text-xs font-semibold mb-1">UPI ID / VPA *</label>
                   <Input
-                    value={profile.socialLinks?.twitter || ''}
-                    onChange={(e) =>
+                    placeholder="merchant@upi or yourname@okhdfcbank"
+                    value={profile.customFields?.upiConfig?.upiId || ''}
+                    onChange={(e) => {
+                      const cur = profile.customFields?.upiConfig || { upiId: '', isEnabled: true };
                       setProfile({
                         ...profile,
-                        socialLinks: { ...profile.socialLinks, twitter: e.target.value },
-                      })
-                    }
-                    placeholder="https://x.com/username"
+                        customFields: {
+                          ...profile.customFields,
+                          upiConfig: { ...cur, upiId: e.target.value },
+                        },
+                      });
+                    }}
+                    className="text-xs font-mono"
+                  />
+                  {profile.customFields?.upiConfig?.upiId && (
+                    <div className="mt-1">
+                      {isValidUpiId(profile.customFields.upiConfig.upiId) ? (
+                        <span className="text-[11px] text-emerald-600 font-medium flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Valid UPI VPA address
+                        </span>
+                      ) : (
+                        <span className="text-[11px] text-destructive font-medium flex items-center gap-1">
+                          <AlertCircle className="w-3.5 h-3.5" /> Invalid UPI format (e.g. name@bank)
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold mb-1">Payee Name</label>
+                  <Input
+                    placeholder={profile.displayName}
+                    value={profile.customFields?.upiConfig?.payeeName || ''}
+                    onChange={(e) => {
+                      const cur = profile.customFields?.upiConfig || { upiId: '', isEnabled: true };
+                      setProfile({
+                        ...profile,
+                        customFields: {
+                          ...profile.customFields,
+                          upiConfig: { ...cur, payeeName: e.target.value },
+                        },
+                      });
+                    }}
+                    className="text-xs"
                   />
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold mb-1">Instagram</label>
-                  <Input
-                    value={profile.socialLinks?.instagram || ''}
-                    onChange={(e) =>
-                      setProfile({
-                        ...profile,
-                        socialLinks: { ...profile.socialLinks, instagram: e.target.value },
-                      })
-                    }
-                    placeholder="https://instagram.com/username"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold mb-1">YouTube</label>
-                  <Input
-                    value={profile.socialLinks?.youtube || ''}
-                    onChange={(e) =>
-                      setProfile({
-                        ...profile,
-                        socialLinks: { ...profile.socialLinks, youtube: e.target.value },
-                      })
-                    }
-                    placeholder="https://youtube.com/@channel"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold mb-1">GitHub</label>
-                  <Input
-                    value={profile.socialLinks?.github || ''}
-                    onChange={(e) =>
-                      setProfile({
-                        ...profile,
-                        socialLinks: { ...profile.socialLinks, github: e.target.value },
-                      })
-                    }
-                    placeholder="https://github.com/username"
-                  />
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold mb-1">Default Amount (₹ optional)</label>
+                    <Input
+                      type="number"
+                      placeholder="e.g. 500"
+                      value={profile.customFields?.upiConfig?.defaultAmount || ''}
+                      onChange={(e) => {
+                        const cur = profile.customFields?.upiConfig || { upiId: '', isEnabled: true };
+                        setProfile({
+                          ...profile,
+                          customFields: {
+                            ...profile.customFields,
+                            upiConfig: { ...cur, defaultAmount: e.target.value },
+                          },
+                        });
+                      }}
+                      className="text-xs font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold mb-1">Payment Purpose / Note</label>
+                    <Input
+                      placeholder="Consulting / Order"
+                      value={profile.customFields?.upiConfig?.note || ''}
+                      onChange={(e) => {
+                        const cur = profile.customFields?.upiConfig || { upiId: '', isEnabled: true };
+                        setProfile({
+                          ...profile,
+                          customFields: {
+                            ...profile.customFields,
+                            upiConfig: { ...cur, note: e.target.value },
+                          },
+                        });
+                      }}
+                      className="text-xs"
+                    />
+                  </div>
                 </div>
 
                 <div className="pt-4 border-t border-slate-200 flex justify-end">
                   <Button
                     size="sm"
                     onClick={() =>
-                      handleSaveSection('Social Networks', {
-                        socialLinks: profile.socialLinks || {},
+                      handleSaveSection('UPI Payment', {
+                        customFields: profile.customFields || {},
                       })
                     }
-                    disabled={savingSection === 'Social Networks'}
+                    disabled={savingSection === 'UPI Payment'}
                     className="text-xs h-8 bg-blue-600 text-white hover:bg-blue-700 font-semibold"
                   >
                     <Save className="w-3.5 h-3.5 mr-1" />
-                    {savingSection === 'Social Networks' ? 'Saving...' : 'Save'}
+                    {savingSection === 'UPI Payment' ? 'Saving...' : 'Save UPI Settings'}
                   </Button>
                 </div>
               </div>
@@ -1196,169 +1656,84 @@ export default function ProfileBuilderPage({
         </main>
 
         {/* Pane 3: Right Live Preview Screen */}
-        <aside className="w-96 bg-neutral-950 p-6 flex flex-col items-center justify-center shrink-0 border-l border-slate-200 overflow-y-auto">
-          <div className="text-[11px] text-muted-foreground mb-3 flex items-center gap-1.5 uppercase font-semibold">
-            <Smartphone className="w-3.5 h-3.5" />
-            Preview
-          </div>
-
-          {/* Phone Frame */}
-          <div className="w-[310px] h-[580px] rounded-[36px] border-4 border-neutral-700 bg-neutral-900 shadow-2xl overflow-hidden flex flex-col relative">
-            {/* Notch */}
-            <div className="h-5 bg-neutral-900 flex items-center justify-center shrink-0">
-              <div className="w-20 h-3 bg-neutral-800 rounded-b-lg" />
-            </div>
-
-            {/* Screen Content Live Reactivity */}
-            <div
-              className="flex-1 p-4 overflow-y-auto"
-              style={{
-                backgroundColor: profile.themeConfig?.background?.toString() || '#0A0A0C',
-                color: profile.themeConfig?.background === '#FDFBF7' ? '#1A202C' : '#FFFFFF',
-              }}
-            >
-              {/* Cover Banner */}
-              <div
-                className="h-16 w-full rounded-xl -mt-1 mb-4 flex items-center justify-center text-[10px] font-medium opacity-70"
-                style={{
-                  background: `linear-gradient(135deg, ${primaryColor}40 0%, ${primaryColor}10 100%)`,
-                }}
-              />
-
-              {/* Avatar & Header */}
-              <div className="text-center -mt-9">
-                <div
-                  className="w-14 h-14 rounded-full mx-auto flex items-center justify-center font-bold text-sm shadow-md border-2 border-background"
-                  style={{
-                    backgroundColor: primaryColor,
-                    color: '#FFFFFF',
-                  }}
-                >
-                  {profile.displayName ? profile.displayName.charAt(0).toUpperCase() : 'U'}
-                </div>
-                <h4 className="mt-2 text-sm font-bold truncate">{profile.displayName || 'Your Name'}</h4>
-                <p className="text-[11px] opacity-70 truncate">{profile.headline || 'Your Professional Title'}</p>
-
-                {/* Physical Location */}
-                {profile.address && (
-                  <div className="flex items-center justify-center gap-1 text-[10px] opacity-75 mt-1">
-                    <MapPin className="w-3 h-3 text-blue-600 shrink-0" />
-                    <span className="truncate max-w-[220px]">{profile.address}</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Quick Communication Buttons */}
-              {(profile.phone || profile.email || profile.whatsapp || profile.website) && (
-                <div className="flex items-center justify-center gap-2 mt-3">
-                  {profile.phone && (
-                    <div
-                      className="w-7 h-7 rounded-full flex items-center justify-center border border-white/15 bg-white/10 text-white"
-                      title={profile.phone}
-                    >
-                      <Phone className="w-3.5 h-3.5" />
-                    </div>
-                  )}
-                  {profile.whatsapp && (
-                    <div
-                      className="w-7 h-7 rounded-full flex items-center justify-center border border-emerald-500/30 bg-emerald-500/20 text-emerald-400"
-                      title={profile.whatsapp}
-                    >
-                      <Phone className="w-3.5 h-3.5" />
-                    </div>
-                  )}
-                  {profile.email && (
-                    <div
-                      className="w-7 h-7 rounded-full flex items-center justify-center border border-white/15 bg-white/10 text-white"
-                      title={profile.email}
-                    >
-                      <Mail className="w-3.5 h-3.5" />
-                    </div>
-                  )}
-                  {profile.website && (
-                    <div
-                      className="w-7 h-7 rounded-full flex items-center justify-center border border-white/15 bg-white/10 text-white"
-                      title={profile.website}
-                    >
-                      <Globe className="w-3.5 h-3.5" />
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Bio Narrative */}
-              {profile.bio && (
-                <p className="mt-3 p-2.5 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm text-[11px] leading-relaxed opacity-85 line-clamp-3">
-                  {profile.bio}
-                </p>
-              )}
-
-              {/* Social Networks Badges */}
-              {profile.socialLinks && Object.values(profile.socialLinks).some(Boolean) && (
-                <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5">
-                  {Object.entries(profile.socialLinks).map(([network, url]) => {
-                    if (!url) return null;
-                    return (
-                      <span
-                        key={network}
-                        className="text-[9px] uppercase font-semibold px-2 py-0.5 rounded-full border border-white/15 bg-white/10 text-white/90"
-                      >
-                        {network}
-                      </span>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Save Contact CTA */}
+        <aside className="w-[420px] xl:w-[480px] bg-slate-100/70 p-4 flex flex-col items-center shrink-0 border-l border-slate-200 overflow-hidden">
+          {/* Viewport & Device Switcher Bar */}
+          <div className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 shadow-xs flex items-center justify-between mb-3 shrink-0">
+            <div className="flex items-center gap-1 bg-muted/60 p-0.5 rounded-lg border border-slate-200">
               <button
                 type="button"
-                className="w-full mt-4 py-2 rounded-xl text-xs font-semibold shadow-md"
-                style={{
-                  backgroundColor: primaryColor,
-                  color: profile.themeConfig?.background === '#FDFBF7' ? '#FFFFFF' : '#0A0A0C',
-                }}
+                onClick={() => setPreviewDevice('mobile')}
+                className={`px-2.5 py-1 rounded-md text-[11px] font-medium flex items-center gap-1 transition-all cursor-pointer ${
+                  previewDevice === 'mobile'
+                    ? 'bg-white shadow-xs font-bold text-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title="Mobile Preview (375px)"
               >
-                Save Contact
+                <Smartphone className="w-3 h-3" />
+                <span>Mobile</span>
               </button>
-
-              {/* Multiple Ventures / Businesses */}
-              {profile.businesses.length > 0 && (
-                <div className="mt-4 space-y-2">
-                  <div className="text-[10px] uppercase font-semibold opacity-60">Ventures</div>
-                  {profile.businesses.map((b) => (
-                    <div
-                      key={b.id}
-                      className="p-2.5 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm"
-                    >
-                      <div className="text-xs font-bold truncate">{b.name}</div>
-                      {b.tagline && <div className="text-[10px] opacity-70 truncate">{b.tagline}</div>}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Catalogue items */}
-              {profile.catalogue.length > 0 && (
-                <div className="mt-4 space-y-2">
-                  <div className="text-[10px] uppercase font-semibold opacity-60">Catalogue</div>
-                  {profile.catalogue.map((c) => (
-                    <div
-                      key={c.id}
-                      className="p-2.5 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm flex items-center justify-between"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <div className="text-xs font-bold truncate">{c.title}</div>
-                        {c.price && <div className="text-[10px] text-blue-600 font-mono">{c.price}</div>}
-                      </div>
-                      <span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-white/10 ml-2">
-                        {c.type}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <button
+                type="button"
+                onClick={() => setPreviewDevice('tablet')}
+                className={`px-2.5 py-1 rounded-md text-[11px] font-medium flex items-center gap-1 transition-all cursor-pointer ${
+                  previewDevice === 'tablet'
+                    ? 'bg-white shadow-xs font-bold text-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title="Tablet Preview (680px)"
+              >
+                <Tablet className="w-3 h-3" />
+                <span>Tablet</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPreviewDevice('desktop')}
+                className={`px-2.5 py-1 rounded-md text-[11px] font-medium flex items-center gap-1 transition-all cursor-pointer ${
+                  previewDevice === 'desktop'
+                    ? 'bg-white shadow-xs font-bold text-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title="Desktop Preview (Full Width)"
+              >
+                <Monitor className="w-3 h-3" />
+                <span>Desktop</span>
+              </button>
             </div>
+
+            <Link
+              href={`/p/${profile.slug}`}
+              target="_blank"
+              className="text-[11px] text-muted-foreground hover:text-foreground flex items-center gap-1"
+              title="Open full page preview"
+            >
+              <ExternalLink className="w-3 h-3" />
+            </Link>
+          </div>
+
+          {/* Live Preview Canvas with Real ProfileRenderer */}
+          <div className="flex-1 w-full overflow-y-auto flex justify-center items-start pb-6">
+            {renderProfileData && (
+              <div
+                className={`transition-all duration-300 ${
+                  previewDevice === 'mobile'
+                    ? 'w-[360px] sm:w-[375px] min-h-[680px] rounded-[44px] border-[10px] border-neutral-900 bg-black shadow-2xl overflow-hidden relative ring-1 ring-white/10 shrink-0 my-2'
+                    : previewDevice === 'tablet'
+                    ? 'w-[440px] min-h-[640px] rounded-[32px] border-[8px] border-neutral-800 bg-neutral-950 shadow-2xl overflow-hidden shrink-0 my-2'
+                    : 'w-full rounded-2xl border border-border bg-neutral-950 shadow-xl overflow-hidden my-2'
+                }`}
+              >
+                {/* Device Camera Pill on Mobile */}
+                {previewDevice === 'mobile' && (
+                  <div className="w-24 h-4 bg-neutral-900 mx-auto rounded-b-xl z-20 relative flex items-center justify-center">
+                    <div className="w-2 h-2 rounded-full bg-neutral-800" />
+                  </div>
+                )}
+                <div className="w-full">
+                  <ProfileRenderer profile={renderProfileData as any} />
+                </div>
+              </div>
+            )}
           </div>
         </aside>
       </div>
@@ -1401,6 +1776,16 @@ export default function ProfileBuilderPage({
                   placeholder="https://..."
                 />
               </div>
+
+              <ImageUploadOrUrl
+                label="Company Logo"
+                description="Upload company brand logo"
+                value={bizForm.logoUrl}
+                onChange={(url) => setBizForm({ ...bizForm, logoUrl: url || '' })}
+                mediaCategory="logo"
+                aspectRatio="square"
+                profileId={profile.id}
+              />
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -1488,6 +1873,16 @@ export default function ProfileBuilderPage({
                 />
               </div>
 
+              <ImageUploadOrUrl
+                label="Item Image"
+                description="Upload product or service showcase image"
+                value={catForm.imageUrl}
+                onChange={(url) => setCatForm({ ...catForm, imageUrl: url || '' })}
+                mediaCategory={catForm.type === 'product' ? 'product' : 'service'}
+                aspectRatio="square"
+                profileId={profile.id}
+              />
+
               <div>
                 <label className="block text-xs font-semibold mb-1">Description</label>
                 <Textarea
@@ -1517,6 +1912,183 @@ export default function ProfileBuilderPage({
                 </Button>
               </div>
             </form>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Pre-Flight Validation Modal */}
+      {showValidationModal && validationResult && (
+        <Dialog open={showValidationModal} onOpenChange={setShowValidationModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-base font-bold flex items-center justify-between">
+                <span>Profile Pre-Publish Readiness</span>
+                <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                  {validationResult.score}% Ready
+                </span>
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-4 my-2 max-h-[60vh] overflow-y-auto pr-1">
+              {/* Blocking Errors */}
+              {validationResult.blockingErrors.length > 0 && (
+                <div className="p-3.5 rounded-xl border border-destructive/30 bg-destructive/10 space-y-2">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-destructive">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{validationResult.blockingErrors.length} Issue(s) Must Be Fixed</span>
+                  </div>
+                  <ul className="space-y-1.5 text-xs text-destructive/90 pl-5 list-disc">
+                    {validationResult.blockingErrors.map((err) => (
+                      <li key={err.id}>
+                        <div className="flex items-center justify-between gap-2">
+                          <span>{err.message}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveTab(err.tab);
+                              setShowValidationModal(false);
+                            }}
+                            className="text-[11px] underline font-semibold text-destructive hover:text-destructive/80 cursor-pointer shrink-0"
+                          >
+                            Fix in {err.tab}
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Quality Warnings */}
+              {validationResult.warnings.length > 0 && (
+                <div className="p-3.5 rounded-xl border border-amber-500/30 bg-amber-500/10 space-y-2">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>Quality Recommendations</span>
+                  </div>
+                  <ul className="space-y-1.5 text-xs text-amber-800 dark:text-amber-300 pl-5 list-disc">
+                    {validationResult.warnings.map((w) => (
+                      <li key={w.id}>
+                        <div className="flex items-center justify-between gap-2">
+                          <span>{w.message}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveTab(w.tab);
+                              setShowValidationModal(false);
+                            }}
+                            className="text-[11px] underline font-semibold cursor-pointer shrink-0"
+                          >
+                            Add in {w.tab}
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Readiness Summary Checklist */}
+              <div className="p-3.5 rounded-xl border border-slate-200 bg-muted/30 space-y-2 text-xs">
+                <span className="font-semibold text-foreground block">Profile Checklist</span>
+                <div className="grid grid-cols-2 gap-2 text-[11px] text-muted-foreground">
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle2 className={`w-3.5 h-3.5 ${validationResult.summary.hasAvatar ? 'text-emerald-500' : 'text-slate-300'}`} />
+                    <span>Avatar Photo</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle2 className={`w-3.5 h-3.5 ${validationResult.summary.contactStatus === 'complete' ? 'text-emerald-500' : 'text-slate-300'}`} />
+                    <span>Contact Info</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle2 className={`w-3.5 h-3.5 ${validationResult.summary.socialCount > 0 ? 'text-emerald-500' : 'text-slate-300'}`} />
+                    <span>Socials ({validationResult.summary.socialCount})</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle2 className={`w-3.5 h-3.5 ${validationResult.summary.hasUpi ? 'text-emerald-500' : 'text-slate-300'}`} />
+                    <span>UPI Payment</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-slate-200 flex justify-end gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => setShowValidationModal(false)}>
+                Cancel
+              </Button>
+              <LoadingButton
+                size="sm"
+                onClick={handleConfirmPublish}
+                loading={isPublishing}
+                disabled={!validationResult.canPublish}
+                className="bg-blue-600 text-white hover:bg-blue-700 font-semibold"
+              >
+                Confirm &amp; Publish Live
+              </LoadingButton>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Publish Success Celebration Modal */}
+      {showPublishSuccessModal && (
+        <Dialog open={showPublishSuccessModal} onOpenChange={setShowPublishSuccessModal}>
+          <DialogContent className="max-w-md text-center p-6 space-y-4">
+            <div className="w-14 h-14 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 flex items-center justify-center mx-auto">
+              <Sparkles className="w-7 h-7" />
+            </div>
+
+            <div className="space-y-1">
+              <DialogTitle className="text-lg font-bold text-foreground">
+                Your Profile is Live!
+              </DialogTitle>
+              <p className="text-xs text-muted-foreground">
+                Your digital identity is now accessible worldwide with sub-second performance.
+              </p>
+            </div>
+
+            <div className="p-3 rounded-xl bg-muted/50 border border-border flex items-center justify-between gap-2">
+              <span className="font-mono text-xs font-semibold truncate text-foreground">
+                {typeof window !== 'undefined' ? `${window.location.origin}/p/${profile.slug}` : `/p/${profile.slug}`}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    navigator.clipboard.writeText(`${window.location.origin}/p/${profile.slug}`);
+                    setCopiedLiveLink(true);
+                    toast.success('Public URL copied to clipboard');
+                    setTimeout(() => setCopiedLiveLink(false), 2000);
+                  }
+                }}
+                className="px-2.5 py-1 rounded-md text-xs font-medium bg-background border border-border hover:bg-muted text-foreground flex items-center gap-1 cursor-pointer shrink-0"
+              >
+                {copiedLiveLink ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copiedLiveLink ? 'Copied' : 'Copy'}</span>
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowPublishSuccessModal(false)}
+                className="flex-1 text-xs"
+              >
+                Keep Editing
+              </Button>
+              <Link href={`/p/${profile.slug}`} target="_blank" className="flex-1">
+                <Button
+                  type="button"
+                  size="sm"
+                  className="w-full text-xs bg-blue-600 text-white hover:bg-blue-700 font-semibold"
+                >
+                  <ExternalLink className="w-3.5 h-3.5 mr-1" />
+                  View Live Profile
+                </Button>
+              </Link>
+            </div>
           </DialogContent>
         </Dialog>
       )}

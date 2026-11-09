@@ -19,6 +19,8 @@ import {
   Layers,
 } from 'lucide-react';
 import type { TemplateLayoutProps } from './types';
+import { UpiPaymentCard } from '@/components/profile/UpiPaymentCard';
+import type { UpiPaymentConfig } from '@/lib/upi';
 
 export function CorporateBusinessTemplate({
   profile,
@@ -32,6 +34,9 @@ export function CorporateBusinessTemplate({
   const catalogue = profile.catalogue || [];
   const primaryBusiness = businesses[0];
   const isNano = previewPlanId === 'nano';
+
+  const rawUpi = (profile as unknown as { customFields?: { upiConfig?: UpiPaymentConfig } }).customFields?.upiConfig;
+  const upiConfig: UpiPaymentConfig | null = rawUpi?.isEnabled && rawUpi.upiId ? rawUpi : null;
 
   return (
     <div className="w-full min-h-screen bg-[#0B0F19] text-slate-100 flex flex-col items-center">
@@ -147,6 +152,14 @@ export function CorporateBusinessTemplate({
             </div>
           </div>
         </div>
+
+        {/* Direct UPI Payment Section */}
+        {upiConfig && (
+          <UpiPaymentCard
+            config={upiConfig}
+            className="bg-[#111827] border-blue-500/30 text-white"
+          />
+        )}
 
         {/* Corporate Bio */}
         {profile.bio && (

@@ -17,6 +17,8 @@ import {
   Scale,
 } from 'lucide-react';
 import type { TemplateLayoutProps } from './types';
+import { UpiPaymentCard } from '@/components/profile/UpiPaymentCard';
+import type { UpiPaymentConfig } from '@/lib/upi';
 
 export function ProfessionalServicesTemplate({
   profile,
@@ -30,6 +32,9 @@ export function ProfessionalServicesTemplate({
   const catalogue = profile.catalogue || [];
   const primaryBusiness = businesses[0];
   const isNano = previewPlanId === 'nano';
+
+  const rawUpi = (profile as unknown as { customFields?: { upiConfig?: UpiPaymentConfig } }).customFields?.upiConfig;
+  const upiConfig: UpiPaymentConfig | null = rawUpi?.isEnabled && rawUpi.upiId ? rawUpi : null;
 
   return (
     <div className="w-full min-h-screen bg-[#FAF8F5] text-[#1E1E24] flex flex-col items-center">
@@ -145,6 +150,14 @@ export function ProfessionalServicesTemplate({
             </div>
           </div>
         </div>
+
+        {/* Direct UPI Payment Section */}
+        {upiConfig && (
+          <UpiPaymentCard
+            config={upiConfig}
+            className="bg-white border-[#E2DDD3] text-[#1E1E24] shadow-md font-sans"
+          />
+        )}
 
         {/* Chambers Hours & Appointment Info */}
         <div className="p-4 rounded-2xl border border-[#E2DDD3] bg-white flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-sans text-[#4A4A52]">

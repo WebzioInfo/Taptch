@@ -48,6 +48,7 @@ function TemplateMarketplaceContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialPreviewParam = searchParams.get('preview');
+  const profileIdParam = searchParams.get('profileId');
 
   const { data: session } = useSession();
   const isAuthenticated = Boolean(session?.user);
@@ -62,9 +63,16 @@ function TemplateMarketplaceContent() {
 
   // Authenticated customer's active profile (if any)
   const [customerProfile, setCustomerProfile] = React.useState<ProfileRenderData | null>(null);
-  const [activeProfileId, setActiveProfileId] = React.useState<string | null>(null);
+  const [activeProfileId, setActiveProfileId] = React.useState<string | null>(profileIdParam || null);
   const [selectedSuccessMessage, setSelectedSuccessMessage] = React.useState<string | null>(null);
   const [isApplying, setIsApplying] = React.useState<string | null>(null);
+
+  // Sync profileIdParam if provided in query
+  React.useEffect(() => {
+    if (profileIdParam) {
+      setActiveProfileId(profileIdParam);
+    }
+  }, [profileIdParam]);
 
   // Check URL query param for deep-linked preview
   React.useEffect(() => {
@@ -201,9 +209,14 @@ function TemplateMarketplaceContent() {
 
       const tpl = templates.find((t) => t.id === templateId || t.slug === templateId);
       setSelectedSuccessMessage(
-        `Applied "${tpl?.name || templateId}".`
+        `Applied "${tpl?.name || templateId}". Returning to editor...`
       );
-      setTimeout(() => setSelectedSuccessMessage(null), 3500);
+
+      const targetId = activeProfileId;
+      setTimeout(() => {
+        setSelectedSuccessMessage(null);
+        router.push(`/builder/${targetId}`);
+      }, 900);
     } catch (err) {
       console.error('Error selecting template', err);
     } finally {
@@ -224,6 +237,21 @@ function TemplateMarketplaceContent() {
       {/* Header Bar */}
       <section className="border-b border-slate-100 bg-white/20 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-5">
+          {profileIdParam && (
+            <div className="mb-4 p-3 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-between gap-3">
+              <div className="text-xs text-blue-900 font-medium">
+                Browsing styles for your profile. Select any template to apply and return to the editor.
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push(`/builder/${profileIdParam}`)}
+                className="text-xs h-7 bg-white text-blue-700 hover:bg-blue-50 border-blue-200 shrink-0"
+              >
+                Back to Editor
+              </Button>
+            </div>
+          )}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-semibold tracking-[-0.025em] text-slate-900">
