@@ -108,20 +108,20 @@ function createRedisClient(): RedisClient {
   const redisUrl = process.env.REDIS_URL;
   const forceMock = process.env.USE_IN_MEMORY_REDIS === 'true';
 
-  if (forceMock || (!redisUrl && process.env.NODE_ENV === 'test')) {
+  // In test or serverless environments where no external Redis URL is provided, safely use in-memory mock
+  if (forceMock || !redisUrl) {
     return new InMemoryRedisMock();
   }
 
-  const url = redisUrl || 'redis://localhost:6379';
-  const client = new Redis(url, {
-    maxRetriesPerRequest: null,
+  const client = new Redis(redisUrl, {
+    maxRetriesPerRequest: 1,
     enableReadyCheck: false,
+    connectTimeout: 3000,
     retryStrategy: (times) => {
-      // In dev, fail quickly to not hang
-      if (process.env.NODE_ENV !== 'production' && times > 2) {
+      if (times > 3) {
         return null;
       }
-      return Math.min(times * 100, 3000);
+      return Math.min(times * 100, 1000);
     },
     lazyConnect: true,
   });

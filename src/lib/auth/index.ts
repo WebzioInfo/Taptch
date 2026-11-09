@@ -21,6 +21,7 @@ export const auth = betterAuth({
     'http://127.0.0.1:3001',
     'https://taptch.webziotech.in',
     'https://taptch.com',
+    'https://www.taptch.com',
     'https://app.taptch.com',
   ].filter(Boolean) as string[],
   database: drizzleAdapter(db, {
@@ -44,11 +45,11 @@ export const auth = betterAuth({
   socialProviders: {
     ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
       ? {
-          google: {
-            clientId: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-          },
-        }
+        google: {
+          clientId: process.env.GOOGLE_CLIENT_ID,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        },
+      }
       : {}),
   },
   plugins: [

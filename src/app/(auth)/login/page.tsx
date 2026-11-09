@@ -26,10 +26,16 @@ function formatLoginError(rawMessage?: string, code?: string): string {
   if (code === 'INVALID_ORIGIN') {
     return 'Security validation failed due to an untrusted origin. Please reload the page.';
   }
-  if (rawMessage && !/internal server error/i.test(rawMessage)) {
+  if (rawMessage && /405|method not allowed/i.test(rawMessage)) {
+    return 'Authentication service configuration error (HTTP 405). Please verify domain routing or contact support.';
+  }
+  if (rawMessage && /500|internal server error/i.test(rawMessage)) {
+    return 'Authentication service temporarily unavailable. Please try again in a few moments.';
+  }
+  if (rawMessage && typeof rawMessage === 'string' && rawMessage.length < 120) {
     return rawMessage;
   }
-  return 'Unable to sign in right now. Please check your network connection and try again.';
+  return 'Unable to sign in right now. Please verify your connection or try again in a moment.';
 }
 
 function LoginContent() {
