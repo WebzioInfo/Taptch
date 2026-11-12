@@ -37,6 +37,12 @@ export const router = createBrowserRouter([
   { path: '/register', element: <RegisterPage /> },
   { path: '/forgot-password', element: <LoginPage /> },
   { path: '/reset-password', element: <LoginPage /> },
+  { path: '/staff/login', element: <Navigate to="/login?redirect=/staff/dashboard" replace /> },
+
+  // Admin & Operations
+  { path: '/portal-x', element: <Navigate to="/admin" replace /> },
+  { path: '/portal-x/*', element: <Navigate to="/admin" replace /> },
+  { path: '/admin', element: <DashboardPage /> },
 
   // App Dashboard (Protected)
   {
@@ -59,3 +65,4 @@ export const router = createBrowserRouter([
   // Fallback
   { path: '*', element: <Navigate to="/" replace /> },
 ]);
+

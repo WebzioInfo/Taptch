@@ -96,3 +96,4 @@ taptch/
 | **Orders** | Physical Card Orders | Migrated | Phase 2 manual payments (`unpaid/paid_offline/waived`) |
 | **Entitlements**| 4-Tier Plan Matrix | Migrated | `nano`, `micro`, `mini`, `max` plan gates |
 | **Admin** | Portal-X Supervision | Migrated | Platform stats, order moderation, subscription assignment |
+

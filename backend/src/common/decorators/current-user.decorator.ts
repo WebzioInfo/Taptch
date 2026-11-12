@@ -7,3 +7,4 @@ export const CurrentActor = createParamDecorator(
     return request.actor || null;
   },
 );
+

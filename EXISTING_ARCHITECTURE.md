@@ -54,3 +54,4 @@ Persistence & Cache Layer (Supabase PostgreSQL 16 + PgBouncer & Redis)
 3. **Storage**: Cloudflare Images and Cloudflare R2 bucket integration, with fallback to local mock storage in test/dev environments.
 4. **Email / SMS**: Nodemailer SMTP dispatcher with fallback to console logger in test mode. Fast2SMS / Twilio provider for mobile OTP verification.
 5. **Observability**: Structured JSON logging via Pino with sensitive credential redaction (tokens, passwords, OTPs).
+

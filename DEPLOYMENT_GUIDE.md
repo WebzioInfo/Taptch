@@ -117,3 +117,4 @@ npx vite preview --config frontend/vite.config.ts --port 80
 - **Liveness Probe:** `GET /api/health`
 - **Readiness Probe:** `GET /api/ready`
 - **Swagger Documentation:** `GET /api/docs`
+

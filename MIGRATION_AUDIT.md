@@ -123,3 +123,4 @@ taptch/
 3. **Brand From Config**: Enforced by `src/config/brand.ts` and architecture test `tests/architecture/brand-literal.test.ts`. All customer-facing brand copy is already centralized.
 4. **Public Profile Hot Path**: `/p/[slug]` requires sub-100ms response times. In the decoupled architecture, the NestJS profile controller serves pre-compiled JSON snapshots from Redis cache, while the React frontend renders them with full fidelity.
 5. **Session-Cookie Auth**: Better Auth manages cookies with HTTP-only tokens. In the decoupled architecture, CORS credentials (`credentials: true`) and cookie forwarding allow the frontend and NestJS backend to share session validation seamlessly.
+

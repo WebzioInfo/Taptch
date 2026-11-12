@@ -25,3 +25,4 @@ export class QrController {
     return this.qrService.createDynamicQr(actor, body);
   }
 }
+

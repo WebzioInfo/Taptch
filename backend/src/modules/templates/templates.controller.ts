@@ -22,3 +22,4 @@ export class TemplatesController {
     return this.templatesService.findOne(id);
   }
 }
+

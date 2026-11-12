@@ -29,3 +29,4 @@ export function useParams<T extends Record<string, string | undefined> = Record<
 export function useSearchParams() {
   return useRouterSearchParams();
 }
+

@@ -8,3 +8,4 @@ import { EntitlementsService } from './entitlements.service';
   exports: [EntitlementsService],
 })
 export class EntitlementsModule {}
+

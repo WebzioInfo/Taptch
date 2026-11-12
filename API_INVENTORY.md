@@ -100,3 +100,4 @@ This document maps all 42 Next.js API route handlers to their corresponding Nest
 | `/api/admin/staff` | GET, POST | `src/app/api/admin/staff/route.ts` | `AdminStaffController.findOrCreate()` | Super Admin |
 | `/api/admin/staff/:id/status` | PATCH | `src/app/api/admin/staff/[id]/status/route.ts` | `AdminStaffController.updateStatus()` | Super Admin |
 | `/api/admin/staff/:id/analytics` | GET | `src/app/api/admin/staff/[id]/analytics/route.ts` | `AdminStaffController.getAnalytics()` | Super Admin |
+

@@ -14,3 +14,4 @@ export function MarketingLayout() {
     </div>
   );
 }
+

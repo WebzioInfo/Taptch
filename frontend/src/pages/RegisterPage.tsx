@@ -133,3 +133,4 @@ export function RegisterPage() {
     </div>
   );
 }
+

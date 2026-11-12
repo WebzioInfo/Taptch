@@ -36,3 +36,4 @@ export class QrRedirectController {
     return this.qrService.resolveToken(token, ip, userAgent);
   }
 }
+

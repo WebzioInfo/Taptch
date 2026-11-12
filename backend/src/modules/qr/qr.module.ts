@@ -9,3 +9,4 @@ import { QrService } from './qr.service';
   exports: [QrService],
 })
 export class QrModule {}
+

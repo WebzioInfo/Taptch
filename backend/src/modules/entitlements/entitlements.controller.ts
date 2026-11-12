@@ -18,3 +18,4 @@ export class EntitlementsController {
     return this.entitlementsService.getActorEntitlements(actor);
   }
 }
+

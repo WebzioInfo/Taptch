@@ -44,3 +44,4 @@ export class AdminController {
     return this.adminService.assignSubscription(body.userId, body.planTier, actor);
   }
 }
+

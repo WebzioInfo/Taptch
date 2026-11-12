@@ -78,3 +78,4 @@ This inventory documents all application features across user journeys, administ
 | MKT-03 | Pricing & Plan Comparison | `/pricing` | 4-tier plan comparison table with dynamic features | React Pricing Page + Brand Config |
 | MKT-04 | Template Showcase Gallery | `/templates`, `/templates/:id` | Interactive template explorer with preview mode | React Showcase + Mock Preview |
 | MKT-05 | Informational Pages | `/about`, `/contact`, `/faq`, `/how-it-works` | Brand editorial pages | React Static Pages |
+

@@ -81,3 +81,4 @@ export class ProfilesController {
     return this.profilesService.updateSections(actor, id, body?.sections || []);
   }
 }
+

@@ -26,3 +26,4 @@ export class LeadsController {
     return this.leadsService.captureLead(body);
   }
 }
+

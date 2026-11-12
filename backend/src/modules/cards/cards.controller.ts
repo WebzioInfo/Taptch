@@ -29,3 +29,4 @@ export class CardsController {
     return this.cardsService.linkCardToProfile(actor, id, body?.profileId);
   }
 }
+

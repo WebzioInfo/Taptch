@@ -45,3 +45,4 @@ export const signUp = {
 export const signOut = async () => {
   return ApiClient.post('/api/auth/sign-out');
 };
+

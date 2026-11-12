@@ -18,3 +18,4 @@ export default function Link({ href, children, ...props }: LinkProps) {
 
   return <RouterLink to={to} {...props}>{children}</RouterLink>;
 }
+

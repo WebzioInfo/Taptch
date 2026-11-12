@@ -10,3 +10,4 @@
 | **RISK-06** | Package Manager | Competing lockfiles (`pnpm-lock.yaml`, `yarn.lock`) created during scaffolding | Low | Medium | Strict adherence to permanent rule: NPM exclusively (`package.json`, `package-lock.json`). | MITIGATED |
 | **RISK-07** | Dependency Conflicts | React 19 peer-dependency conflicts with older UI libraries | Medium | Medium | Use compatible Vite plugins and React 19-ready component libraries already proven in the existing package.json. | MITIGATED |
 | **RISK-08** | Rollback | Inability to revert to previous state if unexpected regression occurs | Low | High | Git branch isolation; monolithic code preserved until full verification; documented step-by-step rollback runbook. | MITIGATED |
+

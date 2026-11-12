@@ -361,7 +361,7 @@ export default function SuperAdminPage() {
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <Button asChild variant="outline" size="sm" className="gap-1.5 text-xs h-8 border-primary/30 text-primary hover:bg-primary/10">
-            <Link href="/portal-x">
+            <Link href="/portal-x/qr-management">
               <QrCode className="w-3.5 h-3.5" />
               Portal-X Operations
             </Link>

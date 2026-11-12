@@ -58,3 +58,4 @@
 - NestJS Drizzle Module will import the exact Drizzle schemas from `src/db/schema/` (or shared library `shared/database/`).
 - Zero foreign key breaks or index recalculations.
 - `prepare: false` mandatory in connection pooler configuration for PgBouncer safety.
+
