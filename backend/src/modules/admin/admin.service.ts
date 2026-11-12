@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
 import * as schema from '../../database/schema';
 import { eq, desc, sql } from 'drizzle-orm';
-import type { ActorContext, PlanTier } from '@taptch/shared';
+import type { ActorContext, PlanTier } from '../../common/types';
 import * as crypto from 'crypto';
 
 @Injectable()

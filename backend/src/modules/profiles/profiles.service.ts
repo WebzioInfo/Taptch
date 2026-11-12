@@ -9,7 +9,7 @@ import { DatabaseService } from '../../database/database.service';
 import { RedisService } from '../../database/redis.service';
 import * as schema from '../../database/schema';
 import { eq, and, desc, asc } from 'drizzle-orm';
-import type { ActorContext, PublicProfileSnapshot } from '@taptch/shared';
+import type { ActorContext, PublicProfileSnapshot } from '../../common/types';
 import * as crypto from 'crypto';
 
 @Injectable()

@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import type { ActorContext } from '@taptch/shared';
+import type { ActorContext } from '../types';
 
 export const CurrentActor = createParamDecorator(
   (data: unknown, ctx: ExecutionContext): ActorContext | null => {

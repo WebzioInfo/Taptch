@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { brandConfig } from '@taptch/shared';
+import { brandConfig } from '../config/brand';
 import { Button } from '../components/ui/button';
 import { ArrowRight, Sparkles, Shield, Zap, Layers, Smartphone, Check, HelpCircle } from 'lucide-react';
 

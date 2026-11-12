@@ -9,7 +9,7 @@ import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { DatabaseService } from '../../database/database.service';
 import * as schema from '../../database/schema';
 import { eq, and, gt } from 'drizzle-orm';
-import type { ActorContext } from '@taptch/shared';
+import type { ActorContext } from '../types';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

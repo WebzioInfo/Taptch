@@ -13,7 +13,7 @@ import { AuthGuard } from '../../common/guards/auth.guard';
 import { Public } from '../../common/decorators/public.decorator';
 import { CurrentActor } from '../../common/decorators/current-user.decorator';
 import { ProfilesService } from './profiles.service';
-import type { ActorContext } from '@taptch/shared';
+import type { ActorContext } from '../../common/types';
 
 @ApiTags('Profiles')
 @Controller('api/v1/profiles')

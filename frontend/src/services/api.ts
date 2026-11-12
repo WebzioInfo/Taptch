@@ -1,4 +1,4 @@
-import type { ApiResponse } from '@taptch/shared';
+import type { ApiResponse } from '../types';
 import { env } from '../config/env';
 
 const API_BASE_URL = env.apiUrl;

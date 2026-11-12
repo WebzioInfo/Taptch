@@ -4,7 +4,7 @@ import { AuthGuard } from '../../common/guards/auth.guard';
 import { RolesGuard, Roles } from '../../common/guards/roles.guard';
 import { CurrentActor } from '../../common/decorators/current-user.decorator';
 import { AdminService } from './admin.service';
-import type { ActorContext, PlanTier } from '@taptch/shared';
+import type { ActorContext, PlanTier } from '../../common/types';
 
 @ApiTags('Admin / Portal-X')
 @Controller('api/v1/admin')

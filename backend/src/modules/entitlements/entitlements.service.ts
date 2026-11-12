@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
 import * as schema from '../../database/schema';
 import { eq } from 'drizzle-orm';
-import type { ActorContext, PlanTier } from '@taptch/shared';
+import type { ActorContext, PlanTier } from '../../common/types';
 
 export interface PlanEntitlements {
   maxProfiles: number;

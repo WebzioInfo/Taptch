@@ -17,11 +17,7 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@taptch/shared": ["../shared/src"],
-      "next/link": ["src/compat/link.tsx"],
-      "next/image": ["src/compat/image.tsx"],
-      "next/navigation": ["src/compat/navigation.ts"]
+      "@/*": ["src/*"]
     }
   },
   "include": ["src"]

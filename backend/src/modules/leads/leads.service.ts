@@ -2,7 +2,7 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
 import * as schema from '../../database/schema';
 import { eq, desc } from 'drizzle-orm';
-import type { ActorContext } from '@taptch/shared';
+import type { ActorContext } from '../../common/types';
 import * as crypto from 'crypto';
 
 @Injectable()

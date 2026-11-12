@@ -4,7 +4,7 @@ import { drizzle, PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import postgres = require('postgres');
 import { sql } from 'drizzle-orm';
 import * as schema from './schema';
-import type { ActorContext } from '@taptch/shared';
+import type { ActorContext } from '../common/types';
 
 export const DRIZZLE = 'DRIZZLE';
 

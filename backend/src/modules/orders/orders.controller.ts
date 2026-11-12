@@ -3,7 +3,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '../../common/guards/auth.guard';
 import { CurrentActor } from '../../common/decorators/current-user.decorator';
 import { OrdersService } from './orders.service';
-import type { ActorContext } from '@taptch/shared';
+import type { ActorContext } from '../../common/types';
 
 @ApiTags('Orders')
 @Controller('api/v1/orders')
