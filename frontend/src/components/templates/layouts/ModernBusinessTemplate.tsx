@@ -21,6 +21,8 @@ import type { TemplateLayoutProps } from './types';
 import { UpiPaymentCard } from '@/components/profile/UpiPaymentCard';
 import type { UpiPaymentConfig } from '@/lib/upi';
 
+import { TemplateContactForm } from '../TemplateContactForm';
+
 export function ModernBusinessTemplate({
   profile,
   onDownloadVCard,
@@ -306,6 +308,22 @@ export function ModernBusinessTemplate({
             </div>
           )}
         </div>
+
+        {/* Native Modern Business Enquiry Form */}
+        <TemplateContactForm
+          profileId={profile.id}
+          profileName={profile.displayName}
+          isBusiness={profile.profileType === 'business'}
+          themeStyle={{
+            accentColor: '#10B981',
+            cardBg: '#064E3B',
+            borderColor: 'rgba(16, 185, 129, 0.3)',
+            textColor: '#F8FAFC',
+            buttonColor: '#059669',
+            buttonTextColor: '#FFFFFF',
+            inputBg: '#022C22',
+          }}
+        />
 
         {/* Footer */}
         <footer className="w-full py-8 text-center border-t border-emerald-500/20 text-xs text-emerald-300/60">

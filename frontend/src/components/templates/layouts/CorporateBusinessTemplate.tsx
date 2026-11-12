@@ -22,6 +22,8 @@ import type { TemplateLayoutProps } from './types';
 import { UpiPaymentCard } from '@/components/profile/UpiPaymentCard';
 import type { UpiPaymentConfig } from '@/lib/upi';
 
+import { TemplateContactForm } from '../TemplateContactForm';
+
 export function CorporateBusinessTemplate({
   profile,
   onDownloadVCard,
@@ -293,6 +295,22 @@ export function CorporateBusinessTemplate({
             </div>
           </div>
         )}
+
+        {/* Native Corporate Contact & RFP Section */}
+        <TemplateContactForm
+          profileId={profile.id}
+          profileName={profile.displayName}
+          isBusiness={profile.profileType === 'business'}
+          themeStyle={{
+            accentColor: '#3B82F6',
+            cardBg: '#111827',
+            borderColor: 'rgba(59, 130, 246, 0.3)',
+            textColor: '#F8FAFC',
+            buttonColor: '#2563EB',
+            buttonTextColor: '#FFFFFF',
+            inputBg: '#0F172A',
+          }}
+        />
 
         {/* Footer */}
         <footer className="w-full py-8 text-center border-t border-slate-800 text-xs text-slate-500">

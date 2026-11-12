@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import type { TemplateLayoutProps } from './types';
 
+import { TemplateContactForm } from '../TemplateContactForm';
+
 export function FoodRestaurantTemplate({
   profile,
   onDownloadVCard,
@@ -243,6 +245,22 @@ export function FoodRestaurantTemplate({
             </div>
           )}
         </div>
+
+        {/* Native Table Reservation & Catering Form */}
+        <TemplateContactForm
+          profileId={profile.id}
+          profileName={profile.displayName}
+          isBusiness={profile.profileType === 'business'}
+          themeStyle={{
+            accentColor: '#F97316',
+            cardBg: '#27272A',
+            borderColor: 'rgba(249, 115, 22, 0.3)',
+            textColor: '#F4F4F5',
+            buttonColor: '#EA580C',
+            buttonTextColor: '#FFFFFF',
+            inputBg: '#18181B',
+          }}
+        />
 
         {/* Footer */}
         <footer className="w-full py-8 text-center border-t border-zinc-800 text-xs text-zinc-500">

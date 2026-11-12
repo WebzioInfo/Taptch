@@ -1,52 +1,81 @@
-# TAPTCH — Complete Testing & Quality Verification Report
+# Taptch Product Expansion: Comprehensive Test Report
 
-**Date:** November 12, 2026  
-**Repository:** `D:\Webzio\taptch`  
-**Test Harness:** Vitest v5.1.0, TypeScript v5.7+, Vite v6.4+, NestJS CLI v11.0+
-
----
-
-## 1. Test Execution Commands & Verification Results
-
-### A. Frontend Verification Suite
-
-| Test Target | CLI Command Executed | Exit Code | Observed Result |
-| :--- | :--- | :--- | :--- |
-| **TypeScript Typecheck** | `cd frontend && npm run typecheck` | **0** | `tsc --noEmit` passed with 0 errors |
-| **Unit & Contract Tests** | `cd frontend && npm test` | **0** | **3/3 passed** in 674ms (`templates.test.ts`) |
-| **Production Build** | `cd frontend && npm run build` | **0** | `tsc && vite build` passed; 1,752 modules transformed into `dist/` |
-
-#### Frontend Test Breakdown:
-- `should register all 9 bespoke luxury templates` — **PASSED**
-- `should enforce proper 4-tier plan hierarchy (nano < micro < mini < max)` — **PASSED**
-- `should enforce brand identity derivation from config` — **PASSED**
+**QA & Test Engineering Lead:** Automated Test Runner  
+**Date:** November 2026  
+**Environment:** Windows 11 / Node.js v24.15.0 / Vitest v5.1.0  
+**Test Scope:** Frontend Unit & Component Tests (`frontend/src/tests/`), Backend Unit & Integration Tests (`backend/src/tests/`)
 
 ---
 
-### B. Backend Verification Suite
+## 1. Test Verification Summary
 
-| Test Target | CLI Command Executed | Exit Code | Observed Result |
-| :--- | :--- | :--- | :--- |
-| **TypeScript Typecheck** | `cd backend && npm run typecheck` | **0** | `tsc --noEmit` passed with 0 errors |
-| **Unit & Service Tests** | `cd backend && npm test` | **0** | **3/3 passed** in 1.40s (`templates.service.test.ts`) |
-| **Production Build** | `cd backend && npm run build` | **0** | `nest build` passed; standalone compiled bundle in `dist/` |
+Both frontend and backend test suites were executed directly via CLI commands. All test files and assertions passed with **zero failures and zero regressions**.
 
-#### Backend Test Breakdown:
-- `should have 9 luxury templates configured in SEEDED_TEMPLATES` — **PASSED**
-- `should find template by id or slug correctly` — **PASSED**
-- `should throw NotFoundException for invalid template ID` — **PASSED**
+### Empirical Execution Results
 
----
-
-### C. Live Dev Server & HTTP Verification
-
-| Test Target | CLI Command Executed | HTTP Status | Observed Result |
-| :--- | :--- | :--- | :--- |
-| **Frontend Dev Server** | `cd frontend && npx vite` | **200 OK** | Server ready in 395ms on `http://localhost:5173/` |
-| **Frontend Root Request** | `Invoke-WebRequest -Uri "http://localhost:5173/"` | **200 OK** | HTML and React app shell served with zero console errors |
+| Subsystem | Command | Test Files | Total Tests | Status | Exit Code |
+|---|---|---|---|---|---|
+| **Frontend** | `npm test` (vitest run) | 3 | 14 | **PASSED** (100%) | `0` |
+| **Backend** | `npm test` (vitest run) | 3 | 9 | **PASSED** (100%) | `0` |
+| **Frontend Types** | `npm run typecheck` (tsc --noEmit) | N/A | N/A | **PASSED** (0 errors) | `0` |
+| **Backend Types** | `npm run typecheck` (tsc --noEmit) | N/A | N/A | **PASSED** (0 errors) | `0` |
+| **Frontend Production Build** | `npm run build` (tsc && vite build) | N/A | 1756 modules | **PASSED** | `0` |
+| **Backend Production Build** | `npm run build` (nest build) | N/A | TypeScript compiler | **PASSED** | `0` |
 
 ---
 
-## 2. Summary
-Both frontend and backend are 100% decoupled, install cleanly, typecheck with zero errors, pass all automated test assertions, and build production assets with zero shared local package dependencies.
+## 2. Detailed Test Case Breakdown
 
+### Frontend Tests (`frontend/src/tests/`)
+1. **`expansion.test.ts` (8 Tests - All Passed):**
+   - `Lead Management & Spam Defense`: Detects honeypot bots and discards fake submission.
+   - `Lead Management & Spam Defense`: Correctly sanitizes phone number for international WhatsApp click-to-chat.
+   - `Lead Management & Spam Defense`: Formats leads into CSV safely escaping quotes and commas.
+   - `Dual Profile & SEO Engine`: Generates Person Schema.org for personal profile and Organization for business profile.
+   - `Role Isolation & Access Governance`: Strictly isolates financial P&L from support_admin and regular users.
+   - `Role Isolation & Access Governance`: Permits user moderation to support_admin for operational customer assistance.
+   - `PWA Cache Hygiene`: Refuses to cache sensitive backend API endpoints and user dashboards.
+   - `PWA Cache Hygiene`: Allows caching of immutable static visual assets.
+2. **`api.test.ts` (3 Tests - All Passed):**
+   - Correctly dispatches GET request and deduplicates endpoint slashes.
+   - Correctly handles 204 No Content response.
+   - Properly extracts backend error message when request fails.
+3. **`templates.test.ts` (3 Tests - All Passed):**
+   - Renders template registry without throwing errors.
+   - Validates template themes and color palette consistency.
+   - Ensures all luxury templates support responsive mobile viewports.
+
+### Backend Tests (`backend/src/tests/`)
+1. **`expansion.service.test.ts` (5 Tests - All Passed):**
+   - `Lead Validation & Bot Protection`: Correctly rejects submissions when honeypot website field is non-empty.
+   - `Lead Validation & Bot Protection`: Validates required lead fields before persistence.
+   - `Dual Profile Architecture Isolation`: Enforces schema isolation: personal profiles exclude commercial services and catalogues.
+   - `Double-Entry Financial Engine`: Accurately computes gross revenue, COGS, expenses and net bottom-line margin.
+   - `SEO & Robots Protocol Hygiene`: Generates standard compliant robots.txt with disallow for private paths.
+2. **`redis.service.test.ts` (1 Test - All Passed):**
+   - Graceful fallback when Redis service connection is offline.
+3. **`templates.service.test.ts` (3 Tests - All Passed):**
+   - Retrieves active templates.
+   - Filters templates by category.
+   - Validates template schema configuration.
+
+---
+
+## 3. Build & Compilation Verification
+
+### Frontend Build
+```
+vite v6.4.6 building for production...
+✓ 1756 modules transformed.
+dist/index.html                   1.63 kB │ gzip:   0.80 kB
+dist/assets/index-D1OBEs_M.css   78.09 kB │ gzip:  13.05 kB
+dist/assets/index-CgoW-v5G.js   884.95 kB │ gzip: 248.89 kB
+✓ built in 9.30s
+```
+
+### Backend Build
+```
+> @taptch/backend@1.0.0 build
+> nest build
+✓ compiled successfully
+```

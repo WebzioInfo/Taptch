@@ -11,7 +11,10 @@ import {
   LogOut,
   Menu,
   X,
+  ShieldCheck,
+  Headphones,
 } from 'lucide-react';
+import { PwaInstallPrompt } from '../components/pwa/PwaInstallPrompt';
 
 export function AppLayout() {
   const location = useLocation();
@@ -143,6 +146,27 @@ export function AppLayout() {
               <Settings className="w-4 h-4" />
               <span>Settings</span>
             </Link>
+
+            {/* Role-Specific Portal Links */}
+            {(session?.user?.systemRole === 'super_admin' || session?.user?.systemRole === 'admin') && (
+              <Link
+                to="/admin"
+                className="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium text-amber-400 hover:bg-amber-400/10 transition-colors"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                <span>Admin Governance</span>
+              </Link>
+            )}
+
+            {(session?.user?.systemRole === 'support_admin' || session?.user?.systemRole === 'super_admin' || session?.user?.systemRole === 'admin') && (
+              <Link
+                to="/support"
+                className="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sky-400 hover:bg-sky-400/10 transition-colors"
+              >
+                <Headphones className="w-4 h-4" />
+                <span>Support Operations</span>
+              </Link>
+            )}
           </nav>
         </div>
 
@@ -172,6 +196,9 @@ export function AppLayout() {
       <main className="flex-1 overflow-y-auto pb-16 md:pb-0">
         <Outlet />
       </main>
+
+      {/* PWA Smart Install Prompt */}
+      <PwaInstallPrompt />
 
       {/* Mobile Bottom Navigation Bar for Instant Thumb Reach */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#121216]/95 backdrop-blur-md border-t border-border/40 flex items-center justify-around py-2 px-2">

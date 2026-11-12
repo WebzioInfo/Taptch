@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { ApiClient } from '@/services/api';
 import { BrandLogo } from '@/components/brand';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -164,21 +165,16 @@ export function ProfileRenderer({ profile }: { profile: ProfileRenderData }) {
     setExchangeError(null);
 
     try {
-      const res = await fetch(`/api/v1/profiles/${profile.id}/exchange`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: exchangeName.trim(),
-          email: exchangeEmail.trim() || undefined,
-          phone: exchangePhone.trim() || undefined,
-          company: exchangeCompany.trim() || undefined,
-          jobTitle: exchangeJobTitle.trim() || undefined,
-          notes: exchangeNotes.trim() || undefined,
-        }),
+      await ApiClient.post('/api/v1/leads', {
+        profileId: profile.id,
+        fullName: exchangeName.trim(),
+        email: exchangeEmail.trim() || undefined,
+        phone: exchangePhone.trim() || undefined,
+        companyName: exchangeCompany.trim() || undefined,
+        jobTitle: exchangeJobTitle.trim() || undefined,
+        message: exchangeNotes.trim() || undefined,
+        source: 'profile_exchange',
       });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error?.message || 'Failed to exchange contact card.');
 
       setExchangeSuccess(true);
     } catch (err: unknown) {

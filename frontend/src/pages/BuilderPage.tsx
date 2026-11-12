@@ -37,11 +37,12 @@ export function BuilderPage() {
   const isNew = id === 'new' || !id;
 
   // Active editor tab
-  const [activeTab, setActiveTab] = useState<'identity' | 'theme' | 'socials' | 'businesses' | 'catalogue'>('identity');
+  const [activeTab, setActiveTab] = useState<'identity' | 'theme' | 'socials' | 'businesses' | 'catalogue' | 'seo'>('identity');
   // Mobile preview toggle (when on mobile screen, toggle between form and phone view)
   const [mobileView, setMobileView] = useState<'editor' | 'preview'>('editor');
 
   // Form State
+  const [profileType, setProfileType] = useState<'personal' | 'business'>('personal');
   const [displayName, setDisplayName] = useState('');
   const [slug, setSlug] = useState('');
   const [headline, setHeadline] = useState('');
@@ -54,6 +55,8 @@ export function BuilderPage() {
   const [website, setWebsite] = useState('');
   const [address, setAddress] = useState('');
   const [templateId, setTemplateId] = useState('obsidian-luxury');
+  const [seoTitle, setSeoTitle] = useState('');
+  const [seoDescription, setSeoDescription] = useState('');
   const [themeColors, setThemeColors] = useState<Record<string, string>>({
     primary: '#D4AF37',
     background: '#0A0A0C',
@@ -75,6 +78,7 @@ export function BuilderPage() {
   // Populate form when data loads
   useEffect(() => {
     if (profile) {
+      setProfileType(profile.profileType === 'business' ? 'business' : 'personal');
       setDisplayName(profile.displayName || '');
       setSlug(profile.slug || '');
       setHeadline(profile.headline || '');
@@ -87,6 +91,10 @@ export function BuilderPage() {
       setWebsite(profile.website || '');
       setAddress(profile.address || '');
       setTemplateId(profile.templateId || profile.themeId || 'obsidian-luxury');
+      if (profile.customFields?.seo) {
+        setSeoTitle(profile.customFields.seo.title || '');
+        setSeoDescription(profile.customFields.seo.description || '');
+      }
       if (profile.themeConfig) {
         setThemeColors(profile.themeConfig);
       }
@@ -106,6 +114,7 @@ export function BuilderPage() {
   const saveMutation = useMutation({
     mutationFn: async (publish: boolean = false) => {
       const payload = {
+        profileType,
         displayName: displayName.trim(),
         slug: slug.trim().toLowerCase(),
         headline: headline.trim() || null,
@@ -118,6 +127,12 @@ export function BuilderPage() {
         website: website.trim() || null,
         address: address.trim() || null,
         templateId,
+        customFields: {
+          seo: {
+            title: seoTitle.trim() || undefined,
+            description: seoDescription.trim() || undefined,
+          },
+        },
         themeConfig: themeColors,
         socialLinks,
         businesses,
@@ -170,17 +185,18 @@ export function BuilderPage() {
     website: website || undefined,
     address: address || undefined,
     templateId,
+    profileType,
     themeConfig: themeColors,
     socialLinks,
-    businesses: businesses.map((b) => ({
+    businesses: profileType === 'business' ? businesses.map((b) => ({
       id: b.id || Math.random().toString(),
       companyName: b.companyName || b.name || 'Company Name',
       roleTitle: b.jobTitle || b.tagline || 'Title',
       websiteUrl: b.websiteUrl || b.businessWebsite || b.website || undefined,
       address: b.address || b.businessAddress || undefined,
       logoUrl: b.logoUrl || undefined,
-    })),
-    catalogue: catalogue.map((c) => ({
+    })) : [],
+    catalogue: profileType === 'business' ? catalogue.map((c) => ({
       id: c.id || Math.random().toString(),
       title: c.title || 'Product / Service Title',
       itemType: c.type || 'product',
@@ -188,7 +204,7 @@ export function BuilderPage() {
       price: c.price || undefined,
       imageUrl: c.imageUrl || undefined,
       actionUrl: c.actionUrl || undefined,
-    })),
+    })) : [],
     isDemo: false,
     previewPlanId: 'max',
   };
@@ -341,14 +357,52 @@ export function BuilderPage() {
             mobileView === 'preview' ? 'hidden lg:block' : 'block'
           }`}
         >
+          {/* Profile Architecture Selector (Personal vs Business) */}
+          <div className="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-[#121216] border border-border/50 mb-6">
+            <button
+              type="button"
+              onClick={() => {
+                setProfileType('personal');
+                if (activeTab === 'businesses' || activeTab === 'catalogue') {
+                  setActiveTab('identity');
+                }
+              }}
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                profileType === 'personal'
+                  ? 'bg-primary text-black shadow-md'
+                  : 'text-muted-foreground hover:text-white'
+              }`}
+            >
+              <User className="w-4 h-4" />
+              <span>Personal Visiting Card</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setProfileType('business')}
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                profileType === 'business'
+                  ? 'bg-primary text-black shadow-md'
+                  : 'text-muted-foreground hover:text-white'
+              }`}
+            >
+              <Briefcase className="w-4 h-4" />
+              <span>Business &amp; Services Profile</span>
+            </button>
+          </div>
+
           {/* Navigation Sub-Tabs */}
           <div className="flex items-center space-x-2 overflow-x-auto pb-4 mb-6 border-b border-border/40 scrollbar-none">
             {[
-              { id: 'identity', label: 'Identity & Info', icon: User },
+              { id: 'identity', label: profileType === 'personal' ? 'Identity & Card' : 'Company Info', icon: User },
               { id: 'theme', label: 'Theme & Style', icon: Palette },
-              { id: 'socials', label: 'Social Links', icon: Share2 },
-              { id: 'businesses', label: 'Ventures / Roles', icon: Briefcase },
-              { id: 'catalogue', label: 'Products & Services', icon: ShoppingBag },
+              { id: 'socials', label: 'Social Channels', icon: Share2 },
+              ...(profileType === 'business'
+                ? [
+                    { id: 'businesses', label: 'Ventures / Branches', icon: Briefcase },
+                    { id: 'catalogue', label: 'Offerings & Catalogue', icon: ShoppingBag },
+                  ]
+                : []),
+              { id: 'seo', label: 'SEO & Social Cards', icon: Globe },
             ].map((tab) => {
               const Icon = tab.icon;
               return (
@@ -496,6 +550,121 @@ export function BuilderPage() {
             </div>
           )}
 
+          {/* TAB: AUTOMATED SEO & SOCIAL CARDS */}
+          {activeTab === 'seo' && (
+            <div className="space-y-6 max-w-2xl">
+              <div>
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-primary" />
+                  Automated Search Engine &amp; Social Card Metadata
+                </h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Taptch automatically builds crawler-ready Open Graph and Schema.org rich tags. You can fine-tune titles and summaries here.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs text-muted-foreground">Custom Meta Title</Label>
+                    <span className="text-[10px] text-muted-foreground font-mono">
+                      {(seoTitle || displayName).length}/60 chars
+                    </span>
+                  </div>
+                  <Input
+                    value={seoTitle}
+                    onChange={(e) => setSeoTitle(e.target.value)}
+                    placeholder={
+                      profileType === 'business'
+                        ? `${displayName || 'Acme Corp'} | Official Business Profile & Offerings`
+                        : `${displayName || 'John Doe'} — ${headline || 'Digital Identity & Visiting Card'}`
+                    }
+                    className="mt-1.5 bg-[#121216] border-border text-xs rounded-xl"
+                  />
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Leave blank to automatically inherit profile title.
+                  </p>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs text-muted-foreground">Custom Meta Description</Label>
+                    <span className="text-[10px] text-muted-foreground font-mono">
+                      {(seoDescription || bio).length}/160 chars
+                    </span>
+                  </div>
+                  <Textarea
+                    value={seoDescription}
+                    onChange={(e) => setSeoDescription(e.target.value)}
+                    rows={3}
+                    placeholder={
+                      bio
+                        ? bio.slice(0, 150)
+                        : `Connect with ${displayName || 'our profile'} on Taptch. Explore portfolio, direct contact exchange, and verified digital identity.`
+                    }
+                    className="mt-1.5 bg-[#121216] border-border text-xs rounded-xl resize-none"
+                  />
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Summarizes your profile in search engine results and social chat previews.
+                  </p>
+                </div>
+              </div>
+
+              {/* Live Search Engine Result Mockup */}
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold text-white">Google Search Result Preview</Label>
+                <div className="p-4 rounded-2xl bg-[#18181D] border border-border/60 space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center text-[9px] font-bold text-primary">
+                      T
+                    </div>
+                    <span className="text-[11px] text-muted-foreground truncate">
+                      https://taptch.com/p/{slug || 'username'}
+                    </span>
+                  </div>
+                  <h4 className="text-sm font-semibold text-blue-400 hover:underline cursor-pointer truncate">
+                    {seoTitle || (profileType === 'business' ? `${displayName || 'Business Name'} | Official Business Profile` : `${displayName || 'Full Name'} — ${headline || 'Digital Identity'}`)}
+                  </h4>
+                  <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed">
+                    {seoDescription || bio || `Connect with ${displayName || 'this professional'} on Taptch - Intelligent Digital Identity & Smart Contact Exchange.`}
+                  </p>
+                </div>
+              </div>
+
+              {/* Live WhatsApp / Social Card Preview */}
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold text-white">Social Media &amp; WhatsApp Card Preview</Label>
+                <div className="rounded-2xl border border-border/60 bg-[#121216] overflow-hidden max-w-md shadow-xl">
+                  <div className="h-40 bg-neutral-900 relative overflow-hidden flex items-center justify-center">
+                    {avatarUrl || coverUrl ? (
+                      <img
+                        src={coverUrl || avatarUrl}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="text-center text-muted-foreground p-4">
+                        <Globe className="w-8 h-8 mx-auto mb-1 opacity-40" />
+                        <span className="text-[11px]">Upload cover/avatar for rich social card image</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4 bg-[#18181D] space-y-1">
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
+                      TAPTCH.COM
+                    </span>
+                    <h5 className="font-bold text-sm text-white truncate">
+                      {seoTitle || displayName || 'Digital Profile'}
+                    </h5>
+                    <p className="text-xs text-muted-foreground line-clamp-2">
+                      {seoDescription || bio || 'Tap to connect and exchange verified contact identity.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* TAB 2: THEME & TEMPLATE SELECTOR */}
           {activeTab === 'theme' && (
             <div className="space-y-6 max-w-2xl">
@@ -612,6 +781,121 @@ export function BuilderPage() {
             </div>
           )}
 
+          {/* TAB: AUTOMATED SEO & SOCIAL CARDS */}
+          {activeTab === 'seo' && (
+            <div className="space-y-6 max-w-2xl">
+              <div>
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-primary" />
+                  Automated Search Engine &amp; Social Card Metadata
+                </h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Taptch automatically builds crawler-ready Open Graph and Schema.org rich tags. You can fine-tune titles and summaries here.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs text-muted-foreground">Custom Meta Title</Label>
+                    <span className="text-[10px] text-muted-foreground font-mono">
+                      {(seoTitle || displayName).length}/60 chars
+                    </span>
+                  </div>
+                  <Input
+                    value={seoTitle}
+                    onChange={(e) => setSeoTitle(e.target.value)}
+                    placeholder={
+                      profileType === 'business'
+                        ? `${displayName || 'Acme Corp'} | Official Business Profile & Offerings`
+                        : `${displayName || 'John Doe'} — ${headline || 'Digital Identity & Visiting Card'}`
+                    }
+                    className="mt-1.5 bg-[#121216] border-border text-xs rounded-xl"
+                  />
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Leave blank to automatically inherit profile title.
+                  </p>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs text-muted-foreground">Custom Meta Description</Label>
+                    <span className="text-[10px] text-muted-foreground font-mono">
+                      {(seoDescription || bio).length}/160 chars
+                    </span>
+                  </div>
+                  <Textarea
+                    value={seoDescription}
+                    onChange={(e) => setSeoDescription(e.target.value)}
+                    rows={3}
+                    placeholder={
+                      bio
+                        ? bio.slice(0, 150)
+                        : `Connect with ${displayName || 'our profile'} on Taptch. Explore portfolio, direct contact exchange, and verified digital identity.`
+                    }
+                    className="mt-1.5 bg-[#121216] border-border text-xs rounded-xl resize-none"
+                  />
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Summarizes your profile in search engine results and social chat previews.
+                  </p>
+                </div>
+              </div>
+
+              {/* Live Search Engine Result Mockup */}
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold text-white">Google Search Result Preview</Label>
+                <div className="p-4 rounded-2xl bg-[#18181D] border border-border/60 space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center text-[9px] font-bold text-primary">
+                      T
+                    </div>
+                    <span className="text-[11px] text-muted-foreground truncate">
+                      https://taptch.com/p/{slug || 'username'}
+                    </span>
+                  </div>
+                  <h4 className="text-sm font-semibold text-blue-400 hover:underline cursor-pointer truncate">
+                    {seoTitle || (profileType === 'business' ? `${displayName || 'Business Name'} | Official Business Profile` : `${displayName || 'Full Name'} — ${headline || 'Digital Identity'}`)}
+                  </h4>
+                  <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed">
+                    {seoDescription || bio || `Connect with ${displayName || 'this professional'} on Taptch - Intelligent Digital Identity & Smart Contact Exchange.`}
+                  </p>
+                </div>
+              </div>
+
+              {/* Live WhatsApp / Social Card Preview */}
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold text-white">Social Media &amp; WhatsApp Card Preview</Label>
+                <div className="rounded-2xl border border-border/60 bg-[#121216] overflow-hidden max-w-md shadow-xl">
+                  <div className="h-40 bg-neutral-900 relative overflow-hidden flex items-center justify-center">
+                    {avatarUrl || coverUrl ? (
+                      <img
+                        src={coverUrl || avatarUrl}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="text-center text-muted-foreground p-4">
+                        <Globe className="w-8 h-8 mx-auto mb-1 opacity-40" />
+                        <span className="text-[11px]">Upload cover/avatar for rich social card image</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4 bg-[#18181D] space-y-1">
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
+                      TAPTCH.COM
+                    </span>
+                    <h5 className="font-bold text-sm text-white truncate">
+                      {seoTitle || displayName || 'Digital Profile'}
+                    </h5>
+                    <p className="text-xs text-muted-foreground line-clamp-2">
+                      {seoDescription || bio || 'Tap to connect and exchange verified contact identity.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* TAB 3: SOCIAL MEDIA LINKS */}
           {activeTab === 'socials' && (
             <div className="space-y-6 max-w-2xl">
@@ -674,6 +958,121 @@ export function BuilderPage() {
                     <p className="text-xs text-muted-foreground">No social media links added yet.</p>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* TAB: AUTOMATED SEO & SOCIAL CARDS */}
+          {activeTab === 'seo' && (
+            <div className="space-y-6 max-w-2xl">
+              <div>
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-primary" />
+                  Automated Search Engine &amp; Social Card Metadata
+                </h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Taptch automatically builds crawler-ready Open Graph and Schema.org rich tags. You can fine-tune titles and summaries here.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs text-muted-foreground">Custom Meta Title</Label>
+                    <span className="text-[10px] text-muted-foreground font-mono">
+                      {(seoTitle || displayName).length}/60 chars
+                    </span>
+                  </div>
+                  <Input
+                    value={seoTitle}
+                    onChange={(e) => setSeoTitle(e.target.value)}
+                    placeholder={
+                      profileType === 'business'
+                        ? `${displayName || 'Acme Corp'} | Official Business Profile & Offerings`
+                        : `${displayName || 'John Doe'} — ${headline || 'Digital Identity & Visiting Card'}`
+                    }
+                    className="mt-1.5 bg-[#121216] border-border text-xs rounded-xl"
+                  />
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Leave blank to automatically inherit profile title.
+                  </p>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs text-muted-foreground">Custom Meta Description</Label>
+                    <span className="text-[10px] text-muted-foreground font-mono">
+                      {(seoDescription || bio).length}/160 chars
+                    </span>
+                  </div>
+                  <Textarea
+                    value={seoDescription}
+                    onChange={(e) => setSeoDescription(e.target.value)}
+                    rows={3}
+                    placeholder={
+                      bio
+                        ? bio.slice(0, 150)
+                        : `Connect with ${displayName || 'our profile'} on Taptch. Explore portfolio, direct contact exchange, and verified digital identity.`
+                    }
+                    className="mt-1.5 bg-[#121216] border-border text-xs rounded-xl resize-none"
+                  />
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Summarizes your profile in search engine results and social chat previews.
+                  </p>
+                </div>
+              </div>
+
+              {/* Live Search Engine Result Mockup */}
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold text-white">Google Search Result Preview</Label>
+                <div className="p-4 rounded-2xl bg-[#18181D] border border-border/60 space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center text-[9px] font-bold text-primary">
+                      T
+                    </div>
+                    <span className="text-[11px] text-muted-foreground truncate">
+                      https://taptch.com/p/{slug || 'username'}
+                    </span>
+                  </div>
+                  <h4 className="text-sm font-semibold text-blue-400 hover:underline cursor-pointer truncate">
+                    {seoTitle || (profileType === 'business' ? `${displayName || 'Business Name'} | Official Business Profile` : `${displayName || 'Full Name'} — ${headline || 'Digital Identity'}`)}
+                  </h4>
+                  <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed">
+                    {seoDescription || bio || `Connect with ${displayName || 'this professional'} on Taptch - Intelligent Digital Identity & Smart Contact Exchange.`}
+                  </p>
+                </div>
+              </div>
+
+              {/* Live WhatsApp / Social Card Preview */}
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold text-white">Social Media &amp; WhatsApp Card Preview</Label>
+                <div className="rounded-2xl border border-border/60 bg-[#121216] overflow-hidden max-w-md shadow-xl">
+                  <div className="h-40 bg-neutral-900 relative overflow-hidden flex items-center justify-center">
+                    {avatarUrl || coverUrl ? (
+                      <img
+                        src={coverUrl || avatarUrl}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="text-center text-muted-foreground p-4">
+                        <Globe className="w-8 h-8 mx-auto mb-1 opacity-40" />
+                        <span className="text-[11px]">Upload cover/avatar for rich social card image</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4 bg-[#18181D] space-y-1">
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
+                      TAPTCH.COM
+                    </span>
+                    <h5 className="font-bold text-sm text-white truncate">
+                      {seoTitle || displayName || 'Digital Profile'}
+                    </h5>
+                    <p className="text-xs text-muted-foreground line-clamp-2">
+                      {seoDescription || bio || 'Tap to connect and exchange verified contact identity.'}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -777,6 +1176,121 @@ export function BuilderPage() {
                     <p className="text-xs text-muted-foreground">No business entities added yet.</p>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* TAB: AUTOMATED SEO & SOCIAL CARDS */}
+          {activeTab === 'seo' && (
+            <div className="space-y-6 max-w-2xl">
+              <div>
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-primary" />
+                  Automated Search Engine &amp; Social Card Metadata
+                </h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Taptch automatically builds crawler-ready Open Graph and Schema.org rich tags. You can fine-tune titles and summaries here.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs text-muted-foreground">Custom Meta Title</Label>
+                    <span className="text-[10px] text-muted-foreground font-mono">
+                      {(seoTitle || displayName).length}/60 chars
+                    </span>
+                  </div>
+                  <Input
+                    value={seoTitle}
+                    onChange={(e) => setSeoTitle(e.target.value)}
+                    placeholder={
+                      profileType === 'business'
+                        ? `${displayName || 'Acme Corp'} | Official Business Profile & Offerings`
+                        : `${displayName || 'John Doe'} — ${headline || 'Digital Identity & Visiting Card'}`
+                    }
+                    className="mt-1.5 bg-[#121216] border-border text-xs rounded-xl"
+                  />
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Leave blank to automatically inherit profile title.
+                  </p>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs text-muted-foreground">Custom Meta Description</Label>
+                    <span className="text-[10px] text-muted-foreground font-mono">
+                      {(seoDescription || bio).length}/160 chars
+                    </span>
+                  </div>
+                  <Textarea
+                    value={seoDescription}
+                    onChange={(e) => setSeoDescription(e.target.value)}
+                    rows={3}
+                    placeholder={
+                      bio
+                        ? bio.slice(0, 150)
+                        : `Connect with ${displayName || 'our profile'} on Taptch. Explore portfolio, direct contact exchange, and verified digital identity.`
+                    }
+                    className="mt-1.5 bg-[#121216] border-border text-xs rounded-xl resize-none"
+                  />
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Summarizes your profile in search engine results and social chat previews.
+                  </p>
+                </div>
+              </div>
+
+              {/* Live Search Engine Result Mockup */}
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold text-white">Google Search Result Preview</Label>
+                <div className="p-4 rounded-2xl bg-[#18181D] border border-border/60 space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center text-[9px] font-bold text-primary">
+                      T
+                    </div>
+                    <span className="text-[11px] text-muted-foreground truncate">
+                      https://taptch.com/p/{slug || 'username'}
+                    </span>
+                  </div>
+                  <h4 className="text-sm font-semibold text-blue-400 hover:underline cursor-pointer truncate">
+                    {seoTitle || (profileType === 'business' ? `${displayName || 'Business Name'} | Official Business Profile` : `${displayName || 'Full Name'} — ${headline || 'Digital Identity'}`)}
+                  </h4>
+                  <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed">
+                    {seoDescription || bio || `Connect with ${displayName || 'this professional'} on Taptch - Intelligent Digital Identity & Smart Contact Exchange.`}
+                  </p>
+                </div>
+              </div>
+
+              {/* Live WhatsApp / Social Card Preview */}
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold text-white">Social Media &amp; WhatsApp Card Preview</Label>
+                <div className="rounded-2xl border border-border/60 bg-[#121216] overflow-hidden max-w-md shadow-xl">
+                  <div className="h-40 bg-neutral-900 relative overflow-hidden flex items-center justify-center">
+                    {avatarUrl || coverUrl ? (
+                      <img
+                        src={coverUrl || avatarUrl}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="text-center text-muted-foreground p-4">
+                        <Globe className="w-8 h-8 mx-auto mb-1 opacity-40" />
+                        <span className="text-[11px]">Upload cover/avatar for rich social card image</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4 bg-[#18181D] space-y-1">
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
+                      TAPTCH.COM
+                    </span>
+                    <h5 className="font-bold text-sm text-white truncate">
+                      {seoTitle || displayName || 'Digital Profile'}
+                    </h5>
+                    <p className="text-xs text-muted-foreground line-clamp-2">
+                      {seoDescription || bio || 'Tap to connect and exchange verified contact identity.'}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -894,6 +1408,121 @@ export function BuilderPage() {
                     <p className="text-xs text-muted-foreground">No catalogue products or services added.</p>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* TAB: AUTOMATED SEO & SOCIAL CARDS */}
+          {activeTab === 'seo' && (
+            <div className="space-y-6 max-w-2xl">
+              <div>
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-primary" />
+                  Automated Search Engine &amp; Social Card Metadata
+                </h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Taptch automatically builds crawler-ready Open Graph and Schema.org rich tags. You can fine-tune titles and summaries here.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs text-muted-foreground">Custom Meta Title</Label>
+                    <span className="text-[10px] text-muted-foreground font-mono">
+                      {(seoTitle || displayName).length}/60 chars
+                    </span>
+                  </div>
+                  <Input
+                    value={seoTitle}
+                    onChange={(e) => setSeoTitle(e.target.value)}
+                    placeholder={
+                      profileType === 'business'
+                        ? `${displayName || 'Acme Corp'} | Official Business Profile & Offerings`
+                        : `${displayName || 'John Doe'} — ${headline || 'Digital Identity & Visiting Card'}`
+                    }
+                    className="mt-1.5 bg-[#121216] border-border text-xs rounded-xl"
+                  />
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Leave blank to automatically inherit profile title.
+                  </p>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs text-muted-foreground">Custom Meta Description</Label>
+                    <span className="text-[10px] text-muted-foreground font-mono">
+                      {(seoDescription || bio).length}/160 chars
+                    </span>
+                  </div>
+                  <Textarea
+                    value={seoDescription}
+                    onChange={(e) => setSeoDescription(e.target.value)}
+                    rows={3}
+                    placeholder={
+                      bio
+                        ? bio.slice(0, 150)
+                        : `Connect with ${displayName || 'our profile'} on Taptch. Explore portfolio, direct contact exchange, and verified digital identity.`
+                    }
+                    className="mt-1.5 bg-[#121216] border-border text-xs rounded-xl resize-none"
+                  />
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Summarizes your profile in search engine results and social chat previews.
+                  </p>
+                </div>
+              </div>
+
+              {/* Live Search Engine Result Mockup */}
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold text-white">Google Search Result Preview</Label>
+                <div className="p-4 rounded-2xl bg-[#18181D] border border-border/60 space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center text-[9px] font-bold text-primary">
+                      T
+                    </div>
+                    <span className="text-[11px] text-muted-foreground truncate">
+                      https://taptch.com/p/{slug || 'username'}
+                    </span>
+                  </div>
+                  <h4 className="text-sm font-semibold text-blue-400 hover:underline cursor-pointer truncate">
+                    {seoTitle || (profileType === 'business' ? `${displayName || 'Business Name'} | Official Business Profile` : `${displayName || 'Full Name'} — ${headline || 'Digital Identity'}`)}
+                  </h4>
+                  <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed">
+                    {seoDescription || bio || `Connect with ${displayName || 'this professional'} on Taptch - Intelligent Digital Identity & Smart Contact Exchange.`}
+                  </p>
+                </div>
+              </div>
+
+              {/* Live WhatsApp / Social Card Preview */}
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold text-white">Social Media &amp; WhatsApp Card Preview</Label>
+                <div className="rounded-2xl border border-border/60 bg-[#121216] overflow-hidden max-w-md shadow-xl">
+                  <div className="h-40 bg-neutral-900 relative overflow-hidden flex items-center justify-center">
+                    {avatarUrl || coverUrl ? (
+                      <img
+                        src={coverUrl || avatarUrl}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="text-center text-muted-foreground p-4">
+                        <Globe className="w-8 h-8 mx-auto mb-1 opacity-40" />
+                        <span className="text-[11px]">Upload cover/avatar for rich social card image</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4 bg-[#18181D] space-y-1">
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
+                      TAPTCH.COM
+                    </span>
+                    <h5 className="font-bold text-sm text-white truncate">
+                      {seoTitle || displayName || 'Digital Profile'}
+                    </h5>
+                    <p className="text-xs text-muted-foreground line-clamp-2">
+                      {seoDescription || bio || 'Tap to connect and exchange verified contact identity.'}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           )}

@@ -14,6 +14,7 @@ import { TemplatesPage } from '../pages/TemplatesPage';
 import { PricingPage } from '../pages/PricingPage';
 import { BuilderPage } from '../pages/BuilderPage';
 import { AdminPage } from '../pages/AdminPage';
+import { SupportPage } from '../pages/SupportPage';
 
 export const router = createBrowserRouter([
   // Marketing Routes
@@ -45,6 +46,9 @@ export const router = createBrowserRouter([
   { path: '/portal-x', element: <Navigate to="/admin" replace /> },
   { path: '/portal-x/*', element: <Navigate to="/admin" replace /> },
   { path: '/admin', element: <AdminPage /> },
+  { path: '/support', element: <SupportPage /> },
+  { path: '/staff/dashboard', element: <Navigate to="/support" replace /> },
+  { path: '/staff/*', element: <Navigate to="/support" replace /> },
 
   // App Dashboard (Protected)
   {

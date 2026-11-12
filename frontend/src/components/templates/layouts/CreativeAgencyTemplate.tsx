@@ -20,6 +20,8 @@ import type { TemplateLayoutProps } from './types';
 import { UpiPaymentCard } from '@/components/profile/UpiPaymentCard';
 import type { UpiPaymentConfig } from '@/lib/upi';
 
+import { TemplateContactForm } from '../TemplateContactForm';
+
 export function CreativeAgencyTemplate({
   profile,
   onDownloadVCard,
@@ -260,6 +262,22 @@ export function CreativeAgencyTemplate({
             </div>
           )}
         </div>
+
+        {/* Native Creative Commission & Project Brief Form */}
+        <TemplateContactForm
+          profileId={profile.id}
+          profileName={profile.displayName}
+          isBusiness={profile.profileType === 'business'}
+          themeStyle={{
+            accentColor: '#A855F7',
+            cardBg: 'rgba(21, 24, 51, 0.85)',
+            borderColor: 'rgba(168, 85, 247, 0.3)',
+            textColor: '#F8FAFC',
+            buttonColor: '#9333EA',
+            buttonTextColor: '#FFFFFF',
+            inputBg: 'rgba(11, 13, 27, 0.6)',
+          }}
+        />
 
         {/* Footer */}
         <footer className="w-full py-8 text-center border-t border-purple-500/20 text-xs text-purple-300/60">

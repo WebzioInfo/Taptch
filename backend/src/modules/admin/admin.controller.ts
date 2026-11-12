@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Param, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Body, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '../../common/guards/auth.guard';
 import { RolesGuard, Roles } from '../../common/guards/roles.guard';
@@ -18,6 +18,41 @@ export class AdminController {
   @ApiOperation({ summary: 'Platform summary metrics for Super Admin' })
   async getStats() {
     return this.adminService.getPlatformStats();
+  }
+
+  @Get('finance')
+  @ApiOperation({ summary: 'Full Platform Financial Management & P&L Analysis' })
+  async getFinance() {
+    return this.adminService.getFinancialSummary();
+  }
+
+  @Post('finance/expenses')
+  @ApiOperation({ summary: 'Record an operating or manufacturing expense' })
+  async recordExpense(
+    @CurrentActor() actor: ActorContext,
+    @Body() body: { category: string; title: string; amount: number; notes?: string; receiptUrl?: string },
+  ) {
+    return this.adminService.recordExpense(body, actor);
+  }
+
+  @Get('users')
+  @ApiOperation({ summary: 'Search and inspect all registered accounts' })
+  async getUsers(
+    @Query('q') query?: string,
+    @Query('role') role?: string,
+    @Query('status') status?: string,
+  ) {
+    return this.adminService.getAllUsers(query, role, status);
+  }
+
+  @Patch('users/:id/status')
+  @ApiOperation({ summary: 'Suspend or reactivate user account' })
+  async updateUserStatus(
+    @Param('id') userId: string,
+    @Body('status') status: string,
+    @CurrentActor() actor: ActorContext,
+  ) {
+    return this.adminService.updateUserStatus(userId, status, actor);
   }
 
   @Get('orders')

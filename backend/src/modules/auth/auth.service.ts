@@ -192,5 +192,203 @@ export class AuthService {
       },
     };
   }
+
+  getGoogleAuthUrl(state?: string): string {
+    const clientId = process.env.GOOGLE_CLIENT_ID || 'dummy-google-client-id';
+    const callbackUrl =
+      process.env.GOOGLE_CALLBACK_URL ||
+      `${process.env.BACKEND_URL || 'http://localhost:4000'}/api/auth/oauth/google/callback`;
+
+    const params = new URLSearchParams({
+      client_id: clientId,
+      redirect_uri: callbackUrl,
+      response_type: 'code',
+      scope: 'openid email profile',
+      access_type: 'offline',
+      prompt: 'consent',
+      state: state || 'taptch_auth_state',
+    });
+
+    return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+  }
+
+  async handleGoogleOAuthCallback(code: string) {
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    const callbackUrl =
+      process.env.GOOGLE_CALLBACK_URL ||
+      `${process.env.BACKEND_URL || 'http://localhost:4000'}/api/auth/oauth/google/callback`;
+
+    if (!clientId || !clientSecret) {
+      this.logger.warn('Google OAuth is not configured with client credentials.');
+      throw new BadRequestException(
+        'Google OAuth credentials are not fully configured on the server. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET.',
+      );
+    }
+
+    const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        code,
+        client_id: clientId,
+        client_secret: clientSecret,
+        redirect_uri: callbackUrl,
+        grant_type: 'authorization_code',
+      }),
+    });
+
+    if (!tokenRes.ok) {
+      const err = await tokenRes.text();
+      throw new BadRequestException(`Google OAuth exchange failed: ${err}`);
+    }
+
+    const tokenData = await tokenRes.json();
+    const idToken = tokenData.id_token;
+    const accessToken = tokenData.access_token;
+
+    const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (!userInfoRes.ok) {
+      throw new BadRequestException('Failed to retrieve user profile from Google.');
+    }
+    const googleUser = await userInfoRes.json();
+    return this.findOrCreateGoogleUser(googleUser, { idToken, accessToken });
+  }
+
+  async verifyGoogleIdToken(idToken: string) {
+    if (!idToken) throw new BadRequestException('Google ID token is required.');
+
+    const res = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`);
+    if (!res.ok) {
+      throw new BadRequestException('Invalid or expired Google credential token.');
+    }
+    const payload = await res.json();
+    if (!payload.email || !payload.sub) {
+      throw new BadRequestException('Malformed Google user token received.');
+    }
+
+    return this.findOrCreateGoogleUser(
+      {
+        sub: payload.sub,
+        email: payload.email,
+        name: payload.name || payload.email.split('@')[0],
+        picture: payload.picture,
+      },
+      { idToken },
+    );
+  }
+
+  private async findOrCreateGoogleUser(
+    googleUser: { sub: string; email: string; name?: string; picture?: string },
+    tokens: { idToken?: string; accessToken?: string },
+  ) {
+    const normalizedEmail = googleUser.email.trim().toLowerCase();
+
+    // 1. Check if user already exists
+    const [existingUser] = await this.dbService.db
+      .select()
+      .from(schema.users)
+      .where(eq(schema.users.email, normalizedEmail))
+      .limit(1);
+
+    let userId: string;
+    let systemRole = 'user';
+
+    if (existingUser) {
+      userId = existingUser.id;
+      systemRole = existingUser.systemRole || 'user';
+
+      if (existingUser.status === 'suspended' || existingUser.status === 'deactivated') {
+        throw new UnauthorizedException('Sign-in is temporarily restricted. Please contact support.');
+      }
+
+      await this.dbService.db
+        .update(schema.users)
+        .set({
+          emailVerified: true,
+          image: existingUser.image || googleUser.picture || null,
+          updatedAt: new Date(),
+        })
+        .where(eq(schema.users.id, userId));
+    } else {
+      userId = crypto.randomUUID();
+      await this.dbService.db.insert(schema.users).values({
+        id: userId,
+        name: googleUser.name?.trim() || normalizedEmail.split('@')[0],
+        email: normalizedEmail,
+        emailVerified: true,
+        image: googleUser.picture || null,
+        systemRole: 'user',
+        status: 'active',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    }
+
+    // 2. Link or update accounts record
+    const [existingAccount] = await this.dbService.db
+      .select()
+      .from(schema.accounts)
+      .where(
+        and(
+          eq(schema.accounts.userId, userId),
+          eq(schema.accounts.providerId, 'google'),
+        ),
+      )
+      .limit(1);
+
+    if (existingAccount) {
+      await this.dbService.db
+        .update(schema.accounts)
+        .set({
+          accountId: googleUser.sub,
+          idToken: tokens.idToken || null,
+          accessToken: tokens.accessToken || null,
+          updatedAt: new Date(),
+        })
+        .where(eq(schema.accounts.id, existingAccount.id));
+    } else {
+      await this.dbService.db.insert(schema.accounts).values({
+        id: crypto.randomUUID(),
+        accountId: googleUser.sub,
+        providerId: 'google',
+        userId,
+        idToken: tokens.idToken || null,
+        accessToken: tokens.accessToken || null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    }
+
+    // 3. Issue session
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+    await this.dbService.db.insert(schema.sessions).values({
+      id: crypto.randomUUID(),
+      userId,
+      token,
+      expiresAt,
+      ipAddress: null,
+      userAgent: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    return {
+      user: {
+        id: userId,
+        email: normalizedEmail,
+        name: googleUser.name || normalizedEmail,
+        systemRole,
+      },
+      session: {
+        token,
+        expiresAt,
+      },
+    };
+  }
 }
 

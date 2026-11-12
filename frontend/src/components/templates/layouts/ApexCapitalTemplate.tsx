@@ -21,6 +21,8 @@ import type { TemplateLayoutProps } from './types';
 import { UpiPaymentCard } from '@/components/profile/UpiPaymentCard';
 import type { UpiPaymentConfig } from '@/lib/upi';
 
+import { TemplateContactForm } from '../TemplateContactForm';
+
 export function ApexCapitalTemplate({
   profile,
   onDownloadVCard,
@@ -273,6 +275,22 @@ export function ApexCapitalTemplate({
             </div>
           </div>
         )}
+
+        {/* Native Contact & Private Enquiry Section */}
+        <TemplateContactForm
+          profileId={profile.id}
+          profileName={profile.displayName}
+          isBusiness={profile.profileType === 'business'}
+          themeStyle={{
+            accentColor: '#10B981',
+            cardBg: '#062D24',
+            borderColor: 'rgba(16, 185, 129, 0.3)',
+            textColor: '#ECFDF5',
+            buttonColor: '#10B981',
+            buttonTextColor: '#022C22',
+            inputBg: '#022019',
+          }}
+        />
 
         {/* Footer */}
         <div className="text-center pt-8 pb-4 text-xs text-neutral-500 space-y-1">

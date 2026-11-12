@@ -20,6 +20,8 @@ import type { TemplateLayoutProps } from './types';
 import { UpiPaymentCard } from '@/components/profile/UpiPaymentCard';
 import type { UpiPaymentConfig } from '@/lib/upi';
 
+import { TemplateContactForm } from '../TemplateContactForm';
+
 export function PremiumBrandTemplate({
   profile,
   onDownloadVCard,
@@ -259,6 +261,22 @@ export function PremiumBrandTemplate({
             </div>
           </div>
         )}
+
+        {/* Native Luxury Concierge & Contact Form */}
+        <TemplateContactForm
+          profileId={profile.id}
+          profileName={profile.displayName}
+          isBusiness={profile.profileType === 'business'}
+          themeStyle={{
+            accentColor: '#D4AF37',
+            cardBg: '#121216',
+            borderColor: 'rgba(212, 175, 55, 0.3)',
+            textColor: '#EDEDED',
+            buttonColor: '#D4AF37',
+            buttonTextColor: '#0A0A0C',
+            inputBg: '#18181D',
+          }}
+        />
 
         {/* Footer */}
         <footer className="w-full py-8 text-center border-t border-white/10 text-xs text-neutral-500">

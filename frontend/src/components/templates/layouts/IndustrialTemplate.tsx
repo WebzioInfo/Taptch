@@ -23,6 +23,8 @@ import {
 } from 'lucide-react';
 import type { TemplateLayoutProps } from './types';
 
+import { TemplateContactForm } from '../TemplateContactForm';
+
 export function IndustrialTemplate({
   profile,
   onDownloadVCard,
@@ -367,6 +369,22 @@ export function IndustrialTemplate({
             </div>
           </div>
         )}
+
+        {/* Native Industrial RFQ & Procurement Form */}
+        <TemplateContactForm
+          profileId={profile.id}
+          profileName={profile.displayName}
+          isBusiness={profile.profileType === 'business'}
+          themeStyle={{
+            accentColor: '#F59E0B',
+            cardBg: '#1E293B',
+            borderColor: 'rgba(245, 158, 11, 0.3)',
+            textColor: '#F8FAFC',
+            buttonColor: '#D97706',
+            buttonTextColor: '#0F172A',
+            inputBg: '#0F172A',
+          }}
+        />
 
         {/* Footer */}
         <footer className="w-full py-8 text-center border-t border-slate-800 text-xs text-slate-500">

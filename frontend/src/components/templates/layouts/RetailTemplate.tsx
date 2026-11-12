@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 import type { TemplateLayoutProps } from './types';
 
+import { TemplateContactForm } from '../TemplateContactForm';
+
 export function RetailTemplate({
   profile,
   onDownloadVCard,
@@ -296,6 +298,22 @@ export function RetailTemplate({
             </div>
           </div>
         </div>
+
+        {/* Native Retail Enquiry & Product Order Form */}
+        <TemplateContactForm
+          profileId={profile.id}
+          profileName={profile.displayName}
+          isBusiness={profile.profileType === 'business'}
+          themeStyle={{
+            accentColor: '#FB7185',
+            cardBg: '#1E293B',
+            borderColor: 'rgba(251, 113, 133, 0.3)',
+            textColor: '#F8FAFC',
+            buttonColor: '#F43F5E',
+            buttonTextColor: '#FFFFFF',
+            inputBg: '#0F172A',
+          }}
+        />
 
         {/* Footer */}
         <footer className="w-full py-8 text-center border-t border-slate-800 text-xs text-slate-500">

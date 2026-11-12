@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ApiClient } from '../services/api';
 import { ProfileRenderer } from '../components/templates/ProfileRenderer';
+import { MetaTags } from '../components/seo/MetaTags';
 import { BrandLogo } from '../components/brand';
 import { Loader2, AlertCircle, Sparkles } from 'lucide-react';
 
@@ -89,8 +90,47 @@ export function PublicProfilePage() {
     })),
   };
 
+  const isBusiness = profile.profileType === 'business';
+  const pageTitle = isBusiness
+    ? `${profile.displayName} | Business Profile & Offerings`
+    : `${profile.displayName} — ${profile.headline || 'Digital Identity'}`;
+  const pageDescription =
+    profile.bio ||
+    `Connect with ${profile.displayName} on Taptch. Access direct contact exchange, portfolio, and verified identity.`;
+
+  const jsonLd = isBusiness
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: profile.displayName,
+        description: pageDescription,
+        url: window.location.href,
+        logo: profile.avatarUrl || undefined,
+        email: profile.email || undefined,
+        telephone: profile.phone || undefined,
+      }
+    : {
+        '@context': 'https://schema.org',
+        '@type': 'Person',
+        name: profile.displayName,
+        jobTitle: profile.headline || undefined,
+        description: pageDescription,
+        image: profile.avatarUrl || undefined,
+        url: window.location.href,
+        email: profile.email || undefined,
+        telephone: profile.phone || undefined,
+      };
+
   return (
     <div className="min-h-screen bg-black">
+      <MetaTags
+        title={pageTitle}
+        description={pageDescription}
+        canonicalUrl={window.location.href}
+        ogImage={profile.avatarUrl || profile.coverUrl}
+        ogType={isBusiness ? 'business.business' : 'profile'}
+        jsonLd={jsonLd}
+      />
       <ProfileRenderer profile={renderData as any} />
     </div>
   );

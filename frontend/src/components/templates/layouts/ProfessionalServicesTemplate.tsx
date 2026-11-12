@@ -20,6 +20,8 @@ import type { TemplateLayoutProps } from './types';
 import { UpiPaymentCard } from '@/components/profile/UpiPaymentCard';
 import type { UpiPaymentConfig } from '@/lib/upi';
 
+import { TemplateContactForm } from '../TemplateContactForm';
+
 export function ProfessionalServicesTemplate({
   profile,
   onDownloadVCard,
@@ -253,6 +255,22 @@ export function ProfessionalServicesTemplate({
             </div>
           </div>
         )}
+
+        {/* Native Editorial Consultation & Retainer Form */}
+        <TemplateContactForm
+          profileId={profile.id}
+          profileName={profile.displayName}
+          isBusiness={profile.profileType === 'business'}
+          themeStyle={{
+            accentColor: '#8C6D3B',
+            cardBg: '#FFFFFF',
+            borderColor: '#E2DDD3',
+            textColor: '#1E1E24',
+            buttonColor: '#8C6D3B',
+            buttonTextColor: '#FFFFFF',
+            inputBg: '#FAF8F5',
+          }}
+        />
 
         {/* Footer */}
         <footer className="w-full py-8 text-center border-t border-[#E2DDD3] text-xs text-[#71717A] font-sans">
