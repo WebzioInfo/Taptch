@@ -1,7 +1,7 @@
 import React from 'react';
-import Link from 'next/link';
-import { brandConfig } from '@/config/brand';
-import { BrandLogo } from '@/components/brand';
+import { Link } from 'react-router-dom';
+import { brandConfig } from '../../config/brand';
+import { BrandLogo } from '../brand';
 
 export function MarketingFooter() {
   return (
@@ -24,17 +24,17 @@ export function MarketingFooter() {
             <p className="font-semibold text-foreground text-xs uppercase tracking-wider">Solutions</p>
             <ul className="space-y-2">
               <li>
-                <Link href="/nfc-business-card" className="hover:text-foreground transition-colors">
+                <Link to="/nfc-business-card" className="hover:text-foreground transition-colors">
                   NFC Business Cards
                 </Link>
               </li>
               <li>
-                <Link href="/digital-business-card" className="hover:text-foreground transition-colors">
+                <Link to="/digital-business-card" className="hover:text-foreground transition-colors">
                   Digital Business Cards
                 </Link>
               </li>
               <li>
-                <Link href="/templates" className="hover:text-foreground transition-colors">
+                <Link to="/templates" className="hover:text-foreground transition-colors">
                   Template Showcase
                 </Link>
               </li>
@@ -46,22 +46,22 @@ export function MarketingFooter() {
             <p className="font-semibold text-foreground text-xs uppercase tracking-wider">Platform</p>
             <ul className="space-y-2">
               <li>
-                <Link href="/features" className="hover:text-foreground transition-colors">
+                <Link to="/features" className="hover:text-foreground transition-colors">
                   Platform Features
                 </Link>
               </li>
               <li>
-                <Link href="/how-it-works" className="hover:text-foreground transition-colors">
+                <Link to="/how-it-works" className="hover:text-foreground transition-colors">
                   How It Works
                 </Link>
               </li>
               <li>
-                <Link href="/pricing" className="hover:text-foreground transition-colors">
+                <Link to="/pricing" className="hover:text-foreground transition-colors">
                   Pricing & Plans
                 </Link>
               </li>
               <li>
-                <Link href="/faq" className="hover:text-foreground transition-colors">
+                <Link to="/faq" className="hover:text-foreground transition-colors">
                   Frequently Asked
                 </Link>
               </li>
@@ -73,22 +73,22 @@ export function MarketingFooter() {
             <p className="font-semibold text-foreground text-xs uppercase tracking-wider">Company</p>
             <ul className="space-y-2">
               <li>
-                <Link href="/about" className="hover:text-foreground transition-colors">
+                <Link to="/about" className="hover:text-foreground transition-colors">
                   About Us
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-foreground transition-colors">
+                <Link to="/contact" className="hover:text-foreground transition-colors">
                   Contact Support
                 </Link>
               </li>
               <li>
-                <Link href="/login" className="hover:text-foreground transition-colors">
+                <Link to="/login" className="hover:text-foreground transition-colors">
                   Sign In
                 </Link>
               </li>
               <li>
-                <Link href="/register" className="hover:text-foreground transition-colors">
+                <Link to="/register" className="hover:text-foreground transition-colors">
                   Create Account
                 </Link>
               </li>

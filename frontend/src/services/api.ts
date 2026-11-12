@@ -1,6 +1,7 @@
 import type { ApiResponse } from '@taptch/shared';
+import { env } from '../config/env';
 
-const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || '';
+const API_BASE_URL = env.apiUrl;
 
 export class ApiClient {
   private static async request<T>(

@@ -1,15 +1,13 @@
-'use client';
-
 import * as React from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { BrandLogo } from '@/components/brand';
-import { Button } from '@/components/ui/button';
-import { useSession } from '@/lib/auth/client';
+import { Link, useLocation } from 'react-router-dom';
+import { BrandLogo } from '../brand';
+import { Button } from '../ui/button';
+import { useSession } from '../../lib/auth/client';
 import { ArrowRight, LayoutDashboard, Menu, X } from 'lucide-react';
 
 export function MarketingHeader() {
-  const pathname = usePathname();
+  const location = useLocation();
+  const pathname = location.pathname;
   const { data: session, isPending } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
@@ -32,7 +30,7 @@ export function MarketingHeader() {
           {navLinks.map((link) => (
             <Link
               key={link.href}
-              href={link.href}
+              to={link.href}
               className={`transition-colors hover:text-foreground ${
                 pathname === link.href ? 'text-primary font-semibold' : ''
               }`}
@@ -46,7 +44,7 @@ export function MarketingHeader() {
           {isPending ? (
             <div className="h-8 w-20 bg-muted/40 animate-pulse rounded-md" />
           ) : session?.user ? (
-            <Link href="/dashboard">
+            <Link to="/dashboard">
               <Button
                 variant="gold"
                 size="sm"
@@ -58,12 +56,12 @@ export function MarketingHeader() {
             </Link>
           ) : (
             <div className="flex items-center space-x-2">
-              <Link href="/login">
+              <Link to="/login">
                 <Button variant="ghost" size="sm" className="text-xs">
                   Sign In
                 </Button>
               </Link>
-              <Link href="/register">
+              <Link to="/register">
                 <Button
                   variant="gold"
                   size="sm"
@@ -99,7 +97,7 @@ export function MarketingHeader() {
             {navLinks.map((link) => (
               <Link
                 key={link.href}
-                href={link.href}
+                to={link.href}
                 onClick={() => setMobileMenuOpen(false)}
                 className={`px-2 py-1.5 rounded-md transition-colors ${
                   pathname === link.href

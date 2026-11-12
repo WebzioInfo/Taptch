@@ -1,8 +1,8 @@
 import * as React from 'react';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import { LucideIcon, Inbox } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { Button } from './button';
+import { cn } from '../../lib/utils';
 
 export interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
   icon?: LucideIcon;
@@ -47,7 +47,7 @@ export function EmptyState({
       {actionNode ? (
         actionNode
       ) : actionHref && actionLabel ? (
-        <Link href={actionHref}>
+        <Link to={actionHref}>
           <Button size="sm" className="mt-2 text-xs font-medium">
             {actionLabel}
           </Button>

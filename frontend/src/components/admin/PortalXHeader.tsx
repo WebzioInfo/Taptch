@@ -1,8 +1,5 @@
-'use client';
-
 import * as React from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { Link, useLocation } from 'react-router-dom';
 import { QrCode, Users, Calendar, ShieldCheck } from 'lucide-react';
 
 interface PortalXHeaderProps {
@@ -12,7 +9,8 @@ interface PortalXHeaderProps {
 }
 
 export function PortalXHeader({ title, subtitle, actions }: PortalXHeaderProps) {
-  const pathname = usePathname();
+  const location = useLocation();
+  const pathname = location.pathname;
 
   const navItems = [
     {
@@ -60,7 +58,7 @@ export function PortalXHeader({ title, subtitle, actions }: PortalXHeaderProps) 
           return (
             <Link
               key={item.href}
-              href={item.href}
+              to={item.href}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
                 item.active
                   ? 'bg-neutral-800 text-white font-semibold border border-neutral-700/60 shadow-sm'
@@ -76,4 +74,3 @@ export function PortalXHeader({ title, subtitle, actions }: PortalXHeaderProps) 
     </div>
   );
 }
-

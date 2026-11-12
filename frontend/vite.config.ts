@@ -12,10 +12,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@taptch/shared': path.resolve(__dirname, '../shared/src'),
-      'next/link': path.resolve(__dirname, './src/compat/link.tsx'),
-      'next/image': path.resolve(__dirname, './src/compat/image.tsx'),
-      'next/navigation': path.resolve(__dirname, './src/compat/navigation.ts'),
+      '@taptch/shared': path.resolve(__dirname, '../shared/src/index.ts'),
     },
   },
   server: {

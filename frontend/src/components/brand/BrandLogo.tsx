@@ -1,9 +1,6 @@
-'use client';
-
 import React from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { brandConfig } from '@/config/brand';
+import { Link } from 'react-router-dom';
+import { brandConfig } from '../../config/brand';
 
 export type BrandLogoVariant = 'primary' | 'horizontal' | 'stacked' | 'symbol' | 'monochrome';
 export type BrandLogoTheme = 'auto' | 'dark' | 'light';
@@ -90,7 +87,7 @@ export function BrandLogo({
   width,
   height,
   className = '',
-  priority = false,
+  priority,
   asLink = false,
   href = '/',
   onClick,
@@ -101,13 +98,12 @@ export function BrandLogo({
   const src = getAssetSrc(variant, theme);
 
   const imageElement = (
-    <Image
+    <img
       src={src}
       alt={brandConfig.name}
       width={finalWidth}
       height={finalHeight}
-      priority={priority}
-      unoptimized
+      loading={priority ? 'eager' : 'lazy'}
       className={`inline-block select-none object-contain transition-opacity duration-200 ${className}`}
       onClick={onClick}
     />
@@ -116,7 +112,7 @@ export function BrandLogo({
   if (asLink) {
     return (
       <Link
-        href={href}
+        to={href}
         className="inline-flex items-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:ring-offset-2 rounded"
         aria-label={brandConfig.name}
       >
@@ -127,4 +123,3 @@ export function BrandLogo({
 
   return imageElement;
 }
-

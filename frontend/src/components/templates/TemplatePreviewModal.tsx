@@ -1,10 +1,8 @@
-'use client';
-
 import * as React from 'react';
-import { useRouter } from 'next/navigation';
-import { brandConfig } from '@/config/brand';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { useNavigate } from 'react-router-dom';
+import { brandConfig } from '../../config/brand';
+import { Button } from '../ui/button';
+import { Badge } from '../ui/badge';
 import {
   Smartphone,
   Tablet,
@@ -35,7 +33,7 @@ export function TemplatePreviewModal({
   onSelectTemplate,
   isAuthenticated = false,
 }: TemplatePreviewModalProps) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [selectedTemplateId] = React.useState<string>(initialTemplateId);
   const [previewDevice, setPreviewDevice] = React.useState<'mobile' | 'tablet' | 'desktop'>('mobile');
   const [previewMode, setPreviewMode] = React.useState<'demo' | 'customer'>(
@@ -99,7 +97,7 @@ export function TemplatePreviewModal({
 
   const handleApplyTemplate = async () => {
     if (!isAuthenticated && !customerProfile) {
-      router.push(`/register?template=${encodeURIComponent(selectedTemplateId)}`);
+      navigate(`/register?template=${encodeURIComponent(selectedTemplateId)}`);
       return;
     }
 
@@ -118,7 +116,7 @@ export function TemplatePreviewModal({
         setIsSaving(false);
       }
     } else {
-      router.push(`/builder/new?template=${encodeURIComponent(selectedTemplateId)}`);
+      navigate(`/builder/new?template=${encodeURIComponent(selectedTemplateId)}`);
     }
   };
 
