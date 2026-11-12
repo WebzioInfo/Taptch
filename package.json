@@ -6,10 +6,11 @@
   "type": "module",
   "scripts": {
     "dev": "cross-env NODE_ENV=development next dev",
-    "build": "next build",
+    "build": "npm run build:all",
+    "build:next": "next build",
     "start": "next start",
     "lint": "eslint src",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc -p shared/tsconfig.json --noEmit && tsc -p backend/tsconfig.json --noEmit && tsc -p frontend/tsconfig.json --noEmit && tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

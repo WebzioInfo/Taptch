@@ -2,11 +2,15 @@
 node_modules/
 .pnpm-store/
 
-# Next.js build output
+# Build outputs
 .next/
 out/
 build/
 dist/
+*/dist/
+frontend/dist/
+backend/dist/
+shared/dist/
 
 # Environment files
 .env

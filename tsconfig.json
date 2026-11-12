@@ -37,6 +37,9 @@
   ],
   "exclude": [
     "node_modules",
-    "load"
+    "load",
+    "backend",
+    "frontend",
+    "shared"
   ]
 }
