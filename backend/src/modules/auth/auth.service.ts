@@ -55,8 +55,28 @@ export class AuthService {
       throw new UnauthorizedException('Email or password is incorrect. Check your details and try again.');
     }
 
-    // 3. Verify bcrypt hash
-    const isValid = await bcrypt.compare(pass, accounts[0].password);
+    // 3. Verify password hash (supports bcrypt and better-auth scrypt)
+    let isValid = false;
+    const storedHash = accounts[0].password;
+    if (storedHash.startsWith('$2a$') || storedHash.startsWith('$2b$')) {
+      isValid = await bcrypt.compare(pass, storedHash);
+    } else {
+      try {
+        const { verifyPassword } = require('@better-auth/utils/password');
+        isValid = await verifyPassword(storedHash, pass);
+        if (isValid) {
+          // Seamlessly migrate legacy scrypt hash to modern bcrypt
+          const upgradedBcryptHash = await bcrypt.hash(pass, 10);
+          await this.dbService.db
+            .update(schema.accounts)
+            .set({ password: upgradedBcryptHash })
+            .where(eq(schema.accounts.id, accounts[0].id));
+        }
+      } catch {
+        isValid = false;
+      }
+    }
+
     if (!isValid) {
       throw new UnauthorizedException('Email or password is incorrect. Check your details and try again.');
     }
