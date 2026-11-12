@@ -64,11 +64,6 @@ export function HomePage() {
     <div className="relative overflow-hidden bg-[#0A0A0C]">
       {/* Hero Section */}
       <section className="relative pt-24 pb-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
-        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full border border-primary/30 bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider mb-8">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>The Next Generation of Professional Identity</span>
-        </div>
-
         <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight">
           Your Digital Identity.{' '}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] via-[#F3E5AB] to-[#D4AF37]">
@@ -153,11 +148,10 @@ export function HomePage() {
             {plans.map((p) => (
               <div
                 key={p.id}
-                className={`rounded-2xl p-6 flex flex-col justify-between ${
-                  p.highlighted
+                className={`rounded-2xl p-6 flex flex-col justify-between ${p.highlighted
                     ? 'bg-[#18181F] border-2 border-primary shadow-xl shadow-primary/10'
                     : 'bg-[#121216] border border-border/60'
-                }`}
+                  }`}
               >
                 <div>
                   <span className="text-[11px] font-mono text-primary uppercase tracking-wider font-semibold">

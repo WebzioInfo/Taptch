@@ -72,3 +72,4 @@ A full forensic audit was executed across all routes, pages, components, service
 - Physical card order logistics (`GET /api/v1/admin/orders`, `PATCH /api/v1/admin/orders/:id`) — **WORKING** (Status and payment tracking).
 - Manual Subscription Override (`POST /api/v1/admin/subscriptions/assign`) — **WORKING** (Enables Super Admin to grant `nano`, `micro`, `mini`, `max` tiers without a payment gateway).
 - Post-print QR Token Verifier (`VerifyQRTab.tsx`) — **WORKING** (Camera scan log, duplicate detection, and token validation).
+

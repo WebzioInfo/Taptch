@@ -42,3 +42,4 @@ describe('TAPTCH Templates & Design System', () => {
     expect(defaultBrandConfig.supportEmail).toBe('support@taptch.com');
   });
 });
+

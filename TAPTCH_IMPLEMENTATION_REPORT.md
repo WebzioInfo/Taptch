@@ -64,3 +64,4 @@
 1. Added top mobile header with BrandLogo and settings quick-access.
 2. Added slide-out mobile drawer with account details and sign-out trigger.
 3. Added bottom navigation bar with thumb-reach tabs (`Profiles`, `Cards`, `QR`, `Leads`) for mobile viewports.
+

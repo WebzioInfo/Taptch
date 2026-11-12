@@ -15,6 +15,27 @@ async function bootstrap() {
   const logger = new Logger('TaptchBackendBootstrap');
   const app = await NestFactory.create(AppModule);
 
+  // Cookie parsing middleware
+  app.use((req: any, _res: any, next: any) => {
+    if (!req.cookies && req.headers?.cookie) {
+      req.cookies = {};
+      const parts = req.headers.cookie.split(';');
+      for (const part of parts) {
+        const [k, ...v] = part.trim().split('=');
+        if (k) {
+          try {
+            req.cookies[k] = decodeURIComponent(v.join('='));
+          } catch {
+            req.cookies[k] = v.join('=');
+          }
+        }
+      }
+    } else if (!req.cookies) {
+      req.cookies = {};
+    }
+    next();
+  });
+
   // Global exception filter and response envelope
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalInterceptors(new TransformInterceptor());

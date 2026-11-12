@@ -8,7 +8,19 @@ export class ApiClient {
     endpoint: string,
     options: RequestInit = {},
   ): Promise<T> {
-    const url = `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+    const base = (API_BASE_URL || '').replace(/\/+$/, '');
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+
+    let url: string;
+    if (base) {
+      if (base.endsWith('/api') && cleanEndpoint.startsWith('/api/')) {
+        url = `${base.slice(0, -4)}${cleanEndpoint}`;
+      } else {
+        url = `${base}${cleanEndpoint}`;
+      }
+    } else {
+      url = cleanEndpoint;
+    }
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -28,7 +40,13 @@ export class ApiClient {
       return {} as T;
     }
 
-    const json: ApiResponse<T> = await response.json();
+    let json: ApiResponse<T>;
+    const rawText = await response.text();
+    try {
+      json = JSON.parse(rawText);
+    } catch {
+      throw new Error(rawText || `Request failed with HTTP status ${response.status}`);
+    }
 
     if (!response.ok || json.success === false) {
       const errorMsg = json.error?.message || `Request failed with status ${response.status}`;
