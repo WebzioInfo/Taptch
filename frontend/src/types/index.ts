@@ -90,3 +90,4 @@ export interface DynamicQRResolution {
   type: 'PROFILE' | 'EXTERNAL_URL' | 'VCARD' | 'UNCLAIMED_CARD';
   targetId?: string;
 }
+

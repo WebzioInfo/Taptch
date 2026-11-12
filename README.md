@@ -72,3 +72,4 @@ Both applications compile and build with zero errors:
 
 - **Frontend Build**: `cd frontend && npm run build` -> `dist/`
 - **Backend Build**: `cd backend && npm run build` -> `dist/`
+
