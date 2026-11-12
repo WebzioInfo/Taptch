@@ -6,72 +6,119 @@ import { eq } from 'drizzle-orm';
 export interface TemplateDefinition {
   id: string;
   name: string;
+  slug: string;
   description: string;
-  category: 'minimal' | 'luxury' | 'creator' | 'corporate';
+  category: 'minimal' | 'luxury' | 'creator' | 'corporate' | 'business' | 'retail' | 'food' | 'industrial';
   thumbnailUrl: string;
-  premiumTier: 'free' | 'mini' | 'max';
+  premiumTier: 'nano' | 'micro' | 'mini' | 'max';
   defaultColors: {
     primary: string;
     background: string;
     surface: string;
     text: string;
   };
+  features: string[];
 }
 
 export const SEEDED_TEMPLATES: TemplateDefinition[] = [
   {
-    id: 'executive-minimal',
-    name: 'Executive Minimal',
-    description: 'Understated elegance with high contrast typography and clean hierarchy.',
-    category: 'minimal',
-    thumbnailUrl: '/templates/previews/executive-minimal.png',
-    premiumTier: 'free',
-    defaultColors: { primary: '#18181B', background: '#FAFAFA', surface: '#FFFFFF', text: '#09090B' },
-  },
-  {
-    id: 'onyx-minimal',
-    name: 'Onyx Minimal',
-    description: 'Sleek dark mode minimalism tailored for technology leaders and architects.',
-    category: 'minimal',
-    thumbnailUrl: '/templates/previews/onyx-minimal.png',
-    premiumTier: 'free',
-    defaultColors: { primary: '#E4E4E7', background: '#09090B', surface: '#18181B', text: '#FAFAFA' },
-  },
-  {
     id: 'obsidian-luxury',
+    slug: 'obsidian-luxury',
     name: 'Obsidian Luxury',
-    description: 'Our flagship aesthetic: deep obsidian charcoal paired with brushed metallic gold.',
+    description: 'Our flagship aesthetic: deep obsidian charcoal paired with brushed metallic gold and VIP verified shield.',
     category: 'luxury',
-    thumbnailUrl: '/templates/previews/obsidian-luxury.png',
-    premiumTier: 'free',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&auto=format&fit=crop&q=80',
+    premiumTier: 'nano',
     defaultColors: { primary: '#D4AF37', background: '#0A0A0C', surface: '#121216', text: '#F4F4F6' },
+    features: ['Obsidian Luxury Theme', 'vCard 3.0 Instant Save', 'VIP Verified Shield', 'High-Contrast Cards'],
   },
   {
     id: 'ivory-minimalist',
+    slug: 'ivory-minimalist',
     name: 'Ivory Minimalist',
-    description: 'Warm editorial paper aesthetic inspired by bespoke stationary.',
+    description: 'Warm alabaster editorial aesthetic with timeless serif typography and subtle dividers for legal & advisory.',
     category: 'luxury',
-    thumbnailUrl: '/templates/previews/ivory-minimalist.png',
-    premiumTier: 'mini',
-    defaultColors: { primary: '#2D2824', background: '#F8F6F0', surface: '#FFFFFF', text: '#1C1917' },
+    thumbnailUrl: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&auto=format&fit=crop&q=80',
+    premiumTier: 'nano',
+    defaultColors: { primary: '#8C6D3B', background: '#FAF8F5', surface: '#FFFFFF', text: '#1C1917' },
+    features: ['Editorial Serif Typography', 'Partner Credentials', 'Chambers Location', 'Discreet vCard'],
   },
   {
     id: 'aurora-creator',
+    slug: 'aurora-creator',
     name: 'Aurora Creator',
-    description: 'Vibrant fluid glassmorphism crafted for digital creatives and founders.',
+    description: 'Vibrant neon-infused glassmorphism crafted for digital creatives, founders, agency owners, and artists.',
     category: 'creator',
-    thumbnailUrl: '/templates/previews/aurora-creator.png',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&auto=format&fit=crop&q=80',
+    premiumTier: 'micro',
+    defaultColors: { primary: '#A855F7', background: '#0B0D1B', surface: '#151833', text: '#F8FAFC' },
+    features: ['Glassmorphic Backdrop Blur', 'Visual Portfolio Grid', 'Social Link Showcase', 'Interactive Project Cards'],
+  },
+  {
+    id: 'corporate-business',
+    slug: 'corporate-business',
+    name: 'Corporate Business',
+    description: 'Structured enterprise navy and titanium precision grid for executives, board directors, and M&A holding groups.',
+    category: 'corporate',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&auto=format&fit=crop&q=80',
     premiumTier: 'mini',
-    defaultColors: { primary: '#8B5CF6', background: '#0D0E15', surface: '#181A26', text: '#F8FAFC' },
+    defaultColors: { primary: '#2563EB', background: '#0B0F19', surface: '#111827', text: '#F8FAFC' },
+    features: ['Executive Header', 'Corporate Credentials', 'Venture Switcher', 'B2B Enquiry Form'],
+  },
+  {
+    id: 'modern-business',
+    slug: 'modern-business',
+    name: 'Modern Business',
+    description: 'Commercial showcase design featuring dedicated product shelves, service cards, and quick lead capture.',
+    category: 'business',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80',
+    premiumTier: 'mini',
+    defaultColors: { primary: '#059669', background: '#064E3B', surface: '#065F46', text: '#ECFDF5' },
+    features: ['Product/Service Showcase', 'Dual Tab Navigation', 'Contact Exchange', 'Fast Booking'],
   },
   {
     id: 'apex-capital',
-    name: 'Apex Capital',
-    description: 'Refined corporate prestige engineered for venture partners and private equity.',
+    slug: 'apex-capital',
+    name: 'Apex Capital & Wealth',
+    description: 'Prestige emerald and dark graphite tailored for luxury developers, venture capital, and private wealth.',
     category: 'corporate',
-    thumbnailUrl: '/templates/previews/apex-capital.png',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&auto=format&fit=crop&q=80',
     premiumTier: 'max',
-    defaultColors: { primary: '#0D9488', background: '#021C1E', surface: '#062B2F', text: '#F0FDFA' },
+    defaultColors: { primary: '#10B981', background: '#022C22', surface: '#064E3B', text: '#F0FDFA' },
+    features: ['Prestige Luxury Styling', 'Private Off-Market Assets', 'Escrow Concierge', 'VIP Wealth Advisory'],
+  },
+  {
+    id: 'industrial-manufacturing',
+    slug: 'industrial-manufacturing',
+    name: 'Industrial & Manufacturing',
+    description: 'Heavy machinery, plant specs, technical PDF brochures, and direct RFQ engineering enquiry.',
+    category: 'industrial',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&auto=format&fit=crop&q=80',
+    premiumTier: 'mini',
+    defaultColors: { primary: '#D97706', background: '#0F172A', surface: '#1E293B', text: '#F8FAFC' },
+    features: ['Machinery Catalogue', 'Technical PDF Specs', 'Plant Location', 'Direct RFQ Quotation'],
+  },
+  {
+    id: 'retail-shopping',
+    slug: 'retail-shopping',
+    name: 'Retail & Storefront',
+    description: 'Vibrant storefront with product gallery, INR price tags, store hours, and direct WhatsApp ordering.',
+    category: 'retail',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&auto=format&fit=crop&q=80',
+    premiumTier: 'micro',
+    defaultColors: { primary: '#E11D48', background: '#0F172A', surface: '#1E293B', text: '#FFF1F2' },
+    features: ['Storefront Product Grid', 'WhatsApp Quick Buy', 'Opening Hours Badge', 'Physical Store Location'],
+  },
+  {
+    id: 'food-restaurant',
+    slug: 'food-restaurant',
+    name: 'Food & Restaurant',
+    description: 'Culinary layout with signature menu cards, chef specialties, opening timings, and table reservation enquiry.',
+    category: 'food',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80',
+    premiumTier: 'micro',
+    defaultColors: { primary: '#EA580C', background: '#18181B', surface: '#27272A', text: '#FFF7ED' },
+    features: ['Chef Specials Showcase', 'Menu Pricing & Categories', 'Table Reservation', 'Kitchen Timings'],
   },
 ];
 
@@ -91,11 +138,10 @@ export class TemplatesService {
 
   async findOne(id: string) {
     const list = await this.findAll();
-    const found = list.find((t) => t.id === id);
+    const found = list.find((t) => t.id === id || t.slug === id);
     if (!found) {
       throw new NotFoundException(`Template "${id}" not found.`);
     }
     return found;
   }
 }
-

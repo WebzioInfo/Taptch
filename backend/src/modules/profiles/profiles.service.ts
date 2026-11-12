@@ -140,9 +140,10 @@ export class ProfilesService {
         id: b.id,
         companyName: b.name,
         jobTitle: b.tagline,
-        businessEmail: null,
-        businessPhone: null,
-        businessWebsite: null,
+        businessEmail: b.email || null,
+        businessPhone: b.phone || null,
+        businessWebsite: b.website || null,
+        businessAddress: b.address || null,
         logoUrl: b.logoUrl,
         isPrimary: false,
       })),
@@ -243,12 +244,75 @@ export class ProfilesService {
           website: data.website !== undefined ? data.website : existing.website,
           address: data.address !== undefined ? data.address : existing.address,
           socialLinks: data.socialLinks !== undefined ? data.socialLinks : existing.socialLinks,
-          templateId: data.themeId !== undefined ? data.themeId : existing.templateId,
-          themeConfig: data.customThemeColors !== undefined ? data.customThemeColors : existing.themeConfig,
+          templateId:
+            data.templateId !== undefined
+              ? data.templateId
+              : data.themeId !== undefined
+                ? data.themeId
+                : existing.templateId,
+          themeConfig:
+            data.themeConfig !== undefined
+              ? data.themeConfig
+              : data.customThemeColors !== undefined
+                ? data.customThemeColors
+                : existing.themeConfig,
           updatedAt: new Date(),
         })
         .where(eq(schema.profiles.id, profileId))
         .returning();
+
+      // Update businesses if provided
+      if (Array.isArray(data.businesses)) {
+        await tx
+          .delete(schema.profileBusinesses)
+          .where(eq(schema.profileBusinesses.profileId, profileId));
+
+        for (let i = 0; i < data.businesses.length; i++) {
+          const b = data.businesses[i];
+          if (b.companyName || b.name) {
+            await tx.insert(schema.profileBusinesses).values({
+              id: b.id || crypto.randomUUID(),
+              profileId,
+              name: b.companyName || b.name,
+              tagline: b.jobTitle || b.tagline || null,
+              logoUrl: b.logoUrl || null,
+              website: b.businessWebsite || b.website || b.websiteUrl || null,
+              address: b.businessAddress || b.address || null,
+              email: b.businessEmail || b.email || null,
+              phone: b.businessPhone || b.phone || null,
+              whatsapp: b.whatsapp || null,
+              displayOrder: i,
+            });
+          }
+        }
+      }
+
+      // Update catalogue items if provided
+      if (Array.isArray(data.catalogue)) {
+        await tx
+          .delete(schema.profileCatalogueItems)
+          .where(eq(schema.profileCatalogueItems.profileId, profileId));
+
+        for (let i = 0; i < data.catalogue.length; i++) {
+          const c = data.catalogue[i];
+          if (c.title) {
+            await tx.insert(schema.profileCatalogueItems).values({
+              id: c.id || crypto.randomUUID(),
+              profileId,
+              type: c.type || 'product',
+              title: c.title,
+              description: c.description || null,
+              price: c.price ? String(c.price) : null,
+              currency: c.currency || 'INR',
+              imageUrl: c.imageUrl || null,
+              actionUrl: c.actionUrl || null,
+              actionLabel: c.actionLabel || 'Enquire',
+              displayOrder: i,
+            });
+          }
+        }
+      }
+
       return res;
     });
 

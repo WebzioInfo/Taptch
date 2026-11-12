@@ -12,6 +12,8 @@ import { LeadsPage } from '../pages/LeadsPage';
 import { QrPage } from '../pages/QrPage';
 import { TemplatesPage } from '../pages/TemplatesPage';
 import { PricingPage } from '../pages/PricingPage';
+import { BuilderPage } from '../pages/BuilderPage';
+import { AdminPage } from '../pages/AdminPage';
 
 export const router = createBrowserRouter([
   // Marketing Routes
@@ -42,7 +44,7 @@ export const router = createBrowserRouter([
   // Admin & Operations
   { path: '/portal-x', element: <Navigate to="/admin" replace /> },
   { path: '/portal-x/*', element: <Navigate to="/admin" replace /> },
-  { path: '/admin', element: <DashboardPage /> },
+  { path: '/admin', element: <AdminPage /> },
 
   // App Dashboard (Protected)
   {
@@ -53,10 +55,12 @@ export const router = createBrowserRouter([
       { path: '/leads', element: <LeadsPage /> },
       { path: '/qr', element: <QrPage /> },
       { path: '/settings', element: <DashboardPage /> },
-      { path: '/builder/:id', element: <DashboardPage /> },
-      { path: '/builder/new', element: <DashboardPage /> },
     ],
   },
+
+  // Studio Builder (Full Workspace)
+  { path: '/builder/:id', element: <BuilderPage /> },
+  { path: '/builder/new', element: <BuilderPage /> },
 
   // Public Identity Hot Path
   { path: '/p/:slug', element: <PublicProfilePage /> },

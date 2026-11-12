@@ -13,13 +13,17 @@ import { AuthGuard } from '../../common/guards/auth.guard';
 import { Public } from '../../common/decorators/public.decorator';
 import { CurrentActor } from '../../common/decorators/current-user.decorator';
 import { ProfilesService } from './profiles.service';
+import { LeadsService } from '../leads/leads.service';
 import type { ActorContext } from '../../common/types';
 
 @ApiTags('Profiles')
 @Controller('api/v1/profiles')
 @UseGuards(AuthGuard)
 export class ProfilesController {
-  constructor(private profilesService: ProfilesService) {}
+  constructor(
+    private profilesService: ProfilesService,
+    private leadsService: LeadsService,
+  ) {}
 
   @Get()
   @ApiBearerAuth()
@@ -68,6 +72,13 @@ export class ProfilesController {
     @Param('id') id: string,
   ) {
     return this.profilesService.publish(actor, id);
+  }
+
+  @Public()
+  @Post(':id/exchange')
+  @ApiOperation({ summary: 'Submit contact exchange on public profile' })
+  async exchangeContact(@Param('id') id: string, @Body() body: any) {
+    return this.leadsService.captureLead({ profileId: id, ...body });
   }
 
   @Put(':id/sections')
