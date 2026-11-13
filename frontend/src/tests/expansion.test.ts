@@ -103,3 +103,4 @@ describe('God Mode Expansion: PWA Cache Hygiene', () => {
     expect(isCacheableAsset('https://taptch.com/icons/icon-192.png')).toBe(true);
   });
 });
+

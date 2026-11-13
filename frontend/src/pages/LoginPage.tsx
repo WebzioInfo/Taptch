@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { BrandLogo } from '../components/brand';
 import { Button } from '../components/ui/button';
 import { signIn } from '../lib/auth/client';
@@ -8,11 +8,24 @@ import { Eye, EyeOff, AlertCircle, ArrowRight, Lock, Mail } from 'lucide-react';
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  React.useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const err = params.get('error');
+    if (err === 'google_not_configured') {
+      setError('Google Sign-In is awaiting credentials. Please configure GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in backend/.env.');
+    } else if (err === 'google_auth_failed') {
+      setError('Google authorization was cancelled or failed. Please try again.');
+    } else if (err === 'google_token_exchange_failed') {
+      setError('Could not verify Google credentials. Please try signing in with your email and password.');
+    }
+  }, [location.search]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

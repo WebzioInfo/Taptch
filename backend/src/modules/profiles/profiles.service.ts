@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ConflictException,
   ForbiddenException,
+  BadRequestException,
   Logger,
 } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
@@ -10,6 +11,7 @@ import { RedisService } from '../../database/redis.service';
 import * as schema from '../../database/schema';
 import { eq, and, desc, asc } from 'drizzle-orm';
 import type { ActorContext, PublicProfileSnapshot } from '../../common/types';
+import { isReservedUsername } from '../../common/constants/reserved-usernames';
 import * as crypto from 'crypto';
 
 @Injectable()
@@ -76,6 +78,10 @@ export class ProfilesService {
   }
 
   async findBySlug(slug: string): Promise<PublicProfileSnapshot> {
+    if (isReservedUsername(slug)) {
+      throw new NotFoundException(`Profile "${slug}" not found.`);
+    }
+
     const cacheKey = `profile:slug:${slug.toLowerCase()}`;
 
     // 1. Redis Cache (<50ms hot path)
@@ -173,6 +179,10 @@ export class ProfilesService {
 
   async create(actor: ActorContext, data: any) {
     const slug = (data.slug || `profile-${Date.now()}`).toLowerCase().trim();
+
+    if (isReservedUsername(slug)) {
+      throw new BadRequestException(`The username "${slug}" is reserved by the system and cannot be claimed.`);
+    }
 
     // Check slug collision
     const existing = await this.dbService.db

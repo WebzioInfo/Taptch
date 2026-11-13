@@ -40,3 +40,4 @@ export const financialTransactions = pgTable('financial_transactions', {
   notes: text('notes'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
+

@@ -44,7 +44,7 @@ export class SeoService {
       throw new NotFoundException(`Profile with slug "${slug}" not found.`);
     }
 
-    const canonicalUrl = `${this.baseUrl}/p/${profile.slug}`;
+    const canonicalUrl = `${this.baseUrl}/${profile.slug}`;
     const isBusiness = profile.profileType === 'business';
     const brandName = 'Taptch';
 
@@ -168,7 +168,7 @@ export class SeoService {
     for (const p of publishedProfiles) {
       const lastMod = p.updatedAt ? new Date(p.updatedAt).toISOString() : new Date().toISOString();
       urls.push(`  <url>
-    <loc>${this.baseUrl}/p/${p.slug}</loc>
+    <loc>${this.baseUrl}/${p.slug}</loc>
     <lastmod>${lastMod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -202,3 +202,4 @@ Sitemap: ${this.baseUrl}/sitemap.xml
 `;
   }
 }
+

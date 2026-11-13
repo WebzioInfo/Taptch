@@ -1,0 +1,72 @@
+/**
+ * Centralized list of reserved system routes and keywords for the backend.
+ * Prevents users from claiming system routes as public profile slugs.
+ */
+export const RESERVED_USERNAMES = new Set<string>([
+  '',
+  'api',
+  'auth',
+  'oauth',
+  'login',
+  'signin',
+  'sign-in',
+  'register',
+  'signup',
+  'sign-up',
+  'forgot-password',
+  'reset-password',
+  'staff',
+  'admin',
+  'superadmin',
+  'support',
+  'portal-x',
+  'dashboard',
+  'cards',
+  'card',
+  'leads',
+  'lead',
+  'qr',
+  'settings',
+  'builder',
+  'claim',
+  'templates',
+  'template',
+  'pricing',
+  'features',
+  'how-it-works',
+  'about',
+  'contact',
+  'faq',
+  'nfc-business-card',
+  'digital-business-card',
+  'p',
+  'profile',
+  'profiles',
+  'assets',
+  'static',
+  'public',
+  'branding',
+  'icons',
+  'images',
+  'sitemap',
+  'sitemap.xml',
+  'robots',
+  'robots.txt',
+  'manifest',
+  'manifest.json',
+  'manifest.webmanifest',
+  'favicon',
+  'favicon.ico',
+  'service-worker',
+  'sw.js',
+  'health',
+  'docs',
+  'swagger',
+]);
+
+export function isReservedUsername(username: string): boolean {
+  if (!username) return true;
+  const clean = username.toLowerCase().trim().replace(/^\/+|\/+$/g, '');
+  return RESERVED_USERNAMES.has(clean);
+}
+

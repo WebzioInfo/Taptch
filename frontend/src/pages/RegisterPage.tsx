@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { BrandLogo } from '../components/brand';
 import { Button } from '../components/ui/button';
 import { signUp } from '../lib/auth/client';
@@ -8,11 +8,24 @@ import { AlertCircle, ArrowRight, Lock, Mail, User } from 'lucide-react';
 
 export function RegisterPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const err = params.get('error');
+    if (err === 'google_not_configured') {
+      setError('Google Sign-Up is awaiting credentials. Please configure GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in backend/.env.');
+    } else if (err === 'google_auth_failed') {
+      setError('Google authorization was cancelled or failed. Please try again.');
+    } else if (err === 'google_token_exchange_failed') {
+      setError('Could not verify Google account. Please register with your email address.');
+    }
+  }, [location.search]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

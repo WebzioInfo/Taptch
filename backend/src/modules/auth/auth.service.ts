@@ -194,7 +194,11 @@ export class AuthService {
   }
 
   getGoogleAuthUrl(state?: string): string {
-    const clientId = process.env.GOOGLE_CLIENT_ID || 'dummy-google-client-id';
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    if (!clientId || clientId.trim() === '' || clientId === 'dummy-google-client-id') {
+      return '';
+    }
+
     const callbackUrl =
       process.env.GOOGLE_CALLBACK_URL ||
       `${process.env.BACKEND_URL || 'http://localhost:4000'}/api/auth/oauth/google/callback`;

@@ -91,7 +91,7 @@ export function DashboardPage() {
                     Edit Studio
                   </Link>
                   <a
-                    href={`/p/${p.slug}`}
+                    href={`/${p.slug}`}
                     target="_blank"
                     rel="noreferrer"
                     className="flex items-center text-xs text-primary font-semibold hover:underline"

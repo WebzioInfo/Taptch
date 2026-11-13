@@ -66,3 +66,4 @@ All 9 templates have been systematically modified to render `<TemplateContactFor
 9. `RetailTemplate.tsx` (Emerald & Minimal Dark)
 
 Each template passes its specific theme styling props (`accentColor`, `cardBg`, `textColor`, `inputBg`) to guarantee zero visual fragmentation.
+

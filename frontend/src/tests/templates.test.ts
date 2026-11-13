@@ -3,9 +3,13 @@ import { STANDARD_TEMPLATES, canAccessTemplate, PLAN_TIER_RANK } from '../module
 import { brandConfig, defaultBrandConfig } from '../config/brand';
 
 describe('TAPTCH Templates & Design System', () => {
-  it('should register all 9 bespoke luxury templates', () => {
-    expect(STANDARD_TEMPLATES.length).toBe(9);
+  it('should register all 13 bespoke luxury templates including the 4 signature designs', () => {
+    expect(STANDARD_TEMPLATES.length).toBe(13);
     const templateIds = STANDARD_TEMPLATES.map((t) => t.id);
+    expect(templateIds).toContain('clean-corporate');
+    expect(templateIds).toContain('dark-premium');
+    expect(templateIds).toContain('soft-modern');
+    expect(templateIds).toContain('bold-editorial');
     expect(templateIds).toContain('industrial-manufacturing');
     expect(templateIds).toContain('corporate-business');
     expect(templateIds).toContain('modern-business');

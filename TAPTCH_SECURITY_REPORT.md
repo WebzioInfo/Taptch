@@ -42,3 +42,4 @@
   1. *PKCE / State Validation:* OAuth initiation issues state validation protecting against redirect interception.
   2. *Server-to-Server Token Exchange:* Authorization codes are exchanged directly with `https://oauth2.googleapis.com/token` over TLS, never via untrusted client proxies.
   3. *Account Linking Safety:* Verified Google emails match existing local accounts only if `emailVerified = true`, preventing account hijacking via arbitrary unverified email claiming.
+

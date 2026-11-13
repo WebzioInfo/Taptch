@@ -1,5 +1,5 @@
 import React from 'react';
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter, Navigate, useParams, useLocation } from 'react-router-dom';
 import { MarketingLayout } from '../layouts/MarketingLayout';
 import { AppLayout } from '../layouts/AppLayout';
 import { HomePage } from '../pages/HomePage';
@@ -15,6 +15,12 @@ import { PricingPage } from '../pages/PricingPage';
 import { BuilderPage } from '../pages/BuilderPage';
 import { AdminPage } from '../pages/AdminPage';
 import { SupportPage } from '../pages/SupportPage';
+
+function LegacyProfileRedirect() {
+  const { slug } = useParams<{ slug: string }>();
+  const location = useLocation();
+  return <Navigate to={`/${slug}${location.search}`} replace />;
+}
 
 export const router = createBrowserRouter([
   // Marketing Routes
@@ -66,9 +72,12 @@ export const router = createBrowserRouter([
   { path: '/builder/:id', element: <BuilderPage /> },
   { path: '/builder/new', element: <BuilderPage /> },
 
-  // Public Identity Hot Path
-  { path: '/p/:slug', element: <PublicProfilePage /> },
+  // Legacy Backward-Compatibility for existing printed NFC cards and QR codes
+  { path: '/p/:slug', element: <LegacyProfileRedirect /> },
   { path: '/claim/:token', element: <RegisterPage /> },
+
+  // Root Dynamic Public Identity
+  { path: '/:slug', element: <PublicProfilePage /> },
 
   // Fallback
   { path: '*', element: <Navigate to="/" replace /> },

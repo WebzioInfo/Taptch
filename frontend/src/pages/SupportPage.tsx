@@ -230,7 +230,7 @@ export function SupportPage() {
                     <div className="flex items-center gap-2">
                       <p className="font-bold text-white">{p.displayName}</p>
                       <a
-                        href={`/p/${p.slug}`}
+                        href={`/${p.slug}`}
                         target="_blank"
                         rel="noreferrer"
                         className="text-muted-foreground hover:text-primary"
@@ -332,3 +332,4 @@ export function SupportPage() {
     </div>
   );
 }
+

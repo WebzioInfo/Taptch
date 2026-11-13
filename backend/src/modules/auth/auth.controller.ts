@@ -73,6 +73,10 @@ export class AuthController {
   @ApiOperation({ summary: 'Initiate Google OAuth flow' })
   async googleOAuthRedirect(@Res() res: Response) {
     const url = this.authService.getGoogleAuthUrl();
+    const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/+$/, '');
+    if (!url) {
+      return res.redirect(`${frontendUrl}/login?error=google_not_configured`);
+    }
     return res.redirect(url);
   }
 

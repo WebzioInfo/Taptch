@@ -275,7 +275,7 @@ export function BuilderPage() {
               <span>{displayName || 'New Profile Studio'}</span>
               {slug && (
                 <a
-                  href={`/p/${slug}`}
+                  href={`/${slug}`}
                   target="_blank"
                   rel="noreferrer"
                   className="hidden sm:inline-flex items-center text-[10px] text-primary hover:underline font-mono"
@@ -439,7 +439,7 @@ export function BuilderPage() {
                   <Label className="text-xs text-muted-foreground">Public Card Handle / Slug *</Label>
                   <div className="mt-1.5 flex rounded-xl overflow-hidden border border-border bg-[#121216]">
                     <span className="px-3 py-2 text-xs text-muted-foreground bg-white/5 border-r border-border font-mono">
-                      /p/
+                      /
                     </span>
                     <input
                       value={slug}
@@ -619,7 +619,7 @@ export function BuilderPage() {
                       T
                     </div>
                     <span className="text-[11px] text-muted-foreground truncate">
-                      https://taptch.com/p/{slug || 'username'}
+                      https://taptch.com/{slug || 'username'}
                     </span>
                   </div>
                   <h4 className="text-sm font-semibold text-blue-400 hover:underline cursor-pointer truncate">
@@ -850,7 +850,7 @@ export function BuilderPage() {
                       T
                     </div>
                     <span className="text-[11px] text-muted-foreground truncate">
-                      https://taptch.com/p/{slug || 'username'}
+                      https://taptch.com/{slug || 'username'}
                     </span>
                   </div>
                   <h4 className="text-sm font-semibold text-blue-400 hover:underline cursor-pointer truncate">
@@ -1031,7 +1031,7 @@ export function BuilderPage() {
                       T
                     </div>
                     <span className="text-[11px] text-muted-foreground truncate">
-                      https://taptch.com/p/{slug || 'username'}
+                      https://taptch.com/{slug || 'username'}
                     </span>
                   </div>
                   <h4 className="text-sm font-semibold text-blue-400 hover:underline cursor-pointer truncate">
@@ -1249,7 +1249,7 @@ export function BuilderPage() {
                       T
                     </div>
                     <span className="text-[11px] text-muted-foreground truncate">
-                      https://taptch.com/p/{slug || 'username'}
+                      https://taptch.com/{slug || 'username'}
                     </span>
                   </div>
                   <h4 className="text-sm font-semibold text-blue-400 hover:underline cursor-pointer truncate">
@@ -1481,7 +1481,7 @@ export function BuilderPage() {
                       T
                     </div>
                     <span className="text-[11px] text-muted-foreground truncate">
-                      https://taptch.com/p/{slug || 'username'}
+                      https://taptch.com/{slug || 'username'}
                     </span>
                   </div>
                   <h4 className="text-sm font-semibold text-blue-400 hover:underline cursor-pointer truncate">

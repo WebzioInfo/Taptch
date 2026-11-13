@@ -47,6 +47,11 @@ export class SeoController {
 
     const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/+$/, '');
 
+    // Non-bots visiting old /p/:slug are permanently redirected to /:slug
+    if (!isBot) {
+      return res.redirect(301, `${frontendUrl}/${encodeURIComponent(slug)}`);
+    }
+
     try {
       const seo = await this.seoService.getProfileSeo(slug);
 
@@ -107,7 +112,7 @@ export class SeoController {
     ${seo.openGraph.image ? `<img src="${escapeHtml(seo.openGraph.image)}" alt="${escapeHtml(seo.title)}" class="avatar">` : ''}
     <h1 class="title">${escapeHtml(seo.title)}</h1>
     <p class="bio">${escapeHtml(seo.description)}</p>
-    <a href="${frontendUrl}/p/${encodeURIComponent(slug)}" class="btn">View Interactive Digital Profile</a>
+    <a href="${frontendUrl}/${encodeURIComponent(slug)}" class="btn">View Interactive Digital Profile</a>
   </div>
 </body>
 </html>`;
@@ -129,3 +134,4 @@ function escapeHtml(str: string): string {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 }
+

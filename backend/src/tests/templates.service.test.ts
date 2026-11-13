@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { SEEDED_TEMPLATES, TemplatesService } from '../modules/templates/templates.service';
 
 describe('Backend Templates Service', () => {
-  it('should have 9 luxury templates configured in SEEDED_TEMPLATES', () => {
-    expect(SEEDED_TEMPLATES.length).toBe(9);
+  it('should have 13 luxury & signature templates configured in SEEDED_TEMPLATES', () => {
+    expect(SEEDED_TEMPLATES.length).toBe(13);
     const ids = SEEDED_TEMPLATES.map((t) => t.id);
     expect(ids).toContain('obsidian-luxury');
     expect(ids).toContain('ivory-minimalist');
@@ -14,6 +14,10 @@ describe('Backend Templates Service', () => {
     expect(ids).toContain('industrial-manufacturing');
     expect(ids).toContain('retail-shopping');
     expect(ids).toContain('food-restaurant');
+    expect(ids).toContain('clean-corporate');
+    expect(ids).toContain('dark-premium');
+    expect(ids).toContain('soft-modern');
+    expect(ids).toContain('bold-editorial');
   });
 
   it('should find template by id or slug correctly', async () => {

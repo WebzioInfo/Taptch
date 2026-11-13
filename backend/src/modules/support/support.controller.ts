@@ -51,3 +51,4 @@ export class SupportController {
     return this.supportService.getAuditTrail(actor);
   }
 }
+

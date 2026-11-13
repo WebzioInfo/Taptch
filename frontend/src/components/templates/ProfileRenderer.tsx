@@ -24,6 +24,11 @@ import { PremiumBrandTemplate } from './layouts/PremiumBrandTemplate';
 import { ProfessionalServicesTemplate } from './layouts/ProfessionalServicesTemplate';
 import { CreativeAgencyTemplate } from './layouts/CreativeAgencyTemplate';
 import { ApexCapitalTemplate } from './layouts/ApexCapitalTemplate';
+import { CleanCorporateTemplate } from './layouts/CleanCorporateTemplate';
+import { DarkPremiumTemplate } from './layouts/DarkPremiumTemplate';
+import { SoftModernTemplate } from './layouts/SoftModernTemplate';
+import { BoldEditorialTemplate } from './layouts/BoldEditorialTemplate';
+import { NfcPreviewStudio } from './layouts/NfcPreviewStudio';
 
 export interface BusinessItem {
   id: string;
@@ -131,7 +136,7 @@ export function ProfileRenderer({ profile }: { profile: ProfileRenderData }) {
 
   const handleCopyLink = () => {
     if (typeof window !== 'undefined') {
-      const url = `${window.location.origin}/p/${profile.slug}`;
+      const url = `${window.location.origin}/${profile.slug}`;
       navigator.clipboard.writeText(url);
       setCopiedUrl(true);
       setTimeout(() => setCopiedUrl(false), 2500);
@@ -199,6 +204,17 @@ export function ProfileRenderer({ profile }: { profile: ProfileRenderData }) {
 
   const renderLayout = () => {
     switch (templateId) {
+      case 'clean-corporate':
+        return <CleanCorporateTemplate {...layoutProps} />;
+      case 'dark-premium':
+        return <DarkPremiumTemplate {...layoutProps} />;
+      case 'soft-modern':
+        return <SoftModernTemplate {...layoutProps} />;
+      case 'bold-editorial':
+        return <BoldEditorialTemplate {...layoutProps} />;
+      case 'preview-studio':
+      case 'nfc-preview-studio':
+        return <NfcPreviewStudio {...layoutProps} />;
       case 'industrial-manufacturing':
         return <IndustrialTemplate {...layoutProps} />;
       case 'retail-shopping':
