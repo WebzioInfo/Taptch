@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ApiClient } from '../services/api';
 import { Button } from '../components/ui/button';
@@ -19,6 +20,12 @@ export function CardsPage() {
             Activate, track, and rebind your physical matte PVC and metal cards
           </p>
         </div>
+        <Link to="/studio">
+          <Button className="bg-[#D4AF37] hover:bg-[#E5C058] text-black font-semibold flex items-center space-x-2">
+            <Sparkles className="w-4 h-4" />
+            <span>Open Design Studio</span>
+          </Button>
+        </Link>
       </div>
 
       <div className="mt-8">
@@ -37,6 +44,11 @@ export function CardsPage() {
             <p className="text-sm text-muted-foreground max-w-md mx-auto mb-6">
               When you receive your TAPTCH physical NFC card, simply tap it with your smartphone camera to activate and claim it to your account.
             </p>
+            <Link to="/studio">
+              <Button className="bg-[#D4AF37] hover:bg-[#E5C058] text-black font-semibold">
+                Design Your Custom NFC Card
+              </Button>
+            </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

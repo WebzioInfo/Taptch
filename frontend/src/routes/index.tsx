@@ -15,6 +15,7 @@ import { PricingPage } from '../pages/PricingPage';
 import { BuilderPage } from '../pages/BuilderPage';
 import { AdminPage } from '../pages/AdminPage';
 import { SupportPage } from '../pages/SupportPage';
+import { DesignStudioPage } from '../pages/DesignStudioPage';
 
 function LegacyProfileRedirect() {
   const { slug } = useParams<{ slug: string }>();
@@ -71,6 +72,10 @@ export const router = createBrowserRouter([
   // Studio Builder (Full Workspace)
   { path: '/builder/:id', element: <BuilderPage /> },
   { path: '/builder/new', element: <BuilderPage /> },
+
+  // Live NFC Card Design Studio
+  { path: '/studio', element: <DesignStudioPage /> },
+  { path: '/studio/:productId', element: <DesignStudioPage /> },
 
   // Legacy Backward-Compatibility for existing printed NFC cards and QR codes
   { path: '/p/:slug', element: <LegacyProfileRedirect /> },

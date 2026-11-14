@@ -12,3 +12,4 @@ export * from './media';
 export * from './publishing';
 export * from './qr';
 export * from './finance';
+export * from './studio';

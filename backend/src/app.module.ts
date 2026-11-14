@@ -15,6 +15,10 @@ import { EntitlementsModule } from './modules/entitlements/entitlements.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { SeoModule } from './modules/seo/seo.module';
 import { SupportModule } from './modules/support/support.module';
+import { ProductsModule } from './modules/products/products.module';
+import { DesignsModule } from './modules/designs/designs.module';
+import { UploadsModule } from './modules/uploads/uploads.module';
+import { CartModule } from './modules/cart/cart.module';
 
 const envSchema = z.object({
   NODE_ENV: z.string().default('development'),
@@ -56,6 +60,10 @@ function validateEnv(config: Record<string, unknown>) {
     AdminModule,
     SeoModule,
     SupportModule,
+    ProductsModule,
+    DesignsModule,
+    UploadsModule,
+    CartModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }
