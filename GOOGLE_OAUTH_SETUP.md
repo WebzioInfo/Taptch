@@ -84,3 +84,4 @@ GOOGLE_CALLBACK_URL=http://localhost:4000/api/auth/oauth/google/callback
 4. **Initiate Login**: Navigate to `http://localhost:5173/login`, click **"Continue with Google"**.
 5. Google will open the official OAuth account chooser with `Taptch` branding.
 6. Upon authentication, Google redirects to `http://localhost:4000/api/auth/oauth/google/callback`, which creates or logs in the user, generates session JWT tokens, and redirects to `http://localhost:5173/dashboard`.
+
