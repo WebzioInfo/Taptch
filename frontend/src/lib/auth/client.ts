@@ -18,12 +18,31 @@ export function useSession() {
   return useQuery({
     queryKey: ['auth', 'session'],
     queryFn: async () => {
-      // Extract session token from OAuth redirect parameter if present
+      // 1. Consume single-use auth code from OAuth redirect (Zero Token in URL)
       if (typeof window !== 'undefined') {
         const urlParams = new URLSearchParams(window.location.search);
-        const tokenFromUrl = urlParams.get('session_token');
-        if (tokenFromUrl) {
-          localStorage.setItem('taptch_session_token', tokenFromUrl);
+        const authCode = urlParams.get('auth_code');
+        const legacyToken = urlParams.get('session_token');
+
+        if (authCode) {
+          // Immediately sanitize URL to prevent code leakage in browser history or referrers
+          urlParams.delete('auth_code');
+          const cleanQuery = urlParams.toString();
+          const cleanUrl = window.location.pathname + (cleanQuery ? `?${cleanQuery}` : '') + window.location.hash;
+          window.history.replaceState({}, '', cleanUrl);
+
+          try {
+            const res = await ApiClient.post<UserSession>('/api/auth/oauth/exchange-code', { code: authCode });
+            if (res?.session?.token) {
+              localStorage.setItem('taptch_session_token', res.session.token);
+            }
+            return res || { user: null, session: null };
+          } catch {
+            // Fall back to standard session retrieval
+          }
+        } else if (legacyToken) {
+          // Sanitize legacy session_token from URL
+          localStorage.setItem('taptch_session_token', legacyToken);
           urlParams.delete('session_token');
           const cleanQuery = urlParams.toString();
           const cleanUrl = window.location.pathname + (cleanQuery ? `?${cleanQuery}` : '') + window.location.hash;
@@ -31,6 +50,7 @@ export function useSession() {
         }
       }
 
+      // 2. Standard session retrieval via HttpOnly cookie and/or Bearer token
       try {
         const res = await ApiClient.get<UserSession>('/api/auth/get-session');
         if (res?.session?.token && typeof window !== 'undefined') {

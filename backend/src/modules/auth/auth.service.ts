@@ -1,5 +1,6 @@
 import { Injectable, UnauthorizedException, BadRequestException, Logger } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
+import { RedisService } from '../../database/redis.service';
 import * as schema from '../../database/schema';
 import { eq, and, gt } from 'drizzle-orm';
 import * as bcrypt from 'bcryptjs';
@@ -9,7 +10,40 @@ import * as crypto from 'crypto';
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
 
-  constructor(private dbService: DatabaseService) {}
+  constructor(
+    private dbService: DatabaseService,
+    private redisService: RedisService,
+  ) {}
+
+  /**
+   * Generates a secure, 60-second single-use exchange ticket
+   * Replaces raw session tokens in redirect URLs for maximum security
+   */
+  async createExchangeCode(token: string, userId: string): Promise<string> {
+    const exchangeCode = crypto.randomBytes(24).toString('base64url');
+    const key = `auth:code:${exchangeCode}`;
+    await this.redisService.set(key, JSON.stringify({ token, userId }), 60);
+    return exchangeCode;
+  }
+
+  /**
+   * Consumes a single-use exchange ticket, immediately destroying it from storage
+   */
+  async consumeExchangeCode(code: string): Promise<{ token: string; userId: string } | null> {
+    if (!code || typeof code !== 'string') return null;
+    const cleanCode = code.trim();
+    const key = `auth:code:${cleanCode}`;
+    const data = await this.redisService.get(key);
+    if (!data) return null;
+
+    // Single-use guarantee: atomic invalidation on consumption
+    await this.redisService.del(key);
+    try {
+      return JSON.parse(data);
+    } catch {
+      return null;
+    }
+  }
 
   async signIn(email: string, pass: string) {
     if (!email || !email.trim()) {

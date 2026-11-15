@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Req, Res } from '@nestjs/common';
+import { Controller, Post, Get, Body, Req, Res, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { Public } from '../../common/decorators/public.decorator';
 import { AuthService } from './auth.service';
@@ -165,6 +165,9 @@ export class AuthController {
 
       res.cookie('better-auth.session_token', result.session.token, this.getSessionCookieOptions(result.session.expiresAt));
 
+      // Generate short-lived single-use auth code (NEVER expose raw 30-day session token in URLs!)
+      const authCode = await this.authService.createExchangeCode(result.session.token, result.user.id);
+
       // Role-based post-login redirect
       let targetPath = '/dashboard';
       if (result.user.systemRole === 'super_admin' || result.user.systemRole === 'admin') {
@@ -173,11 +176,43 @@ export class AuthController {
         targetPath = '/support';
       }
 
-      return res.redirect(`${resolvedFrontend}${targetPath}?session_token=${encodeURIComponent(result.session.token)}`);
+      return res.redirect(`${resolvedFrontend}${targetPath}?auth_code=${encodeURIComponent(authCode)}`);
     } catch (err: any) {
       const errorMsg = err?.response?.message || err?.message || 'google_token_exchange_failed';
       return res.redirect(`${resolvedFrontend}/login?error=${encodeURIComponent(errorMsg)}`);
     }
+  }
+
+  @Public()
+  @Post('oauth/exchange-code')
+  @ApiOperation({ summary: 'Exchange single-use auth code for user session (Zero Token Leakage)' })
+  async exchangeCode(
+    @Body() body: { code: string },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const code = body?.code;
+    if (!code) {
+      throw new BadRequestException('Exchange code is required.');
+    }
+
+    const payload = await this.authService.consumeExchangeCode(code);
+    if (!payload) {
+      throw new UnauthorizedException('Authentication code is invalid or has expired.');
+    }
+
+    const sessionData = await this.authService.getSession(payload.token);
+    if (!sessionData?.session) {
+      throw new UnauthorizedException('Session could not be established.');
+    }
+
+    // Set secure HttpOnly cookie
+    res.cookie(
+      'better-auth.session_token',
+      sessionData.session.token,
+      this.getSessionCookieOptions(new Date(sessionData.session.expiresAt)),
+    );
+
+    return sessionData;
   }
 
   @Public()
