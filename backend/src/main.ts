@@ -49,16 +49,69 @@ async function bootstrap() {
     }),
   );
 
-  // CORS Configuration
-  const allowedOrigins = process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
-    : ['http://localhost:5173', 'http://localhost:3000', 'https://taptch.com', 'https://taptch.webziotech.in'];
+  // CORS Configuration - Multi-domain production support
+  const defaultOrigins = [
+    'https://www.taptch.com',
+    'https://taptch.com',
+    'https://taptch.webziotech.in',
+    'https://shop.taptch.com',
+    'https://app.taptch.com',
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://localhost:4000',
+    'http://127.0.0.1:5173',
+  ];
+
+  const envOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim().replace(/\/+$/, ''))
+    : [];
+
+  const allowedOriginsSet = new Set([...defaultOrigins, ...envOrigins]);
 
   app.enableCors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile clients, curl, server-to-server health checks)
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      const normalizedOrigin = origin.trim().replace(/\/+$/, '');
+
+      // Check explicit allowlist
+      if (allowedOriginsSet.has(normalizedOrigin)) {
+        return callback(null, true);
+      }
+
+      // Allow any subdomain of taptch.com (*.taptch.com)
+      if (/^https:\/\/([a-zA-Z0-9-]+\.)?taptch\.com$/i.test(normalizedOrigin)) {
+        return callback(null, true);
+      }
+
+      // Allow any subdomain of webziotech.in (*.webziotech.in)
+      if (/^https:\/\/([a-zA-Z0-9-]+\.)?webziotech\.in$/i.test(normalizedOrigin)) {
+        return callback(null, true);
+      }
+
+      // Allow local development origins
+      if (process.env.NODE_ENV !== 'production' && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(normalizedOrigin)) {
+        return callback(null, true);
+      }
+
+      logger.warn(`Blocked CORS request from origin: ${origin}`);
+      callback(new Error(`CORS policy blocked access from origin: ${origin}`));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'x-test-user-id', 'x-test-role', 'x-test-org-id'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'Accept',
+      'Origin',
+      'x-test-user-id',
+      'x-test-role',
+      'x-test-org-id',
+    ],
   });
 
   // Swagger OpenAPI documentation

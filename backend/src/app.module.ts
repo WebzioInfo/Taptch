@@ -20,16 +20,23 @@ import { DesignsModule } from './modules/designs/designs.module';
 import { UploadsModule } from './modules/uploads/uploads.module';
 import { CartModule } from './modules/cart/cart.module';
 
-const envSchema = z.object({
-  NODE_ENV: z.string().default('development'),
-  PORT: z.coerce.number().default(4000),
-  API_PREFIX: z.string().default('api'),
-  DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
-  DATABASE_URL_DIRECT: z.string().optional(),
-  REDIS_URL: z.string().default('redis://localhost:6379'),
-  USE_IN_MEMORY_REDIS: z.string().default('true'),
-  FRONTEND_URL: z.string().default('http://localhost:5173'),
-});
+const envSchema = z
+  .object({
+    NODE_ENV: z.string().default('development'),
+    PORT: z.coerce.number().default(4000),
+    API_PREFIX: z.string().default('api'),
+    DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
+    DATABASE_URL_DIRECT: z.string().optional(),
+    REDIS_URL: z.string().default('redis://localhost:6379'),
+    USE_IN_MEMORY_REDIS: z.string().default('true'),
+    FRONTEND_URL: z.string().default('https://taptch.com'),
+    BACKEND_URL: z.string().default('https://api.taptch.com'),
+    ALLOWED_ORIGINS: z.string().optional(),
+    COOKIE_DOMAIN: z.string().optional(),
+    COOKIE_SAME_SITE: z.string().optional(),
+    COOKIE_SECURE: z.string().optional(),
+  })
+  .passthrough();
 
 function validateEnv(config: Record<string, unknown>) {
   const parsed = envSchema.safeParse(config);

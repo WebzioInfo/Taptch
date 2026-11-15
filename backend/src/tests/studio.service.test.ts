@@ -10,9 +10,8 @@ describe('Taptch Live NFC Card Design Studio — Backend Services', () => {
   let mockDbService: any;
   const mockActor: ActorContext = {
     userId: 'user_test_123',
-    email: 'alexander@example.com',
+    orgId: null,
     role: 'user',
-    organizationId: null,
     isAdmin: false,
   };
 

@@ -75,7 +75,8 @@ export function LoginPage() {
         <button
           type="button"
           onClick={() => {
-            window.location.href = `${env.apiUrl}/api/auth/oauth/google`;
+            const returnTo = typeof window !== 'undefined' ? window.location.origin : '';
+            window.location.href = `${env.apiUrl}/api/auth/oauth/google?returnTo=${encodeURIComponent(returnTo)}`;
           }}
           className="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-xl bg-white hover:bg-neutral-100 text-neutral-900 font-semibold text-xs border border-neutral-300 transition-colors shadow-sm active:scale-[0.99]"
         >

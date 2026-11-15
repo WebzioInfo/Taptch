@@ -9,6 +9,48 @@ import { Request, Response } from 'express';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  private getSessionCookieOptions(expires?: Date) {
+    const isProd = process.env.NODE_ENV === 'production';
+    const sameSite = (process.env.COOKIE_SAME_SITE as 'none' | 'lax' | 'strict') || (isProd ? 'none' : 'lax');
+    const secure = process.env.COOKIE_SECURE ? process.env.COOKIE_SECURE === 'true' : isProd;
+    const domain = process.env.COOKIE_DOMAIN ? process.env.COOKIE_DOMAIN.trim() : undefined;
+
+    return {
+      httpOnly: true,
+      secure,
+      sameSite,
+      path: '/',
+      ...(expires ? { expires } : {}),
+      ...(domain ? { domain } : {}),
+    };
+  }
+
+  private isAllowedFrontendOrigin(originUrl: string): boolean {
+    try {
+      const parsed = new URL(originUrl);
+      const hostname = parsed.hostname.toLowerCase();
+
+      // Check taptch.com subdomains and root domain
+      if (hostname === 'taptch.com' || hostname.endsWith('.taptch.com')) {
+        return true;
+      }
+
+      // Check webziotech.in staging domains
+      if (hostname === 'webziotech.in' || hostname.endsWith('.webziotech.in')) {
+        return true;
+      }
+
+      // Check local development
+      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return true;
+      }
+
+      return false;
+    } catch {
+      return false;
+    }
+  }
+
   @Public()
   @Post('sign-in/email')
   @ApiOperation({ summary: 'Email & Password Sign In' })
@@ -17,14 +59,8 @@ export class AuthController {
     const password = body?.password;
     const result = await this.authService.signIn(email, password);
 
-    // Set HTTP-only session cookie
-    res.cookie('better-auth.session_token', result.session.token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      expires: result.session.expiresAt,
-      path: '/',
-    });
+    // Set secure HTTP-only session cookie
+    res.cookie('better-auth.session_token', result.session.token, this.getSessionCookieOptions(result.session.expiresAt));
 
     return result;
   }
@@ -38,13 +74,7 @@ export class AuthController {
     const password = body?.password;
     const result = await this.authService.signUp(name, email, password);
 
-    res.cookie('better-auth.session_token', result.session.token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      expires: result.session.expiresAt,
-      path: '/',
-    });
+    res.cookie('better-auth.session_token', result.session.token, this.getSessionCookieOptions(result.session.expiresAt));
 
     return result;
   }
@@ -53,10 +83,14 @@ export class AuthController {
   @Post('sign-out')
   @ApiOperation({ summary: 'Sign Out' })
   async signOut(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const token = req.cookies?.['better-auth.session_token'];
-    await this.authService.signOut(token);
+    const token = req.cookies?.['better-auth.session_token'] || req.headers.authorization?.replace('Bearer ', '');
+    if (token) {
+      await this.authService.signOut(token);
+    }
 
-    res.clearCookie('better-auth.session_token', { path: '/' });
+    const clearOptions = this.getSessionCookieOptions();
+    delete (clearOptions as any).expires;
+    res.clearCookie('better-auth.session_token', clearOptions);
     return { success: true };
   }
 
@@ -71,11 +105,31 @@ export class AuthController {
   @Public()
   @Get('oauth/google')
   @ApiOperation({ summary: 'Initiate Google OAuth flow' })
-  async googleOAuthRedirect(@Res() res: Response) {
-    const url = this.authService.getGoogleAuthUrl();
-    const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/+$/, '');
+  async googleOAuthRedirect(@Req() req: Request, @Res() res: Response) {
+    const returnToQuery = (req.query?.returnTo as string) || (req.query?.redirect_uri as string);
+    const referer = req.headers?.referer;
+    let targetOrigin = '';
+
+    if (returnToQuery && this.isAllowedFrontendOrigin(returnToQuery)) {
+      targetOrigin = new URL(returnToQuery).origin;
+    } else if (referer && this.isAllowedFrontendOrigin(referer)) {
+      try {
+        targetOrigin = new URL(referer).origin;
+      } catch {
+        targetOrigin = '';
+      }
+    }
+
+    const statePayload = targetOrigin
+      ? Buffer.from(JSON.stringify({ returnTo: targetOrigin })).toString('base64url')
+      : 'taptch_auth_state';
+
+    const url = this.authService.getGoogleAuthUrl(statePayload);
+    const fallbackFrontend = (process.env.FRONTEND_URL || 'https://taptch.com').replace(/\/+$/, '');
+
     if (!url) {
-      return res.redirect(`${frontendUrl}/login?error=google_not_configured`);
+      const redirectBase = targetOrigin || fallbackFrontend;
+      return res.redirect(`${redirectBase}/login?error=google_not_configured`);
     }
     return res.redirect(url);
   }
@@ -88,22 +142,28 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const code = req.query?.code as string;
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const stateParam = req.query?.state as string;
+    let resolvedFrontend = (process.env.FRONTEND_URL || 'https://taptch.com').replace(/\/+$/, '');
+
+    if (stateParam && stateParam !== 'taptch_auth_state') {
+      try {
+        const decoded = JSON.parse(Buffer.from(stateParam, 'base64url').toString('utf-8'));
+        if (decoded?.returnTo && this.isAllowedFrontendOrigin(decoded.returnTo)) {
+          resolvedFrontend = new URL(decoded.returnTo).origin;
+        }
+      } catch {
+        // Fallback to resolvedFrontend
+      }
+    }
 
     if (!code) {
-      return res.redirect(`${frontendUrl}/login?error=google_auth_failed`);
+      return res.redirect(`${resolvedFrontend}/login?error=google_auth_failed`);
     }
 
     try {
       const result = await this.authService.handleGoogleOAuthCallback(code);
 
-      res.cookie('better-auth.session_token', result.session.token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        expires: result.session.expiresAt,
-        path: '/',
-      });
+      res.cookie('better-auth.session_token', result.session.token, this.getSessionCookieOptions(result.session.expiresAt));
 
       // Role-based post-login redirect
       let targetPath = '/dashboard';
@@ -113,9 +173,9 @@ export class AuthController {
         targetPath = '/support';
       }
 
-      return res.redirect(`${frontendUrl}${targetPath}`);
+      return res.redirect(`${resolvedFrontend}${targetPath}?session_token=${encodeURIComponent(result.session.token)}`);
     } catch {
-      return res.redirect(`${frontendUrl}/login?error=google_token_exchange_failed`);
+      return res.redirect(`${resolvedFrontend}/login?error=google_token_exchange_failed`);
     }
   }
 
@@ -129,13 +189,7 @@ export class AuthController {
     const idToken = body.credential || body.idToken;
     const result = await this.authService.verifyGoogleIdToken(idToken!);
 
-    res.cookie('better-auth.session_token', result.session.token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      expires: result.session.expiresAt,
-      path: '/',
-    });
+    res.cookie('better-auth.session_token', result.session.token, this.getSessionCookieOptions(result.session.expiresAt));
 
     return result;
   }

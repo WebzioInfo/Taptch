@@ -21,7 +21,12 @@ export class QrRedirectController {
     const userAgent = req.headers['user-agent'];
 
     const target = await this.qrService.resolveToken(token, ip, userAgent);
-    return res.redirect(302, target.destinationUrl);
+    let finalUrl = target.destinationUrl;
+    if (finalUrl.startsWith('/')) {
+      const frontendUrl = (process.env.FRONTEND_URL || 'https://taptch.com').replace(/\/+$/, '');
+      finalUrl = `${frontendUrl}${finalUrl}`;
+    }
+    return res.redirect(302, finalUrl);
   }
 
   @Public()
