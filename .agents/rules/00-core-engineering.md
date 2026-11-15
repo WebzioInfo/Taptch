@@ -32,3 +32,7 @@ trigger: always_on
 - Consider the instructions from the complete skill library. Apply all relevant engineering requirements.
 - Never silently skip a skill. Re-read skills for every new task rather than assuming previous context remains valid.
 - If a skill cannot be accessed, report it and do not falsely claim compliance.
+
+## 7. Remote Push Restriction (Explicit User Permission Required)
+- Strictly NEVER push to GitHub or any remote repository (`git push`) without explicit prior user permission or an explicit command from the user requesting a push.
+- Local commits (`git commit`) and branch work may occur as needed, but remote operations (`git push`) must never be executed autonomously under any circumstances.
