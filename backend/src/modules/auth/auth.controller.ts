@@ -174,8 +174,9 @@ export class AuthController {
       }
 
       return res.redirect(`${resolvedFrontend}${targetPath}?session_token=${encodeURIComponent(result.session.token)}`);
-    } catch {
-      return res.redirect(`${resolvedFrontend}/login?error=google_token_exchange_failed`);
+    } catch (err: any) {
+      const errorMsg = err?.response?.message || err?.message || 'google_token_exchange_failed';
+      return res.redirect(`${resolvedFrontend}/login?error=${encodeURIComponent(errorMsg)}`);
     }
   }
 

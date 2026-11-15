@@ -23,7 +23,9 @@ export function LoginPage() {
     } else if (err === 'google_auth_failed') {
       setError('Google authorization was cancelled or failed. Please try again.');
     } else if (err === 'google_token_exchange_failed') {
-      setError('Could not verify Google credentials. Please try signing in with your email and password.');
+      setError('Could not verify Google credentials. Please check your Google OAuth credentials in backend/.env or sign in with your email and password.');
+    } else if (err) {
+      setError(decodeURIComponent(err));
     }
   }, [location.search]);
 
