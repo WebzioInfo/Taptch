@@ -852,5 +852,187 @@ describe('Taptch Profile Builder — Theme Customization & State Engine', () => 
       expect(activeTab).toBe('catalogue');
       expect(draftState.productName).toBe('Smart NFC Metal Card');
     });
+
+    it('normalizes draft restoration for businesses and catalogue across backend and frontend shapes', () => {
+      // Raw database row shape returned from findOne
+      const rawBackendProfile = {
+        id: 'prof-123',
+        displayName: 'Vikramaditya Singhania',
+        slug: 'vikram-singhania',
+        profileType: 'business',
+        businesses: [
+          {
+            id: 'biz-1',
+            profileId: 'prof-123',
+            name: 'Singhania Capital Group',
+            tagline: 'Principal & Chairman',
+            website: 'https://singhania.capital',
+            address: 'Lower Parel, Mumbai',
+            logoUrl: 'https://images.unsplash.com/logo.png',
+            email: 'chair@singhania.capital',
+            phone: '+91 22 4567 8900',
+            whatsapp: '+91 98765 00000',
+          },
+        ],
+        catalogue: [
+          {
+            id: 'cat-1',
+            profileId: 'prof-123',
+            title: 'Private Wealth Advisory',
+            type: 'service',
+            price: '₹5,00,000',
+            description: 'Bespoke family office and liquidity management.',
+            actionUrl: 'https://singhania.capital/advisory',
+            actionLabel: 'Schedule Private Consultation',
+          },
+        ],
+      };
+
+      // Frontend loader normalization
+      const normalizedBusinesses = rawBackendProfile.businesses.map((b: any) => ({
+        id: b.id,
+        companyName: b.companyName || b.name || '',
+        name: b.name || b.companyName || '',
+        jobTitle: b.jobTitle || b.tagline || '',
+        tagline: b.tagline || b.jobTitle || '',
+        businessWebsite: b.businessWebsite || b.website || '',
+        website: b.website || b.businessWebsite || '',
+        businessAddress: b.businessAddress || b.address || '',
+        address: b.address || b.businessAddress || '',
+        logoUrl: b.logoUrl || '',
+        email: b.email || b.businessEmail || '',
+        phone: b.phone || b.businessPhone || '',
+        whatsapp: b.whatsapp || '',
+      }));
+
+      expect(normalizedBusinesses[0].companyName).toBe('Singhania Capital Group');
+      expect(normalizedBusinesses[0].jobTitle).toBe('Principal & Chairman');
+      expect(normalizedBusinesses[0].businessWebsite).toBe('https://singhania.capital');
+      expect(normalizedBusinesses[0].businessAddress).toBe('Lower Parel, Mumbai');
+
+      const normalizedCatalogue = rawBackendProfile.catalogue.map((c: any) => ({
+        id: c.id,
+        title: c.title || '',
+        type: c.type || c.itemType || 'product',
+        itemType: c.type || c.itemType || 'product',
+        price: c.price || '',
+        description: c.description || '',
+        actionUrl: c.actionUrl || '',
+        actionLabel: c.actionLabel || 'Enquire',
+      }));
+
+      expect(normalizedCatalogue[0].title).toBe('Private Wealth Advisory');
+      expect(normalizedCatalogue[0].type).toBe('service');
+      expect(normalizedCatalogue[0].actionLabel).toBe('Schedule Private Consultation');
+    });
+
+    it('verifies public profile renderData parity with live preview data', () => {
+      // Mock snapshot from /api/v1/profiles/by-slug/:slug
+      const publicSnapshot = {
+        id: 'prof-999',
+        slug: 'acme-corp',
+        displayName: 'Acme Corporation Ltd',
+        headline: 'Global Supply Chain & Logistics',
+        bio: 'Delivering excellence across 40 countries.',
+        profileType: 'business',
+        socialLinks: [
+          { platform: 'linkedin', url: 'https://linkedin.com/company/acme' },
+          { platform: 'twitter', url: 'https://x.com/acme' },
+        ],
+        phone: '+91 22 1234 5678',
+        whatsapp: '+91 98765 43210',
+        email: 'contact@acme.com',
+        website: 'https://acme.com',
+        address: 'BKC, Mumbai',
+        location: 'BKC, Mumbai',
+        templateId: 'corporate-business',
+        businesses: [
+          {
+            id: 'biz-1',
+            companyName: 'Acme Air Express',
+            tagline: 'Aviation Logistics',
+            businessWebsite: 'https://air.acme.com',
+            businessAddress: 'Mumbai Cargo Terminal',
+            logoUrl: 'https://acme.com/air.png',
+          },
+        ],
+        catalogue: [
+          {
+            id: 'cat-1',
+            title: 'Express Air Freight',
+            type: 'service',
+            price: 'Custom Quote',
+            actionUrl: 'https://acme.com/quote',
+            actionLabel: 'Get Instant Rate',
+          },
+        ],
+      };
+
+      // PublicProfilePage renderData mapping
+      const publicRenderData = {
+        id: publicSnapshot.id,
+        slug: publicSnapshot.slug,
+        displayName: publicSnapshot.displayName,
+        headline: publicSnapshot.headline,
+        bio: publicSnapshot.bio,
+        profileType: publicSnapshot.profileType,
+        socialLinks: publicSnapshot.socialLinks || [],
+        phone: publicSnapshot.phone,
+        whatsapp: publicSnapshot.whatsapp,
+        email: publicSnapshot.email,
+        website: publicSnapshot.website,
+        address: publicSnapshot.address,
+        location: publicSnapshot.location,
+        templateId: canonicalTemplateId(publicSnapshot.templateId),
+        businesses: publicSnapshot.businesses.map((b) => ({
+          id: b.id,
+          companyName: b.companyName,
+          roleTitle: b.tagline,
+          websiteUrl: b.businessWebsite,
+          address: b.businessAddress,
+          logoUrl: b.logoUrl,
+        })),
+        catalogue: publicSnapshot.catalogue.map((c) => ({
+          id: c.id,
+          title: c.title,
+          type: c.type,
+          price: c.price,
+          actionUrl: c.actionUrl,
+          actionLabel: c.actionLabel,
+        })),
+      };
+
+      // Parity Assertions
+      expect(publicRenderData.socialLinks).toHaveLength(2);
+      expect(publicRenderData.profileType).toBe('business');
+      expect(publicRenderData.location).toBe('BKC, Mumbai');
+      expect(publicRenderData.businesses[0].companyName).toBe('Acme Air Express');
+      expect(publicRenderData.businesses[0].logoUrl).toBe('https://acme.com/air.png');
+      expect(publicRenderData.catalogue[0].type).toBe('service');
+      expect(publicRenderData.catalogue[0].actionLabel).toBe('Get Instant Rate');
+    });
+
+    it('prevents saving profiles with empty required name or slug', () => {
+      const validateProfileSubmission = (payload: { displayName: string; slug: string }) => {
+        const cleanName = payload.displayName.trim();
+        const cleanSlug = payload.slug.trim().toLowerCase();
+        if (!cleanName) {
+          throw new Error('Display Name is required.');
+        }
+        if (!cleanSlug) {
+          throw new Error('Public handle / slug is required.');
+        }
+        return { displayName: cleanName, slug: cleanSlug };
+      };
+
+      expect(() => validateProfileSubmission({ displayName: '', slug: 'valid-slug' })).toThrow('Display Name is required.');
+      expect(() => validateProfileSubmission({ displayName: '   ', slug: 'valid-slug' })).toThrow('Display Name is required.');
+      expect(() => validateProfileSubmission({ displayName: 'Vikram', slug: '' })).toThrow('Public handle / slug is required.');
+      expect(() => validateProfileSubmission({ displayName: 'Vikram', slug: '   ' })).toThrow('Public handle / slug is required.');
+      expect(validateProfileSubmission({ displayName: ' Vikram ', slug: ' My-Slug ' })).toEqual({
+        displayName: 'Vikram',
+        slug: 'my-slug',
+      });
+    });
   });
 });

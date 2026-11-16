@@ -49,6 +49,7 @@ export interface ProfileBusinessData {
 export interface ProfileCatalogueItemData {
   id: string;
   title: string;
+  type?: 'product' | 'service' | string | null;
   description?: string | null;
   price?: string | null;
   currency?: string;
@@ -81,6 +82,7 @@ export interface PublicProfileSnapshot {
   whatsapp?: string | null;
   website?: string | null;
   address?: string | null;
+  location?: string | null;
   profileType?: string | null;
   status?: string | null;
   customFields?: Record<string, unknown> | null;

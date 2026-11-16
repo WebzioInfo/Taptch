@@ -9,7 +9,7 @@ import {
 import { DatabaseService } from '../../database/database.service';
 import { RedisService } from '../../database/redis.service';
 import * as schema from '../../database/schema';
-import { eq, and, desc, asc } from 'drizzle-orm';
+import { eq, and, desc, asc, ne } from 'drizzle-orm';
 import type { ActorContext, PublicProfileSnapshot } from '../../common/types';
 import { isReservedUsername } from '../../common/constants/reserved-usernames';
 import * as crypto from 'crypto';
@@ -61,7 +61,8 @@ export class ProfilesService {
       this.dbService.db
         .select()
         .from(schema.profileBusinesses)
-        .where(eq(schema.profileBusinesses.profileId, profileId)),
+        .where(eq(schema.profileBusinesses.profileId, profileId))
+        .orderBy(asc(schema.profileBusinesses.displayOrder)),
       this.dbService.db
         .select()
         .from(schema.profileCatalogueItems)
@@ -72,8 +73,27 @@ export class ProfilesService {
     return {
       ...profile,
       sections,
-      businesses,
-      catalogue,
+      businesses: businesses.map((b) => ({
+        ...b,
+        companyName: b.name,
+        name: b.name,
+        jobTitle: b.tagline,
+        tagline: b.tagline,
+        businessWebsite: b.website,
+        websiteUrl: b.website,
+        website: b.website,
+        businessAddress: b.address,
+        address: b.address,
+        businessEmail: b.email,
+        email: b.email,
+        businessPhone: b.phone,
+        phone: b.phone,
+      })),
+      catalogue: catalogue.map((c) => ({
+        ...c,
+        type: c.type || 'product',
+        actionLabel: c.actionLabel || 'Enquire',
+      })),
     };
   }
 
@@ -160,10 +180,12 @@ export class ProfilesService {
       catalogue: catalogue.map((c) => ({
         id: c.id,
         title: c.title,
+        type: c.type || 'product',
         description: c.description,
         price: c.price ? String(c.price) : null,
         imageUrl: c.imageUrl,
         actionUrl: c.actionUrl,
+        actionLabel: c.actionLabel || 'Enquire',
         orderIndex: c.displayOrder,
         isActive: true,
       })),
@@ -173,6 +195,7 @@ export class ProfilesService {
       whatsapp: profile.whatsapp,
       website: profile.website,
       address: profile.address,
+      location: profile.location || null,
       customFields: (profile.customFields as Record<string, unknown>) || null,
     };
 
@@ -227,6 +250,7 @@ export class ProfilesService {
           email: data.email || null,
           website: data.website || null,
           address: data.address || null,
+          location: data.location || null,
         })
         .returning();
 
@@ -294,10 +318,30 @@ export class ProfilesService {
   async update(actor: ActorContext, profileId: string, data: any) {
     const existing = await this.findOne(actor, profileId);
 
+    // If slug is provided and changed, validate and check uniqueness
+    let nextSlug = existing.slug;
+    if (data.slug && data.slug.toLowerCase().trim() !== existing.slug) {
+      const candidateSlug = data.slug.toLowerCase().trim();
+      if (isReservedUsername(candidateSlug)) {
+        throw new BadRequestException(`The username "${candidateSlug}" is reserved by the system and cannot be claimed.`);
+      }
+      const collision = await this.dbService.db
+        .select({ id: schema.profiles.id })
+        .from(schema.profiles)
+        .where(and(eq(schema.profiles.slug, candidateSlug), ne(schema.profiles.id, profileId)))
+        .limit(1);
+      if (collision.length > 0) {
+        throw new ConflictException(`The profile slug "${candidateSlug}" is already taken.`);
+      }
+      nextSlug = candidateSlug;
+    }
+
     const updated = await this.dbService.withActor(actor, async (tx) => {
       const [res] = await tx
         .update(schema.profiles)
         .set({
+          slug: nextSlug,
+          profileType: data.profileType !== undefined ? data.profileType : existing.profileType,
           displayName: data.displayName !== undefined ? data.displayName : existing.displayName,
           headline: data.headline !== undefined ? data.headline : existing.headline,
           bio: data.bio !== undefined ? data.bio : existing.bio,
@@ -315,6 +359,7 @@ export class ProfilesService {
           email: data.email !== undefined ? data.email : existing.email,
           website: data.website !== undefined ? data.website : existing.website,
           address: data.address !== undefined ? data.address : existing.address,
+          location: data.location !== undefined ? data.location : existing.location,
           socialLinks: data.socialLinks !== undefined ? data.socialLinks : existing.socialLinks,
           customFields: data.customFields !== undefined ? data.customFields : existing.customFields,
           templateId:
@@ -323,6 +368,12 @@ export class ProfilesService {
               : data.themeId !== undefined
                 ? data.themeId
                 : existing.templateId,
+          themeId:
+            data.templateId !== undefined
+              ? data.templateId
+              : data.themeId !== undefined
+                ? data.themeId
+                : existing.themeId,
           themeConfig:
             data.themeConfig !== undefined
               ? data.themeConfig
@@ -390,65 +441,69 @@ export class ProfilesService {
     });
 
     // Invalidate Redis cache
-    if (updated?.slug) {
-      await this.redisService.del(`profile:slug:${updated.slug}`);
+      if (existing?.slug) {
+        await this.redisService.del(`profile:slug:${existing.slug.toLowerCase()}`);
+      }
+      if (updated?.slug && updated.slug !== existing?.slug) {
+        await this.redisService.del(`profile:slug:${updated.slug.toLowerCase()}`);
+      }
+
+      return updated;
     }
 
-    return updated;
-  }
-
   async publish(actor: ActorContext, profileId: string) {
-    const profile = await this.findOne(actor, profileId);
+      const profile = await this.findOne(actor, profileId);
 
-    // Invalidate any existing stale cache before compiling fresh snapshot
-    await this.redisService.del(`profile:slug:${profile.slug.toLowerCase()}`);
+      // Invalidate any existing stale cache before compiling fresh snapshot
+      await this.redisService.del(`profile:slug:${profile.slug.toLowerCase()}`);
 
-    // Pre-compile snapshot directly from fresh DB records
-    const snapshot = await this.findBySlug(profile.slug);
+      // Pre-compile snapshot directly from fresh DB records
+      const snapshot = await this.findBySlug(profile.slug);
 
-    const [published] = await this.dbService.withActor(actor, async (tx) => {
-      return tx
-        .update(schema.profiles)
-        .set({
-          status: 'PUBLISHED',
-          publishedJson: snapshot as any,
-          updatedAt: new Date(),
-        })
-        .where(eq(schema.profiles.id, profileId))
-        .returning();
-    });
+      const [published] = await this.dbService.withActor(actor, async (tx) => {
+        return tx
+          .update(schema.profiles)
+          .set({
+            status: 'PUBLISHED',
+            publishedJson: snapshot as any,
+            publishedAt: new Date(),
+            updatedAt: new Date(),
+          })
+          .where(eq(schema.profiles.id, profileId))
+          .returning();
+      });
 
-    // Sync fresh Redis cache for 24h
-    await this.redisService.set(`profile:slug:${profile.slug.toLowerCase()}`, JSON.stringify(snapshot), 86400);
+      // Sync fresh Redis cache for 24h
+      await this.redisService.set(`profile:slug:${profile.slug.toLowerCase()}`, JSON.stringify(snapshot), 86400);
 
-    return published;
-  }
+      return published;
+    }
 
   async updateSections(actor: ActorContext, profileId: string, sections: any[]) {
-    await this.findOne(actor, profileId);
+      await this.findOne(actor, profileId);
 
-    await this.dbService.withActor(actor, async (tx) => {
-      for (let i = 0; i < sections.length; i++) {
-        const s = sections[i];
-        if (s.id) {
-          await tx
-            .update(schema.profileSections)
-            .set({
-              displayOrder: i,
-              isEnabled: s.isEnabled ?? true,
-              title: s.title || '',
-              configJson: s.content || {},
-            })
-            .where(
-              and(
-                eq(schema.profileSections.id, s.id),
-                eq(schema.profileSections.profileId, profileId),
-              ),
-            );
+      await this.dbService.withActor(actor, async (tx) => {
+        for (let i = 0; i < sections.length; i++) {
+          const s = sections[i];
+          if (s.id) {
+            await tx
+              .update(schema.profileSections)
+              .set({
+                displayOrder: i,
+                isEnabled: s.isEnabled ?? true,
+                title: s.title || '',
+                configJson: s.content || {},
+              })
+              .where(
+                and(
+                  eq(schema.profileSections.id, s.id),
+                  eq(schema.profileSections.profileId, profileId),
+                ),
+              );
+          }
         }
-      }
-    });
+      });
 
-    return { success: true };
+      return { success: true };
+    }
   }
-}
