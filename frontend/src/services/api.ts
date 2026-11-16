@@ -22,9 +22,11 @@ export class ApiClient {
       url = cleanEndpoint;
     }
 
+    const localToken = typeof window !== 'undefined' ? localStorage.getItem('taptch_session_token') : null;
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       Accept: 'application/json',
+      ...(localToken ? { Authorization: `Bearer ${localToken}` } : {}),
       ...((options.headers as Record<string, string>) || {}),
     };
 

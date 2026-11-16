@@ -55,6 +55,15 @@ export class RedisService implements OnModuleDestroy {
     });
   }
 
+  getCacheStatus(): { mode: 'redis' | 'in-memory'; status: 'operational'; connected: boolean } {
+    const connected = this.isAvailable && this.client.status === 'ready';
+    return {
+      mode: connected ? 'redis' : 'in-memory',
+      status: 'operational',
+      connected,
+    };
+  }
+
   async get(key: string): Promise<string | null> {
     if (this.isAvailable && this.client.status === 'ready') {
       try {

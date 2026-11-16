@@ -23,7 +23,9 @@ export function LoginPage() {
     } else if (err === 'google_auth_failed') {
       setError('Google authorization was cancelled or failed. Please try again.');
     } else if (err === 'google_token_exchange_failed') {
-      setError('Could not verify Google credentials. Please try signing in with your email and password.');
+      setError('Could not verify Google credentials. Please check your Google OAuth credentials in backend/.env or sign in with your email and password.');
+    } else if (err) {
+      setError(decodeURIComponent(err));
     }
   }, [location.search]);
 
@@ -75,7 +77,8 @@ export function LoginPage() {
         <button
           type="button"
           onClick={() => {
-            window.location.href = `${env.apiUrl}/api/auth/oauth/google`;
+            const returnTo = typeof window !== 'undefined' ? window.location.origin : '';
+            window.location.href = `${env.apiUrl}/api/auth/oauth/google?returnTo=${encodeURIComponent(returnTo)}`;
           }}
           className="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-xl bg-white hover:bg-neutral-100 text-neutral-900 font-semibold text-xs border border-neutral-300 transition-colors shadow-sm active:scale-[0.99]"
         >

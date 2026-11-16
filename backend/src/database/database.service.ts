@@ -41,6 +41,29 @@ export class DatabaseService implements OnModuleDestroy {
   }
 
   /**
+   * Database Connectivity and Latency Health Probe
+   */
+  async checkHealth(): Promise<{ status: 'healthy' | 'unhealthy'; latencyMs: number; serverTime?: string; error?: string }> {
+    const start = Date.now();
+    try {
+      const res = await this.db.execute(sql`SELECT NOW() as db_time, 1 as check`);
+      const latencyMs = Date.now() - start;
+      const serverTime = (res?.[0] as any)?.db_time ? new Date((res[0] as any).db_time).toISOString() : undefined;
+      return {
+        status: 'healthy',
+        latencyMs,
+        serverTime,
+      };
+    } catch (err: any) {
+      return {
+        status: 'unhealthy',
+        latencyMs: Date.now() - start,
+        error: err?.message || 'Database query execution failed',
+      };
+    }
+  }
+
+  /**
    * Tenant-Scoped Data Access Wrapper
    * In pooled connections, RLS session variables MUST be scoped to the transaction
    */
