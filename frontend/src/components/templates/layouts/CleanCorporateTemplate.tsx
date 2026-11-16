@@ -1,6 +1,9 @@
 import React from 'react';
 import type { ProfileRenderData } from '../ProfileRenderer';
 import { TemplateContactForm } from '../TemplateContactForm';
+import { DirectContactSection } from '@/components/profile/DirectContactSection';
+import { SocialLinksSection } from '@/components/profile/SocialLinksSection';
+import { formatTelLink, formatWhatsAppLink } from '@/lib/contact-utils';
 import './clean-corporate.css';
 
 interface CleanCorporateProps {
@@ -23,10 +26,9 @@ export function CleanCorporateTemplate({
 }: CleanCorporateProps) {
   const businesses = profile.businesses || [];
   const primaryBusiness = businesses[0];
-  const phone = profile.phone || '';
-  const rawPhone = phone.replace(/\D/g, '');
-  const email = profile.email || '';
-  const location = profile.address || profile.location || 'Calicut, Kerala';
+  const telLink = formatTelLink(profile.phone);
+  const waLink = formatWhatsAppLink(profile.whatsapp, profile.phone);
+  const location = profile.address || profile.location || '';
 
   return (
     <div className="template-clean-corporate">
@@ -51,24 +53,30 @@ export function CleanCorporateTemplate({
             <div className="profile-meta">
               <h1 className="profile-name">{profile.displayName}</h1>
               <p className="profile-title">{profile.headline || primaryBusiness?.tagline || 'Digital Identity'}</p>
-              <div className="location-badge">
-                <svg
-                  className="icon icon-sm"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.75"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M10 2.5C6.962 2.5 4.5 4.962 4.5 8c0 4.125 5.5 9.5 5.5 9.5s5.5-5.375 5.5-9.5c0-3.038-2.462-5.5-5.5-5.5z" />
-                  <circle cx="10" cy="8" r="2.25" />
-                </svg>
-                <span>{location}</span>
-                <span className="meta-dot" aria-hidden="true">•</span>
-                <span>Verified</span>
-              </div>
+              {location ? (
+                <div className="location-badge">
+                  <svg
+                    className="icon icon-sm"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.75"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M10 2.5C6.962 2.5 4.5 4.962 4.5 8c0 4.125 5.5 9.5 5.5 9.5s5.5-5.375 5.5-9.5c0-3.038-2.462-5.5-5.5-5.5z" />
+                    <circle cx="10" cy="8" r="2.25" />
+                  </svg>
+                  <span>{location}</span>
+                  <span className="meta-dot" aria-hidden="true">•</span>
+                  <span>Verified</span>
+                </div>
+              ) : (
+                <div className="location-badge">
+                  <span>Verified Executive</span>
+                </div>
+              )}
             </div>
           </header>
 
@@ -98,37 +106,38 @@ export function CleanCorporateTemplate({
             </button>
 
             <div className="button-row">
-              {phone ? (
-                <a href={`tel:${phone}`} className="btn btn-secondary">
-                  <svg
-                    className="icon"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                  </svg>
-                  <span>Call</span>
-                </a>
-              ) : (
-                <button type="button" onClick={onOpenQr} className="btn btn-secondary">
-                  <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="3" width="7" height="7" />
-                    <rect x="14" y="3" width="7" height="7" />
-                    <rect x="14" y="14" width="7" height="7" />
-                    <rect x="3" y="14" width="7" height="7" />
-                  </svg>
-                  <span>QR Code</span>
-                </button>
-              )}
+                  {telLink ? (
+                    <a href={telLink} className="btn btn-secondary">
+                      <svg
+                        className="icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                      </svg>
+                      <span>Call</span>
+                    </a>
+                  ) : (
+                    <button type="button" onClick={onOpenQr} className="btn btn-secondary">
+                      <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="3" y="3" width="7" height="7" />
+                        <rect x="14" y="3" width="7" height="7" />
+                        <rect x="14" y="14" width="7" height="7" />
+                        <rect x="3" y="14" width="7" height="7" />
+                      </svg>
+                      <span>QR Code</span>
+                    </button>
+                  )}
 
-              {rawPhone ? (
+                    {
+                      waLink?(
                 <a
-                  href={`https://wa.me/${rawPhone}`}
+                  href={waLink}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn btn-secondary"
@@ -204,55 +213,107 @@ export function CleanCorporateTemplate({
             </section>
           )}
 
-          {/* Direct Contact Points */}
+          {/* Direct Contact Coordinates */}
           <section className="content-section" aria-labelledby="contact-heading">
-            <h2 id="contact-heading" className="section-title">Direct Details</h2>
-            <div className="contact-list">
-              {email && (
-                <a href={`mailto:${email}`} className="contact-item">
-                  <div className="contact-icon" aria-hidden="true">
-                    <svg
-                      className="icon"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                      <polyline points="22,6 12,13 2,6" />
-                    </svg>
-                  </div>
-                  <div className="contact-info">
-                    <span className="contact-label">Email</span>
-                    <span className="contact-value">{email}</span>
-                  </div>
-                </a>
-              )}
+            <DirectContactSection
+              phone={profile.phone}
+              whatsapp={profile.whatsapp}
+              email={profile.email}
+              website={profile.website}
+              address={profile.address}
+              variant="corporate"
+              title="Direct Contact Coordinates"
+              themeStyle={{
+                accentColor: '#0A2540',
+                cardBg: '#FFFFFF',
+                borderColor: '#E2E8F0',
+                textColor: '#0F172A',
+                headingColor: '#0A2540',
+              }}
+            />
 
-              <div className="contact-item">
-                <div className="contact-icon" aria-hidden="true">
-                  <svg
-                    className="icon"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                    <circle cx="12" cy="10" r="3" />
-                  </svg>
-                </div>
-                <div className="contact-info">
-                  <span className="contact-label">Headquarters</span>
-                  <span className="contact-value">{location}</span>
+            {/* Social Channels Section */}
+            <SocialLinksSection
+              socialLinks={profile.socialLinks}
+              variant="corporate"
+              themeStyle={{
+                accentColor: '#0A2540',
+                cardBg: '#FFFFFF',
+                borderColor: '#E2E8F0',
+                textColor: '#0F172A',
+                headingColor: '#0A2540',
+              }}
+            />
+          </section>
+
+          {/* Business Offerings & Products Catalogue */}
+          {profile.catalogue && profile.catalogue.length > 0 && (
+            <section className="content-section" aria-labelledby="catalogue-heading">
+              <div className="section-header" style={{ marginBottom: '12px' }}>
+                <div className="flex items-center justify-between">
+                  <h2 id="catalogue-heading" className="section-title text-base font-bold text-[#0A2540]">
+                    Products &amp; Business Services
+                  </h2>
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-[#0A2540]/10 text-[#0A2540] font-semibold">
+                    {profile.catalogue.length} {profile.catalogue.length === 1 ? 'Offering' : 'Offerings'}
+                  </span>
                 </div>
               </div>
-            </div>
-          </section>
+              <div className="space-y-3">
+                {profile.catalogue.map((item) => (
+                  <div
+                    key={item.id}
+                    className="p-4 rounded-xl border border-[#E2E8F0] bg-white shadow-sm flex flex-col justify-between gap-3 transition-all hover:border-[#0A2540]/30"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-[#0A2540]/10 text-[#0A2540]">
+                            {item.itemType || 'Product'}
+                          </span>
+                          {item.price && (
+                            <span className="text-xs font-mono font-bold text-[#0A2540]">
+                              {item.currency || '₹'} {item.price}
+                            </span>
+                          )}
+                        </div>
+                        <h3 className="text-sm font-bold text-[#0F172A] leading-snug">{item.title}</h3>
+                        {item.description && (
+                          <p className="text-xs text-[#64748B] mt-1 leading-relaxed">{item.description}</p>
+                        )}
+                      </div>
+                      {item.imageUrl && (
+                        <img
+                          src={item.imageUrl}
+                          alt={item.title}
+                          className="w-16 h-16 rounded-lg object-cover border border-[#E2E8F0] shrink-0"
+                        />
+                      )}
+                    </div>
+                    <div className="pt-2 border-t border-[#F1F5F9] flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={() => onOpenExchange(`Inquiry regarding: ${item.title}`)}
+                        className="text-xs font-semibold text-[#0A2540] hover:underline flex items-center gap-1"
+                      >
+                        Inquire About Offering &rarr;
+                      </button>
+                      {item.actionUrl && (
+                        <a
+                          href={item.actionUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-medium text-[#64748B] hover:text-[#0A2540]"
+                        >
+                          Details
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Dynamic Universal Contact & Lead Generation Form */}
           <section className="content-section" aria-label="Send Direct Enquiry">

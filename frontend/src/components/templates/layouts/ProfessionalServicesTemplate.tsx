@@ -15,10 +15,15 @@ import {
   Clock,
   Lock,
   Scale,
+  Phone,
+  MessageSquare,
 } from 'lucide-react';
 import type { TemplateLayoutProps } from './types';
 import { UpiPaymentCard } from '@/components/profile/UpiPaymentCard';
 import type { UpiPaymentConfig } from '@/lib/upi';
+import { DirectContactSection } from '@/components/profile/DirectContactSection';
+import { SocialLinksSection } from '@/components/profile/SocialLinksSection';
+import { formatTelLink, formatWhatsAppLink } from '@/lib/contact-utils';
 
 import { TemplateContactForm } from '../TemplateContactForm';
 
@@ -91,34 +96,34 @@ export function ProfessionalServicesTemplate({
             </div>
           </div>
 
-          <div className="px-6 pb-6 pt-0 relative flex flex-col md:flex-row items-center md:items-end gap-6 text-center md:text-left -mt-14 sm:-mt-16">
-            <div className="h-28 w-28 sm:h-32 sm:w-32 rounded-2xl border-4 border-white overflow-hidden bg-[#FAF8F5] flex items-center justify-center font-bold text-3xl shadow-xl shrink-0 text-[#8C6D3B]">
-              {profile.avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={profile.avatarUrl}
-                  alt={profile.displayName}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span>{profile.displayName.charAt(0)}</span>
-              )}
-            </div>
-
-            <div className="space-y-1.5 flex-1 min-w-0">
-              <div className="flex items-center justify-center md:justify-start gap-2">
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1E1E24] font-serif">
-                  {profile.displayName}
-                </h1>
-                <ShieldCheck className="h-5 w-5 text-[#8C6D3B] shrink-0" />
+            <div className="px-5 pb-6 pt-0 relative flex flex-col items-center text-center -mt-14 sm:-mt-16">
+              <div className="h-28 w-28 sm:h-32 sm:w-32 rounded-2xl border-4 border-white overflow-hidden bg-[#FAF8F5] flex items-center justify-center font-bold text-3xl shadow-xl shrink-0 text-[#8C6D3B]">
+                {profile.avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={profile.avatarUrl}
+                    alt={profile.displayName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span>{profile.displayName.charAt(0)}</span>
+                )}
               </div>
-              {profile.headline && (
-                <p className="text-sm text-[#4A4A52] leading-snug font-serif">
-                  {profile.headline}
-                </p>
+
+                    <div className="w-full min-w-0 mt-4 space-y-1.5 px-2">
+                      <div className="flex items-center justify-center gap-2">
+                        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1E1E24] font-serif break-words">
+                          {profile.displayName}
+                        </h1>
+                        <ShieldCheck className="h-5 w-5 text-[#8C6D3B] shrink-0" />
+                      </div>
+                      {profile.headline && (
+                          <p className="text-sm text-[#4A4A52] leading-snug font-serif break-words max-w-sm mx-auto">
+                            {profile.headline}
+                          </p>
               )}
-              {primaryBusiness?.companyName && (
-                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 text-xs text-[#71717A] pt-1">
+                          {primaryBusiness?.companyName && (
+                <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-[#71717A] pt-1">
                   <span className="flex items-center gap-1.5">
                     <Building className="h-3.5 w-3.5 text-[#8C6D3B]" />
                     {primaryBusiness.companyName}
@@ -133,25 +138,88 @@ export function ProfessionalServicesTemplate({
               )}
             </div>
 
-            <div className="flex flex-row md:flex-col gap-2.5 w-full md:w-auto shrink-0 mt-4 md:mt-0 font-sans">
-              <Button
-                onClick={onDownloadVCard}
-                className="flex-1 md:flex-none bg-[#8C6D3B] hover:bg-[#73572D] text-white font-medium gap-2 text-xs h-10 px-5 shadow-md"
-              >
-                <Download className="h-4 w-4" />
-                <span>Save Counsel Card</span>
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => onOpenExchange('Confidential Consultation Request')}
-                className="flex-1 md:flex-none border-[#E2DDD3] bg-[#FAF8F5] text-[#1E1E24] hover:bg-[#F0EDE6] text-xs h-10 px-5 gap-2"
-              >
-                <Send className="h-4 w-4 text-[#8C6D3B]" />
-                <span>Book Consultation</span>
-              </Button>
+            <div className="w-full max-w-sm mt-5 space-y-2.5 font-sans">
+              <div className="grid grid-cols-2 gap-2.5 w-full">
+                <Button
+                  onClick={onDownloadVCard}
+                  className="bg-[#8C6D3B] hover:bg-[#73572D] text-white font-medium gap-2 text-xs h-10 px-3 shadow-md"
+                >
+                  <Download className="h-4 w-4 shrink-0" />
+                  <span className="truncate">Save Counsel Card</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => onOpenExchange('Confidential Consultation Request')}
+                  className="border-[#E2DDD3] bg-[#FAF8F5] text-[#1E1E24] hover:bg-[#F0EDE6] text-xs h-10 px-3 gap-2"
+                >
+                  <Send className="h-4 w-4 text-[#8C6D3B] shrink-0" />
+                  <span className="truncate">Consultation</span>
+                </Button>
+              </div>
+              {(profile.phone || profile.whatsapp) && (
+                <div className="grid grid-cols-2 gap-2.5 w-full">
+                  {profile.phone && formatTelLink(profile.phone) && (
+                    <a href={formatTelLink(profile.phone)!} className="w-full">
+                      <Button
+                        variant="outline"
+                        className="w-full border-[#E2DDD3] bg-white text-[#1E1E24] hover:bg-[#F0EDE6] text-xs h-9 px-3 gap-1.5"
+                      >
+                        <Phone className="h-3.5 w-3.5 text-[#8C6D3B] shrink-0" />
+                        <span>Call</span>
+                      </Button>
+                    </a>
+                  )}
+                  {(profile.whatsapp || profile.phone) && formatWhatsAppLink(profile.whatsapp, profile.phone) && (
+                    <a
+                      href={formatWhatsAppLink(profile.whatsapp, profile.phone)!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full"
+                    >
+                      <Button
+                        variant="outline"
+                        className="w-full border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 text-xs h-9 px-3 gap-1.5"
+                      >
+                        <MessageSquare className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                        <span>WhatsApp</span>
+                      </Button>
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
+
+        {/* Direct Contact Coordinates Section */}
+        <DirectContactSection
+          phone={profile.phone}
+          whatsapp={profile.whatsapp}
+          email={profile.email}
+          website={profile.website}
+          address={profile.address}
+          variant="ivory"
+          themeStyle={{
+            accentColor: '#8C6D3B',
+            cardBg: '#FFFFFF',
+            borderColor: '#E2DDD3',
+            textColor: '#1E1E24',
+            headingColor: '#1E1E24',
+          }}
+        />
+
+        {/* Social Channels Section */}
+        <SocialLinksSection
+          socialLinks={profile.socialLinks}
+          variant="ivory"
+          themeStyle={{
+            accentColor: '#8C6D3B',
+            cardBg: '#FFFFFF',
+            borderColor: '#E2DDD3',
+            textColor: '#1E1E24',
+            headingColor: '#1E1E24',
+          }}
+        />
 
         {/* Direct UPI Payment Section */}
         {upiConfig && (
@@ -282,5 +350,5 @@ export function ProfessionalServicesTemplate({
         </footer>
       </div>
     </div>
-  );
+                      );
 }

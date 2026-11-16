@@ -69,16 +69,21 @@ export interface PublicProfileSnapshot {
   avatarUrl?: string | null;
   coverUrl?: string | null;
   themeId: string;
+  templateId?: string;
   customThemeColors?: Record<string, string> | null;
+  themeConfig?: Record<string, unknown> | null;
   sections: ProfileSectionData[];
   businesses: ProfileBusinessData[];
   catalogue: ProfileCatalogueItemData[];
-  socialLinks?: Record<string, string> | null;
+  socialLinks?: Record<string, string> | Array<{ id?: string; platform: string; url: string }> | null;
   phone?: string | null;
   email?: string | null;
   whatsapp?: string | null;
   website?: string | null;
   address?: string | null;
+  profileType?: string | null;
+  status?: string | null;
+  customFields?: Record<string, unknown> | null;
 }
 
 export interface DynamicQRResolution {

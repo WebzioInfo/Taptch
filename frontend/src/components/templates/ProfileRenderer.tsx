@@ -29,6 +29,17 @@ import { DarkPremiumTemplate } from './layouts/DarkPremiumTemplate';
 import { SoftModernTemplate } from './layouts/SoftModernTemplate';
 import { BoldEditorialTemplate } from './layouts/BoldEditorialTemplate';
 import { NfcPreviewStudio } from './layouts/NfcPreviewStudio';
+import { getTemplateDefaultThemeConfig } from '../../modules/templates/constants';
+
+export function canonicalTemplateId(rawId?: string | null): string {
+  const norm = (rawId || 'premium-brand').toLowerCase().trim();
+  if (norm === 'obsidian-luxury') return 'premium-brand';
+  if (norm === 'zenith-corporate') return 'corporate-business';
+  if (norm === 'catalyst-business') return 'modern-business';
+  if (norm === 'ivory-minimal' || norm === 'ivory-minimalist') return 'professional-services';
+  if (norm === 'aurora-creator') return 'creative-agency';
+  return norm;
+}
 
 export interface BusinessItem {
   id: string;
@@ -189,11 +200,15 @@ export function ProfileRenderer({ profile }: { profile: ProfileRenderData }) {
     }
   };
 
-  // Dispatch to the specialized layout
-  const templateId = (profile.templateId || 'obsidian-luxury').toLowerCase();
+  // Dispatch to the specialized layout with canonical ID resolution
+  const templateId = canonicalTemplateId(profile.templateId);
+  const defaultPalette = getTemplateDefaultThemeConfig(templateId);
 
   const layoutProps = {
-    profile,
+    profile: {
+      ...profile,
+      templateId,
+    },
     onDownloadVCard: handleDownloadVCard,
     onOpenExchange: handleOpenExchange,
     onOpenQr: () => setShowQrModal(true),
@@ -205,46 +220,81 @@ export function ProfileRenderer({ profile }: { profile: ProfileRenderData }) {
   const renderLayout = () => {
     switch (templateId) {
       case 'clean-corporate':
-        return <CleanCorporateTemplate {...layoutProps} />;
+        return <CleanCorporateTemplate key="clean-corporate" {...layoutProps} />;
       case 'dark-premium':
-        return <DarkPremiumTemplate {...layoutProps} />;
+        return <DarkPremiumTemplate key="dark-premium" {...layoutProps} />;
       case 'soft-modern':
-        return <SoftModernTemplate {...layoutProps} />;
+        return <SoftModernTemplate key="soft-modern" {...layoutProps} />;
       case 'bold-editorial':
-        return <BoldEditorialTemplate {...layoutProps} />;
+        return <BoldEditorialTemplate key="bold-editorial" {...layoutProps} />;
       case 'preview-studio':
       case 'nfc-preview-studio':
-        return <NfcPreviewStudio {...layoutProps} />;
+        return <NfcPreviewStudio key="nfc-preview-studio" {...layoutProps} />;
       case 'industrial-manufacturing':
-        return <IndustrialTemplate {...layoutProps} />;
+        return <IndustrialTemplate key="industrial-manufacturing" {...layoutProps} />;
       case 'retail-shopping':
-        return <RetailTemplate {...layoutProps} />;
+        return <RetailTemplate key="retail-shopping" {...layoutProps} />;
       case 'food-restaurant':
-        return <FoodRestaurantTemplate {...layoutProps} />;
+        return <FoodRestaurantTemplate key="food-restaurant" {...layoutProps} />;
       case 'corporate-business':
-      case 'zenith-corporate':
-        return <CorporateBusinessTemplate {...layoutProps} />;
+        return <CorporateBusinessTemplate key="corporate-business" {...layoutProps} />;
       case 'modern-business':
-      case 'catalyst-business':
-        return <ModernBusinessTemplate {...layoutProps} />;
+        return <ModernBusinessTemplate key="modern-business" {...layoutProps} />;
       case 'professional-services':
-      case 'ivory-minimal':
-      case 'ivory-minimalist':
-        return <ProfessionalServicesTemplate {...layoutProps} />;
+        return <ProfessionalServicesTemplate key="professional-services" {...layoutProps} />;
       case 'creative-agency':
-      case 'aurora-creator':
-        return <CreativeAgencyTemplate {...layoutProps} />;
+        return <CreativeAgencyTemplate key="creative-agency" {...layoutProps} />;
       case 'apex-capital':
-        return <ApexCapitalTemplate {...layoutProps} />;
+        return <ApexCapitalTemplate key="apex-capital" {...layoutProps} />;
       case 'premium-brand':
-      case 'obsidian-luxury':
       default:
-        return <PremiumBrandTemplate {...layoutProps} />;
+        return <PremiumBrandTemplate key="premium-brand" {...layoutProps} />;
     }
   };
 
-  return (
-    <div className="w-full relative">
+  const themeStyles = React.useMemo(() => {
+    const userCfg = (profile.themeConfig || {}) as Record<string, string>;
+    const cfg = { ...defaultPalette, ...userCfg };
+    const primary = cfg.primary || defaultPalette.primary || '#D4AF37';
+    const secondary = cfg.secondary || defaultPalette.secondary || primary;
+    const accent = cfg.accent || defaultPalette.accent || primary;
+    const background = cfg.background || defaultPalette.background || '#0A0A0C';
+    const cardBg = cfg.cardBackground || cfg.surface || defaultPalette.cardBackground || '#121216';
+    const text = cfg.text || defaultPalette.text || '#EDEDED';
+    const heading = cfg.heading || defaultPalette.heading || text;
+    const btnBg = cfg.buttonBackground || defaultPalette.buttonBackground || primary;
+    const btnText = cfg.buttonText || defaultPalette.buttonText || '#0A0A0C';
+    const border = cfg.border || defaultPalette.border || 'rgba(255, 255, 255, 0.12)';
+
+    return {
+      '--bg-page': background,
+      '--bg-card': cardBg,
+      '--bg-surface': cardBg,
+      '--color-accent': accent,
+      '--color-accent-hover': secondary,
+      '--color-primary': primary,
+      '--color-secondary': secondary,
+      '--color-text-main': text,
+      '--color-text-muted': `${text}99`,
+      '--color-text-heading': heading,
+      '--color-border': border,
+      '--color-btn-bg': btnBg,
+      '--color-btn-text': btnText,
+      // User-specific CSS variable overrides for scoped CSS files
+      '--user-bg-page': background,
+      '--user-bg-card': cardBg,
+      '--user-bg-surface': cardBg,
+      '--user-color-primary': primary,
+      '--user-color-accent': accent,
+      '--user-color-text-main': text,
+      '--user-color-border': border,
+      backgroundColor: background,
+      color: text,
+    } as React.CSSProperties;
+}, [profile.themeConfig, templateId, defaultPalette]);
+
+return (
+    <div key={templateId} className="w-full relative min-h-full transition-colors duration-150" style={themeStyles}>
       {renderLayout()}
 
       {/* QR Code Modal */}
@@ -414,5 +464,5 @@ export function ProfileRenderer({ profile }: { profile: ProfileRenderData }) {
         </div>
       )}
     </div>
-  );
+    );
 }

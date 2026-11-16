@@ -16,10 +16,15 @@ import {
   Lock,
   Landmark,
   TrendingUp,
+  Phone,
+  MessageSquare,
 } from 'lucide-react';
 import type { TemplateLayoutProps } from './types';
 import { UpiPaymentCard } from '@/components/profile/UpiPaymentCard';
 import type { UpiPaymentConfig } from '@/lib/upi';
+import { DirectContactSection } from '@/components/profile/DirectContactSection';
+import { SocialLinksSection } from '@/components/profile/SocialLinksSection';
+import { formatTelLink, formatWhatsAppLink } from '@/lib/contact-utils';
 
 import { TemplateContactForm } from '../TemplateContactForm';
 
@@ -107,199 +112,263 @@ export function ApexCapitalTemplate({
               )}
             </div>
 
-            <div className="mt-4 space-y-1.5 max-w-xl">
-              <div className="flex items-center justify-center gap-2">
-                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-                  {profile.displayName}
-                </h1>
-                <ShieldCheck className="w-5 h-5 text-[#10B981]" />
-              </div>
+              <div className="mt-4 space-y-1.5 w-full min-w-0 max-w-md px-2">
+                <div className="flex items-center justify-center gap-2">
+                    <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white break-words">
+                      {profile.displayName}
+                    </h1>
+                    <ShieldCheck className="w-5 h-5 text-[#10B981] shrink-0" />
+                </div>
 
-              {profile.headline && (
-                <p className="text-sm sm:text-base text-[#34D399] font-medium tracking-wide">
-                  {profile.headline}
-                </p>
+                {profile.headline && (
+                    <p className="text-sm sm:text-base text-[#34D399] font-medium tracking-wide break-words max-w-sm mx-auto">
+                      {profile.headline}
+                    </p>
               )}
 
-              {primaryBusiness?.companyName && (
-                <p className="text-xs text-[#A7F3D0] uppercase tracking-wider font-semibold">
-                  {primaryBusiness.companyName}
-                  {primaryBusiness.roleTitle && ` • ${primaryBusiness.roleTitle}`}
-                </p>
+                    {primaryBusiness?.companyName && (
+                        <p className="text-xs text-[#A7F3D0] uppercase tracking-wider font-semibold break-words">
+                          {primaryBusiness.companyName}
+                          {primaryBusiness.roleTitle && ` • ${primaryBusiness.roleTitle}`}
+                        </p>
               )}
 
-              {profile.location && (
-                <p className="text-xs text-neutral-400">{profile.location}</p>
-              )}
+                        {profile.location && (
+                <p className="text-xs text-neutral-400 break-words">{profile.location}</p>
+                        )}
 
-              {profile.bio && (
-                <p className="text-xs sm:text-sm text-[#D1FAE5]/80 pt-2 leading-relaxed">
-                  {profile.bio}
-                </p>
+                        {profile.bio && (
+                            <p className="text-xs sm:text-sm text-[#D1FAE5]/80 pt-2 leading-relaxed break-words max-w-sm mx-auto">
+                              {profile.bio}
+                            </p>
               )}
-            </div>
+                          </div>
 
             {/* Action Buttons */}
-            <div className="mt-6 flex flex-wrap gap-3 justify-center w-full max-w-md">
-              <Button
-                onClick={onDownloadVCard}
-                className="flex-1 bg-[#10B981] hover:bg-[#059669] text-[#022C22] font-bold text-xs h-11 rounded-xl shadow-lg transition-all"
-              >
-                <Download className="mr-2 h-4 w-4" />
-                Save Private vCard
-              </Button>
-              <Button
-                onClick={() => onOpenExchange()}
-                variant="outline"
-                className="flex-1 border-[#10B981]/40 text-[#ECFDF5] hover:bg-[#10B981]/10 text-xs h-11 rounded-xl"
-              >
-                <Send className="mr-2 h-4 w-4" />
-                Connect Privately
-              </Button>
-            </div>
-          </div>
-        </div>
+                          <div className="mt-6 grid grid-cols-2 gap-2.5 w-full max-w-sm">
+                            <Button
+                              onClick={onDownloadVCard}
+                              className="bg-[#10B981] hover:bg-[#059669] text-[#022C22] font-bold text-xs h-11 rounded-xl shadow-lg transition-all"
+                            >
+                              <Download className="mr-1.5 h-4 w-4 shrink-0" />
+                              <span className="truncate">Save vCard</span>
+                            </Button>
+                            <Button
+                              onClick={() => onOpenExchange()}
+                              variant="outline"
+                              className="border-[#10B981]/40 text-[#ECFDF5] hover:bg-[#10B981]/10 text-xs h-11 rounded-xl"
+                            >
+                              <Send className="mr-1.5 h-4 w-4 shrink-0" />
+                              <span className="truncate">Connect</span>
+                            </Button>
+                          </div>
 
-        {/* Optional UPI Payment Section */}
-        {upiConfig && (
-          <div className="space-y-3">
-            <h3 className="text-xs font-bold text-[#A7F3D0] uppercase tracking-wider flex items-center gap-2">
-              <Landmark className="w-4 h-4 text-[#10B981]" />
-              Direct Settlement &amp; Escrow
-            </h3>
-            <UpiPaymentCard
-              config={upiConfig}
-              className="bg-[#062D24] border-[#10B981]/30 text-white"
-            />
-          </div>
-        )}
-
-        {/* Associated Ventures / Assets */}
-        {businesses.length > 0 && (
-          <div className="space-y-4">
-            <h3 className="text-xs font-bold text-[#A7F3D0] uppercase tracking-wider flex items-center gap-2">
-              <Building className="w-4 h-4 text-[#10B981]" />
-              Off-Market Portfolios &amp; Enterprises
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {businesses.map((biz) => (
-                <div
-                  key={biz.id}
-                  className="rounded-2xl border border-[#10B981]/20 bg-[#062D24]/80 p-5 space-y-2 hover:border-[#10B981]/50 transition-colors shadow-lg"
-                >
-                  <div className="flex justify-between items-start">
-                    <h4 className="font-bold text-sm text-white">{biz.companyName}</h4>
-                    {biz.websiteUrl && (
-                      <a
-                        href={biz.websiteUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-[#10B981] hover:text-[#34D399]"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                      </a>
-                    )}
-                  </div>
-                  {biz.roleTitle && (
-                    <p className="text-xs text-[#34D399] font-medium">{biz.roleTitle}</p>
-                  )}
-                  {biz.description && (
-                    <p className="text-xs text-neutral-300 leading-relaxed">{biz.description}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* High-Ticket Assets & Offerings Shelf */}
-        {catalogue.length > 0 && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold text-[#A7F3D0] uppercase tracking-wider flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-[#10B981]" />
-                Investment Offerings &amp; Real Estate
-              </h3>
-              {isNano && (
-                <Badge variant="outline" className="border-amber-500/40 text-amber-400 text-[10px]">
-                  <Lock className="w-3 h-3 mr-1" />
-                  Mini Plan Required for Full Enquiries
-                </Badge>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {catalogue.map((item) => (
-                <div
-                  key={item.id}
-                  className="rounded-2xl border border-[#10B981]/20 bg-[#062D24]/80 overflow-hidden shadow-lg flex flex-col justify-between"
-                >
-                  {item.imageUrl && (
-                    <div className="h-36 w-full relative overflow-hidden bg-neutral-900">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={item.imageUrl}
-                        alt={item.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
-                  <div className="p-4 space-y-2 flex-1 flex flex-col justify-between">
-                    <div>
-                      <div className="flex justify-between items-start gap-2">
-                        <h4 className="font-bold text-sm text-white">{item.title}</h4>
-                        {item.price && (
-                          <span className="text-xs font-mono font-bold text-[#34D399]">
-                            {item.price}
-                          </span>
-                        )}
+                          {/* Quick Call & WhatsApp Action Buttons */}
+                          {(profile.phone || profile.whatsapp) && (
+                            <div className="mt-3 flex items-center gap-2.5 w-full max-w-md">
+                              {profile.phone && formatTelLink(profile.phone) && (
+                                <a href={formatTelLink(profile.phone)!} className="flex-1">
+                                  <Button
+                                    variant="outline"
+                                    className="w-full text-xs h-9 gap-1.5 border border-[#10B981]/30 bg-[#062D24] text-[#A7F3D0] hover:bg-[#10B981]/20"
+                                  >
+                                    <Phone className="w-3.5 h-3.5 text-[#10B981]" />
+                                    <span>Direct Call</span>
+                                  </Button>
+                                </a>
+                              )}
+                              {(profile.whatsapp || profile.phone) && formatWhatsAppLink(profile.whatsapp, profile.phone) && (
+                                <a
+                                  href={formatWhatsAppLink(profile.whatsapp, profile.phone)!}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex-1"
+                                >
+                                  <Button
+                                    variant="outline"
+                                    className="w-full text-xs h-9 gap-1.5 border border-emerald-400/40 bg-emerald-500/20 text-emerald-200 hover:bg-emerald-500/30"
+                                  >
+                                    <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
+                                    <span>WhatsApp</span>
+                                  </Button>
+                                </a>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      {item.description && (
-                        <p className="text-xs text-neutral-300 mt-1 line-clamp-2">
-                          {item.description}
-                        </p>
-                      )}
-                    </div>
-                    <div className="pt-3">
-                      <Button
-                        size="sm"
-                        onClick={() => onOpenExchange(`Enquiry regarding: ${item.title}`)}
-                        className="w-full text-xs bg-[#10B981] hover:bg-[#059669] text-[#022C22] font-bold h-8"
-                      >
-                        Request Private Teaser
-                      </Button>
+
+        {/* Direct Contact Coordinates Section */}
+                    <DirectContactSection
+                      phone={profile.phone}
+                      whatsapp={profile.whatsapp}
+                      email={profile.email}
+                      website={profile.website}
+                      address={profile.address}
+                      variant="apex"
+                      title="Confidential Client Coordinates"
+                      themeStyle={{
+                        accentColor: '#10B981',
+                        cardBg: '#062D24',
+                        borderColor: 'rgba(16, 185, 129, 0.25)',
+                        textColor: '#ECFDF5',
+                        headingColor: '#A7F3D0',
+                      }}
+                    />
+
+                    {/* Social Channels Section */}
+                    <SocialLinksSection
+                      socialLinks={profile.socialLinks}
+                      variant="apex"
+                      themeStyle={{
+                        accentColor: '#10B981',
+                        cardBg: '#062D24',
+                        borderColor: 'rgba(16, 185, 129, 0.25)',
+                        textColor: '#ECFDF5',
+                        headingColor: '#A7F3D0',
+                      }}
+                    />
+
+                    {/* Optional UPI Payment Section */}
+                    {upiConfig && (
+                      <div className="space-y-3">
+                        <h3 className="text-xs font-bold text-[#A7F3D0] uppercase tracking-wider flex items-center gap-2">
+                          <Landmark className="w-4 h-4 text-[#10B981]" />
+                          Direct Settlement &amp; Escrow
+                        </h3>
+                        <UpiPaymentCard
+                          config={upiConfig}
+                          className="bg-[#062D24] border-[#10B981]/30 text-white"
+                        />
+                      </div>
+                    )}
+
+                    {/* Associated Ventures / Assets */}
+                    {businesses.length > 0 && (
+                      <div className="space-y-4">
+                        <h3 className="text-xs font-bold text-[#A7F3D0] uppercase tracking-wider flex items-center gap-2">
+                          <Building className="w-4 h-4 text-[#10B981]" />
+                          Off-Market Portfolios &amp; Enterprises
+                        </h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {businesses.map((biz) => (
+                            <div
+                              key={biz.id}
+                              className="rounded-2xl border border-[#10B981]/20 bg-[#062D24]/80 p-5 space-y-2 hover:border-[#10B981]/50 transition-colors shadow-lg"
+                            >
+                              <div className="flex justify-between items-start">
+                                <h4 className="font-bold text-sm text-white">{biz.companyName}</h4>
+                                {biz.websiteUrl && (
+                                  <a
+                                    href={biz.websiteUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-[#10B981] hover:text-[#34D399]"
+                                  >
+                                    <ExternalLink className="w-4 h-4" />
+                                  </a>
+                                )}
+                              </div>
+                              {biz.roleTitle && (
+                                <p className="text-xs text-[#34D399] font-medium">{biz.roleTitle}</p>
+                              )}
+                              {biz.description && (
+                                <p className="text-xs text-neutral-300 leading-relaxed">{biz.description}</p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* High-Ticket Assets & Offerings Shelf */}
+                    {catalogue.length > 0 && (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-xs font-bold text-[#A7F3D0] uppercase tracking-wider flex items-center gap-2">
+                            <TrendingUp className="w-4 h-4 text-[#10B981]" />
+                            Investment Offerings &amp; Real Estate
+                          </h3>
+                          {isNano && (
+                            <Badge variant="outline" className="border-amber-500/40 text-amber-400 text-[10px]">
+                              <Lock className="w-3 h-3 mr-1" />
+                              Mini Plan Required for Full Enquiries
+                            </Badge>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {catalogue.map((item) => (
+                            <div
+                              key={item.id}
+                              className="rounded-2xl border border-[#10B981]/20 bg-[#062D24]/80 overflow-hidden shadow-lg flex flex-col justify-between"
+                            >
+                              {item.imageUrl && (
+                                <div className="h-36 w-full relative overflow-hidden bg-neutral-900">
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img
+                                    src={item.imageUrl}
+                                    alt={item.title}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                              )}
+                              <div className="p-4 space-y-2 flex-1 flex flex-col justify-between">
+                                <div>
+                                  <div className="flex justify-between items-start gap-2">
+                                    <h4 className="font-bold text-sm text-white">{item.title}</h4>
+                                    {item.price && (
+                                      <span className="text-xs font-mono font-bold text-[#34D399]">
+                                        {item.price}
+                                      </span>
+                                    )}
+                                  </div>
+                                  {item.description && (
+                                    <p className="text-xs text-neutral-300 mt-1 line-clamp-2">
+                                      {item.description}
+                                    </p>
+                                  )}
+                                </div>
+                                <div className="pt-3">
+                                  <Button
+                                    size="sm"
+                                    onClick={() => onOpenExchange(`Enquiry regarding: ${item.title}`)}
+                                    className="w-full text-xs bg-[#10B981] hover:bg-[#059669] text-[#022C22] font-bold h-8"
+                                  >
+                                    Request Private Teaser
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Native Contact & Private Enquiry Section */}
+                    <TemplateContactForm
+                      profileId={profile.id}
+                      profileName={profile.displayName}
+                      isBusiness={profile.profileType === 'business'}
+                      themeStyle={{
+                        accentColor: '#10B981',
+                        cardBg: '#062D24',
+                        borderColor: 'rgba(16, 185, 129, 0.3)',
+                        textColor: '#ECFDF5',
+                        buttonColor: '#10B981',
+                        buttonTextColor: '#022C22',
+                        inputBg: '#022019',
+                      }}
+                    />
+
+                    {/* Footer */}
+                    <div className="text-center pt-8 pb-4 text-xs text-neutral-500 space-y-1">
+                      <p>Verified Private Wealth Identity</p>
+                      <p className="text-[10px] text-neutral-600">
+                        Powered by {brandConfig.name} Enterprise Architecture
+                      </p>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Native Contact & Private Enquiry Section */}
-        <TemplateContactForm
-          profileId={profile.id}
-          profileName={profile.displayName}
-          isBusiness={profile.profileType === 'business'}
-          themeStyle={{
-            accentColor: '#10B981',
-            cardBg: '#062D24',
-            borderColor: 'rgba(16, 185, 129, 0.3)',
-            textColor: '#ECFDF5',
-            buttonColor: '#10B981',
-            buttonTextColor: '#022C22',
-            inputBg: '#022019',
-          }}
-        />
-
-        {/* Footer */}
-        <div className="text-center pt-8 pb-4 text-xs text-neutral-500 space-y-1">
-          <p>Verified Private Wealth Identity</p>
-          <p className="text-[10px] text-neutral-600">
-            Powered by {brandConfig.name} Enterprise Architecture
-          </p>
-        </div>
-      </div>
     </div>
-  );
+              );
 }

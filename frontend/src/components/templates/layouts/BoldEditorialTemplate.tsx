@@ -1,6 +1,9 @@
 import React from 'react';
 import type { ProfileRenderData } from '../ProfileRenderer';
 import { TemplateContactForm } from '../TemplateContactForm';
+import { DirectContactSection } from '@/components/profile/DirectContactSection';
+import { SocialLinksSection } from '@/components/profile/SocialLinksSection';
+import { formatTelLink, formatWhatsAppLink } from '@/lib/contact-utils';
 import './bold-editorial.css';
 
 interface BoldEditorialProps {
@@ -23,10 +26,9 @@ export function BoldEditorialTemplate({
 }: BoldEditorialProps) {
   const businesses = profile.businesses || [];
   const primaryBusiness = businesses[0];
-  const phone = profile.phone || '';
-  const rawPhone = phone.replace(/\D/g, '');
-  const email = profile.email || '';
-  const location = profile.address || profile.location || 'Calicut, Kerala';
+  const telLink = formatTelLink(profile.phone);
+  const waLink = formatWhatsAppLink(profile.whatsapp, profile.phone);
+  const location = profile.address || profile.location || '';
 
   const nameParts = profile.displayName.toUpperCase().split(' ');
   const firstName = nameParts[0] || 'TAPTCH';
@@ -45,8 +47,7 @@ export function BoldEditorialTemplate({
           {/* Oversized Editorial Name */}
           <header className="name-block">
             <h1 className="oversized-title">
-              <span>{firstName}</span>
-              {lastName && <span>{lastName}</span>}
+              <span>{profile.displayName.toUpperCase()}</span>
             </h1>
             <div className="role-rule">
               <span className="role-pill">
@@ -110,8 +111,8 @@ export function BoldEditorialTemplate({
             </button>
 
             <div className="secondary-split">
-              {phone ? (
-                <a href={`tel:${phone}`} className="btn btn-secondary">
+              {telLink ? (
+                <a href={telLink} className="btn btn-secondary">
                   <svg
                     className="icon icon-sm"
                     viewBox="0 0 24 24"
@@ -131,31 +132,32 @@ export function BoldEditorialTemplate({
                 </button>
               )}
 
-              {rawPhone ? (
-                <a
-                  href={`https://wa.me/${rawPhone}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-secondary"
-                >
-                  <svg
-                    className="icon icon-sm"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="square"
-                    aria-hidden="true"
+              {
+                waLink ? (
+                  <a
+                    href={waLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-secondary"
                   >
-                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-                  </svg>
-                  <span>WHATSAPP</span>
-                </a>
-              ) : (
-                <button type="button" onClick={onCopyLink} className="btn btn-secondary">
-                  <span>{copiedUrl ? 'COPIED!' : 'SHARE'}</span>
-                </button>
-              )}
+                    <svg
+                      className="icon icon-sm"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="square"
+                      aria-hidden="true"
+                    >
+                      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                    </svg>
+                    <span>WHATSAPP</span>
+                  </a>
+                ) : (
+                  <button type="button" onClick={onCopyLink} className="btn btn-secondary">
+                    <span>{copiedUrl ? 'COPIED' : 'SHARE'}</span>
+                  </button>
+                )}
             </div>
           </section>
 
@@ -186,41 +188,101 @@ export function BoldEditorialTemplate({
           )}
 
           {/* Communication Lines */}
-          <section className="index-section" aria-labelledby="comms-label">
-            <div className="index-header">
-              <h2 id="comms-label" className="index-title">COMMUNICATION LINES</h2>
-            </div>
+          <DirectContactSection
+            phone={profile.phone}
+            whatsapp={profile.whatsapp}
+            email={profile.email}
+            website={profile.website}
+            address={profile.address}
+            variant="editorial"
+            title="COMMUNICATION LINES // COORDINATES"
+            themeStyle={{
+              borderColor: '#171717',
+              cardBg: '#FFFFFF',
+              textColor: '#0A0A0A',
+              headingColor: '#000000',
+            }}
+          />
 
-            <div className="index-list">
-              {phone && (
-                <div className="index-row">
-                  <span className="row-num">TEL</span>
-                  <div className="row-body">
-                    <a href={`tel:${phone}`} className="row-link">{phone}</a>
-                  </div>
-                  <span className="row-tag">DIRECT</span>
-                </div>
-              )}
+          {/* Social Channels Section */}
+          <SocialLinksSection
+            socialLinks={profile.socialLinks}
+            variant="editorial"
+            title="CHANNELS // SOCIAL NETWORK"
+            themeStyle={{
+              accentColor: '#000000',
+              borderColor: '#171717',
+              cardBg: '#FFFFFF',
+              textColor: '#0A0A0A',
+              headingColor: '#000000',
+            }}
+          />
 
-              {email && (
-                <div className="index-row">
-                  <span className="row-num">MAIL</span>
-                  <div className="row-body">
-                    <a href={`mailto:${email}`} className="row-link">{email}</a>
-                  </div>
-                  <span className="row-tag">OFFICIAL</span>
+          {/* Dossier Commercial Offerings Catalogue */}
+          {profile.catalogue && profile.catalogue.length > 0 && (
+            <section className="index-section" aria-labelledby="editorial-catalogue-heading">
+              <div className="index-header" style={{ marginBottom: '12px' }}>
+                <div className="flex items-center justify-between">
+                  <h2 id="editorial-catalogue-heading" className="index-title font-mono font-bold text-xs uppercase tracking-widest text-black">
+                    PORTFOLIO // COMMERCIAL CATALOGUE
+                  </h2>
+                  <span className="font-mono text-[10px] font-bold border border-black px-1.5 py-0.5">
+                    {profile.catalogue.length} ITEMS
+                  </span>
                 </div>
-              )}
-
-              <div className="index-row">
-                <span className="row-num">BASE</span>
-                <div className="row-body">
-                  <span className="row-name">{location}</span>
-                </div>
-                <span className="row-tag">HQ</span>
               </div>
-            </div>
-          </section>
+              <div className="border border-black divide-y divide-black font-mono">
+                {profile.catalogue.map((item, idx) => (
+                  <div key={item.id} className="p-3 bg-white space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 text-[10px]">
+                          <span className="font-bold uppercase bg-black text-white px-1.5 py-0.2">
+                            [ {item.itemType || 'PRODUCT'} #{idx + 1} ]
+                          </span>
+                          {item.price && (
+                            <span className="font-bold text-black">
+                              {item.currency || '₹'} {item.price}
+                            </span>
+                          )}
+                        </div>
+                        <h3 className="font-bold text-sm text-black mt-1 uppercase tracking-tight">{item.title}</h3>
+                        {item.description && (
+                          <p className="text-xs text-neutral-600 mt-1">{item.description}</p>
+                        )}
+                      </div>
+                      {item.imageUrl && (
+                        <img
+                          src={item.imageUrl}
+                          alt={item.title}
+                          className="w-14 h-14 object-cover border border-black shrink-0"
+                        />
+                      )}
+                    </div>
+                    <div className="pt-2 flex items-center justify-between text-[11px] border-t border-black/20">
+                      <button
+                        type="button"
+                        onClick={() => onOpenExchange(`Dossier inquiry: ${item.title}`)}
+                        className="font-bold underline text-black hover:opacity-75 uppercase"
+                      >
+                        [ TRANSMIT SPEC INQUIRY ]
+                      </button>
+                      {item.actionUrl && (
+                        <a
+                          href={item.actionUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-bold text-black underline uppercase"
+                        >
+                          [ SPEC LINK ]
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Universal Contact Form - Sharp Editorial Style */}
           <section className="index-section" aria-label="Submit Dossier Enquiry">

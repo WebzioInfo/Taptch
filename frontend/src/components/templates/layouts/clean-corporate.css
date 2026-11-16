@@ -1,13 +1,13 @@
 /* Scoped Design System 1: Clean Corporate */
 .template-clean-corporate {
   /* Color Palette */
-  --bg-page: #F1F5F9;
-  --bg-card: #FFFFFF;
-  --color-accent: #0A2540;
-  --color-accent-hover: #06192C;
-  --color-text-main: #0F172A;
-  --color-text-muted: #64748B;
-  --color-border: #E2E8F0;
+  --bg-page: var(--user-bg-page, #F1F5F9);
+  --bg-card: var(--user-bg-card, #FFFFFF);
+  --color-accent: var(--user-color-primary, #0A2540);
+  --color-accent-hover: var(--user-color-accent-hover, #06192C);
+  --color-text-main: var(--user-color-text-main, #0F172A);
+  --color-text-muted: var(--user-color-text-muted, #64748B);
+  --color-border: var(--user-color-border, #E2E8F0);
   --color-surface-subtle: #F8FAFC;
   --color-success: #10B981;
 
@@ -43,8 +43,8 @@
   width: 100%;
 }
 
-.template-clean-corporate *, 
-.template-clean-corporate *::before, 
+.template-clean-corporate *,
+.template-clean-corporate *::before,
 .template-clean-corporate *::after {
   box-sizing: border-box;
 }
@@ -60,6 +60,7 @@
     opacity: 0;
     transform: translateY(6px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -69,10 +70,7 @@
 .template-clean-corporate .card-container {
   width: 100%;
   background-color: var(--bg-card);
-  padding: max(var(--space-24), env(safe-area-inset-top))
-           max(var(--space-20), env(safe-area-inset-right))
-           max(var(--space-32), env(safe-area-inset-bottom))
-           max(var(--space-20), env(safe-area-inset-left));
+  padding: max(var(--space-24), env(safe-area-inset-top)) max(var(--space-20), env(safe-area-inset-right)) max(var(--space-32), env(safe-area-inset-bottom)) max(var(--space-20), env(safe-area-inset-left));
   display: flex;
   flex-direction: column;
   gap: var(--space-24);
@@ -119,6 +117,9 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-4);
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .template-clean-corporate .profile-name {
@@ -127,12 +128,16 @@
   letter-spacing: -0.02em;
   color: var(--color-text-main);
   line-height: 1.25;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .template-clean-corporate .profile-title {
   font-size: 0.9375rem;
   font-weight: 500;
   color: var(--color-text-muted);
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .template-clean-corporate .location-badge {
@@ -418,4 +423,3 @@
     padding: var(--space-32) var(--space-24);
   }
 }
-

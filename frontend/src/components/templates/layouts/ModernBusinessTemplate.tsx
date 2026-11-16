@@ -16,10 +16,15 @@ import {
   Lock,
   ExternalLink,
   CheckCircle,
+  Phone,
+  MessageSquare,
 } from 'lucide-react';
 import type { TemplateLayoutProps } from './types';
 import { UpiPaymentCard } from '@/components/profile/UpiPaymentCard';
 import type { UpiPaymentConfig } from '@/lib/upi';
+import { DirectContactSection } from '@/components/profile/DirectContactSection';
+import { SocialLinksSection } from '@/components/profile/SocialLinksSection';
+import { formatTelLink, formatWhatsAppLink } from '@/lib/contact-utils';
 
 import { TemplateContactForm } from '../TemplateContactForm';
 
@@ -100,34 +105,34 @@ export function ModernBusinessTemplate({
             </div>
           </div>
 
-          <div className="px-6 pb-6 pt-0 relative flex flex-col md:flex-row items-center md:items-end gap-6 text-center md:text-left -mt-14 sm:-mt-16">
-            <div className="h-28 w-28 sm:h-32 sm:w-32 rounded-2xl border-4 border-[#064e3b] overflow-hidden bg-emerald-950 flex items-center justify-center font-bold text-3xl shadow-2xl shrink-0">
-              {profile.avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={profile.avatarUrl}
-                  alt={profile.displayName}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span className="text-emerald-400">{profile.displayName.charAt(0)}</span>
-              )}
-            </div>
-
-            <div className="space-y-1.5 flex-1 min-w-0">
-              <div className="flex items-center justify-center md:justify-start gap-2">
-                <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white">
-                  {profile.displayName}
-                </h1>
-                <ShieldCheck className="h-5 w-5 text-emerald-400 shrink-0" />
+            <div className="px-5 pb-6 pt-0 relative flex flex-col items-center text-center -mt-14 sm:-mt-16">
+              <div className="h-28 w-28 sm:h-32 sm:w-32 rounded-2xl border-4 border-[#064e3b] overflow-hidden bg-emerald-950 flex items-center justify-center font-bold text-3xl shadow-2xl shrink-0">
+                {profile.avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={profile.avatarUrl}
+                    alt={profile.displayName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-emerald-400">{profile.displayName.charAt(0)}</span>
+                )}
               </div>
-              {profile.headline && (
-                <p className="text-sm font-medium text-emerald-100 leading-snug">
-                  {profile.headline}
-                </p>
+
+                    <div className="w-full min-w-0 mt-4 space-y-1.5 px-2">
+                      <div className="flex items-center justify-center gap-2">
+                        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white break-words">
+                          {profile.displayName}
+                        </h1>
+                        <ShieldCheck className="h-5 w-5 text-emerald-400 shrink-0" />
+                      </div>
+                      {profile.headline && (
+                          <p className="text-sm font-medium text-emerald-100 leading-snug break-words max-w-sm mx-auto">
+                            {profile.headline}
+                          </p>
               )}
-              {primaryBusiness?.companyName && (
-                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 text-xs text-emerald-200/80 pt-1">
+                          {primaryBusiness?.companyName && (
+                <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-emerald-200/80 pt-1">
                   <span className="flex items-center gap-1.5">
                     <Building className="h-3.5 w-3.5 text-emerald-400" />
                     {primaryBusiness.companyName}
@@ -142,25 +147,88 @@ export function ModernBusinessTemplate({
               )}
             </div>
 
-            <div className="flex flex-row md:flex-col gap-2.5 w-full md:w-auto shrink-0 mt-4 md:mt-0">
-              <Button
-                onClick={onDownloadVCard}
-                className="flex-1 md:flex-none bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold gap-2 text-xs h-10 px-5 shadow-lg shadow-emerald-500/20"
-              >
-                <Download className="h-4 w-4" />
-                <span>Save this profile</span>
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => onOpenExchange('Partnership & Commercial Discussion')}
-                className="flex-1 md:flex-none border-emerald-400/30 bg-emerald-950/60 text-emerald-100 hover:bg-emerald-900 text-xs h-10 px-5 gap-2"
-              >
-                <Send className="h-4 w-4 text-emerald-400" />
-                <span>Exchange Card</span>
-              </Button>
+            <div className="w-full max-w-sm mt-5 space-y-2.5">
+              <div className="grid grid-cols-2 gap-2.5 w-full">
+                <Button
+                  onClick={onDownloadVCard}
+                  className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold gap-2 text-xs h-10 px-3 shadow-lg shadow-emerald-500/20"
+                >
+                  <Download className="h-4 w-4 shrink-0" />
+                  <span className="truncate">Save Profile</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => onOpenExchange('Partnership & Commercial Discussion')}
+                  className="border-emerald-400/30 bg-emerald-950/60 text-emerald-100 hover:bg-emerald-900 text-xs h-10 px-3 gap-2"
+                >
+                  <Send className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <span className="truncate">Exchange Card</span>
+                </Button>
+              </div>
+              {(profile.phone || profile.whatsapp) && (
+                <div className="grid grid-cols-2 gap-2.5 w-full">
+                  {profile.phone && formatTelLink(profile.phone) && (
+                    <a href={formatTelLink(profile.phone)!} className="w-full">
+                      <Button
+                        variant="outline"
+                        className="w-full border-emerald-500/30 bg-emerald-950/60 text-emerald-100 hover:bg-emerald-900 text-xs h-9 px-3 gap-1.5"
+                      >
+                        <Phone className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                        <span>Call</span>
+                      </Button>
+                    </a>
+                  )}
+                  {(profile.whatsapp || profile.phone) && formatWhatsAppLink(profile.whatsapp, profile.phone) && (
+                    <a
+                      href={formatWhatsAppLink(profile.whatsapp, profile.phone)!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full"
+                    >
+                      <Button
+                        variant="outline"
+                        className="w-full border-emerald-400/50 bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 text-xs h-9 px-3 gap-1.5"
+                      >
+                        <MessageSquare className="h-3.5 w-3.5 shrink-0" />
+                        <span>WhatsApp</span>
+                      </Button>
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
+
+        {/* Direct Contact Coordinates Section */}
+        <DirectContactSection
+          phone={profile.phone}
+          whatsapp={profile.whatsapp}
+          email={profile.email}
+          website={profile.website}
+          address={profile.address}
+          variant="modern"
+          themeStyle={{
+            accentColor: '#10B981',
+            cardBg: '#064E3B',
+            borderColor: 'rgba(16, 185, 129, 0.25)',
+            textColor: '#ECFDF5',
+            headingColor: '#34D399',
+          }}
+        />
+
+        {/* Social Channels Section */}
+        <SocialLinksSection
+          socialLinks={profile.socialLinks}
+          variant="modern"
+          themeStyle={{
+            accentColor: '#10B981',
+            cardBg: '#064E3B',
+            borderColor: 'rgba(16, 185, 129, 0.25)',
+            textColor: '#ECFDF5',
+            headingColor: '#34D399',
+          }}
+        />
 
         {/* Direct UPI Payment Section */}
         {upiConfig && (
@@ -335,5 +403,5 @@ export function ModernBusinessTemplate({
         </footer>
       </div>
     </div>
-  );
+                      );
 }

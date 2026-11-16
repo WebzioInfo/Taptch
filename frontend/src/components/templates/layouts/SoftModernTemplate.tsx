@@ -1,6 +1,9 @@
 import React from 'react';
 import type { ProfileRenderData } from '../ProfileRenderer';
 import { TemplateContactForm } from '../TemplateContactForm';
+import { DirectContactSection } from '@/components/profile/DirectContactSection';
+import { SocialLinksSection } from '@/components/profile/SocialLinksSection';
+import { formatTelLink, formatWhatsAppLink } from '@/lib/contact-utils';
 import './soft-modern.css';
 
 interface SoftModernProps {
@@ -23,10 +26,9 @@ export function SoftModernTemplate({
 }: SoftModernProps) {
   const businesses = profile.businesses || [];
   const primaryBusiness = businesses[0];
-  const phone = profile.phone || '';
-  const rawPhone = phone.replace(/\D/g, '');
-  const email = profile.email || '';
-  const location = profile.address || profile.location || 'Calicut, Kerala, India';
+  const telLink = formatTelLink(profile.phone);
+  const waLink = formatWhatsAppLink(profile.whatsapp, profile.phone);
+  const location = profile.address || profile.location || '';
 
   return (
     <div className="template-soft-modern">
@@ -48,22 +50,26 @@ export function SoftModernTemplate({
             </div>
 
             <div className="header-intro">
-              <span className="location-chip">
-                <svg
-                  className="icon icon-xs"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
-                {location} &bull; Verified
-              </span>
+              {location ? (
+                <span className="location-chip">
+                  <svg
+                    className="icon icon-xs"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                  {location} &bull; Verified
+                </span>
+              ) : (
+                <span className="location-chip">Verified Digital Card</span>
+              )}
               <h1 className="profile-name">{profile.displayName}</h1>
               <p className="profile-summary">
                 {profile.bio || profile.headline || primaryBusiness?.tagline || 'Building ventures across technology, logistics, and connected experiences.'}
@@ -96,37 +102,38 @@ export function SoftModernTemplate({
             </button>
 
             <div className="secondary-actions">
-              {phone ? (
-                <a href={`tel:${phone}`} className="btn btn-secondary">
-                  <svg
-                    className="icon"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                  </svg>
-                  <span>Call</span>
-                </a>
-              ) : (
-                <button type="button" onClick={onOpenQr} className="btn btn-secondary">
-                  <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="3" width="7" height="7" />
-                    <rect x="14" y="3" width="7" height="7" />
-                    <rect x="14" y="14" width="7" height="7" />
-                    <rect x="3" y="14" width="7" height="7" />
-                  </svg>
-                  <span>QR Code</span>
-                </button>
-              )}
+                  {telLink ? (
+                    <a href={telLink} className="btn btn-secondary">
+                      <svg
+                        className="icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                      </svg>
+                      <span>Call</span>
+                    </a>
+                  ) : (
+                    <button type="button" onClick={onOpenQr} className="btn btn-secondary">
+                      <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="3" y="3" width="7" height="7" />
+                        <rect x="14" y="3" width="7" height="7" />
+                        <rect x="14" y="14" width="7" height="7" />
+                        <rect x="3" y="14" width="7" height="7" />
+                      </svg>
+                      <span>QR Code</span>
+                    </button>
+                  )}
 
-              {rawPhone ? (
+                    {
+                      waLink?(
                 <a
-                  href={`https://wa.me/${rawPhone}`}
+                  href={waLink}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn btn-secondary"
@@ -174,34 +181,105 @@ export function SoftModernTemplate({
             </section>
           )}
 
-          {/* Additional Details */}
+          {/* Direct Contact Coordinates */}
           <section className="section-group" aria-labelledby="direct-title">
-            <h2 id="direct-title" className="section-heading">Get in Touch</h2>
-            <div className="info-card">
-              {phone && (
-                <>
-                  <div className="info-row">
-                    <span className="info-label">Direct</span>
-                    <a href={`tel:${phone}`} className="info-value">{phone}</a>
-                  </div>
-                  <div className="info-divider" />
-                </>
-              )}
-              {email && (
-                <>
-                  <div className="info-row">
-                    <span className="info-label">Email</span>
-                    <a href={`mailto:${email}`} className="info-value">{email}</a>
-                  </div>
-                  <div className="info-divider" />
-                </>
-              )}
-              <div className="info-row">
-                <span className="info-label">Base</span>
-                <span className="info-value">{location}</span>
-              </div>
-            </div>
+            <DirectContactSection
+              phone={profile.phone}
+              whatsapp={profile.whatsapp}
+              email={profile.email}
+              website={profile.website}
+              address={profile.address}
+              variant="soft"
+              title="Get in Touch"
+              themeStyle={{
+                accentColor: '#24352D',
+                cardBg: '#FAF8F5',
+                borderColor: '#E8E3DA',
+                textColor: '#23201D',
+                headingColor: '#24352D',
+              }}
+            />
+
+            {/* Social Channels Section */}
+            <SocialLinksSection
+              socialLinks={profile.socialLinks}
+              variant="soft"
+              themeStyle={{
+                accentColor: '#24352D',
+                cardBg: '#FAF8F5',
+                borderColor: '#E8E3DA',
+                textColor: '#23201D',
+                headingColor: '#24352D',
+              }}
+            />
           </section>
+
+          {/* Business Offerings & Menu Catalogue */}
+          {profile.catalogue && profile.catalogue.length > 0 && (
+            <section className="section-group" aria-labelledby="soft-catalogue-heading">
+              <div className="flex items-center justify-between mb-3 px-1">
+                <h2 id="soft-catalogue-heading" className="text-base font-serif font-medium text-[#24352D]">
+                  Offerings &amp; Menu
+                </h2>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-[#24352D]/10 text-[#24352D] font-medium">
+                  {profile.catalogue.length} {profile.catalogue.length === 1 ? 'Item' : 'Items'}
+                </span>
+              </div>
+              <div className="space-y-3">
+                {profile.catalogue.map((item) => (
+                  <div
+                    key={item.id}
+                    className="p-4 rounded-2xl border border-[#E8E3DA] bg-[#FAF8F5] flex flex-col justify-between gap-3 shadow-sm hover:border-[#24352D]/40 transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#24352D]/10 text-[#24352D]">
+                            {item.itemType || 'Product'}
+                          </span>
+                          {item.price && (
+                            <span className="text-xs font-mono font-bold text-[#24352D]">
+                              {item.currency || '₹'} {item.price}
+                            </span>
+                          )}
+                        </div>
+                        <h3 className="text-sm font-serif font-medium text-[#23201D]">{item.title}</h3>
+                        {item.description && (
+                          <p className="text-xs text-[#79716B] mt-1 leading-relaxed">{item.description}</p>
+                        )}
+                      </div>
+                      {item.imageUrl && (
+                        <img
+                          src={item.imageUrl}
+                          alt={item.title}
+                          className="w-16 h-16 rounded-xl object-cover border border-[#E8E3DA] shrink-0"
+                        />
+                      )}
+                    </div>
+                    <div className="pt-2 border-t border-[#E8E3DA] flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={() => onOpenExchange(`Inquiry regarding: ${item.title}`)}
+                        className="text-xs font-semibold text-[#24352D] hover:underline"
+                      >
+                        Inquire &amp; Order &rarr;
+                      </button>
+                      {item.actionUrl && (
+                        <a
+                          href={item.actionUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-[#79716B] hover:text-[#24352D]"
+                        >
+                          View Link
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Dynamic Universal Contact & Lead Generation Form */}
           <section className="section-group" aria-label="Send Direct Message">

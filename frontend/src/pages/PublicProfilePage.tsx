@@ -206,8 +206,8 @@ export function PublicProfilePage() {
     bio: profile.bio,
     avatarUrl: profile.avatarUrl,
     coverUrl: profile.coverUrl,
-    phone: profile.phone,
-    whatsapp: profile.whatsapp,
+    phone: profile.phone || profile.phoneNumber || profile.directPhone,
+    whatsapp: profile.whatsapp || profile.whatsappNumber || profile.whatsappDirectNumber || profile.customFields?.whatsapp,
     email: profile.email,
     website: profile.website,
     address: profile.address,
@@ -224,9 +224,10 @@ export function PublicProfilePage() {
     catalogue: (profile.catalogue || []).map((c: any) => ({
       id: c.id,
       title: c.title,
-      itemType: 'product',
+      itemType: c.itemType || c.type || 'product',
       description: c.description,
       price: c.price,
+      currency: c.currency || '₹',
       imageUrl: c.imageUrl,
       actionUrl: c.actionUrl,
     })),
@@ -241,37 +242,53 @@ export function PublicProfilePage() {
   };
 
   const isBusiness = profile.profileType === 'business';
-  const pageTitle = isBusiness
-    ? `${profile.displayName} | Official Business Profile`
-    : `${profile.displayName} — ${profile.headline || 'Digital Identity'}`;
+  const customSeo = (profile.customFields as Record<string, any> | undefined)?.seo;
+
+  const pageTitle =
+    customSeo?.title?.trim() ||
+    (isBusiness
+      ? `${profile.displayName} | Official Business Profile`
+      : `${profile.displayName} — ${profile.headline || 'Digital Identity'}`);
+
   const pageDescription =
+    customSeo?.description?.trim() ||
     profile.bio ||
     `Connect with ${profile.displayName} on Taptch. Access direct contact exchange, portfolio, and verified identity.`;
 
+  const ogImage =
+    customSeo?.socialImageUrl?.trim() ||
+    profile.coverUrl ||
+    profile.avatarUrl ||
+    'https://taptch.com/og-default.png';
+
   const canonicalUrl = `${window.location.origin}/${profile.slug}`;
+  const robots =
+    profile.status === 'PUBLISHED' || profile.status === 'ACTIVE'
+      ? 'index, follow'
+      : 'noindex, nofollow';
 
   const jsonLd = isBusiness
     ? {
-        '@context': 'https://schema.org',
-        '@type': 'Organization',
-        name: profile.displayName,
-        description: pageDescription,
-        url: canonicalUrl,
-        logo: profile.avatarUrl || undefined,
-        email: profile.email || undefined,
-        telephone: profile.phone || undefined,
-      }
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      name: profile.displayName,
+      description: pageDescription,
+      url: canonicalUrl,
+      logo: ogImage || profile.avatarUrl || undefined,
+      email: profile.email || undefined,
+      telephone: profile.phone || undefined,
+    }
     : {
-        '@context': 'https://schema.org',
-        '@type': 'Person',
-        name: profile.displayName,
-        jobTitle: profile.headline || undefined,
-        description: pageDescription,
-        image: profile.avatarUrl || undefined,
-        url: canonicalUrl,
-        email: profile.email || undefined,
-        telephone: profile.phone || undefined,
-      };
+      '@context': 'https://schema.org',
+      '@type': 'Person',
+      name: profile.displayName,
+      jobTitle: profile.headline || undefined,
+      description: pageDescription,
+      image: ogImage || profile.avatarUrl || undefined,
+      url: canonicalUrl,
+      email: profile.email || undefined,
+      telephone: profile.phone || undefined,
+    };
 
   return (
     <div className="min-h-screen bg-black">
@@ -279,8 +296,11 @@ export function PublicProfilePage() {
         title={pageTitle}
         description={pageDescription}
         canonicalUrl={canonicalUrl}
-        ogImage={profile.avatarUrl || profile.coverUrl}
+        ogImage={ogImage}
         ogType={isBusiness ? 'business.business' : 'profile'}
+        siteName="Taptch"
+        twitterCard="summary_large_image"
+        robots={robots}
         jsonLd={jsonLd}
       />
       <ProfileRenderer profile={renderData as any} />

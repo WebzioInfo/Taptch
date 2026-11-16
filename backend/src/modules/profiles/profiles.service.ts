@@ -21,7 +21,7 @@ export class ProfilesService {
   constructor(
     private dbService: DatabaseService,
     private redisService: RedisService,
-  ) {}
+  ) { }
 
   async findAllForActor(actor: ActorContext) {
     return this.dbService.withActor(actor, async (tx) => {
@@ -133,7 +133,11 @@ export class ProfilesService {
       avatarUrl: profile.avatarUrl,
       coverUrl: profile.coverUrl,
       themeId: profile.templateId || 'obsidian-luxury',
+      templateId: profile.templateId || 'obsidian-luxury',
       customThemeColors: (profile.themeConfig as Record<string, string>) || null,
+      themeConfig: (profile.themeConfig as Record<string, unknown>) || null,
+      profileType: profile.profileType || 'personal',
+      status: profile.status,
       sections: sections.map((s) => ({
         id: s.id,
         sectionType: s.sectionType,
@@ -169,6 +173,7 @@ export class ProfilesService {
       whatsapp: profile.whatsapp,
       website: profile.website,
       address: profile.address,
+      customFields: (profile.customFields as Record<string, unknown>) || null,
     };
 
     // Edge cache for 1 hour
@@ -208,11 +213,17 @@ export class ProfilesService {
           displayName: data.displayName || 'My Profile',
           headline: data.headline || null,
           bio: data.bio || null,
-          templateId: data.themeId || 'obsidian-luxury',
+          avatarUrl: data.avatarUrl || null,
+          coverUrl: data.coverUrl || null,
+          templateId: data.templateId || data.themeId || 'obsidian-luxury',
+          themeId: data.themeId || data.templateId || 'obsidian-luxury',
+          themeConfig: data.themeConfig || data.customThemeColors || {},
+          customFields: data.customFields || {},
+          socialLinks: Array.isArray(data.socialLinks) ? data.socialLinks : [],
           status: 'DRAFT',
           profileType: data.profileType || 'personal',
-          phone: data.phone || null,
-          whatsapp: data.whatsapp || null,
+          phone: data.phone || data.phoneNumber || data.directPhone || null,
+          whatsapp: data.whatsapp || data.whatsappNumber || data.whatsappDirectNumber || null,
           email: data.email || null,
           website: data.website || null,
           address: data.address || null,
@@ -229,6 +240,50 @@ export class ProfilesService {
         isEnabled: true,
         configJson: {},
       });
+
+      // Insert businesses if provided on creation
+      if (Array.isArray(data.businesses)) {
+        for (let i = 0; i < data.businesses.length; i++) {
+          const b = data.businesses[i];
+          if (b.companyName || b.name) {
+            await tx.insert(schema.profileBusinesses).values({
+              id: b.id || crypto.randomUUID(),
+              profileId,
+              name: b.companyName || b.name,
+              tagline: b.jobTitle || b.tagline || null,
+              logoUrl: b.logoUrl || null,
+              website: b.businessWebsite || b.website || b.websiteUrl || null,
+              address: b.businessAddress || b.address || null,
+              email: b.businessEmail || b.email || null,
+              phone: b.businessPhone || b.phone || null,
+              whatsapp: b.whatsapp || null,
+              displayOrder: i,
+            });
+          }
+        }
+      }
+
+      // Insert catalogue items if provided on creation
+      if (Array.isArray(data.catalogue)) {
+        for (let i = 0; i < data.catalogue.length; i++) {
+          const c = data.catalogue[i];
+          if (c.title) {
+            await tx.insert(schema.profileCatalogueItems).values({
+              id: c.id || crypto.randomUUID(),
+              profileId,
+              type: c.type || c.itemType || 'product',
+              title: c.title,
+              description: c.description || null,
+              price: c.price ? String(c.price) : null,
+              currency: c.currency || 'INR',
+              imageUrl: c.imageUrl || null,
+              actionUrl: c.actionUrl || null,
+              actionLabel: c.actionLabel || 'Enquire',
+              displayOrder: i,
+            });
+          }
+        }
+      }
 
       return res;
     });
@@ -248,12 +303,20 @@ export class ProfilesService {
           bio: data.bio !== undefined ? data.bio : existing.bio,
           avatarUrl: data.avatarUrl !== undefined ? data.avatarUrl : existing.avatarUrl,
           coverUrl: data.coverUrl !== undefined ? data.coverUrl : existing.coverUrl,
-          phone: data.phone !== undefined ? data.phone : existing.phone,
-          whatsapp: data.whatsapp !== undefined ? data.whatsapp : existing.whatsapp,
+          phone: data.phone !== undefined ? data.phone : data.phoneNumber !== undefined ? data.phoneNumber : existing.phone,
+          whatsapp:
+            data.whatsapp !== undefined
+              ? data.whatsapp
+              : data.whatsappNumber !== undefined
+                ? data.whatsappNumber
+                : data.whatsappDirectNumber !== undefined
+                  ? data.whatsappDirectNumber
+                  : existing.whatsapp,
           email: data.email !== undefined ? data.email : existing.email,
           website: data.website !== undefined ? data.website : existing.website,
           address: data.address !== undefined ? data.address : existing.address,
           socialLinks: data.socialLinks !== undefined ? data.socialLinks : existing.socialLinks,
+          customFields: data.customFields !== undefined ? data.customFields : existing.customFields,
           templateId:
             data.templateId !== undefined
               ? data.templateId
@@ -309,7 +372,7 @@ export class ProfilesService {
             await tx.insert(schema.profileCatalogueItems).values({
               id: c.id || crypto.randomUUID(),
               profileId,
-              type: c.type || 'product',
+              type: c.type || (c as any).itemType || 'product',
               title: c.title,
               description: c.description || null,
               price: c.price ? String(c.price) : null,
@@ -337,7 +400,10 @@ export class ProfilesService {
   async publish(actor: ActorContext, profileId: string) {
     const profile = await this.findOne(actor, profileId);
 
-    // Pre-compile snapshot
+    // Invalidate any existing stale cache before compiling fresh snapshot
+    await this.redisService.del(`profile:slug:${profile.slug.toLowerCase()}`);
+
+    // Pre-compile snapshot directly from fresh DB records
     const snapshot = await this.findBySlug(profile.slug);
 
     const [published] = await this.dbService.withActor(actor, async (tx) => {
@@ -352,8 +418,8 @@ export class ProfilesService {
         .returning();
     });
 
-    // Sync Redis
-    await this.redisService.set(`profile:slug:${profile.slug}`, JSON.stringify(snapshot), 86400);
+    // Sync fresh Redis cache for 24h
+    await this.redisService.set(`profile:slug:${profile.slug.toLowerCase()}`, JSON.stringify(snapshot), 86400);
 
     return published;
   }

@@ -133,3 +133,17 @@
 .gold-glow {
   box-shadow: 0 0 25px rgba(212, 175, 55, 0.2);
 }
+
+/* Cross-Browser Scrollbar Hiding (Preserves Touch and Mousewheel Scrolling) */
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.no-scrollbar,
+.scrollbar-none {
+  -ms-overflow-style: none !important; /* IE and Edge */
+  scrollbar-width: none !important; /* Firefox */
+}

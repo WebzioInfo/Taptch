@@ -1,18 +1,18 @@
 /* Scoped Design System 4: Bold Editorial */
 .template-bold-editorial {
   /* Color Palette: Monochromatic minimal */
-  --bg-page: #ECECEC;
-  --bg-card: #FFFFFF;
+  --bg-page: var(--user-bg-page, #ECECEC);
+  --bg-card: var(--user-bg-card, #FFFFFF);
   --bg-subtle: #F6F6F6;
 
-  --color-accent: #000000;
+  --color-accent: var(--user-color-primary, #000000);
   --color-accent-inverse: #FFFFFF;
 
-  --color-text-main: #000000;
+  --color-text-main: var(--user-color-text-main, #000000);
   --color-text-muted: #555555;
   --color-text-subtle: #888888;
 
-  --color-border: #000000;
+  --color-border: var(--user-color-border, #000000);
   --color-border-hairline: #D0D0D0;
 
   /* Typography */
@@ -43,8 +43,8 @@
   width: 100%;
 }
 
-.template-bold-editorial *, 
-.template-bold-editorial *::before, 
+.template-bold-editorial *,
+.template-bold-editorial *::before,
 .template-bold-editorial *::after {
   box-sizing: border-box;
 }
@@ -60,6 +60,7 @@
     opacity: 0;
     transform: translateY(6px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -69,10 +70,7 @@
 .template-bold-editorial .card-container {
   width: 100%;
   background-color: var(--bg-card);
-  padding: max(var(--space-32), env(safe-area-inset-top))
-           max(var(--space-20), env(safe-area-inset-right))
-           max(var(--space-32), env(safe-area-inset-bottom))
-           max(var(--space-20), env(safe-area-inset-left));
+  padding: max(var(--space-32), env(safe-area-inset-top)) max(var(--space-20), env(safe-area-inset-right)) max(var(--space-32), env(safe-area-inset-bottom)) max(var(--space-20), env(safe-area-inset-left));
   display: flex;
   flex-direction: column;
   gap: var(--space-20);
@@ -106,13 +104,14 @@
 
 .template-bold-editorial .oversized-title {
   font-family: var(--font-display);
-  font-size: clamp(2.2rem, 8.5vw, 2.75rem);
+  font-size: clamp(1.6rem, 6.5vw, 2.2rem);
   font-weight: 700;
-  line-height: 0.92;
-  letter-spacing: -0.04em;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
   color: var(--color-text-main);
-  display: flex;
-  flex-direction: column;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  display: block;
 }
 
 .template-bold-editorial .role-rule {
@@ -390,4 +389,3 @@
     padding: var(--space-24);
   }
 }
-

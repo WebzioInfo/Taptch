@@ -1,6 +1,9 @@
 import React from 'react';
 import type { ProfileRenderData } from '../ProfileRenderer';
 import { TemplateContactForm } from '../TemplateContactForm';
+import { DirectContactSection } from '@/components/profile/DirectContactSection';
+import { SocialLinksSection } from '@/components/profile/SocialLinksSection';
+import { formatTelLink, formatWhatsAppLink } from '@/lib/contact-utils';
 import './dark-premium.css';
 
 interface DarkPremiumProps {
@@ -23,10 +26,9 @@ export function DarkPremiumTemplate({
 }: DarkPremiumProps) {
   const businesses = profile.businesses || [];
   const primaryBusiness = businesses[0];
-  const phone = profile.phone || '';
-  const rawPhone = phone.replace(/\D/g, '');
-  const email = profile.email || '';
-  const location = profile.address || profile.location || 'Calicut, Kerala, IN';
+  const telLink = formatTelLink(profile.phone);
+  const waLink = formatWhatsAppLink(profile.whatsapp, profile.phone);
+  const location = profile.address || profile.location || '';
 
   return (
     <div className="template-dark-premium">
@@ -48,34 +50,30 @@ export function DarkPremiumTemplate({
             </div>
 
             <div className="hero-text">
-              <h1 className="hero-name">
-                {profile.displayName.split(' ').map((word, i) => (
-                  <React.Fragment key={i}>
-                    {word}
-                    {i === 0 && <br />}
-                    {i > 0 && ' '}
-                  </React.Fragment>
-                ))}
-              </h1>
+              <h1 className="hero-name">{profile.displayName}</h1>
               <p className="hero-tagline">{profile.headline || primaryBusiness?.tagline || 'Executive Identity'}</p>
               <div className="meta-row">
-                <span className="meta-item">
-                  <svg
-                    className="icon icon-sm"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                    <circle cx="12" cy="10" r="3" />
-                  </svg>
-                  {location}
-                </span>
-                <span className="meta-sep">/</span>
+                {location ? (
+                  <>
+                    <span className="meta-item">
+                      <svg
+                        className="icon icon-sm"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                        <circle cx="12" cy="10" r="3" />
+                      </svg>
+                      {location}
+                    </span>
+                    <span className="meta-sep">/</span>
+                  </>
+                ) : null}
                 <span className="meta-item">VIP Verified</span>
               </div>
             </div>
@@ -106,8 +104,8 @@ export function DarkPremiumTemplate({
             </button>
 
             <div className="actions-grid">
-              {phone ? (
-                <a href={`tel:${phone}`} className="btn btn-secondary">
+              {telLink ? (
+                <a href={telLink} className="btn btn-secondary">
                   <svg
                     className="icon"
                     viewBox="0 0 24 24"
@@ -134,32 +132,33 @@ export function DarkPremiumTemplate({
                 </button>
               )}
 
-              {rawPhone ? (
-                <a
-                  href={`https://wa.me/${rawPhone}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-secondary"
-                >
-                  <svg
-                    className="icon"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
+              {
+                waLink ? (
+                  <a
+                    href={waLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-secondary"
                   >
-                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-                  </svg>
-                  <span>WhatsApp</span>
-                </a>
-              ) : (
-                <button type="button" onClick={onCopyLink} className="btn btn-secondary">
-                  <span>{copiedUrl ? 'Copied!' : 'Share'}</span>
-                </button>
-              )}
+                    <svg
+                      className="icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                    </svg>
+                    <span>WhatsApp</span>
+                  </a>
+                ) : (
+                  <button type="button" onClick={onCopyLink} className="btn btn-secondary">
+                    <span>{copiedUrl ? 'Copied!' : 'Share'}</span>
+                  </button>
+                )}
             </div>
           </section>
 
@@ -193,29 +192,103 @@ export function DarkPremiumTemplate({
 
           {/* Communication & Coordinates */}
           <section className="content-block" aria-labelledby="coords-title">
-            <div className="block-header">
-              <h2 id="coords-title" className="block-label">Direct Coordinates</h2>
-            </div>
+            <DirectContactSection
+              phone={profile.phone}
+              whatsapp={profile.whatsapp}
+              email={profile.email}
+              website={profile.website}
+              address={profile.address}
+              variant="dark"
+              title="Direct Coordinates"
+              themeStyle={{
+                accentColor: '#C5A880',
+                cardBg: '#121316',
+                borderColor: '#22252A',
+                textColor: '#F4F4F6',
+                headingColor: '#C5A880',
+              }}
+            />
 
-            <div className="data-rows">
-              <div className="data-row">
-                <span className="data-key">Location</span>
-                <span className="data-val">{location}</span>
-              </div>
-              {phone && (
-                <div className="data-row">
-                  <span className="data-key">Direct Line</span>
-                  <a href={`tel:${phone}`} className="data-val data-link">{phone}</a>
-                </div>
-              )}
-              {email && (
-                <div className="data-row">
-                  <span className="data-key">Email</span>
-                  <a href={`mailto:${email}`} className="data-val data-link">{email}</a>
-                </div>
-              )}
-            </div>
+            {/* Social Networking Channels */}
+            <SocialLinksSection
+              socialLinks={profile.socialLinks}
+              variant="dark"
+              themeStyle={{
+                accentColor: '#C5A880',
+                cardBg: '#121316',
+                borderColor: '#22252A',
+                textColor: '#F4F4F6',
+                headingColor: '#C5A880',
+              }}
+            />
           </section>
+
+          {/* Business Offerings & Catalogue Section */}
+          {profile.catalogue && profile.catalogue.length > 0 && (
+            <section className="content-block" aria-labelledby="dark-catalogue-heading">
+              <div className="section-title-wrap mb-3 flex items-center justify-between">
+                <h2 id="dark-catalogue-heading" className="text-sm font-bold uppercase tracking-wider text-[#C5A880]">
+                  Capabilities &amp; Offerings
+                </h2>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-[#22252A] text-[#C5A880]">
+                  {profile.catalogue.length} Items
+                </span>
+              </div>
+              <div className="space-y-3">
+                {profile.catalogue.map((item) => (
+                  <div
+                    key={item.id}
+                    className="p-4 rounded-xl border border-[#22252A] bg-[#16181D] flex flex-col justify-between gap-3 transition-colors hover:border-[#C5A880]/40"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-[#C5A880]/15 text-[#C5A880]">
+                            {item.itemType || 'Product'}
+                          </span>
+                          {item.price && (
+                            <span className="text-xs font-mono font-bold text-[#F4F4F6]">
+                              {item.currency || '₹'} {item.price}
+                            </span>
+                          )}
+                        </div>
+                        <h3 className="text-sm font-semibold text-[#F4F4F6]">{item.title}</h3>
+                        {item.description && (
+                          <p className="text-xs text-[#A1A1AA] mt-1 leading-relaxed">{item.description}</p>
+                        )}
+                      </div>
+                      {item.imageUrl && (
+                        <img
+                          src={item.imageUrl}
+                          alt={item.title}
+                          className="w-16 h-16 rounded-lg object-cover border border-[#22252A] shrink-0"
+                        />
+                      )}
+                    </div>
+                    <div className="pt-2 border-t border-[#22252A] flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={() => onOpenExchange(`Inquiry regarding: ${item.title}`)}
+                        className="text-xs font-semibold text-[#C5A880] hover:underline"
+                      >
+                        Request Private Mandate &rarr;
+                      </button>
+                      {item.actionUrl && (
+                        <a
+                          href={item.actionUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-neutral-400 hover:text-[#C5A880]"
+                        >
+                          Details
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Universal Contact & Inquiries Form */}
           <section className="content-block" aria-label="Direct Inquiry">

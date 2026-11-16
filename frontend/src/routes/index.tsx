@@ -13,6 +13,7 @@ import { QrPage } from '../pages/QrPage';
 import { TemplatesPage } from '../pages/TemplatesPage';
 import { PricingPage } from '../pages/PricingPage';
 import { BuilderPage } from '../pages/BuilderPage';
+import { StudioRouteError } from '../components/common/StudioErrorBoundary';
 import { AdminPage } from '../pages/AdminPage';
 import { SupportPage } from '../pages/SupportPage';
 import { DesignStudioPage } from '../pages/DesignStudioPage';
@@ -70,8 +71,8 @@ export const router = createBrowserRouter([
   },
 
   // Studio Builder (Full Workspace)
-  { path: '/builder/:id', element: <BuilderPage /> },
-  { path: '/builder/new', element: <BuilderPage /> },
+  { path: '/builder/:id', element: <BuilderPage />, errorElement: <StudioRouteError /> },
+  { path: '/builder/new', element: <BuilderPage />, errorElement: <StudioRouteError /> },
 
   // Live NFC Card Design Studio
   { path: '/studio', element: <DesignStudioPage /> },
