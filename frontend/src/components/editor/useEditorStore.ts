@@ -231,6 +231,9 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     if (!activeObj) return;
 
     activeObj.set(key, value);
+    if (key === 'fontFamily' || key === 'fontSize' || key === 'fontWeight' || key === 'text') {
+      activeObj.initDimensions?.();
+    }
     activeObj.setCoords();
     canvas.requestRenderAll();
 

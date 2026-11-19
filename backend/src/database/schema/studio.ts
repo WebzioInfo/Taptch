@@ -95,6 +95,8 @@ export const cardDesigns = pgTable('card_designs', {
   backCanvasJson: text('back_canvas_json'),
   previewUrl: text('preview_url'),
   backPreviewUrl: text('back_preview_url'),
+  previewFrontUrl: text('preview_front_url'),
+  previewBackUrl: text('preview_back_url'),
   isDraft: boolean('is_draft').notNull().default(false),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
@@ -143,6 +145,8 @@ export const orderItems = pgTable('order_items', {
   designSnapshotJson: text('design_snapshot_json'), // Frozen immutable snapshot
   designPreviewUrl: text('design_preview_url'),
   backPreviewUrl: text('back_preview_url'),
+  previewFrontUrl: text('preview_front_url'),
+  previewBackUrl: text('preview_back_url'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 

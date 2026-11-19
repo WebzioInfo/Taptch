@@ -4,6 +4,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { ValidationPipe, Logger } from '@nestjs/common';
+import { json, urlencoded } from 'express';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 
@@ -14,6 +15,10 @@ dotenv.config({ path: path.resolve('.env') });
 async function bootstrap() {
   const logger = new Logger('TaptchBackendBootstrap');
   const app = await NestFactory.create(AppModule);
+
+  // Large payload middleware for canvas studio vector JSON and high-res previews
+  app.use(json({ limit: '25mb' }));
+  app.use(urlencoded({ limit: '25mb', extended: true }));
 
   // Cookie parsing middleware
   app.use((req: any, _res: any, next: any) => {

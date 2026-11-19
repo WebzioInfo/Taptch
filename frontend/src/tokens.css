@@ -1,0 +1,53 @@
+/* ==========================================================================
+   Taptch Design Tokens — Universal Premium Light + Orange Theme
+   Single Source of Truth
+   ========================================================================== */
+
+:root,
+[data-theme="light"],
+[data-theme="dark"] {
+  /* Primary Design Palette */
+  --bg-page: #F8F9FB;
+  --bg-surface: #FFFFFF;
+  --bg-raised: #FFFFFF;
+  --bg-muted: #F8F9FB;
+  --bg-accent-light: #FFF3E9;
+
+  /* Typography Colors */
+  --ink: #171717;
+  --ink-muted: #666666;
+  --ink-subtle: #929292;
+
+  /* Border Colors */
+  --border: #E8E8E8;
+  --border-strong: #D5D5D5;
+
+  /* Accent Colors */
+  --accent: #FF6A00;
+  --accent-hover: #E85D00;
+  --accent-ink: #FFFFFF;
+  --accent-text: #FF6A00;
+  --accent-tint: #FFF3E9;
+  --accent-border: rgba(255, 106, 0, 0.35);
+
+  /* Semantic Feedback Colors */
+  --success: #16A36A;
+  --warning: #E5A000;
+  --danger: #DC4545;
+  --info: #2563EB;
+
+  /* Radius System */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-phone: 16px;
+
+  /* Typography */
+  --font-head: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Transitions */
+  --transition-fast: 150ms ease-out;
+  --transition-panel: 250ms ease-out;
+}

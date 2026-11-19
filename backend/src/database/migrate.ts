@@ -13,7 +13,9 @@ dotenv.config({ path: path.resolve('.env') });
 export async function runMigrations() {
   console.log('[MIGRATIONS] Starting TAPTCH database migrations...');
 
-  const migrationsDir = path.resolve('src/db/migrations');
+  const migrationsDir = fs.existsSync(path.resolve('src/database/migrations'))
+    ? path.resolve('src/database/migrations')
+    : path.resolve('src/db/migrations');
   const sqlFiles = fs
     .readdirSync(migrationsDir)
     .filter((f) => f.endsWith('.sql'))

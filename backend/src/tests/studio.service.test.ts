@@ -3,8 +3,9 @@ import { ProductsService, SEEDED_CARD_PRODUCTS } from '../modules/products/produ
 import { DesignsService } from '../modules/designs/designs.service';
 import { UploadsService } from '../modules/uploads/uploads.service';
 import { CartService } from '../modules/cart/cart.service';
-import { OrdersService } from '../modules/orders/orders.service';
+import { OrdersService, type CreateOrderDto } from '../modules/orders/orders.service';
 import type { ActorContext } from '../common/types';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 
 describe('Taptch Live NFC Card Design Studio — Backend Services', () => {
   let mockDbService: any;
@@ -16,16 +17,28 @@ describe('Taptch Live NFC Card Design Studio — Backend Services', () => {
   };
 
   beforeEach(() => {
+    const limitMock = vi.fn().mockResolvedValue([]);
+    const returningMock = vi.fn().mockResolvedValue([{ id: 'test_record_01' }]);
+
+    const chainableValues: any = {
+      returning: returningMock,
+      onConflictDoNothing: vi.fn().mockResolvedValue([]),
+    };
+
+    const chainableOrderBy: any = Object.assign(Promise.resolve([]), {
+      limit: limitMock,
+    });
+
     mockDbService = {
       db: {
         select: vi.fn().mockReturnThis(),
         from: vi.fn().mockReturnThis(),
         where: vi.fn().mockReturnThis(),
-        orderBy: vi.fn().mockResolvedValue([]),
-        limit: vi.fn().mockResolvedValue([]),
+        orderBy: vi.fn().mockImplementation(() => chainableOrderBy),
+        limit: limitMock,
         insert: vi.fn().mockReturnThis(),
-        values: vi.fn().mockReturnThis(),
-        returning: vi.fn().mockResolvedValue([{ id: 'test_record_01' }]),
+        values: vi.fn().mockReturnValue(chainableValues),
+        returning: returningMock,
         update: vi.fn().mockReturnThis(),
         set: vi.fn().mockReturnThis(),
         delete: vi.fn().mockReturnThis(),
@@ -61,6 +74,113 @@ describe('Taptch Live NFC Card Design Studio — Backend Services', () => {
       expect(templates.length).toBeGreaterThan(0);
       expect(templates[0].frontCanvasJson).toBeDefined();
       expect(templates[0].backCanvasJson).toBeDefined();
+    });
+  });
+
+  describe('DesignsService', () => {
+    it('creates a new draft with sanitized fields and isolated customerId', async () => {
+      const expectedRecord = {
+        id: 'des_new_456',
+        customerId: mockActor.userId,
+        name: 'Alexander Obsidian Card',
+        isDraft: true,
+      };
+
+      mockDbService.db.values.mockReturnValue({
+        returning: vi.fn().mockResolvedValue([expectedRecord]),
+        onConflictDoNothing: vi.fn().mockResolvedValue([]),
+      });
+
+      const service = new DesignsService(mockDbService);
+      const draft = await service.upsertDraft(mockActor, {
+        name: 'Alexander Obsidian Card',
+        productId: 'prod_matte_obsidian',
+        frontCanvasJson: { objects: [] },
+        backCanvasJson: { objects: [] },
+        previewUrl: 'data:image/png;base64,front_mock_url',
+        backPreviewUrl: 'data:image/png;base64,back_mock_url',
+      });
+
+      expect(draft).toEqual(expectedRecord);
+      expect(mockDbService.withActor).toHaveBeenCalledWith(mockActor, expect.any(Function));
+    });
+
+    it('updates existing draft when matching draft record is found', async () => {
+      const existingDraft = {
+        id: 'des_existing_789',
+        customerId: mockActor.userId,
+        productId: 'prod_classic_pvc',
+        name: 'Draft V1',
+        variantId: null,
+        templateId: null,
+      };
+
+      const updatedDraft = {
+        ...existingDraft,
+        name: 'Draft V2 Updated',
+      };
+
+      // Mock limit to return existing draft on the draft lookup query
+      mockDbService.db.limit
+        .mockResolvedValueOnce([{ id: 'prod_classic_pvc' }]) // prod check
+        .mockResolvedValueOnce([existingDraft]); // draft check
+
+      mockDbService.db.returning.mockResolvedValue([updatedDraft]);
+
+      const service = new DesignsService(mockDbService);
+      const res = await service.upsertDraft(mockActor, {
+        designId: 'des_existing_789',
+        name: 'Draft V2 Updated',
+        productId: 'prod_classic_pvc',
+        frontCanvasJson: '{"objects":[{"type":"text"}]}',
+      });
+
+      expect(res).toEqual(updatedDraft);
+      expect(mockDbService.db.update).toHaveBeenCalled();
+    });
+
+    it('defensively handles unknown product, variant, and custom template without crashing', async () => {
+      // Return empty array for product, variant, and template lookups
+      mockDbService.db.limit.mockResolvedValue([]);
+
+      const createdRecord = {
+        id: 'des_fallback_111',
+        customerId: mockActor.userId,
+        productId: 'prod_classic_pvc',
+        isDraft: true,
+      };
+
+      mockDbService.db.values.mockReturnValue({
+        returning: vi.fn().mockResolvedValue([createdRecord]),
+        onConflictDoNothing: vi.fn().mockResolvedValue([]),
+      });
+
+      const service = new DesignsService(mockDbService);
+      const draft = await service.upsertDraft(mockActor, {
+        name: 'Safe Card',
+        productId: 'unknown_product_999',
+        templateId: 'custom',
+        variantId: 'unknown_variant_888',
+        frontCanvasJson: '{}',
+      });
+
+      expect(draft).toBeDefined();
+      expect(draft.id).toBe('des_fallback_111');
+    });
+
+    it('enforces customer authorization in findOne', async () => {
+      const otherUserDesign = {
+        id: 'des_other_user',
+        customerId: 'user_stranger_999',
+        name: 'Secret Card',
+      };
+
+      mockDbService.db.where.mockReturnValueOnce([otherUserDesign]);
+
+      const service = new DesignsService(mockDbService);
+      await expect(service.findOne(mockActor, 'des_other_user')).rejects.toThrow(
+        ForbiddenException
+      );
     });
   });
 
@@ -103,10 +223,10 @@ describe('Taptch Live NFC Card Design Studio — Backend Services', () => {
     it('creates order request and executes transactional snapshot creation', async () => {
       const service = new OrdersService(mockDbService);
 
-      const orderData = {
+      const orderData: CreateOrderDto = {
         shippingAddress: {
-          recipientName: 'Alexander Vance',
-          street: '100 Silicon Boulevard',
+          fullName: 'Alexander Vance',
+          addressLine1: '100 Silicon Boulevard',
           city: 'Bengaluru',
           state: 'Karnataka',
           postalCode: '560001',

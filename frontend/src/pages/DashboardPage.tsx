@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ApiClient } from '../services/api';
 import { Button } from '../components/ui/button';
-import { Plus, ExternalLink, Sparkles, Edit3, Smartphone, QrCode } from 'lucide-react';
+import { Plus, ExternalLink, Sparkles, Edit3 } from 'lucide-react';
 
 export function DashboardPage() {
   const { data: profiles = [], isLoading } = useQuery({
@@ -12,100 +12,109 @@ export function DashboardPage() {
   });
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-8 border-b border-border/40">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Digital Profiles</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Manage your personal and business contactless cards
-          </p>
-        </div>
-        <Link to="/builder/new">
-          <Button className="bg-primary text-black hover:bg-primary-hover font-semibold rounded-xl">
-            <Plus className="w-4 h-4 mr-1.5" />
-            Create New Profile
-          </Button>
-        </Link>
-      </div>
-
-      {/* Profiles Grid */}
-      <div className="mt-8">
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-56 rounded-2xl bg-[#121216] border border-border/40 animate-pulse" />
-            ))}
-          </div>
-        ) : profiles.length === 0 ? (
-          <div className="text-center py-20 px-4 rounded-2xl border border-dashed border-border/60 bg-[#121216]/50">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mx-auto mb-4">
-              <Sparkles className="w-6 h-6" />
+      <div className="p-6 sm:p-8 max-w-6xl mx-auto">
+        {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
+            <div>
+                <h1 className="font-head text-2xl font-medium tracking-tight text-[var(--ink)]">
+                  Digital Profiles
+                </h1>
+                <p className="font-body text-sm text-[var(--ink-muted)] mt-1">
+                  Manage your personal and business contactless cards
+                </p>
             </div>
-            <h3 className="text-lg font-bold text-white mb-2">No Profiles Yet</h3>
-            <p className="text-sm text-muted-foreground max-w-md mx-auto mb-6">
-              Create your first digital profile to start sharing your contacts, portfolio, and socials with a single contactless tap.
-            </p>
             <Link to="/builder/new">
-              <Button className="bg-primary text-black hover:bg-primary-hover font-semibold rounded-xl">
-                <Plus className="w-4 h-4 mr-1.5" />
-                Build My First Card
-              </Button>
+                <Button variant="accent" className="rounded-[var(--radius-sm)] text-xs font-medium gap-1.5 shadow-none">
+                  <Plus className="w-4 h-4" />
+                  <span>Create New Profile</span>
+                </Button>
             </Link>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {profiles.map((p) => (
+
+          {/* Profiles Grid */}
+          <div className="mt-8">
+            {isLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3].map((i) => (
               <div
-                key={p.id}
-                className="p-6 rounded-2xl bg-[#121216] border border-border/60 hover:border-primary/40 transition-all flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <span
-                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${
-                        p.status === 'PUBLISHED'
-                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                          : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                      }`}
-                    >
-                      {p.status}
-                    </span>
-                    <span className="text-xs text-muted-foreground font-mono">
-                      /{p.slug}
-                    </span>
+                key={i}
+                className="h-52 rounded-[var(--radius-md)] bg-[var(--bg-surface)] border border-[var(--border)] animate-pulse"
+              />
+                ))}
+              </div>
+            ) : profiles.length === 0 ? (
+                  <div className="text-center py-16 px-4 rounded-[var(--radius-md)] border border-dashed border-[var(--border)] bg-[var(--bg-surface)]">
+                    <div className="w-12 h-12 rounded-[var(--radius-sm)] bg-[var(--bg-raised)] border border-[var(--border)] flex items-center justify-center text-[var(--accent-text)] mx-auto mb-4">
+                      <Sparkles className="w-5 h-5" />
+                    </div>
+                      <h3 className="font-head text-lg font-medium text-[var(--ink)] mb-1">No Profiles Yet</h3>
+                      <p className="font-body text-xs sm:text-sm text-[var(--ink-muted)] max-w-md mx-auto mb-6">
+                        Create your first digital profile to start sharing your contacts, portfolio, and socials with a single contactless tap.
+                      </p>
+                      <Link to="/builder/new">
+                          <Button variant="accent" className="rounded-[var(--radius-sm)] text-xs font-medium gap-1.5">
+                            <Plus className="w-4 h-4" />
+                            <span>Build My First Card</span>
+                          </Button>
+                      </Link>
+                  </div>
+                  ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                              {profiles.map((p) => {
+                                const isPublished = p.status === 'PUBLISHED';
+                                return (
+                <div
+                  key={p.id}
+                  className="p-6 rounded-[var(--radius-md)] bg-[var(--bg-surface)] border border-[var(--border)] hover:border-[var(--border-strong)] transition-colors flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <span
+                        className={`px-2 py-0.5 rounded-[var(--radius-sm)] font-mono text-[10px] font-medium uppercase tracking-[0.04em] ${
+                          isPublished
+                            ? 'bg-[var(--success)]/15 text-[var(--success)] border border-[var(--success)]/30'
+                            : 'bg-[var(--bg-raised)] text-[var(--ink-muted)] border border-[var(--border)]'
+                        }`}
+                      >
+                        {isPublished ? 'Published' : 'Draft'}
+                      </span>
+                      <span className="font-mono text-xs text-[var(--ink-muted)]">
+                        /{p.slug}
+                      </span>
+                    </div>
+
+                    <h3 className="font-head text-base font-medium text-[var(--ink)] mb-1">
+                      {p.displayName || 'Untitled Profile'}
+                    </h3>
+                    <p className={`font-body text-xs line-clamp-2 ${p.headline ? 'text-[var(--ink-muted)]' : 'text-[var(--ink-muted)]/60 italic'}`}>
+                      {p.headline || 'Add a headline'}
+                    </p>
                   </div>
 
-                  <h3 className="text-lg font-bold text-white mb-1">{p.displayName}</h3>
-                  <p className="text-xs text-muted-foreground line-clamp-2">
-                    {p.headline || 'No headline configured'}
-                  </p>
+                  <div className="mt-6 pt-4 border-t border-[var(--border)] flex items-center justify-between font-body text-xs">
+                    <Link
+                      to={`/builder/${p.id}`}
+                      className="flex items-center text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
+                    >
+                      <Edit3 className="w-3.5 h-3.5 mr-1" />
+                      <span>Edit studio</span>
+                    </Link>
+                    <a
+                      href={`/p/${p.slug || p.id}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center text-[var(--accent-text)] font-medium hover:underline"
+                    >
+                      <span>Live card</span>
+                      <ExternalLink className="w-3 h-3 ml-1" />
+                    </a>
+                  </div>
                 </div>
-
-                <div className="mt-6 pt-4 border-t border-border/40 flex items-center justify-between">
-                  <Link
-                    to={`/builder/${p.id}`}
-                    className="flex items-center text-xs text-muted-foreground hover:text-white transition-colors"
-                  >
-                    <Edit3 className="w-3.5 h-3.5 mr-1" />
-                    Edit Studio
-                  </Link>
-                  <a
-                    href={`/${p.slug}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center text-xs text-primary font-semibold hover:underline"
-                  >
-                    Live Card
-                    <ExternalLink className="w-3 h-3 ml-1" />
-                  </a>
+                        );
+            })}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
+                );
 }
-

@@ -17,6 +17,10 @@ import { StudioRouteError } from '../components/common/StudioErrorBoundary';
 import { AdminPage } from '../pages/AdminPage';
 import { SupportPage } from '../pages/SupportPage';
 import { DesignStudioPage } from '../pages/DesignStudioPage';
+import { CheckoutPage } from '../pages/CheckoutPage';
+import { OrderConfirmationPage } from '../pages/OrderConfirmationPage';
+import { OrdersPage } from '../pages/OrdersPage';
+import { OrderTrackingPage } from '../pages/OrderTrackingPage';
 
 function LegacyProfileRedirect() {
   const { slug } = useParams<{ slug: string }>();
@@ -64,11 +68,18 @@ export const router = createBrowserRouter([
     children: [
       { path: '/dashboard', element: <DashboardPage /> },
       { path: '/cards', element: <CardsPage /> },
+      { path: '/orders', element: <OrdersPage /> },
       { path: '/leads', element: <LeadsPage /> },
       { path: '/qr', element: <QrPage /> },
       { path: '/settings', element: <DashboardPage /> },
     ],
   },
+
+  // E-Commerce NFC Ordering & Tracking
+  { path: '/checkout', element: <CheckoutPage /> },
+  { path: '/orders/:id/confirmation', element: <OrderConfirmationPage /> },
+  { path: '/orders/:id/track', element: <OrderTrackingPage /> },
+  { path: '/orders/:id', element: <OrderTrackingPage /> },
 
   // Studio Builder (Full Workspace)
   { path: '/builder/:id', element: <BuilderPage />, errorElement: <StudioRouteError /> },

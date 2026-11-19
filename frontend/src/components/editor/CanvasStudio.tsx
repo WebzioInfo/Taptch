@@ -4,13 +4,14 @@
  * card boundary clipping (rx: 24, ry: 24), safe zone / bleed guides, and event bindings.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { fabric } from 'fabric';
 import { useEditorStore } from './useEditorStore';
 import {
   safeParseCanvasJson,
   normalizeLiveTextStyle,
 } from '../../utils/canvasJson';
+import { ensureFontsForJson } from '../../studio/fonts/fontLoader';
 
 interface CanvasStudioProps {
   product?: any;
@@ -27,6 +28,7 @@ export const CanvasStudio: React.FC<CanvasStudioProps> = ({ product }) => {
     frontJson,
     backJson,
     zoom,
+    setZoom,
     showGuides,
     setCanvas,
     syncSelectedProps,
@@ -41,6 +43,44 @@ export const CanvasStudio: React.FC<CanvasStudioProps> = ({ product }) => {
   const safeZone = product?.safeZone || 40;
   const bleedZone = product?.bleedZone || 25;
 
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+  const touchStartDistRef = useRef<number | null>(null);
+  const touchStartZoomRef = useRef<number>(1);
+
+  // Monitor container dimensions for responsive auto-scaling below 1024px
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const updateSize = () => {
+      if (containerRef.current) {
+        setContainerSize({
+          width: containerRef.current.clientWidth,
+          height: containerRef.current.clientHeight,
+        });
+      }
+    };
+    updateSize();
+
+    const observer = new ResizeObserver(() => {
+      updateSize();
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // Viewport Scaling based on Container and Zoom
+  // On desktop (width >= 1024), strictly maintain exact 720 / logicalWidth baseline for zero desktop drift
+  const isDesktopScreen = typeof window !== 'undefined' ? window.innerWidth >= 1024 : true;
+
+  const baseScale = isDesktopScreen
+    ? Math.min(1.0, 720 / logicalWidth)
+    : (() => {
+      const availWidth = Math.max(160, (containerSize.width || 320) - 32);
+      const availHeight = Math.max(120, (containerSize.height || 260) - 32);
+      return Math.min(availWidth / logicalWidth, availHeight / logicalHeight, 1.0);
+    })();
+
+  const effectiveScale = baseScale * zoom;
+
   // Initialize Fabric Canvas once on mount
   useEffect(() => {
     if (!canvasElRef.current) return;
@@ -52,8 +92,8 @@ export const CanvasStudio: React.FC<CanvasStudioProps> = ({ product }) => {
       perPixelTargetFind: true,
       targetFindTolerance: 6,
       backgroundColor: '#0A0A0C',
-      selectionColor: 'rgba(212, 175, 55, 0.15)',
-      selectionBorderColor: '#D4AF37',
+      selectionColor: 'rgba(255, 106, 0, 0.15)',
+      selectionBorderColor: '#FF6A00',
       selectionLineWidth: 1.5,
     });
 
@@ -62,9 +102,9 @@ export const CanvasStudio: React.FC<CanvasStudioProps> = ({ product }) => {
       cornerStyle: 'circle',
       cornerSize: 10,
       cornerColor: '#FFFFFF',
-      cornerStrokeColor: '#D4AF37',
+      cornerStrokeColor: '#FF6A00',
       transparentCorners: false,
-      borderColor: '#D4AF37',
+      borderColor: '#FF6A00',
       borderScaleFactor: 1.5,
     });
 
@@ -163,16 +203,40 @@ export const CanvasStudio: React.FC<CanvasStudioProps> = ({ product }) => {
     const canvas = fabricRef.current;
     if (!canvas || !containerRef.current) return;
 
-    const baseScale = Math.min(1.0, 720 / logicalWidth);
-    const effectiveScale = baseScale * zoom;
-
     canvas.setDimensions({
       width: logicalWidth * effectiveScale,
       height: logicalHeight * effectiveScale,
     });
     canvas.setZoom(effectiveScale);
     canvas.requestRenderAll();
-  }, [zoom, logicalWidth, logicalHeight]);
+  }, [effectiveScale, logicalWidth, logicalHeight]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      touchStartDistRef.current = dist;
+      touchStartZoomRef.current = zoom;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 2 && touchStartDistRef.current !== null) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const ratio = dist / touchStartDistRef.current;
+      const newZoom = Math.min(2.5, Math.max(0.5, touchStartZoomRef.current * ratio));
+      setZoom(Number(newZoom.toFixed(2)));
+    }
+  };
+
+  const handleTouchEnd = () => {
+    touchStartDistRef.current = null;
+  };
 
   // Load active side JSON when side or initial configs change
   useEffect(() => {
@@ -185,28 +249,37 @@ export const CanvasStudio: React.FC<CanvasStudioProps> = ({ product }) => {
     isInternalLoading.current = true;
     const parsed = safeParseCanvasJson(targetJson);
 
-    canvas.loadFromJSON(parsed.data, () => {
-      const objects = canvas.getObjects() || [];
-      for (const obj of objects) {
-        normalizeLiveTextStyle(obj);
-      }
-      canvas.renderAll();
-      isInternalLoading.current = false;
-      syncSelectedProps();
+    ensureFontsForJson(targetJson).finally(() => {
+      if (!fabricRef.current) return;
+      canvas.loadFromJSON(parsed.data, () => {
+        const objects = canvas.getObjects() || [];
+        for (const obj of objects) {
+          normalizeLiveTextStyle(obj);
+          if ((obj as any).initDimensions) {
+            (obj as any).initDimensions();
+          }
+        }
+        canvas.renderAll();
+        isInternalLoading.current = false;
+        syncSelectedProps();
+      });
     });
   }, [activeSide]);
 
   return (
     <div
       ref={containerRef}
-      className="relative flex items-center justify-center w-full h-full p-8 select-none overflow-hidden"
+      className="relative flex items-center justify-center w-full h-full p-4 lg:p-8 select-none overflow-hidden"
     >
       {/* Canvas Wrapper */}
       <div
-        className="relative shadow-2xl rounded-[18px] overflow-hidden border border-[#23232A]"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        className="relative shadow-2xl rounded-[18px] overflow-hidden border border-[var(--border)] touch-none"
         style={{
-          width: logicalWidth * Math.min(1.0, 720 / logicalWidth) * zoom,
-          height: logicalHeight * Math.min(1.0, 720 / logicalWidth) * zoom,
+          width: logicalWidth * effectiveScale,
+          height: logicalHeight * effectiveScale,
         }}
       >
         <canvas ref={canvasElRef} />

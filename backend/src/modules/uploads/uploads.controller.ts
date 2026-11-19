@@ -26,6 +26,12 @@ export class UploadsController {
     return this.uploadsService.generateSignature(actor, body?.assetType || 'image');
   }
 
+  @Post('card-preview')
+  @ApiOperation({ summary: 'Upload card preview front/back images to Cloudinary' })
+  async uploadCardPreview(@CurrentActor() actor: ActorContext, @Body() body: any) {
+    return this.uploadsService.uploadCardPreview(actor, body);
+  }
+
   @Post('record')
   @ApiOperation({ summary: 'Record uploaded asset metadata' })
   async recordAsset(@CurrentActor() actor: ActorContext, @Body() body: any) {

@@ -17,6 +17,8 @@ import { ExportModal } from '../components/editor/ExportModal';
 import { AutoRecoveryBanner, RecoverySnapshot } from '../components/editor/AutoRecoveryBanner';
 import { UnsavedChangesModal } from '../components/editor/UnsavedChangesModal';
 import { ApiClient } from '../services/api';
+import { useIsDesktop } from '../hooks/useMediaQuery';
+import { MobileStudioShell } from '../components/editor/mobile/MobileStudioShell';
 
 // Default starter card product for fallback
 const DEFAULT_CARD_PRODUCT = {
@@ -125,137 +127,152 @@ const DEFAULT_MASTER_TEMPLATE = {
 };
 
 export const DesignStudioPage: React.FC = () => {
-  const { productId: routeProductId } = useParams<{ productId: string }>();
+  const { productId, designId: paramDesignId } = useParams<{ productId?: string; designId?: string }>();
   const [searchParams] = useSearchParams();
+  const templateSlug = searchParams.get('template');
   const navigate = useNavigate();
-
-  const queryProductId = searchParams.get('productId');
-  const queryTemplateId = searchParams.get('templateId');
-  const queryDesignId = searchParams.get('designId');
-
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [product, setProduct] = useState<any>(DEFAULT_CARD_PRODUCT);
-  const [selectedVariant, setSelectedVariant] = useState<any>(DEFAULT_CARD_PRODUCT.variants[0]);
-  const [templates, setTemplates] = useState<any[]>([DEFAULT_MASTER_TEMPLATE]);
-
-  // Modal states
-  const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
-  const [isExportOpen, setIsExportOpen] = useState<boolean>(false);
-  const [recoverySnapshot, setRecoverySnapshot] = useState<RecoverySnapshot | null>(null);
-  const [isUnsavedModalOpen, setIsUnsavedModalOpen] = useState<boolean>(false);
 
   const {
     zoom,
     setZoom,
     loadSideConfigs,
-    setContext,
     setDesignName,
     isDirty,
-    frontJson,
-    backJson,
+    markSaved,
     activeSide,
-    switchSide,
   } = useEditorStore();
 
-  // Studio Lifecycle Initialization
+  const [product, setProduct] = useState<any>(null);
+  const [selectedVariant, setSelectedVariant] = useState<any>(null);
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const isDesktop = useIsDesktop();
+
+  // Modals state
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isUnsavedModalOpen, setIsUnsavedModalOpen] = useState(false);
+  const [recoverySnapshot, setRecoverySnapshot] = useState<RecoverySnapshot | null>(null);
+
+  // Load product, templates, and initial design state
   useEffect(() => {
     let isMounted = true;
 
-    async function initStudio() {
+    async function loadStudioData() {
       setIsLoading(true);
-      const activePid = routeProductId || queryProductId || DEFAULT_CARD_PRODUCT.id;
-
       try {
-        // 1. Fetch Product
-        let resolvedProduct = DEFAULT_CARD_PRODUCT;
+        let loadedProduct = DEFAULT_CARD_PRODUCT;
+        if (productId) {
+          try {
+            const prodRes = await ApiClient.get<any>(`/api/v1/products/${productId}`);
+            if (prodRes && prodRes.id) {
+              loadedProduct = prodRes;
+            }
+          } catch (e) {
+            console.warn('[DesignStudioPage] Remote product fetch failed, fallback to default:', e);
+          }
+        }
+
+        let loadedTemplates: any[] = [DEFAULT_MASTER_TEMPLATE];
         try {
-          const p = await ApiClient.get<any>(`/api/v1/products/${activePid}`);
-          if (p && p.id) resolvedProduct = p;
+          const tplRes = await ApiClient.get<any[]>('/api/v1/templates');
+          if (Array.isArray(tplRes) && tplRes.length > 0) {
+            loadedTemplates = tplRes;
+          }
         } catch (e) {
-          // Use default product
+          console.warn('[DesignStudioPage] Remote templates fetch failed, using default master:', e);
         }
 
         if (!isMounted) return;
-        setProduct(resolvedProduct);
-        setSelectedVariant(resolvedProduct.variants?.[0] || DEFAULT_CARD_PRODUCT.variants[0]);
 
-        // 2. Fetch Templates
-        let resolvedTemplates = [DEFAULT_MASTER_TEMPLATE];
-        try {
-          const tpls = await ApiClient.get<any[]>(`/api/v1/products/${resolvedProduct.id}/templates`);
-          if (tpls && tpls.length > 0) resolvedTemplates = tpls;
-        } catch (e) {
-          // fallback to global templates
+        setProduct(loadedProduct);
+        setSelectedVariant(loadedProduct.variants?.[0] || null);
+        setTemplates(loadedTemplates);
+
+        if (paramDesignId) {
           try {
-            const globalTpls = await ApiClient.get<any[]>('/api/v1/templates');
-            if (globalTpls && globalTpls.length > 0) resolvedTemplates = globalTpls;
-          } catch (ge) { }
+            const designRes = await ApiClient.get<any>(`/api/v1/designs/${paramDesignId}`);
+            if (designRes && isMounted) {
+              loadSideConfigs(designRes.frontCanvasJson, designRes.backCanvasJson, designRes.templateId);
+              setDesignName(designRes.name || 'Custom NFC Card');
+              markSaved(designRes.id);
+              setIsLoading(false);
+              return;
+            }
+          } catch (e) {
+            console.warn('[DesignStudioPage] Existing design load error:', e);
+          }
         }
 
-        if (!isMounted) return;
-        setTemplates(resolvedTemplates);
-
-        // 3. Resolve Active Template & Draft
-        const targetTemplate =
-          resolvedTemplates.find((t) => t.id === queryTemplateId) || resolvedTemplates[0];
-
-        let targetFrontJson = targetTemplate.frontCanvasJson || DEFAULT_MASTER_TEMPLATE.frontCanvasJson;
-        let targetBackJson = targetTemplate.backCanvasJson || DEFAULT_MASTER_TEMPLATE.backCanvasJson;
-        let designTitle = targetTemplate.name || 'Untitled NFC Card';
-
-        // 4. Check for Existing Saved Design if designId passed
-        if (queryDesignId) {
-          try {
-            const savedDesign = await ApiClient.get<any>(`/api/v1/designs/${queryDesignId}`);
-            if (savedDesign && savedDesign.frontCanvasJson) {
-              targetFrontJson = savedDesign.frontCanvasJson;
-              targetBackJson = savedDesign.backCanvasJson || targetBackJson;
-              designTitle = savedDesign.name || designTitle;
-            }
-          } catch (e) { }
-        } else {
-          // 5. Check Cloud Draft
-          try {
-            const draft = await ApiClient.get<any>(
-              `/api/v1/designs/draft?productId=${resolvedProduct.id}&templateId=${targetTemplate.id}`
-            );
-            if (draft && draft.frontCanvasJson) {
-              targetFrontJson = draft.frontCanvasJson;
-              targetBackJson = draft.backCanvasJson || targetBackJson;
-              designTitle = draft.name || designTitle;
-            }
-          } catch (e) { }
+        let chosenTemplate = loadedTemplates[0];
+        if (templateSlug) {
+          const matched = loadedTemplates.find((t) => t.slug === templateSlug || t.id === templateSlug);
+          if (matched) chosenTemplate = matched;
         }
 
-        // 6. Check Local Recovery Snapshot in localStorage
-        const recoveryKey = `taptch_recovery_${resolvedProduct.id}_${targetTemplate.id || 'custom'}`;
-        const localSnapshotStr = localStorage.getItem(recoveryKey);
-        if (localSnapshotStr) {
-          try {
-            const snap = JSON.parse(localSnapshotStr) as RecoverySnapshot;
-            if (snap.frontJson && snap.timestamp > Date.now() - 24 * 60 * 60 * 1000) {
-              setRecoverySnapshot(snap);
-            }
-          } catch (se) { }
+        if (chosenTemplate && isMounted) {
+          loadSideConfigs(
+            chosenTemplate.frontCanvasJson || DEFAULT_MASTER_TEMPLATE.frontCanvasJson,
+            chosenTemplate.backCanvasJson || DEFAULT_MASTER_TEMPLATE.backCanvasJson,
+            chosenTemplate.id
+          );
+          setDesignName(chosenTemplate.name || 'Untitled NFC Card');
         }
 
-        // 7. Load into Store
-        loadSideConfigs(targetFrontJson, targetBackJson, targetTemplate.id);
-        setDesignName(designTitle);
-        setContext(resolvedProduct, resolvedProduct.variants?.[0], targetTemplate.id, queryDesignId || undefined);
+        const recoveryKey = `taptch_recovery_${loadedProduct.id}_${chosenTemplate?.id || 'custom'}`;
+        const rawRecovery = localStorage.getItem(recoveryKey);
+        if (rawRecovery && isMounted) {
+          try {
+            const parsed = JSON.parse(rawRecovery);
+            if (Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000) {
+              setRecoverySnapshot(parsed);
+            }
+          } catch (e) {
+            localStorage.removeItem(recoveryKey);
+          }
+        }
       } catch (err) {
-        console.warn('[DesignStudioPage] Init warning:', err);
+        console.error('[DesignStudioPage] Initialization failed:', err);
       } finally {
         if (isMounted) setIsLoading(false);
       }
     }
 
-    initStudio();
-
+    loadStudioData();
     return () => {
       isMounted = false;
     };
-  }, [routeProductId, queryProductId, queryTemplateId, queryDesignId]);
+  }, [productId, paramDesignId, templateSlug]);
+
+  // Window unload guard
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isDirty]);
+
+  // Keyboard zoom shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+')) {
+        e.preventDefault();
+        setZoom(zoom + 0.1);
+      } else if ((e.ctrlKey || e.metaKey) && e.key === '-') {
+        e.preventDefault();
+        setZoom(zoom - 0.1);
+      } else if ((e.ctrlKey || e.metaKey) && e.key === '0') {
+        e.preventDefault();
+        setZoom(1.0);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [zoom, setZoom]);
 
   // Apply Template Switch
   const handleApplyTemplate = (tpl: any) => {
@@ -292,108 +309,168 @@ export const DesignStudioPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="h-screen w-full flex flex-col items-center justify-center bg-[#0A0A0C] text-white">
-        <Loader2 className="w-8 h-8 text-[#D4AF37] animate-spin mb-3" />
-        <p className="text-sm font-semibold tracking-wider uppercase">Loading NFC Design Studio...</p>
+      <div
+        data-theme="light"
+        className="h-screen w-full flex flex-col items-center justify-center bg-[var(--bg-page)] text-[var(--ink)]"
+      >
+        <Loader2 className="w-8 h-8 text-[var(--accent)] animate-spin mb-3" />
+        <p className="font-mono text-xs uppercase tracking-wider text-[var(--ink-muted)]">Loading NFC Design Studio...</p>
       </div>
     );
   }
 
-  return (
-    <div className="h-screen w-full flex flex-col bg-[#0A0A0C] text-white overflow-hidden select-none">
-      {/* Top Bar */}
-      <EditorTopBar
-        product={product}
-        selectedVariant={selectedVariant}
-        onOpenPreview={() => setIsPreviewOpen(true)}
-        onOpenExport={() => setIsExportOpen(true)}
-        onResetTemplate={handleResetTemplate}
-      />
+  if (!isDesktop) {
+    return (
+        <div data-theme="light" className="h-dvh w-full overflow-hidden select-none bg-[var(--bg-page)] text-[var(--ink)]">
+          {/* Crash Recovery Banner */}
+          {recoverySnapshot && (
+            <AutoRecoveryBanner
+              snapshot={recoverySnapshot}
+              onRestore={handleRestoreSnapshot}
+              onDismiss={handleDismissSnapshot}
+            />
+          )}
 
-      {/* Main Studio Body: Left Sidebar, Canvas Stage, Right Inspector */}
-      <div className="flex-1 flex overflow-hidden relative">
-        {/* Crash Recovery Banner */}
-        {recoverySnapshot && (
-          <AutoRecoveryBanner
-            snapshot={recoverySnapshot}
-            onRestore={handleRestoreSnapshot}
-            onDismiss={handleDismissSnapshot}
+          <MobileStudioShell
+            product={product}
+            selectedVariant={selectedVariant}
+            templates={templates}
+            onOpenPreview={() => setIsPreviewOpen(true)}
+            onOpenExport={() => setIsExportOpen(true)}
+            onResetTemplate={handleResetTemplate}
+            onApplyTemplate={handleApplyTemplate}
           />
-        )}
 
-        {/* Left Multi-tab Palette */}
-        <EditorLeftSidebar
-          templates={templates}
-          product={product}
-          onApplyTemplate={handleApplyTemplate}
-        />
+          {/* 3D Mockup Modal */}
+          <CardMockupPreview
+            isOpen={isPreviewOpen}
+            onClose={() => setIsPreviewOpen(false)}
+            product={product}
+            selectedVariant={selectedVariant}
+          />
 
-        {/* Center Stage (Canvas Studio Viewport) */}
-        <main className="flex-1 relative flex flex-col items-center justify-center bg-[#121216] overflow-hidden">
-          <CanvasStudio product={product} />
+          {/* Print Export Modal */}
+          <ExportModal
+            isOpen={isExportOpen}
+            onClose={() => setIsExportOpen(false)}
+            product={product}
+          />
 
-          {/* Floating Zoom & Fit Controls */}
-          <div className="absolute bottom-4 right-4 flex items-center bg-[#0A0A0C]/90 backdrop-blur-md p-1 rounded-xl border border-[#23232A] shadow-xl text-neutral-300">
-            <button
-              onClick={() => setZoom(zoom - 0.1)}
-              className="p-1.5 rounded-lg hover:text-white hover:bg-[#18181D] transition-colors"
-              title="Zoom Out"
-            >
-              <ZoomOut className="w-4 h-4" />
-            </button>
-            <span className="text-xs font-mono font-medium px-2 min-w-[50px] text-center">
-              {Math.round(zoom * 100)}%
-            </span>
-            <button
-              onClick={() => setZoom(zoom + 0.1)}
-              className="p-1.5 rounded-lg hover:text-white hover:bg-[#18181D] transition-colors"
-              title="Zoom In"
-            >
-              <ZoomIn className="w-4 h-4" />
-            </button>
-            <div className="h-4 w-[1px] bg-[#23232A] mx-1" />
-            <button
-              onClick={() => setZoom(1.0)}
-              className="p-1.5 rounded-lg hover:text-white hover:bg-[#18181D] transition-colors"
-              title="Reset Zoom to 100%"
-            >
-              <Maximize2 className="w-4 h-4" />
-            </button>
+          {/* Navigation Guard Modal */}
+          <UnsavedChangesModal
+            isOpen={isUnsavedModalOpen}
+            onSaveAndExit={async () => {
+              setIsUnsavedModalOpen(false);
+              navigate('/cards');
+            }}
+            onDiscardAndExit={() => {
+              setIsUnsavedModalOpen(false);
+              navigate('/cards');
+            }}
+            onCancel={() => setIsUnsavedModalOpen(false)}
+          />
+        </div>
+        );
+  }
+
+        return (
+        <div
+          data-theme="light"
+          className="h-screen w-full flex flex-col bg-[var(--bg-page)] text-[var(--ink)] font-body overflow-hidden select-none"
+        >
+          {/* Top Bar */}
+          <EditorTopBar
+            product={product}
+            selectedVariant={selectedVariant}
+            onOpenPreview={() => setIsPreviewOpen(true)}
+            onOpenExport={() => setIsExportOpen(true)}
+            onResetTemplate={handleResetTemplate}
+          />
+
+          {/* Main Studio Body: Left Sidebar, Canvas Stage, Right Inspector */}
+          <div className="flex-1 flex overflow-hidden relative">
+            {/* Crash Recovery Banner */}
+            {recoverySnapshot && (
+              <AutoRecoveryBanner
+                snapshot={recoverySnapshot}
+                onRestore={handleRestoreSnapshot}
+                onDismiss={handleDismissSnapshot}
+              />
+            )}
+
+            {/* Left Multi-tab Palette */}
+            <EditorLeftSidebar
+              templates={templates}
+              product={product}
+              onApplyTemplate={handleApplyTemplate}
+            />
+
+            {/* Center Stage (Canvas Studio Viewport) */}
+            <main className="flex-1 relative flex flex-col items-center justify-center bg-[var(--bg-page)] overflow-hidden">
+              <CanvasStudio product={product} />
+
+              {/* Floating Zoom & Fit Controls */}
+              <div className="absolute bottom-4 right-4 flex items-center bg-[var(--bg-surface)]/90 backdrop-blur-md p-1 rounded-[var(--radius-sm)] border border-[var(--border)] shadow-sm text-[var(--ink)]">
+                <button
+                  onClick={() => setZoom(zoom - 0.1)}
+                  className="p-1.5 rounded-[var(--radius-sm)] hover:bg-[var(--bg-raised)] transition-colors text-[var(--ink-muted)] hover:text-[var(--ink)]"
+                  title="Zoom Out"
+                >
+                  <ZoomOut className="w-4 h-4" />
+                </button>
+                <span className="font-mono text-xs font-medium px-2 min-w-[50px] text-center text-[var(--ink)]">
+                  {Math.round(zoom * 100)}%
+                </span>
+                <button
+                  onClick={() => setZoom(zoom + 0.1)}
+                  className="p-1.5 rounded-[var(--radius-sm)] hover:bg-[var(--bg-raised)] transition-colors text-[var(--ink-muted)] hover:text-[var(--ink)]"
+                  title="Zoom In"
+                >
+                  <ZoomIn className="w-4 h-4" />
+                </button>
+                <div className="h-4 w-[1px] bg-[var(--border)] mx-1" />
+                <button
+                  onClick={() => setZoom(1.0)}
+                  className="p-1.5 rounded-[var(--radius-sm)] hover:bg-[var(--bg-raised)] transition-colors text-[var(--ink-muted)] hover:text-[var(--ink)]"
+                  title="Reset Zoom to 100%"
+                >
+                  <Maximize2 className="w-4 h-4" />
+                </button>
+              </div>
+            </main>
+
+            {/* Right Inspector */}
+            <EditorRightSidebar />
           </div>
-        </main>
 
-        {/* Right Inspector */}
-        <EditorRightSidebar />
-      </div>
+          {/* 3D Mockup Modal */}
+          <CardMockupPreview
+            isOpen={isPreviewOpen}
+            onClose={() => setIsPreviewOpen(false)}
+            product={product}
+            selectedVariant={selectedVariant}
+          />
 
-      {/* 3D Mockup Modal */}
-      <CardMockupPreview
-        isOpen={isPreviewOpen}
-        onClose={() => setIsPreviewOpen(false)}
-        product={product}
-        selectedVariant={selectedVariant}
-      />
+          {/* Print Export Modal */}
+          <ExportModal
+            isOpen={isExportOpen}
+            onClose={() => setIsExportOpen(false)}
+            product={product}
+          />
 
-      {/* Print Export Modal */}
-      <ExportModal
-        isOpen={isExportOpen}
-        onClose={() => setIsExportOpen(false)}
-        product={product}
-      />
-
-      {/* Navigation Guard Modal */}
-      <UnsavedChangesModal
-        isOpen={isUnsavedModalOpen}
-        onSaveAndExit={async () => {
-          setIsUnsavedModalOpen(false);
-          navigate('/cards');
-        }}
-        onDiscardAndExit={() => {
-          setIsUnsavedModalOpen(false);
-          navigate('/cards');
-        }}
-        onCancel={() => setIsUnsavedModalOpen(false)}
-      />
-    </div>
-  );
+          {/* Navigation Guard Modal */}
+          <UnsavedChangesModal
+            isOpen={isUnsavedModalOpen}
+            onSaveAndExit={async () => {
+              setIsUnsavedModalOpen(false);
+              navigate('/cards');
+            }}
+            onDiscardAndExit={() => {
+              setIsUnsavedModalOpen(false);
+              navigate('/cards');
+            }}
+            onCancel={() => setIsUnsavedModalOpen(false)}
+          />
+        </div>
+        );
 };

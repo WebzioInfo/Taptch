@@ -9,6 +9,7 @@ import { fabric } from 'fabric';
 import { X, Download, FileJson, Check, Loader2, Printer } from 'lucide-react';
 import { useEditorStore } from './useEditorStore';
 import { safeParseCanvasJson, normalizeLiveTextStyle } from '../../utils/canvasJson';
+import { ensureFontsForJson } from '../../studio/fonts/fontLoader';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -28,8 +29,13 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, produ
 
   // Render a specific side JSON to high-resolution 300 DPI PNG using headless StaticCanvas
   const renderSideToPng = (jsonStr: string): Promise<string> => {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
+        await ensureFontsForJson(jsonStr);
+        if ('fonts' in document && (document as any).fonts?.ready) {
+          await (document as any).fonts.ready;
+        }
+
         const offEl = document.createElement('canvas');
         const offCanvas = new fabric.StaticCanvas(offEl, {
           width: logicalWidth,
@@ -42,6 +48,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, produ
           const objects = offCanvas.getObjects() || [];
           for (const obj of objects) {
             normalizeLiveTextStyle(obj);
+            if ((obj as any).initDimensions) {
+              (obj as any).initDimensions();
+            }
           }
           offCanvas.renderAll();
 
@@ -120,95 +129,95 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, produ
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 select-none">
-      <div className="relative w-full max-w-md bg-[#0A0A0C] border border-[#23232A] rounded-2xl shadow-2xl p-6 flex flex-col text-white">
-        {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-[#23232A]">
-          <div className="flex items-center space-x-2">
-            <Printer className="w-5 h-5 text-[#D4AF37]" />
-            <h2 className="text-sm font-bold uppercase tracking-wider">Production Print Export</h2>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-[#18181D] transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 select-none">
+          <div className="relative w-full max-w-md bg-white border border-[#E8E8E8] rounded-2xl shadow-2xl p-6 flex flex-col text-[#171717]">
+            {/* Header */}
+              <div className="flex items-center justify-between pb-4 border-b border-[#E8E8E8]">
+                <div className="flex items-center space-x-2">
+                  <Printer className="w-5 h-5 text-[#FF6A00]" />
+                  <h2 className="text-sm font-bold uppercase tracking-wider text-[#171717]">Production Print Export</h2>
+                </div>
+                <button
+                  onClick={onClose}
+                  className="p-1.5 rounded-lg text-[#666666] hover:text-[#171717] hover:bg-[#F8F9FB] transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
 
-        {/* Specifications Information */}
-        <div className="my-5 p-4 rounded-xl bg-[#121216] border border-[#23232A] text-xs space-y-1.5 text-neutral-300">
-          <div className="flex justify-between">
-            <span className="text-neutral-400">Resolution Multiplier:</span>
-            <span className="font-mono font-semibold text-[#D4AF37]">3.0x (3150 x 1800 px)</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-neutral-400">Commercial Density:</span>
-            <span className="font-mono text-emerald-400">~300 DPI True Quality</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-neutral-400">Die-Cut Bleed Allowance:</span>
-            <span className="font-mono">25 px (~2.0mm)</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-neutral-400">Editor UI Artifacts:</span>
-            <span className="text-neutral-200">Zero (Clean headless capture)</span>
-          </div>
-        </div>
+              {/* Specifications Information */}
+                <div className="my-5 p-4 rounded-xl bg-[#F8F9FB] border border-[#E8E8E8] text-xs space-y-1.5 text-[#666666]">
+                  <div className="flex justify-between">
+                    <span className="text-[#666666]">Resolution Multiplier:</span>
+                    <span className="font-mono font-semibold text-[#FF6A00]">3.0x (3150 x 1800 px)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#666666]">Commercial Density:</span>
+                    <span className="font-mono text-[#16A36A] font-medium">~300 DPI True Quality</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#666666]">Die-Cut Bleed Allowance:</span>
+                    <span className="font-mono text-[#171717]">25 px (~2.0mm)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#666666]">Editor UI Artifacts:</span>
+                    <span className="text-[#171717]">Zero (Clean headless capture)</span>
+                  </div>
+                </div>
 
-        {exportSuccess && (
-          <div className="mb-4 flex items-center space-x-2 p-2.5 rounded-lg bg-emerald-950/40 border border-emerald-900/60 text-xs text-emerald-300">
-            <Check className="w-4 h-4 text-emerald-400" />
-            <span>{exportSuccess} successfully!</span>
-          </div>
-        )}
+                {exportSuccess && (
+                    <div className="mb-4 flex items-center space-x-2 p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-800">
+                      <Check className="w-4 h-4 text-emerald-600" />
+                      <span>{exportSuccess} successfully!</span>
+                    </div>
+          )}
 
-        {/* Export Buttons */}
-        <div className="space-y-2.5">
-          <button
-            onClick={() => handleExportPng('front')}
-            disabled={isExporting}
-            className="w-full py-2.5 px-4 rounded-xl bg-[#121216] hover:bg-[#18181D] border border-[#23232A] hover:border-[#D4AF37] text-xs font-semibold flex items-center justify-between transition-colors disabled:opacity-50"
-          >
-            <div className="flex items-center space-x-2">
-              <Download className="w-4 h-4 text-[#D4AF37]" />
-              <span>Download Front (300 DPI PNG)</span>
-            </div>
-            <span className="text-[10px] text-neutral-400">3150 x 1800</span>
-          </button>
+                    {/* Export Buttons */}
+                    <div className="space-y-2.5">
+                      <button
+                        onClick={() => handleExportPng('front')}
+                        disabled={isExporting}
+                        className="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-[#F8F9FB] border border-[#E8E8E8] hover:border-[#FF6A00] text-xs font-semibold text-[#171717] flex items-center justify-between transition-colors disabled:opacity-50"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <Download className="w-4 h-4 text-[#FF6A00]" />
+                          <span>Download Front (300 DPI PNG)</span>
+                        </div>
+                        <span className="text-[10px] text-[#929292]">3150 x 1800</span>
+                      </button>
 
-          <button
-            onClick={() => handleExportPng('back')}
-            disabled={isExporting}
-            className="w-full py-2.5 px-4 rounded-xl bg-[#121216] hover:bg-[#18181D] border border-[#23232A] hover:border-[#D4AF37] text-xs font-semibold flex items-center justify-between transition-colors disabled:opacity-50"
-          >
-            <div className="flex items-center space-x-2">
-              <Download className="w-4 h-4 text-[#D4AF37]" />
-              <span>Download Back (300 DPI PNG)</span>
-            </div>
-            <span className="text-[10px] text-neutral-400">3150 x 1800</span>
-          </button>
+                      <button
+                        onClick={() => handleExportPng('back')}
+                        disabled={isExporting}
+                        className="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-[#F8F9FB] border border-[#E8E8E8] hover:border-[#FF6A00] text-xs font-semibold text-[#171717] flex items-center justify-between transition-colors disabled:opacity-50"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <Download className="w-4 h-4 text-[#FF6A00]" />
+                          <span>Download Back (300 DPI PNG)</span>
+                        </div>
+                        <span className="text-[10px] text-[#929292]">3150 x 1800</span>
+                      </button>
 
-          <button
-            onClick={() => handleExportPng('both')}
-            disabled={isExporting}
-            className="w-full py-2.5 px-4 rounded-xl bg-[#D4AF37] hover:bg-[#E5C058] text-black text-xs font-bold flex items-center justify-center space-x-2 transition-all shadow-sm disabled:opacity-50"
-          >
-            {isExporting ? <Loader2 className="w-4 h-4 animate-spin text-black" /> : <Printer className="w-4 h-4 text-black" />}
-            <span>Download Both Sides (Print Package)</span>
-          </button>
+                      <button
+                        onClick={() => handleExportPng('both')}
+                        disabled={isExporting}
+                        className="w-full py-2.5 px-4 rounded-xl bg-[#FF6A00] hover:bg-[#E85D00] text-white text-xs font-bold flex items-center justify-center space-x-2 transition-all shadow-sm disabled:opacity-50"
+                      >
+                        {isExporting ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <Printer className="w-4 h-4 text-white" />}
+                        <span>Download Both Sides (Print Package)</span>
+                      </button>
 
-          <button
-            onClick={handleExportJson}
-            disabled={isExporting}
-            className="w-full py-2 px-4 rounded-xl bg-[#18181D] hover:bg-[#23232A] border border-[#23232A] text-xs text-neutral-300 font-medium flex items-center justify-center space-x-2 transition-colors disabled:opacity-50"
-          >
-            <FileJson className="w-3.5 h-3.5 text-neutral-400" />
-            <span>Export Portable Design JSON</span>
-          </button>
-        </div>
+                      <button
+                        onClick={handleExportJson}
+                        disabled={isExporting}
+                        className="w-full py-2 px-4 rounded-xl bg-[#F8F9FB] hover:bg-[#FFF3E9] border border-[#E8E8E8] hover:border-[#FF6A00] text-xs text-[#171717] font-medium flex items-center justify-center space-x-2 transition-colors disabled:opacity-50"
+                      >
+                        <FileJson className="w-3.5 h-3.5 text-[#666666]" />
+                        <span>Export Portable Design JSON</span>
+                      </button>
+                    </div>
+                  </div>
       </div>
-    </div>
-  );
-};
+              );
+  };
 

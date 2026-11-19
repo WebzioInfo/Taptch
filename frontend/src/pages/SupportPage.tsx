@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ApiClient } from '../services/api';
+import { defaultBrandConfig } from '../config/brand';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
@@ -65,64 +66,64 @@ export function SupportPage() {
   });
 
   return (
-    <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-8">
+    <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-8 bg-[#F8F9FB] min-h-screen text-[#171717] font-body">
       {/* Support Cockpit Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border/40">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#E8E8E8]">
         <div>
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-400 text-xs font-semibold uppercase tracking-wider mb-2">
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full border border-orange-200 bg-[#FFF3E9] text-[#FF6A00] text-xs font-semibold uppercase tracking-wider mb-2">
             <Headphones className="w-3.5 h-3.5" />
             <span>Support &amp; Customer Operations Center</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Customer Support &amp; Moderation</h1>
-          <p className="text-xs text-muted-foreground mt-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#171717]">Customer Support &amp; Moderation</h1>
+          <p className="text-xs text-[#666666] mt-1">
             Account assistance, digital profile content audits, hardware fulfillment triage, and operations
           </p>
         </div>
 
         {/* Security Isolation Notice */}
-        <div className="p-3 rounded-xl border border-border/50 bg-[#121216] flex items-center gap-2 text-xs text-muted-foreground max-w-xs">
-          <Lock className="w-4 h-4 text-amber-400 shrink-0" />
+        <div className="p-3 rounded-xl border border-[#E8E8E8] bg-white shadow-xs flex items-center gap-2 text-xs text-[#666666] max-w-xs">
+          <Lock className="w-4 h-4 text-amber-500 shrink-0" />
           <span>Financial P&amp;L and platform credentials are restricted from Support roles.</span>
         </div>
       </div>
 
       {/* Operational Metrics Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-[#121216] border border-border/60">
+        <div className="p-5 rounded-2xl bg-white border border-[#E8E8E8] shadow-xs">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs text-muted-foreground font-medium">Customer Accounts</span>
-            <Users className="w-4 h-4 text-blue-400" />
+            <span className="text-xs text-[#666666] font-medium">Customer Accounts</span>
+            <Users className="w-4 h-4 text-blue-500" />
           </div>
-          <p className="text-2xl font-black text-white">{stats?.totalUsers ?? '—'}</p>
+          <p className="text-2xl font-black text-[#171717]">{stats?.totalUsers ?? '—'}</p>
         </div>
 
-        <div className="p-5 rounded-2xl bg-[#121216] border border-border/60">
+        <div className="p-5 rounded-2xl bg-white border border-[#E8E8E8] shadow-xs">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs text-muted-foreground font-medium">Published Profiles</span>
-            <Layers className="w-4 h-4 text-primary" />
+            <span className="text-xs text-[#666666] font-medium">Published Profiles</span>
+            <Layers className="w-4 h-4 text-[#FF6A00]" />
           </div>
-          <p className="text-2xl font-black text-white">{stats?.totalProfiles ?? '—'}</p>
+          <p className="text-2xl font-black text-[#171717]">{stats?.totalProfiles ?? '—'}</p>
         </div>
 
-        <div className="p-5 rounded-2xl bg-[#121216] border border-border/60">
+        <div className="p-5 rounded-2xl bg-white border border-[#E8E8E8] shadow-xs">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs text-muted-foreground font-medium">Pending Orders</span>
-            <Package className="w-4 h-4 text-amber-400" />
+            <span className="text-xs text-[#666666] font-medium">Pending Orders</span>
+            <Package className="w-4 h-4 text-amber-500" />
           </div>
-          <p className="text-2xl font-black text-amber-400">{stats?.pendingOrders ?? '—'}</p>
+          <p className="text-2xl font-black text-[#FF6A00]">{stats?.pendingOrders ?? '—'}</p>
         </div>
 
-        <div className="p-5 rounded-2xl bg-[#121216] border border-border/60">
+        <div className="p-5 rounded-2xl bg-white border border-[#E8E8E8] shadow-xs">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs text-muted-foreground font-medium">Leads Captured</span>
-            <MessageSquare className="w-4 h-4 text-emerald-400" />
+            <span className="text-xs text-[#666666] font-medium">Leads Captured</span>
+            <MessageSquare className="w-4 h-4 text-emerald-500" />
           </div>
-          <p className="text-2xl font-black text-emerald-400">{stats?.totalLeadsCaptured ?? '—'}</p>
+          <p className="text-2xl font-black text-[#16A36A]">{stats?.totalLeadsCaptured ?? '—'}</p>
         </div>
       </div>
 
       {/* Sub-Tabs */}
-      <div className="flex items-center space-x-2 border-b border-border/40 pb-4 overflow-x-auto scrollbar-none">
+      <div className="flex items-center space-x-2 border-b border-[#E8E8E8] pb-4 overflow-x-auto scrollbar-none">
         {[
           { id: 'users', label: 'Customer Account Lookup', icon: Users },
           { id: 'profiles', label: 'Profile Content Moderation', icon: Layers },
@@ -135,8 +136,8 @@ export function SupportPage() {
               onClick={() => setActiveTab(tab.id as any)}
               className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                 activeTab === tab.id
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'bg-[#121216] text-muted-foreground hover:text-white border border-border/40'
+                  ? 'bg-[#FFF3E9] text-[#FF6A00] border border-[#FF6A00] shadow-xs font-semibold'
+                  : 'bg-white text-[#666666] hover:text-[#171717] border border-[#E8E8E8]'
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
@@ -150,18 +151,18 @@ export function SupportPage() {
       {activeTab === 'users' && (
         <div className="space-y-4">
           <div className="relative max-w-md">
-            <Search className="w-4 h-4 absolute left-3 top-2.5 text-muted-foreground" />
+            <Search className="w-4 h-4 absolute left-3 top-2.5 text-[#929292]" />
             <Input
               placeholder="Search customers by name, email, or phone..."
               value={userQuery}
               onChange={(e) => setUserQuery(e.target.value)}
-              className="pl-9 text-xs h-9 bg-[#121216] border-border/60"
+              className="pl-9 text-xs h-9 bg-white border-[#E8E8E8] text-[#171717] focus:border-[#FF6A00]"
             />
           </div>
 
-          <div className="rounded-2xl border border-border/60 bg-[#121216] overflow-hidden">
+          <div className="rounded-2xl border border-[#E8E8E8] bg-white shadow-xs overflow-hidden">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#18181D] text-muted-foreground border-b border-border/40 uppercase tracking-wider font-semibold">
+              <thead className="bg-[#F8F9FB] text-[#666666] border-b border-[#E8E8E8] uppercase tracking-wider font-semibold">
                 <tr>
                   <th className="py-3 px-4">User Details</th>
                   <th className="py-3 px-4">Role</th>
@@ -170,34 +171,34 @@ export function SupportPage() {
                   <th className="py-3 px-4 text-right">Direct Contact</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border/30">
+              <tbody className="divide-y divide-[#E8E8E8]">
                 {users.map((u) => (
-                  <tr key={u.id} className="hover:bg-white/5 transition-colors">
+                  <tr key={u.id} className="hover:bg-orange-50/30 transition-colors">
                     <td className="py-3 px-4">
-                      <p className="font-bold text-white">{u.name}</p>
-                      <p className="text-[11px] text-muted-foreground font-mono">{u.email}</p>
+                      <p className="font-bold text-[#171717]">{u.name}</p>
+                      <p className="text-[11px] text-[#666666] font-mono">{u.email}</p>
                     </td>
                     <td className="py-3 px-4">
-                      <Badge className="bg-white/10 text-white text-[10px] uppercase">{u.systemRole}</Badge>
+                      <Badge className="bg-neutral-100 text-[#171717] border-[#E8E8E8] text-[10px] uppercase">{u.systemRole}</Badge>
                     </td>
                     <td className="py-3 px-4">
                       <Badge
                         className={`text-[10px] uppercase ${
                           u.status === 'active'
-                            ? 'bg-emerald-500/20 text-emerald-300'
-                            : 'bg-red-500/20 text-red-300'
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            : 'bg-red-50 text-red-700 border-red-200'
                         }`}
                       >
                         {u.status}
                       </Badge>
                     </td>
-                    <td className="py-3 px-4 text-muted-foreground font-mono text-[11px]">
+                    <td className="py-3 px-4 text-[#666666] font-mono text-[11px]">
                       {new Date(u.createdAt).toLocaleDateString()}
                     </td>
                     <td className="py-3 px-4 text-right">
                       <a
-                        href={`mailto:${u.email}?subject=Taptch%20Support%20Assistance`}
-                        className="text-xs text-blue-400 hover:underline"
+                        href={`mailto:${u.email}?subject=${encodeURIComponent(defaultBrandConfig.name)}%20Support%20Assistance`}
+                        className="text-xs text-[#FF6A00] hover:text-[#E85D00] hover:underline font-medium"
                       >
                         Email Customer
                       </a>
@@ -212,9 +213,9 @@ export function SupportPage() {
 
       {/* TAB 2: PROFILES AUDIT & CONTENT MODERATION */}
       {activeTab === 'profiles' && (
-        <div className="rounded-2xl border border-border/60 bg-[#121216] overflow-hidden">
+        <div className="rounded-2xl border border-[#E8E8E8] bg-white shadow-xs overflow-hidden">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#18181D] text-muted-foreground border-b border-border/40 uppercase tracking-wider font-semibold">
+            <thead className="bg-[#F8F9FB] text-[#666666] border-b border-[#E8E8E8] uppercase tracking-wider font-semibold">
               <tr>
                 <th className="py-3 px-4">Profile &amp; Handle</th>
                 <th className="py-3 px-4">Type</th>
@@ -223,46 +224,46 @@ export function SupportPage() {
                 <th className="py-3 px-4 text-right">Moderation Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/30">
+            <tbody className="divide-y divide-[#E8E8E8]">
               {profiles.map((p) => (
-                <tr key={p.id} className="hover:bg-white/5 transition-colors">
+                <tr key={p.id} className="hover:bg-orange-50/30 transition-colors">
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-2">
-                      <p className="font-bold text-white">{p.displayName}</p>
+                      <p className="font-bold text-[#171717]">{p.displayName}</p>
                       <a
                         href={`/${p.slug}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-muted-foreground hover:text-primary"
+                        className="text-[#666666] hover:text-[#FF6A00]"
                         title="View Public Profile"
                       >
                         <ExternalLink className="w-3 h-3" />
                       </a>
                     </div>
-                    <p className="text-[11px] text-muted-foreground font-mono">/{p.slug}</p>
+                    <p className="text-[11px] text-[#666666] font-mono">/{p.slug}</p>
                   </td>
-                  <td className="py-3 px-4 capitalize font-medium text-slate-300">{p.profileType}</td>
+                  <td className="py-3 px-4 capitalize font-medium text-[#171717]">{p.profileType}</td>
                   <td className="py-3 px-4">
                     <Badge
                       className={`text-[10px] uppercase ${
                         p.status === 'PUBLISHED'
-                          ? 'bg-emerald-500/20 text-emerald-300'
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                           : p.status === 'SUSPENDED'
-                          ? 'bg-red-500/20 text-red-300'
-                          : 'bg-amber-500/20 text-amber-300'
+                          ? 'bg-red-50 text-red-700 border-red-200'
+                          : 'bg-amber-50 text-amber-700 border-amber-200'
                       }`}
                     >
                       {p.status}
                     </Badge>
                   </td>
-                  <td className="py-3 px-4 text-muted-foreground font-mono text-[11px]">{p.templateId}</td>
+                  <td className="py-3 px-4 text-[#666666] font-mono text-[11px]">{p.templateId}</td>
                   <td className="py-3 px-4 text-right space-x-1.5">
                     {p.status !== 'PUBLISHED' && (
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => reviewMutation.mutate({ id: p.id, action: 'approve', reason: 'Approved by Support' })}
-                        className="text-xs h-7 border-emerald-500/40 text-emerald-300 hover:bg-emerald-950/40"
+                        className="text-xs h-7 border-emerald-500/40 text-emerald-700 hover:bg-emerald-50"
                       >
                         Approve
                       </Button>
@@ -287,15 +288,15 @@ export function SupportPage() {
 
       {/* TAB 3: OPERATIONAL AUDIT TRAIL */}
       {activeTab === 'audit' && (
-        <div className="rounded-2xl border border-border/60 bg-[#121216] overflow-hidden">
-          <div className="p-4 bg-[#18181D] border-b border-border/40 flex items-center justify-between">
-            <h3 className="font-bold text-xs uppercase tracking-wider text-muted-foreground">
+        <div className="rounded-2xl border border-[#E8E8E8] bg-white shadow-xs overflow-hidden">
+          <div className="p-4 bg-[#F8F9FB] border-b border-[#E8E8E8] flex items-center justify-between">
+            <h3 className="font-bold text-xs uppercase tracking-wider text-[#666666]">
               Immutable Action Log (Security &amp; DPDP Compliant)
             </h3>
-            <span className="text-[11px] text-muted-foreground font-mono">Real-time DB stream</span>
+            <span className="text-[11px] text-[#929292] font-mono">Real-time DB stream</span>
           </div>
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#121216] text-muted-foreground border-b border-border/40 uppercase tracking-wider font-semibold text-[11px]">
+            <thead className="bg-[#F8F9FB] text-[#666666] border-b border-[#E8E8E8] uppercase tracking-wider font-semibold text-[11px]">
               <tr>
                 <th className="py-3 px-4">Operator</th>
                 <th className="py-3 px-4">Action</th>
@@ -304,23 +305,23 @@ export function SupportPage() {
                 <th className="py-3 px-4 text-right">Timestamp</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/20">
+            <tbody className="divide-y divide-[#E8E8E8]">
               {auditTrail.map((log) => (
-                <tr key={log.id} className="hover:bg-white/5 transition-colors">
+                <tr key={log.id} className="hover:bg-orange-50/30 transition-colors">
                   <td className="py-3 px-4">
-                    <p className="font-bold text-white">{log.actorName || log.actorId}</p>
-                    <p className="text-[10px] text-muted-foreground font-mono">{log.actorEmail}</p>
+                    <p className="font-bold text-[#171717]">{log.actorName || log.actorId}</p>
+                    <p className="text-[10px] text-[#666666] font-mono">{log.actorEmail}</p>
                   </td>
                   <td className="py-3 px-4">
-                    <code className="text-[11px] text-primary font-mono">{log.action}</code>
+                    <code className="text-[11px] text-[#FF6A00] font-mono">{log.action}</code>
                   </td>
-                  <td className="py-3 px-4 text-muted-foreground">
-                    {log.resourceType}: <span className="font-mono text-slate-200">{log.resourceId}</span>
+                  <td className="py-3 px-4 text-[#666666]">
+                    {log.resourceType}: <span className="font-mono text-[#171717]">{log.resourceId}</span>
                   </td>
-                  <td className="py-3 px-4 text-slate-300">
+                  <td className="py-3 px-4 text-[#666666]">
                     {log.metadata?.reason || JSON.stringify(log.metadata || {})}
                   </td>
-                  <td className="py-3 px-4 text-right text-muted-foreground font-mono text-[11px]">
+                  <td className="py-3 px-4 text-right text-[#666666] font-mono text-[11px]">
                     {new Date(log.createdAt).toLocaleString()}
                   </td>
                 </tr>

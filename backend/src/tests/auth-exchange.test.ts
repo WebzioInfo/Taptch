@@ -67,7 +67,7 @@ describe('AuthService & AuthController — Single-Use Ticket Exchange Flow', () 
 
     vi.spyOn(authService, 'getSession').mockResolvedValueOnce({
       user: { id: 'user_id_456', email: 'test@example.com', name: 'Test User', systemRole: 'user' },
-      session: { token: 'session_token_123', expiresAt: new Date(Date.now() + 10000).toISOString() },
+      session: { token: 'session_token_123', expiresAt: new Date(Date.now() + 10000) } as any,
     });
 
     const mockResponse = {

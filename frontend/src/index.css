@@ -3,83 +3,64 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: #0A0A0C;
-    --foreground: #F4F4F6;
-    --card: #121216;
-    --card-foreground: #F4F4F6;
-    --popover: #121216;
-    --popover-foreground: #F4F4F6;
-    --primary: #D4AF37;
-    --primary-hover: #B5942E;
-    --primary-foreground: #0A0A0C;
-    --secondary: #18181D;
-    --secondary-foreground: #F4F4F6;
-    --muted: #18181D;
-    --muted-foreground: #94A3B8;
-    --accent: #E5C058;
-    --accent-foreground: #0A0A0C;
-    --destructive: #EF4444;
-    --destructive-foreground: #FFFFFF;
-    --border: rgba(255, 255, 255, 0.08);
-    --input: rgba(255, 255, 255, 0.08);
-    --ring: #D4AF37;
-    --radius: 0.5rem;
-  }
-
   * {
     border-color: var(--border);
   }
 
   body {
-    background-color: var(--background);
-    color: var(--foreground);
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    background-color: var(--bg-page);
+    color: var(--ink);
+    font-family: var(--font-body);
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Universal Input, Textarea, and Select Theme & Contrast */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-head);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+
+  /* Universal Inputs, Textareas, and Selects */
   input,
   textarea,
   select {
-    color: var(--foreground);
-    background-color: var(--card);
-    border-color: var(--border);
-    caret-color: var(--primary);
-    accent-color: var(--primary);
+    color: var(--ink);
+    background-color: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    caret-color: var(--accent);
+    accent-color: var(--accent);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   }
 
   input::placeholder,
   textarea::placeholder {
-    color: var(--muted-foreground) !important;
+    color: var(--ink-muted) !important;
     opacity: 1 !important;
   }
 
   input:focus,
   textarea:focus,
   select:focus {
-    color: var(--foreground) !important;
-    background-color: var(--card) !important;
-    border-color: var(--ring) !important;
+    color: var(--ink) !important;
+    background-color: var(--bg-raised) !important;
+    border-color: var(--border-strong) !important;
     outline: none !important;
+    box-shadow: 0 0 0 2px var(--accent) !important;
+  }
+
+  /* Focus visible accessibility state (2px orange ring with 2px offset) */
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--accent) !important;
+    outline-offset: 2px !important;
   }
 
   select option {
-    background-color: #141418 !important;
-    color: #FAFAFA !important;
-  }
-
-  select optgroup {
-    background-color: #141418 !important;
-    color: #A1A1AA !important;
-  }
-
-  [data-theme="ivory"] select option,
-  .light select option {
-    background-color: #FFFFFF !important;
-    color: #18181B !important;
+    background-color: var(--bg-raised) !important;
+    color: var(--ink) !important;
   }
 
   /* WebKit / Chromium Autofill Protection */
@@ -95,46 +76,70 @@
   select:-webkit-autofill:hover,
   select:-webkit-autofill:focus,
   select:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 1000px #141418 inset !important;
-    -webkit-text-fill-color: #FAFAFA !important;
-    caret-color: var(--primary) !important;
+    -webkit-box-shadow: 0 0 0 1000px var(--bg-raised) inset !important;
+    -webkit-text-fill-color: var(--ink) !important;
+    caret-color: var(--accent) !important;
     border-color: var(--border) !important;
     transition: background-color 5000s ease-in-out 0s;
   }
+}
 
-  [data-theme="ivory"] input:-webkit-autofill,
-  [data-theme="ivory"] input:-webkit-autofill:hover,
-  [data-theme="ivory"] input:-webkit-autofill:focus,
-  [data-theme="ivory"] input:-webkit-autofill:active,
-  [data-theme="ivory"] textarea:-webkit-autofill,
-  [data-theme="ivory"] textarea:-webkit-autofill:hover,
-  [data-theme="ivory"] textarea:-webkit-autofill:focus,
-  [data-theme="ivory"] textarea:-webkit-autofill:active,
-  [data-theme="ivory"] select:-webkit-autofill,
-  [data-theme="ivory"] select:-webkit-autofill:hover,
-  [data-theme="ivory"] select:-webkit-autofill:focus,
-  [data-theme="ivory"] select:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 1000px #FFFFFF inset !important;
-    -webkit-text-fill-color: #18181B !important;
-    caret-color: #8B4513 !important;
-    border-color: #E6DFD5 !important;
-    transition: background-color 5000s ease-in-out 0s;
+/* Modals soft shadow (one soft shadow only) */
+.modal-shadow {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* Hero card tap animation */
+@keyframes tapCardAnimation {
+  0%, 100% {
+    transform: rotate(-6deg) translateY(0);
+  }
+  50% {
+    transform: rotate(-3deg) translateY(-8px);
   }
 }
 
-/* Obsidian Glassmorphism */
-.glass-panel {
-  background: rgba(18, 18, 22, 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+@keyframes profileSlideUpAnimation {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
 }
 
-.gold-glow {
-  box-shadow: 0 0 25px rgba(212, 175, 55, 0.2);
+.animate-tap-card {
+  animation: tapCardAnimation 3.5s ease-in-out infinite;
 }
 
-/* Cross-Browser Scrollbar Hiding (Preserves Touch and Mousewheel Scrolling) */
+.animate-profile-slide {
+  animation: profileSlideUpAnimation 3.5s ease-in-out infinite;
+}
+
+/* Premium Hero NFC Card Floating Animation */
+@keyframes heroCardFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-hero-card-float {
+  animation: heroCardFloat 6s ease-in-out infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-tap-card,
+  .animate-profile-slide,
+  .animate-hero-card-float {
+    animation: none !important;
+  }
+}
+
+/* Cross-Browser Scrollbar Hiding */
 .no-scrollbar::-webkit-scrollbar,
 .scrollbar-none::-webkit-scrollbar {
   display: none !important;
@@ -144,6 +149,58 @@
 
 .no-scrollbar,
 .scrollbar-none {
-  -ms-overflow-style: none !important; /* IE and Edge */
-  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
 }
+
+/* Studio Slim Dark Scrollbar */
+.slim-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+.slim-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.slim-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.slim-scroll::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 99px;
+}
+.slim-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-muted);
+}
+.slim-scroll::-webkit-scrollbar-button {
+  display: none;
+}
+
+/* Safe Area Inset Support */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.pl-safe {
+  padding-left: env(safe-area-inset-left, 0px);
+}
+.pr-safe {
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* Mobile Studio Height Fix */
+.h-dvh {
+  height: 100vh;
+  height: 100dvh;
+}
+.min-h-dvh {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+.max-h-dvh {
+  max-height: 100vh;
+  max-height: 100dvh;
+}
+

@@ -19,107 +19,83 @@ export interface BrandLogoProps {
   onClick?: () => void;
 }
 
-const DIMENSIONS: Record<BrandLogoVariant, Record<BrandLogoSize, { width: number; height: number }>> = {
-  primary: {
-    sm: { width: 115, height: 25 },
-    md: { width: 147, height: 32 },
-    lg: { width: 184, height: 40 },
-    xl: { width: 230, height: 50 },
-    '2xl': { width: 276, height: 60 },
-  },
-  horizontal: {
-    sm: { width: 126, height: 24 },
-    md: { width: 168, height: 32 },
-    lg: { width: 211, height: 40 },
-    xl: { width: 253, height: 48 },
-    '2xl': { width: 316, height: 60 },
-  },
-  stacked: {
-    sm: { width: 80, height: 60 },
-    md: { width: 120, height: 90 },
-    lg: { width: 160, height: 120 },
-    xl: { width: 200, height: 150 },
-    '2xl': { width: 240, height: 180 },
-  },
-  symbol: {
-    sm: { width: 24, height: 24 },
-    md: { width: 32, height: 32 },
-    lg: { width: 40, height: 40 },
-    xl: { width: 48, height: 48 },
-    '2xl': { width: 64, height: 64 },
-  },
-  monochrome: {
-    sm: { width: 115, height: 25 },
-    md: { width: 147, height: 32 },
-    lg: { width: 184, height: 40 },
-    xl: { width: 230, height: 50 },
-    '2xl': { width: 276, height: 60 },
-  },
-};
-
-function getAssetSrc(variant: BrandLogoVariant, theme: BrandLogoTheme): string {
-  if (variant === 'symbol') {
-    return brandConfig.assets.symbolUrl;
-  }
-  if (variant === 'monochrome') {
-    return brandConfig.assets.monochromeUrl;
-  }
-  if (variant === 'stacked') {
-    return brandConfig.assets.logoStackedUrl;
-  }
-  if (variant === 'horizontal') {
-    return brandConfig.assets.logoHorizontalUrl;
-  }
-  
-  if (theme === 'light') {
-    return brandConfig.assets.logoDarkUrl;
-  }
-  if (theme === 'dark') {
-    return brandConfig.assets.logoLightUrl;
-  }
-  return brandConfig.assets.logoUrl;
-}
+  const SIZE_MAP: Record<BrandLogoSize, { text: string; icon: string }> = {
+    sm: { text: 'text-base', icon: 'w-4 h-4' },
+    md: { text: 'text-xl', icon: 'w-5 h-5' },
+    lg: { text: 'text-2xl', icon: 'w-6 h-6' },
+    xl: { text: 'text-3xl', icon: 'w-8 h-8' },
+    '2xl': { text: 'text-4xl', icon: 'w-10 h-10' },
+  };
 
 export function BrandLogo({
   variant = 'primary',
-  theme = 'auto',
   size = 'md',
-  width,
-  height,
   className = '',
-  priority,
   asLink = false,
   href = '/',
   onClick,
 }: BrandLogoProps) {
-  const defaultDims = DIMENSIONS[variant][size];
-  const finalWidth = width ?? defaultDims.width;
-  const finalHeight = height ?? defaultDims.height;
-  const src = getAssetSrc(variant, theme);
+  const currentSize = SIZE_MAP[size] || SIZE_MAP.md;
+  const brandName = (brandConfig.shortName || 'taptch').toLowerCase();
 
-  const imageElement = (
-    <img
-      src={src}
-      alt={brandConfig.name}
-      width={finalWidth}
-      height={finalHeight}
-      loading={priority ? 'eager' : 'lazy'}
-      className={`inline-block select-none object-contain transition-opacity duration-200 ${className}`}
-      onClick={onClick}
-    />
+  const symbolElement = (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={`${currentSize.icon} text-[var(--ink)] inline-block select-none flex-shrink-0`}
+      aria-hidden="true"
+    >
+      <rect x="3" y="4" width="18" height="16" rx="3" stroke="currentColor" strokeWidth="2" />
+      <path d="M7 8.5h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M7 12h4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" opacity="0.6" />
+      <circle cx="16" cy="14.5" r="2.5" fill="var(--accent)" />
+    </svg>
   );
+
+  const wordmarkElement = (
+    <span className={`font-head font-medium tracking-tight text-[var(--ink)] leading-none select-none ${currentSize.text}`}>
+      {brandName}
+      <span className="text-[var(--accent)] font-bold">.</span>
+    </span>
+  );
+
+  let content: React.ReactNode;
+
+  if (variant === 'symbol') {
+    content = (
+      <span className={`inline-flex items-center justify-center ${className}`} onClick={onClick}>
+        {symbolElement}
+      </span>
+    );
+  } else if (variant === 'stacked') {
+    content = (
+      <span className={`inline-flex flex-col items-center gap-1.5 ${className}`} onClick={onClick}>
+        {symbolElement}
+        {wordmarkElement}
+      </span>
+    );
+  } else {
+    // primary, horizontal, monochrome
+    content = (
+      <span className={`inline-flex items-center gap-2 ${className}`} onClick={onClick}>
+        {variant !== 'monochrome' && symbolElement}
+        {wordmarkElement}
+      </span>
+    );
+  }
 
   if (asLink) {
     return (
       <Link
         to={href}
-        className="inline-flex items-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:ring-offset-2 rounded"
+        className="inline-flex items-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 rounded-[var(--radius-sm)] transition-opacity hover:opacity-90"
         aria-label={brandConfig.name}
       >
-        {imageElement}
+        {content}
       </Link>
     );
   }
 
-  return imageElement;
+  return <>{content}</>;
 }
