@@ -408,7 +408,11 @@ export function CheckoutPage() {
     } else if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
       errors.phone = 'Please enter a valid 10-digit mobile number';
     }
-    if (!addressForm.addressLine1.trim()) errors.addressLine1 = 'Street / House / Flat details are required';
+    if (!addressForm.addressLine1.trim()) {
+      errors.addressLine1 = 'Street / House / Flat details are required';
+    } else if (addressForm.addressLine1.trim().length < 5) {
+      errors.addressLine1 = 'Street address must be at least 5 characters long';
+    }
     if (!addressForm.city.trim()) errors.city = 'City / District is required';
     if (!addressForm.stateName.trim()) errors.stateName = 'State is required';
     if (!addressForm.postalCode.trim()) {
@@ -494,25 +498,30 @@ export function CheckoutPage() {
   // Save new address from modal or manual form
   const handleSaveNewAddress = async () => {
     if (!validateAddressForm()) return;
+    if (!editingAddress && savedAddresses.length >= 5) {
+      setFormBannerError('Maximum 5 saved addresses reached. Please delete an older address to save this one, or proceed with checkout directly.');
+      return;
+    }
+
     setIsSavingAddress(true);
     setFormBannerError(null);
 
     try {
       if (editingAddress) {
         const updated = await ApiClient.patch<SavedAddress>(`/api/v1/addresses/${editingAddress.id}`, {
-          recipientName: addressForm.fullName,
-          phone: addressForm.phone,
-          email: addressForm.email || undefined,
-          whatsappNumber: addressForm.whatsappNumber || undefined,
-          addressLine1: addressForm.addressLine1,
-          addressLine2: addressForm.addressLine2 || undefined,
-          city: addressForm.city,
-          state: addressForm.stateName,
-          postalCode: addressForm.postalCode,
+          recipientName: addressForm.fullName.trim(),
+          phone: normalizeIndianPhone(addressForm.phone),
+          email: addressForm.email?.trim() || undefined,
+          whatsappNumber: addressForm.whatsappNumber ? normalizeIndianPhone(addressForm.whatsappNumber) : undefined,
+          addressLine1: addressForm.addressLine1.trim(),
+          addressLine2: addressForm.addressLine2?.trim() || undefined,
+          city: addressForm.city.trim(),
+          state: addressForm.stateName.trim(),
+          postalCode: addressForm.postalCode.trim(),
           country: addressForm.country || 'India',
-          deliveryInstructions: addressForm.deliveryInstructions || undefined,
+          deliveryInstructions: addressForm.deliveryInstructions?.trim() || undefined,
           label: addressForm.label || 'Home',
-          customLabel: addressForm.customLabel || undefined,
+          customLabel: addressForm.customLabel?.trim() || undefined,
           isDefault: addressForm.isDefault,
         });
         await queryClient.invalidateQueries({ queryKey: ['saved-addresses'] });
@@ -522,19 +531,19 @@ export function CheckoutPage() {
         setShowAddressPicker(false);
       } else {
         const created = await ApiClient.post<SavedAddress>('/api/v1/addresses', {
-          recipientName: addressForm.fullName,
-          phone: addressForm.phone,
-          email: addressForm.email || undefined,
-          whatsappNumber: addressForm.whatsappNumber || undefined,
-          addressLine1: addressForm.addressLine1,
-          addressLine2: addressForm.addressLine2 || undefined,
-          city: addressForm.city,
-          state: addressForm.stateName,
-          postalCode: addressForm.postalCode,
+          recipientName: addressForm.fullName.trim(),
+          phone: normalizeIndianPhone(addressForm.phone),
+          email: addressForm.email?.trim() || undefined,
+          whatsappNumber: addressForm.whatsappNumber ? normalizeIndianPhone(addressForm.whatsappNumber) : undefined,
+          addressLine1: addressForm.addressLine1.trim(),
+          addressLine2: addressForm.addressLine2?.trim() || undefined,
+          city: addressForm.city.trim(),
+          state: addressForm.stateName.trim(),
+          postalCode: addressForm.postalCode.trim(),
           country: addressForm.country || 'India',
-          deliveryInstructions: addressForm.deliveryInstructions || undefined,
+          deliveryInstructions: addressForm.deliveryInstructions?.trim() || undefined,
           label: addressForm.label || 'Home',
-          customLabel: addressForm.customLabel || undefined,
+          customLabel: addressForm.customLabel?.trim() || undefined,
           isDefault: addressForm.isDefault,
         });
         await queryClient.invalidateQueries({ queryKey: ['saved-addresses'] });
@@ -1648,9 +1657,9 @@ export function CheckoutPage() {
                           <p className="font-semibold text-zinc-900">
                             {getProductName(cardMaterial)}
                           </p>
-                          <p className="text-[11px] text-gray-400">₹{unitPrice} per card</p>
+                          <p className="text-[11px] text-gray-400">₹{unitPrice.toLocaleString('en-IN')} per card</p>
                         </div>
-                        <span className="font-bold text-zinc-900">₹{subtotal}</span>
+                        <span className="font-bold text-zinc-900">₹{subtotal.toLocaleString('en-IN')}</span>
                       </div>
 
                       <div className="flex items-center justify-between text-xs pt-0.5">
@@ -1700,7 +1709,7 @@ export function CheckoutPage() {
                     <div className="space-y-2 pt-2 border-t border-gray-100 text-xs text-gray-600">
                       <div className="flex justify-between">
                         <span>Subtotal:</span>
-                        <span className="text-zinc-800 font-medium">₹{subtotal}</span>
+                        <span className="text-zinc-800 font-medium">₹{subtotal.toLocaleString('en-IN')}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Express Shipping:</span>
@@ -1710,11 +1719,11 @@ export function CheckoutPage() {
                       </div>
                       <div className="flex justify-between">
                         <span>GST (18%):</span>
-                        <span className="text-zinc-800 font-medium">₹{taxAmount}</span>
+                        <span className="text-zinc-800 font-medium">₹{taxAmount.toLocaleString('en-IN')}</span>
                       </div>
                       <div className="pt-2.5 border-t border-gray-200 flex justify-between items-baseline text-sm font-bold text-zinc-900">
                         <span>Total Payable:</span>
-                        <span className="text-lg font-bold text-[#FF6A00]">₹{totalAmount}</span>
+                        <span className="text-lg font-bold text-[#FF6A00]">₹{totalAmount.toLocaleString('en-IN')}</span>
                       </div>
                     </div>
 
@@ -1820,7 +1829,7 @@ export function CheckoutPage() {
                 </div>
                 <div className="flex justify-between">
                   <span>GST (18%):</span>
-                  <span className="text-zinc-800">₹{taxAmount}</span>
+                  <span className="text-zinc-800">₹{taxAmount.toLocaleString('en-IN')}</span>
                 </div>
               </div>
             )}
