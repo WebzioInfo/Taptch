@@ -11,7 +11,6 @@ import {
   ChevronRight,
   Plus,
   AlertCircle,
-  Sparkles,
   Check,
   CreditCard,
 } from 'lucide-react';
@@ -241,7 +240,7 @@ function OrderCardSkeleton() {
                             to="/studio"
                             className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-[#FF6A00] hover:bg-[#E85D00] text-white font-medium text-xs shadow-xs transition-colors"
                           >
-                            <Sparkles className="w-4 h-4" />
+                            <CreditCard className="w-4 h-4" />
                             <span>Design your first card</span>
                           </Link>
           </div>

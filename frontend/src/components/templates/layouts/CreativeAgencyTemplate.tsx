@@ -11,7 +11,7 @@ import {
   ShieldCheck,
   Send,
   ExternalLink,
-  Sparkles,
+  ArrowRight,
   Lock,
   Palette,
   Layers,
@@ -309,7 +309,7 @@ export function CreativeAgencyTemplate({
                       onClick={() => onOpenExchange(`Project Commission: ${item.title}`)}
                       className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs h-9 gap-1.5"
                     >
-                      <Sparkles className="w-3.5 h-3.5" />
+                      <ArrowRight className="w-3.5 h-3.5" />
                       <span>Commission Work</span>
                     </Button>
                     {item.actionUrl && (

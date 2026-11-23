@@ -15,7 +15,7 @@ import {
   Clock,
   Truck,
   RotateCcw,
-  Sparkles,
+  ShieldCheck,
   QrCode,
   Loader2,
   DollarSign,
@@ -202,7 +202,7 @@ export function AdminPage() {
           { id: 'finance', label: 'Financial Management & P&L', icon: DollarSign },
           { id: 'orders', label: 'Physical Orders Logistics', icon: Package },
           { id: 'users', label: 'User Accounts Governance', icon: Users },
-          { id: 'subscriptions', label: 'Manual Plan Entitlements', icon: Sparkles },
+          { id: 'subscriptions', label: 'Manual Plan Entitlements', icon: ShieldCheck },
           { id: 'qr-verify', label: 'Hardware QR Verifier', icon: QrCode },
         ].map((tab) => {
           const Icon = tab.icon;

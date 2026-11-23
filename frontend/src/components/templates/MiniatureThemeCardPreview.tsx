@@ -10,7 +10,7 @@ import {
   Flame,
   Briefcase,
   CheckCircle,
-  Sparkles,
+  Palette,
 } from 'lucide-react';
 
 export interface MiniatureThemeCardPreviewProps {
@@ -435,7 +435,7 @@ export const MiniatureThemeCardPreview = React.memo(function MiniatureThemeCardP
             <span className="text-[6.5px] font-bold uppercase tracking-wider" style={{ color: colors.accent }}>
               AURORA CREATIVE
             </span>
-            <Sparkles className="w-2 h-2" style={{ color: colors.primary }} />
+            <Palette className="w-2 h-2" style={{ color: colors.primary }} />
           </div>
 
           <div className="rounded-md p-1 border relative z-10 backdrop-blur-md shadow-xs" style={{ backgroundColor: `${colors.cardBackground}D0`, borderColor: colors.border }}>

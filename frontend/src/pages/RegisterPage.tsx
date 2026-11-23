@@ -48,7 +48,9 @@ export function RegisterPage() {
     setLoading(true);
     try {
       await signUp.email({ name: name.trim(), email: email.trim(), password });
-      navigate('/dashboard');
+      const searchParams = new URLSearchParams(location.search);
+      const redirectUrl = searchParams.get('redirect') || '/dashboard';
+      navigate(redirectUrl);
     } catch (err: any) {
       setError(err?.message || 'Registration failed. Try again with a different email.');
     } finally {

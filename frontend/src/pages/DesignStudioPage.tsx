@@ -6,7 +6,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { ZoomIn, ZoomOut, Maximize2, Loader2, Sparkles } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize2, Loader2 } from 'lucide-react';
 import { useEditorStore } from '../components/editor/useEditorStore';
 import { CanvasStudio } from '../components/editor/CanvasStudio';
 import { EditorTopBar } from '../components/editor/EditorTopBar';
@@ -16,6 +16,7 @@ import { CardMockupPreview } from '../components/editor/CardMockupPreview';
 import { ExportModal } from '../components/editor/ExportModal';
 import { AutoRecoveryBanner, RecoverySnapshot } from '../components/editor/AutoRecoveryBanner';
 import { UnsavedChangesModal } from '../components/editor/UnsavedChangesModal';
+import { SimpleCardStudio } from '../components/editor/SimpleCardStudio';
 import { ApiClient } from '../services/api';
 import { useIsDesktop } from '../hooks/useMediaQuery';
 import { MobileStudioShell } from '../components/editor/mobile/MobileStudioShell';
@@ -153,6 +154,9 @@ export const DesignStudioPage: React.FC = () => {
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isUnsavedModalOpen, setIsUnsavedModalOpen] = useState(false);
   const [recoverySnapshot, setRecoverySnapshot] = useState<RecoverySnapshot | null>(null);
+  const [studioMode, setStudioMode] = useState<'simple' | 'advanced'>(
+    searchParams.get('mode') === 'advanced' ? 'advanced' : 'simple'
+  );
 
   // Load product, templates, and initial design state
   useEffect(() => {
@@ -306,6 +310,10 @@ export const DesignStudioPage: React.FC = () => {
     localStorage.removeItem(key);
     setRecoverySnapshot(null);
   };
+
+  if (studioMode === 'simple') {
+    return <SimpleCardStudio onSwitchToAdvanced={() => setStudioMode('advanced')} />;
+  }
 
   if (isLoading) {
     return (

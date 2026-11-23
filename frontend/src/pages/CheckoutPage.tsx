@@ -43,6 +43,9 @@ import {
   Wallet,
   Smartphone,
   Layers,
+  User,
+  Users,
+  Building2,
 } from 'lucide-react';
 import { ApiClient } from '../services/api';
 import { useSession } from '../lib/auth/client';
@@ -54,6 +57,10 @@ import { SavedAddressesList } from '../components/address/SavedAddressesList';
 import type { SavedAddress } from '../types/address';
 import { renderSideToPreview } from '../utils/canvasRenderer';
 import { CardPreview } from '../components/cards/CardPreview';
+import {
+  getCardPricing,
+  type CardMaterial,
+} from '../config/pricing';
 
 interface ProfileOption {
   id: string;
@@ -63,6 +70,55 @@ interface ProfileOption {
   avatarUrl?: string;
   status: string;
 }
+
+export interface OrderTemplateOption {
+  id: string;
+  name: string;
+  style: string;
+  theme: {
+    bg: string;
+    accent: string;
+  };
+}
+
+export const CHECKOUT_TEMPLATES: OrderTemplateOption[] = [
+  {
+    id: 'premium-brand',
+    name: 'Obsidian Luxury',
+    style: 'Black & Gold',
+    theme: { bg: '#0A0A0C', accent: '#D4AF37' },
+  },
+  {
+    id: 'clean-corporate',
+    name: 'Clean Corporate',
+    style: 'Navy & Blue',
+    theme: { bg: '#0A2540', accent: '#38BDF8' },
+  },
+  {
+    id: 'dark-premium',
+    name: 'Dark Premium',
+    style: 'Champagne Gold',
+    theme: { bg: '#08090A', accent: '#C5A880' },
+  },
+  {
+    id: 'soft-modern',
+    name: 'Soft Modern',
+    style: 'Warm Stone',
+    theme: { bg: '#F6F4EE', accent: '#24352D' },
+  },
+  {
+    id: 'creative-agency',
+    name: 'Creative Agency',
+    style: 'Vibrant Indigo',
+    theme: { bg: '#0F172A', accent: '#818CF8' },
+  },
+  {
+    id: 'bold-editorial',
+    name: 'Bold Editorial',
+    style: 'High Contrast',
+    theme: { bg: '#18181B', accent: '#FF6A00' },
+  },
+];
 
 type CheckoutStep = 1 | 2 | 3 | 4;
 
@@ -90,6 +146,7 @@ export function CheckoutPage() {
   const [formBannerError, setFormBannerError] = useState<string | null>(null);
   const [errorReferenceId, setErrorReferenceId] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
 
   // Idempotency Key: preserved per checkout attempt to prevent duplicate orders
   const idempotencyKeyRef = useRef<string>(`idem_${Math.random().toString(36).substring(2, 12)}_${Date.now()}`);
@@ -184,24 +241,39 @@ export function CheckoutPage() {
     };
   }, [effectiveFrontJson, effectiveBackJson, effectiveFrontPreview, effectiveBackPreview]);
 
+  // Derive initial material from query params or stored simpleCard draft
+  const initialMaterial = useMemo<'pvc' | 'matte' | 'metal' | 'wood'>(() => {
+    const mat = searchParams.get('material');
+    if (mat === 'metal' || mat === 'wood' || mat === 'pvc' || mat === 'matte') return mat as any;
+    const prod = (searchParams.get('productId') || '').toLowerCase();
+    const surf = (searchParams.get('surface') || '').toLowerCase();
+    if (prod.includes('metal') || surf === 'metal') return 'metal';
+    if (prod.includes('bamboo') || prod.includes('wood') || surf === 'bamboo' || surf === 'wood') return 'wood';
+    if (prod.includes('matte') || surf === 'matte') return 'matte';
+    if (localDraft?.material === 'metal' || localDraft?.simpleCard?.product?.material === 'metal') return 'metal';
+    if (localDraft?.material === 'wood' || localDraft?.simpleCard?.product?.material === 'wood') return 'wood';
+    if (localDraft?.material === 'matte') return 'matte';
+    return 'pvc';
+  }, [searchParams, localDraft]);
+
   // Step 1: Card Configuration
-  const [cardMaterial, setCardMaterial] = useState<'pvc' | 'metal' | 'wood'>('pvc');
+  const [cardMaterial, setCardMaterial] = useState<CardMaterial>(initialMaterial as CardMaterial);
+
+  useEffect(() => {
+    if (initialMaterial) {
+      setCardMaterial(initialMaterial as CardMaterial);
+    }
+  }, [initialMaterial]);
   const [quantity, setQuantity] = useState<number>(1);
   const [showTechSpecs, setShowTechSpecs] = useState<boolean>(false);
   const [previewSide, setPreviewSide] = useState<'front' | 'back'>('front');
 
-  // Pricing based on material
-  const unitPrice = useMemo(() => {
-    switch (cardMaterial) {
-      case 'metal':
-        return 2499;
-      case 'wood':
-        return 1999;
-      case 'pvc':
-      default:
-        return 1499;
-    }
+  // Pricing: Separate Material Rate + Design Rate (Combined price shown to customer)
+  const pricingBreakdown = useMemo(() => {
+    return getCardPricing(cardMaterial);
   }, [cardMaterial]);
+
+  const unitPrice = pricingBreakdown.combinedPrice;
 
   const subtotal = unitPrice * quantity;
   const shippingCost = subtotal >= 2000 ? 0 : 99; // Free above ₹2,000
@@ -209,8 +281,26 @@ export function CheckoutPage() {
   const totalAmount = subtotal + shippingCost + taxAmount;
 
   // Step 2: Digital Profile Association
+  const initialPurpose = useMemo<'personal' | 'business'>(() => {
+    const p = searchParams.get('purpose');
+    if (p === 'business') return 'business';
+    if (localDraft?.purpose === 'business' || localDraft?.simpleCard?.purpose === 'business') return 'business';
+    return 'personal';
+  }, [searchParams, localDraft]);
+
+  const [profileUsage, setProfileUsage] = useState<'personal' | 'business'>(initialPurpose);
+
+  useEffect(() => {
+    if (initialPurpose) setProfileUsage(initialPurpose);
+  }, [initialPurpose]);
+
   const [profileChoice, setProfileChoice] = useState<'attach' | 'assistance'>('attach');
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>(() => {
+    const t = searchParams.get('templateId') || searchParams.get('template');
+    if (t) return t;
+    return 'premium-brand';
+  });
   const [conciergeNotes, setConciergeNotes] = useState<string>('');
 
   const { data: profiles = [], isLoading: profilesLoading } = useQuery<ProfileOption[]>({
@@ -297,14 +387,26 @@ export function CheckoutPage() {
     if (formBannerError) setFormBannerError(null);
   };
 
+  // Phone normalization for Indian mobile numbers (handles +91, 91, 0 prefixes)
+  const normalizeIndianPhone = (raw: string): string => {
+    let clean = raw.replace(/\D/g, '');
+    if (clean.length === 12 && clean.startsWith('91')) {
+      clean = clean.slice(2);
+    } else if (clean.length === 11 && clean.startsWith('0')) {
+      clean = clean.slice(1);
+    }
+    return clean;
+  };
+
   // Address Validation
   const validateAddressForm = (): boolean => {
     const errors: Record<string, string> = {};
     if (!addressForm.fullName.trim()) errors.fullName = 'Full name is required';
+    const cleanPhone = normalizeIndianPhone(addressForm.phone);
     if (!addressForm.phone.trim()) {
       errors.phone = 'Phone number is required';
-    } else if (!/^[6-9]\d{9}$/.test(addressForm.phone.replace(/\D/g, ''))) {
-      errors.phone = 'Please enter a valid 10-digit Indian mobile number';
+    } else if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+      errors.phone = 'Please enter a valid 10-digit mobile number';
     }
     if (!addressForm.addressLine1.trim()) errors.addressLine1 = 'Street / House / Flat details are required';
     if (!addressForm.city.trim()) errors.city = 'City / District is required';
@@ -328,9 +430,14 @@ export function CheckoutPage() {
       setCurrentStep(2);
       setMaxStepReached((prev) => Math.max(prev, 2) as CheckoutStep);
     } else if (currentStep === 2) {
-      if (profileChoice === 'attach' && profiles.length > 0 && !selectedProfileId) {
-        setFormBannerError('Please choose a digital profile to attach to your card.');
-        return;
+      if (profileChoice === 'attach') {
+        if (profiles.length === 0) {
+          // Gracefully fallback to concierge setup when no profiles exist
+          setProfileChoice('assistance');
+        } else if (!selectedProfileId) {
+          setFormBannerError('Please choose a digital profile to attach to your card.');
+          return;
+        }
       }
       setCurrentStep(3);
       setMaxStepReached((prev) => Math.max(prev, 3) as CheckoutStep);
@@ -344,6 +451,29 @@ export function CheckoutPage() {
         if (!validateAddressForm()) {
           setFormBannerError('Please fix the highlighted fields in your address.');
           return;
+        }
+
+        // Auto-persist address to user's address book for future purchases
+        if (addressForm.saveForLater !== false && sessionData?.user && !editingAddress) {
+          ApiClient.post<SavedAddress>('/api/v1/addresses', {
+            recipientName: addressForm.fullName.trim(),
+            phone: normalizeIndianPhone(addressForm.phone),
+            email: addressForm.email?.trim() || undefined,
+            whatsappNumber: addressForm.whatsappNumber ? normalizeIndianPhone(addressForm.whatsappNumber) : undefined,
+            addressLine1: addressForm.addressLine1.trim(),
+            addressLine2: addressForm.addressLine2?.trim() || undefined,
+            city: addressForm.city.trim(),
+            state: addressForm.stateName.trim(),
+            postalCode: addressForm.postalCode.trim(),
+            country: addressForm.country || 'India',
+            deliveryInstructions: orderDeliveryInstructions || addressForm.deliveryInstructions?.trim() || undefined,
+            label: addressForm.label || 'Home',
+            customLabel: addressForm.customLabel?.trim() || undefined,
+            isDefault: savedAddresses.length === 0,
+          }).then((created) => {
+            queryClient.invalidateQueries({ queryKey: ['saved-addresses'] });
+            setSelectedAddressId(created.id);
+          }).catch(() => { });
         }
       }
       setCurrentStep(4);
@@ -471,6 +601,12 @@ export function CheckoutPage() {
 
   // Final Order Submission Handler
   const handlePlaceOrder = async () => {
+    if (isSubmittingOrder) return;
+    if (!sessionData?.user) {
+      setShowAuthModal(true);
+      return;
+    }
+
     setIsSubmittingOrder(true);
     setFormBannerError(null);
     setErrorReferenceId(null);
@@ -481,9 +617,9 @@ export function CheckoutPage() {
       if (savedAddresses.length > 0 && !isAddingNewAddress && selectedSavedAddress) {
         shippingAddressPayload = {
           fullName: selectedSavedAddress.recipientName,
-          phone: selectedSavedAddress.phone,
+          phone: normalizeIndianPhone(selectedSavedAddress.phone),
           email: selectedSavedAddress.email || sessionData?.user?.email || '',
-          whatsappNumber: selectedSavedAddress.whatsappNumber || undefined,
+          whatsappNumber: selectedSavedAddress.whatsappNumber ? normalizeIndianPhone(selectedSavedAddress.whatsappNumber) : undefined,
           addressLine1: selectedSavedAddress.addressLine1,
           addressLine2: selectedSavedAddress.addressLine2 || undefined,
           city: selectedSavedAddress.city,
@@ -496,25 +632,25 @@ export function CheckoutPage() {
         ApiClient.post(`/api/v1/addresses/${selectedSavedAddress.id}/use`, {}).catch(() => { });
       } else {
         shippingAddressPayload = {
-          fullName: addressForm.fullName,
-          phone: addressForm.phone,
-          email: addressForm.email || sessionData?.user?.email || '',
-          whatsappNumber: addressForm.whatsappNumber || undefined,
-          addressLine1: addressForm.addressLine1,
-          addressLine2: addressForm.addressLine2 || undefined,
-          city: addressForm.city,
-          state: addressForm.stateName,
-          postalCode: addressForm.postalCode,
+          fullName: addressForm.fullName.trim(),
+          phone: normalizeIndianPhone(addressForm.phone),
+          email: addressForm.email?.trim() || sessionData?.user?.email || '',
+          whatsappNumber: addressForm.whatsappNumber ? normalizeIndianPhone(addressForm.whatsappNumber) : undefined,
+          addressLine1: addressForm.addressLine1.trim(),
+          addressLine2: addressForm.addressLine2?.trim() || undefined,
+          city: addressForm.city.trim(),
+          state: addressForm.stateName.trim(),
+          postalCode: addressForm.postalCode.trim(),
           country: addressForm.country || 'India',
-          deliveryInstructions: orderDeliveryInstructions || addressForm.deliveryInstructions || undefined,
+          deliveryInstructions: orderDeliveryInstructions || addressForm.deliveryInstructions?.trim() || undefined,
         };
 
         if (addressForm.saveForLater && sessionData?.user) {
           ApiClient.post('/api/v1/addresses', {
-            recipientName: addressForm.fullName,
-            phone: addressForm.phone,
-            email: addressForm.email || undefined,
-            whatsappNumber: addressForm.whatsappNumber || undefined,
+            recipientName: addressForm.fullName.trim(),
+            phone: normalizeIndianPhone(addressForm.phone),
+            email: addressForm.email?.trim() || undefined,
+            whatsappNumber: addressForm.whatsappNumber ? normalizeIndianPhone(addressForm.whatsappNumber) : undefined,
             addressLine1: addressForm.addressLine1,
             addressLine2: addressForm.addressLine2 || undefined,
             city: addressForm.city,
@@ -529,15 +665,39 @@ export function CheckoutPage() {
         }
       }
 
+      const resolvedDesignSnapshot =
+        studioDesignSnapshot ||
+        localDraft?.simpleCard ||
+        (searchParams.get('name')
+          ? {
+              cardCustomization: {
+                name: searchParams.get('name') || '',
+                title: searchParams.get('title') || '',
+                extra: searchParams.get('extra') || '',
+                finish: searchParams.get('finish') || 'gold',
+                style: searchParams.get('style') || 'classic',
+                surface: searchParams.get('surface') || 'metal',
+                material: cardMaterial,
+              },
+              capturedAt: new Date().toISOString(),
+            }
+          : null);
+
       const orderPayload = {
         designId: queryDesignId && queryDesignId !== 'draft' ? queryDesignId : (fetchedDesign?.id || undefined),
-        designSnapshot: studioDesignSnapshot,
+        designSnapshot: resolvedDesignSnapshot,
         productId: queryProductId,
         quantity,
         cardMaterial,
+        materialRate: pricingBreakdown.materialRate,
+        designRate: pricingBreakdown.designRate,
+        templateId: selectedTemplateId,
+        profileUsage,
         profileId: profileChoice === 'attach' ? selectedProfileId : null,
         requestProfileAssistance: profileChoice === 'assistance',
-        profileAssistanceNotes: profileChoice === 'assistance' ? conciergeNotes : undefined,
+        profileAssistanceNotes: profileChoice === 'assistance'
+          ? `Template: ${CHECKOUT_TEMPLATES.find((t) => t.id === selectedTemplateId)?.name || selectedTemplateId}. ${conciergeNotes.trim()}`
+          : `Template: ${CHECKOUT_TEMPLATES.find((t) => t.id === selectedTemplateId)?.name || selectedTemplateId}`,
         shippingAddress: shippingAddressPayload,
         paymentMethod,
         idempotencyKey: idempotencyKeyRef.current,
@@ -562,12 +722,14 @@ export function CheckoutPage() {
   const getProductName = (mat: string) => {
     switch (mat) {
       case 'metal':
-        return 'Obsidian Matte Metal';
+        return 'Metal NFC Card';
       case 'wood':
-        return 'Handcrafted Wood';
+        return 'Wood NFC Card';
+      case 'matte':
+        return 'Matte NFC Card';
       case 'pvc':
       default:
-        return 'Matte Obsidian PVC';
+        return 'PVC NFC Card';
     }
   };
 
@@ -668,8 +830,40 @@ export function CheckoutPage() {
           <div className="mb-5 p-3.5 sm:p-4 rounded-xl bg-red-50 border border-red-200 text-red-900 flex items-start gap-3 text-xs sm:text-sm animate-in fade-in duration-150">
             <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 shrink-0 mt-0.5" />
             <div className="flex-1">
-              <p className="font-semibold text-red-900">Please review your information</p>
-              <p className="text-red-700 mt-0.5">{formBannerError}</p>
+              <p className="font-semibold text-red-900">
+                {formBannerError.toLowerCase().includes('authentication')
+                  ? 'Sign in required to place order'
+                  : 'Please review your information'}
+              </p>
+              <p className="text-red-700 mt-0.5">
+                {formBannerError.toLowerCase().includes('authentication')
+                  ? 'You must be signed in to your Taptch account so your physical NFC card can be linked to your profile and tracked during shipment.'
+                  : formBannerError}
+              </p>
+              {formBannerError.toLowerCase().includes('authentication') && (
+                <div className="mt-3 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const redirect = encodeURIComponent(window.location.pathname + window.location.search);
+                      navigate(`/login?redirect=${redirect}`);
+                    }}
+                    className="px-3.5 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-xs transition-all active:scale-95"
+                  >
+                    Sign In to Account
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const redirect = encodeURIComponent(window.location.pathname + window.location.search);
+                      navigate(`/register?redirect=${redirect}`);
+                    }}
+                    className="px-3.5 py-1.5 rounded-lg border border-red-300 bg-white hover:bg-red-50 text-red-900 font-bold text-xs shadow-xs transition-all active:scale-95"
+                  >
+                    Create Free Account
+                  </button>
+                </div>
+              )}
               {errorReferenceId && (
                 <p className="text-xs text-red-600 mt-1 font-mono">
                   Reference: <span className="font-semibold">{errorReferenceId}</span>
@@ -705,55 +899,41 @@ export function CheckoutPage() {
                 </div>
 
                 {/* Material Selection Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
                   {[
-                    {
-                      id: 'pvc',
-                      name: 'Matte Obsidian PVC',
-                      price: '₹1,499',
-                      desc: 'Lightweight, durable & water-resistant matte finish.',
-                    },
-                    {
-                      id: 'wood',
-                      name: 'Handcrafted Wood',
-                      price: '₹1,999',
-                      desc: 'Authentic dark walnut finish with precision laser engraving.',
-                    },
-                    {
-                      id: 'metal',
-                      name: 'Obsidian Matte Metal',
-                      price: '₹2,499',
-                      desc: 'Aerospace-grade stainless steel with weighted luxury feel.',
-                    },
+                    { id: 'pvc', name: 'PVC' },
+                    { id: 'matte', name: 'Matte' },
+                    { id: 'wood', name: 'Wood' },
+                    { id: 'metal', name: 'Metal' },
                   ].map((mat) => {
                     const isSelected = cardMaterial === mat.id;
+                    const combinedPrice = getCardPricing(mat.id as CardMaterial).combinedPrice;
                     return (
                       <button
                         key={mat.id}
                         type="button"
-                        onClick={() => setCardMaterial(mat.id as any)}
-                        className={`text-left p-3.5 sm:p-4 rounded-xl border transition-all relative flex flex-col justify-between ${isSelected
-                          ? 'bg-[#FFF8F3] border-2 border-[#FF6A00] ring-1 ring-[#FF6A00]/20 shadow-xs'
-                          : 'bg-white border-gray-200 hover:border-gray-300'
-                          }`}
+                        onClick={() => setCardMaterial(mat.id as CardMaterial)}
+                        className={`text-left p-3.5 sm:p-4 rounded-xl border transition-all relative flex flex-col justify-between ${
+                          isSelected
+                            ? 'bg-[#FFF8F3] border-2 border-[#FF6A00] ring-1 ring-[#FF6A00]/20 shadow-xs'
+                            : 'bg-white border-gray-200 hover:border-gray-300'
+                        }`}
                       >
-                        <div>
-                          <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-sm font-bold text-zinc-900">{mat.name}</span>
-                            <div
-                              className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors shrink-0 ml-1.5 ${isSelected
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm sm:text-base font-bold text-zinc-900">{mat.name}</span>
+                          <div
+                            className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors shrink-0 ml-1 ${
+                              isSelected
                                 ? 'border-[#FF6A00] bg-[#FF6A00] text-white'
                                 : 'border-gray-300 bg-white'
-                                }`}
-                            >
-                              {isSelected && <Check className="w-2.5 h-2.5 stroke-[3] text-white" />}
-                            </div>
+                            }`}
+                          >
+                            {isSelected && <Check className="w-2.5 h-2.5 stroke-[3] text-white" />}
                           </div>
-                          <p className="text-xs text-gray-500 leading-relaxed">{mat.desc}</p>
                         </div>
-                        <div className="mt-3 pt-2.5 border-t border-gray-100 flex items-baseline justify-between">
-                          <span className="text-base font-bold text-zinc-900">{mat.price}</span>
-                          <span className="text-[11px] text-gray-400">per card</span>
+                        <div className="pt-2 border-t border-gray-100 flex items-baseline justify-between">
+                          <span className="text-base sm:text-lg font-bold text-zinc-900">₹{combinedPrice.toLocaleString('en-IN')}</span>
+                          <span className="text-[10px] sm:text-[11px] text-gray-400">per card</span>
                         </div>
                       </button>
                     );
@@ -788,7 +968,7 @@ export function CheckoutPage() {
                     </div>
                   </div>
 
-                    <div className="max-w-[260px] mx-auto">
+                    <div className="w-full max-w-[280px] xs:max-w-[320px] sm:max-w-[340px] mx-auto">
                       {isDesignLoading || isRenderingArtwork ? (
                           <div className="aspect-[85.6/54] rounded-xl border border-gray-200 bg-white flex flex-col items-center justify-center p-4 space-y-2">
                             <Loader2 className="w-6 h-6 animate-spin text-[#FF6A00]" />
@@ -806,18 +986,18 @@ export function CheckoutPage() {
                                 showFlipHint={true}
                                 onFlip={(s) => setPreviewSide(s)}
                                 cloudinaryWidth={800}
-                                className="rounded-xl shadow-xs"
+                                className="rounded-xl shadow-xs w-full"
                               />
                               <button
                                 type="button"
                                 onClick={() => navigate(`/design-studio?productId=${encodeURIComponent(queryProductId)}`)}
-                                className="text-[11px] font-semibold text-[#FF6A00] hover:underline block mx-auto pt-2"
+                                className="text-[11px] font-semibold text-[#FF6A00] hover:underline block mx-auto pt-2 text-center"
                               >
                                 Customize in Design Studio
                               </button>
                           </>
                     )}
-                        </div>
+                    </div>
                 </div>
 
                     {/* Quantity Selector */}
@@ -895,8 +1075,130 @@ export function CheckoutPage() {
                           Link Digital Profile
                         </h2>
                         <p className="text-xs text-gray-500 mt-0.5">
-                          Choose what happens when someone taps your physical NFC card with their phone.
+                          Choose what opens when someone taps your physical NFC card with their phone.
                         </p>
+                      </div>
+
+                      {/* 1. Card Purpose: Personal (1 Profile) vs Business (Multiple Profiles) */}
+                      <div className="p-4 bg-gray-50/90 border border-gray-200 rounded-xl space-y-3">
+                        <div>
+                          <span className="text-xs font-bold uppercase tracking-wider text-zinc-700 block">
+                            Card Purpose
+                          </span>
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            Select whether this card is for individual personal use or for a company team.
+                          </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {/* Personal Option */}
+                          <div
+                            onClick={() => setProfileUsage('personal')}
+                            className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
+                              profileUsage === 'personal'
+                                ? 'bg-white border-2 border-[#FF6A00] ring-1 ring-[#FF6A00]/20 shadow-xs'
+                                : 'bg-white border-gray-200 hover:border-gray-300'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-sm font-bold text-zinc-900 flex items-center gap-1.5">
+                                <User className="w-4 h-4 text-[#FF6A00]" />
+                                Personal (1 Profile)
+                              </span>
+                              {profileUsage === 'personal' && (
+                                <Check className="w-4 h-4 text-[#FF6A00]" />
+                              )}
+                            </div>
+                            <p className="text-xs text-gray-500 leading-relaxed">
+                              Best for 1 person. When anyone taps your card with their phone, it directly opens your <strong>1 personal profile</strong> with your phone, email, WhatsApp, and social links.
+                            </p>
+                          </div>
+
+                          {/* Business Option */}
+                          <div
+                            onClick={() => setProfileUsage('business')}
+                            className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
+                              profileUsage === 'business'
+                                ? 'bg-white border-2 border-indigo-600 ring-1 ring-indigo-600/20 shadow-xs'
+                                : 'bg-white border-gray-200 hover:border-gray-300'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-sm font-bold text-zinc-900 flex items-center gap-1.5">
+                                <Building2 className="w-4 h-4 text-indigo-600" />
+                                Business (Multiple Profiles)
+                              </span>
+                              {profileUsage === 'business' && (
+                                <Check className="w-4 h-4 text-indigo-600" />
+                              )}
+                            </div>
+                            <p className="text-xs text-gray-500 leading-relaxed">
+                              Best for companies & teams. Lets you manage <strong>multiple employee profiles</strong>, company catalogs, brochures, and team leads all in one place.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 2. Profile Template Selector (Simple, compact & mobile-optimized) */}
+                      <div className="p-3.5 sm:p-4 bg-gray-50/90 border border-gray-200 rounded-xl space-y-2.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <div>
+                            <span className="text-xs font-bold uppercase tracking-wider text-zinc-700 block">
+                              Select Profile Template
+                            </span>
+                            <p className="text-[11px] text-gray-500 mt-0.5">
+                              Choose the layout and style for your digital profile page.
+                            </p>
+                          </div>
+                          <span className="text-[10px] font-semibold text-[#FF6A00] bg-orange-50 px-2 py-0.5 rounded border border-orange-200 shrink-0">
+                            {CHECKOUT_TEMPLATES.find((t) => t.id === selectedTemplateId)?.name || 'Obsidian Luxury'}
+                          </span>
+                        </div>
+
+                        {/* Simple Small Grid for Phones (2 cols mobile, 3 cols tablet+) */}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                          {CHECKOUT_TEMPLATES.map((tmpl) => {
+                            const isSelected = selectedTemplateId === tmpl.id;
+                            return (
+                              <button
+                                key={tmpl.id}
+                                type="button"
+                                onClick={() => setSelectedTemplateId(tmpl.id)}
+                                className={`p-2.5 rounded-xl border text-left transition-all relative flex flex-col justify-between ${
+                                  isSelected
+                                    ? 'bg-white border-2 border-[#FF6A00] ring-1 ring-[#FF6A00]/20 shadow-xs'
+                                    : 'bg-white border-gray-200 hover:border-gray-300'
+                                }`}
+                              >
+                                <div className="flex items-center justify-between mb-1.5">
+                                  <div className="flex items-center gap-1">
+                                    <span
+                                      className="w-3.5 h-3.5 rounded-full border border-black/10 shadow-2xs shrink-0"
+                                      style={{ backgroundColor: tmpl.theme.bg }}
+                                    />
+                                    <span
+                                      className="w-3.5 h-3.5 rounded-full border border-black/10 shadow-2xs shrink-0"
+                                      style={{ backgroundColor: tmpl.theme.accent }}
+                                    />
+                                  </div>
+                                  {isSelected ? (
+                                    <Check className="w-3.5 h-3.5 text-[#FF6A00] stroke-[3]" />
+                                  ) : (
+                                    <span className="w-3 h-3 rounded-full border border-gray-300" />
+                                  )}
+                                </div>
+                                <div>
+                                  <span className="text-xs font-bold text-zinc-900 block truncate leading-tight">
+                                    {tmpl.name}
+                                  </span>
+                                  <span className="text-[10px] text-gray-400 block truncate mt-0.5">
+                                    {tmpl.style}
+                                  </span>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
 
                       <div className="space-y-3">
@@ -917,10 +1219,14 @@ export function CheckoutPage() {
                             />
                             <div className="flex-1">
                               <span className="text-sm font-bold text-zinc-900 block">
-                                Link to one of my existing digital profiles
+                                {profileUsage === 'business'
+                                  ? 'Link to my company profile'
+                                  : 'Link to my personal profile (1 Profile)'}
                               </span>
                               <span className="text-xs text-gray-500 mt-0.5 block leading-relaxed">
-                                Your physical card tap will immediately open your chosen live profile.
+                                {profileUsage === 'business'
+                                  ? 'Tapping this card will open your company profile. You can also add and assign multiple team member profiles later.'
+                                  : 'Tapping this card will immediately open your personal contact card with phone, email, and social links.'}
                               </span>
 
                               {profileChoice === 'attach' && (
@@ -990,10 +1296,14 @@ export function CheckoutPage() {
                             />
                             <div className="flex-1">
                               <span className="text-sm font-bold text-zinc-900 block">
-                                Free Concierge Profile Setup
+                                {profileUsage === 'business'
+                                  ? 'Free Business & Team Profile Setup'
+                                  : 'Free Personal Profile Setup'}
                               </span>
                               <span className="text-xs text-gray-500 mt-0.5 block leading-relaxed">
-                                Our digital identity specialists will contact you after order placement to design and configure your digital profile before dispatch.
+                                {profileUsage === 'business'
+                                  ? 'Our onboarding team will contact you to set up multiple employee profiles, company branding, and product catalogs before dispatch.'
+                                  : 'Our specialists will contact you after order placement to build and configure your 1 personal digital profile before dispatch.'}
                               </span>
 
                               {profileChoice === 'assistance' && (
@@ -1172,26 +1482,37 @@ export function CheckoutPage() {
                             showInstructionsField={true}
                           />
 
-                          {sessionData?.user && isAddingNewAddress && (
-                            <div className="pt-2 flex justify-end gap-2">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setIsAddingNewAddress(false);
-                                  setEditingAddress(null);
-                                }}
-                                className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 hover:text-zinc-900 bg-gray-100 transition-colors"
-                              >
-                                Cancel
-                              </button>
+                          {sessionData?.user && (
+                            <div className="pt-3 border-t border-gray-100 flex items-center justify-end gap-2.5">
+                              {savedAddresses.length > 0 && isAddingNewAddress && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setIsAddingNewAddress(false);
+                                    setEditingAddress(null);
+                                  }}
+                                  className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 hover:text-zinc-900 bg-gray-100 transition-colors"
+                                >
+                                  Cancel
+                                </button>
+                              )}
                               <button
                                 type="button"
                                 onClick={handleSaveNewAddress}
                                 disabled={isSavingAddress}
-                                className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-[#FF6A00] hover:bg-[#E85F00] transition-colors flex items-center gap-1.5 shadow-sm"
+                                className="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-[#FF6A00] hover:bg-[#E85F00] transition-colors flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer disabled:opacity-50"
                               >
-                                {isSavingAddress && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                                {editingAddress ? 'Update Address' : 'Save Address'}
+                                {isSavingAddress ? (
+                                  <>
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    <span>Saving Address...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Check className="w-3.5 h-3.5 stroke-[3]" />
+                                    <span>{editingAddress ? 'Update Address' : 'Save Address'}</span>
+                                  </>
+                                )}
                               </button>
                             </div>
                           )}
@@ -1358,13 +1679,21 @@ export function CheckoutPage() {
                     </div>
 
                     {/* Linked Profile Badge */}
-                    <div className="p-2.5 rounded-lg bg-gray-50 border border-gray-200 text-xs">
-                      <span className="text-[11px] text-gray-500 block mb-0.5">Card Linked To:</span>
-                      <span className="font-semibold text-[#FF6A00]">
-                        {profileChoice === 'attach'
-                          ? profiles.find((p) => p.id === selectedProfileId)?.displayName || 'Linked Profile'
-                          : 'Free Concierge Setup'}
-                      </span>
+                    <div className="p-2.5 rounded-lg bg-gray-50 border border-gray-200 text-xs space-y-1.5">
+                      <div>
+                        <span className="text-[11px] text-gray-500 block mb-0.5">Card Linked To:</span>
+                        <span className="font-semibold text-[#FF6A00]">
+                          {profileChoice === 'attach'
+                            ? profiles.find((p) => p.id === selectedProfileId)?.displayName || 'Linked Profile'
+                            : 'Free Concierge Setup'}
+                        </span>
+                      </div>
+                      <div className="pt-1 border-t border-gray-200/60 flex items-center justify-between text-[11px]">
+                        <span className="text-gray-500">Theme:</span>
+                        <span className="font-semibold text-zinc-800">
+                          {CHECKOUT_TEMPLATES.find((t) => t.id === selectedTemplateId)?.name || 'Obsidian Luxury'}
+                        </span>
+                      </div>
                     </div>
 
                     {/* Price Breakdown */}
@@ -1478,6 +1807,12 @@ export function CheckoutPage() {
                   </span>
                 </div>
                 <div className="flex justify-between">
+                  <span>Theme:</span>
+                  <span className="font-semibold text-zinc-800">
+                    {CHECKOUT_TEMPLATES.find((t) => t.id === selectedTemplateId)?.name || 'Obsidian Luxury'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
                   <span>Express Shipping:</span>
                   <span className={shippingCost === 0 ? 'text-emerald-700 font-semibold' : 'text-zinc-800'}>
                     {shippingCost === 0 ? 'FREE' : `₹${shippingCost}`}
@@ -1505,7 +1840,12 @@ export function CheckoutPage() {
                     <ChevronUp className="w-3.5 h-3.5" />
                   )}
                 </button>
-                <span className="text-lg font-bold text-[#FF6A00]">₹{totalAmount}</span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-lg font-bold text-[#FF6A00]">₹{totalAmount.toLocaleString('en-IN')}</span>
+                  <span className="text-[10px] text-gray-400">
+                    {shippingCost === 0 ? '(Free ship + GST)' : '(Incl. ship + GST)'}
+                  </span>
+                </div>
               </div>
 
               <div className="flex items-center gap-2">
@@ -1609,6 +1949,51 @@ export function CheckoutPage() {
               </div>
             </div>
           )}
+          {/* Authentication Required Modal */}
+          {showAuthModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+              <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 text-zinc-900 animate-in zoom-in-95 duration-200">
+                <div className="w-12 h-12 rounded-xl bg-orange-50 border border-orange-200 flex items-center justify-center text-[#FF6A00] mb-4">
+                  <Lock className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-zinc-900 mb-1.5">
+                  Sign in to complete your NFC card order
+                </h3>
+                <p className="text-xs text-zinc-600 leading-relaxed mb-6">
+                  Your customized card design and delivery address have been preserved. Please sign in or register so your physical NFC card can be linked to your profile and tracked during shipment.
+                </p>
+                <div className="flex flex-col gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const redirect = encodeURIComponent(window.location.pathname + window.location.search);
+                      navigate(`/login?redirect=${redirect}`);
+                    }}
+                    className="w-full py-3 px-4 rounded-xl bg-[#FF6A00] hover:bg-[#e55f00] text-white font-bold text-sm shadow-md transition-all active:scale-95"
+                  >
+                    Sign In to My Account
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const redirect = encodeURIComponent(window.location.pathname + window.location.search);
+                      navigate(`/register?redirect=${redirect}`);
+                    }}
+                    className="w-full py-3 px-4 rounded-xl border border-gray-200 bg-gray-50 hover:bg-gray-100 text-zinc-800 font-bold text-sm transition-all"
+                  >
+                    Create a New Account
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowAuthModal(false)}
+                    className="w-full py-2 text-xs font-semibold text-zinc-500 hover:text-zinc-800"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-        );
+      );
 }

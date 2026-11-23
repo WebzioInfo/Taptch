@@ -11,8 +11,10 @@ export interface CreateOrderDto {
   productId?: string;
   variantId?: string;
   quantity?: number;
-  cardMaterial?: 'pvc' | 'metal' | 'wood';
+  cardMaterial?: 'pvc' | 'metal' | 'wood' | 'matte';
+  designTier?: 'standard' | 'premium';
   profileId?: string | null;
+  templateId?: string;
   requestProfileAssistance?: boolean;
   profileAssistanceNotes?: string;
   shippingAddress: {
@@ -248,12 +250,24 @@ export class OrdersService {
         product = p;
       } catch (e) { }
 
-      let unitPrice = product?.discountPrice || product?.basePrice;
-      if (!unitPrice) {
-        if (data.cardMaterial === 'metal') unitPrice = 2499;
-        else if (data.cardMaterial === 'wood') unitPrice = 1999;
-        else unitPrice = 1499;
-      }
+      // 3. Resolve Product & Pricing on Backend (Material Rate + Design Rate = Combined Unit Price)
+      const materialRates: Record<string, number> = {
+        pvc: 1099,
+        matte: 1099,
+        wood: 1499,
+        metal: 1999,
+      };
+      const defaultDesignRates: Record<string, number> = {
+        pvc: 400,
+        matte: 400,
+        wood: 500,
+        metal: 500,
+      };
+
+      const selectedMaterial = data.cardMaterial || 'pvc';
+      const materialRate = materialRates[selectedMaterial] ?? 1099;
+      const designRate = defaultDesignRates[selectedMaterial] ?? 400;
+      const unitPrice = materialRate + designRate; // Combined Price: PVC ₹1499, Matte ₹1499, Wood ₹1999, Metal ₹2499
       const quantity = Math.max(1, data.quantity || 1);
       const subtotal = unitPrice * quantity;
       const shippingCost = subtotal >= 2000 ? 0 : 99; // Free shipping above ₹2,000
@@ -370,7 +384,14 @@ export class OrdersService {
         orderId,
         productId,
         productName: product?.name || 'Custom Contactless NFC Card',
-        variantName: data.cardMaterial === 'metal' ? 'Matte Titanium Metal' : 'Matte Obsidian PVC',
+        variantName:
+          data.cardMaterial === 'metal'
+            ? 'Metal NFC Card'
+            : data.cardMaterial === 'wood'
+            ? 'Wood NFC Card'
+            : data.cardMaterial === 'matte'
+            ? 'Matte NFC Card'
+            : 'PVC NFC Card',
         unitPrice,
         quantity,
         total: subtotal,
@@ -439,6 +460,7 @@ export class OrdersService {
         gatewayOrderId,
         currency: 'INR',
         amount: totalAmount,
+        isDuplicate: false,
       };
     });
   }

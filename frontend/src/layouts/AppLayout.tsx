@@ -7,8 +7,6 @@ import {
   CreditCard,
   Package,
   QrCode,
-  Users,
-  Settings,
   LogOut,
   Menu,
   X,
@@ -27,7 +25,6 @@ export function AppLayout() {
     { to: '/cards', label: 'Cards', icon: CreditCard },
     { to: '/orders', label: 'Orders', icon: Package },
     { to: '/qr', label: 'QR Engine', icon: QrCode },
-    { to: '/leads', label: 'Leads', icon: Users },
   ];
 
   const userInitials = (session?.user?.name || 'U')
@@ -46,13 +43,6 @@ export function AppLayout() {
         <header className="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-[#E8E8E8] sticky top-0 z-40">
           <BrandLogo variant="symbol" size="sm" asLink href="/dashboard" />
             <div className="flex items-center space-x-1">
-              <Link
-                to="/settings"
-                className="p-2 text-[#666666] hover:text-[#171717] rounded-lg transition-colors"
-                title="Settings"
-              >
-                <Settings className="w-5 h-5" />
-              </Link>
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="p-2 text-[#666666] hover:text-[#171717] rounded-lg transition-colors"
@@ -77,7 +67,7 @@ export function AppLayout() {
                         </button>
                       </div>
                       <nav className="space-y-1">
-                        {[...navItems, { to: '/settings', label: 'Account Settings', icon: Settings }].map((item) => {
+                        {navItems.map((item) => {
                           const Icon = item.icon;
                           const isActive = location.pathname === item.to || location.pathname.startsWith(`${item.to}/`);
                           return (
@@ -149,19 +139,6 @@ export function AppLayout() {
                                       </Link>
                                     );
                                   })}
-                                  <Link
-                                    to="/settings"
-                                    className={`relative flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${location.pathname.startsWith('/settings')
-                                        ? 'bg-[#FFF3E9] text-[#FF6A00] font-semibold'
-                                        : 'text-[#666666] hover:text-[#171717] hover:bg-[#F8F9FB]'
-                                      }`}
-                                  >
-                                    {location.pathname.startsWith('/settings') && (
-                                      <div className="absolute left-0 top-2 bottom-2 w-1 rounded-r bg-[#FF6A00]" />
-                                    )}
-                                    <Settings className="w-4 h-4" />
-                                    <span>Settings</span>
-                                  </Link>
 
                                   {/* Role-Specific Governance & Support */}
                                   {(session?.user?.systemRole === 'super_admin' || session?.user?.systemRole === 'admin') && (

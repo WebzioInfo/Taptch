@@ -15,7 +15,7 @@ import {
   MapPin,
   Clock,
   ShoppingBag,
-  Sparkles,
+  Tag,
   Lock,
   Phone,
 } from 'lucide-react';
@@ -232,7 +232,7 @@ export function RetailTemplate({
                               key={i}
                               className="p-3.5 rounded-2xl border border-rose-500/20 bg-rose-500/5 text-center flex flex-col items-center justify-center space-y-1"
                             >
-                              <Sparkles className="w-4 h-4 text-rose-400" />
+                              <Tag className="w-4 h-4 text-rose-400" />
                               <span className="text-xs font-semibold text-slate-200">{h}</span>
                             </div>
                           ))}

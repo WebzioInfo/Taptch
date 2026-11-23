@@ -18,7 +18,7 @@ import {
   Upload,
   Palette,
   Shapes,
-  Sparkles,
+  Stamp,
   Layers,
   Search,
   Lock,
@@ -372,7 +372,7 @@ export const EditorLeftSidebar: React.FC<EditorLeftSidebarProps> = ({
           { id: 'uploads', label: 'Uploads', icon: Upload },
           { id: 'background', label: 'Color', icon: Palette },
           { id: 'elements', label: 'Shapes', icon: Shapes },
-          { id: 'artwork', label: 'Artwork', icon: Sparkles },
+          { id: 'artwork', label: 'Artwork', icon: Stamp },
           { id: 'layers', label: 'Layers', icon: Layers },
         ].map((tab) => {
           const Icon = tab.icon;

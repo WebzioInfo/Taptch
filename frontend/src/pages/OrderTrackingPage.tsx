@@ -18,7 +18,7 @@ import {
   ExternalLink,
   ChevronLeft,
   ChevronRight,
-  Sparkles,
+  CreditCard,
   AlertCircle,
   Loader2,
   Copy,
@@ -506,7 +506,7 @@ export function OrderTrackingPage() {
                               <div className="bg-white rounded-[12px] p-4 sm:p-5 border border-[#E9E9E6] shadow-xs space-y-2.5 text-xs">
                                 <div className="flex items-center justify-between border-b border-[#F4F4F2] pb-2.5">
                                   <h3 className="font-bold text-[14px] text-[#161616] flex items-center gap-2">
-                                    <Sparkles className="w-4 h-4 text-[#FF6A00]" />
+                                    <CreditCard className="w-4 h-4 text-[#FF6A00]" />
                                     <span>Paired Digital Identity</span>
                                   </h3>
                                 </div>

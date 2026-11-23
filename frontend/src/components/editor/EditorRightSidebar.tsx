@@ -13,7 +13,7 @@ import { fabric } from 'fabric';
 import {
   Type,
   Sliders,
-  Sparkles,
+  Layers,
   Move,
   AlignLeft,
   AlignCenter,
@@ -405,7 +405,7 @@ export const EditorRightSidebar: React.FC = () => {
         {/* 3. SHADOW & GLOW */}
                         <div className="space-y-3">
                             <h4 className="font-head text-[11px] font-medium text-[var(--ink)] uppercase tracking-wider flex items-center space-x-1.5">
-                              <Sparkles className="w-3.5 h-3.5 text-[var(--accent-text)]" />
+                              <Layers className="w-3.5 h-3.5 text-[var(--accent-text)]" />
                               <span>Drop Shadow</span>
                             </h4>
 

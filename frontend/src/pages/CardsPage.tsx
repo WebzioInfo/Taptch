@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ApiClient } from '../services/api';
 import { Button } from '../components/ui/button';
-import { CreditCard, Sparkles } from 'lucide-react';
+import { CreditCard, Plus } from 'lucide-react';
 import { CardPreview } from '../components/cards/CardPreview';
 
 export function CardsPage() {
@@ -13,7 +13,7 @@ export function CardsPage() {
   });
 
   return (
-    <div className="p-6 sm:p-8 max-w-6xl mx-auto font-body text-[var(--ink)]">
+    <div className="p-4 sm:p-8 max-w-6xl mx-auto font-body text-[var(--ink)]">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
         <div>
           <h1 className="font-head text-2xl font-medium tracking-tight text-[var(--ink)]">
@@ -25,7 +25,7 @@ export function CardsPage() {
         </div>
         <Link to="/studio">
           <Button variant="accent" className="rounded-[var(--radius-sm)] text-xs font-medium gap-1.5 shadow-none">
-            <Sparkles className="w-4 h-4" />
+            <Plus className="w-4 h-4" />
             <span>Open Design Studio</span>
           </Button>
         </Link>

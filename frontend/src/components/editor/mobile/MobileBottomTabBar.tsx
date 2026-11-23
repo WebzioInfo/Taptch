@@ -5,7 +5,7 @@ import {
   Upload,
   Palette,
   Shapes,
-  Sparkles,
+  Stamp,
   Layers,
 } from 'lucide-react';
 
@@ -22,7 +22,7 @@ const TABS: { id: MobileTabId; label: string; icon: React.ElementType }[] = [
   { id: 'uploads', label: 'Uploads', icon: Upload },
   { id: 'background', label: 'Colors', icon: Palette },
   { id: 'elements', label: 'Shapes', icon: Shapes },
-  { id: 'artwork', label: 'Artwork', icon: Sparkles },
+  { id: 'artwork', label: 'Artwork', icon: Stamp },
   { id: 'layers', label: 'Layers', icon: Layers },
 ];
 

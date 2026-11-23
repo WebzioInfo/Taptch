@@ -13,7 +13,7 @@ import {
   Send,
   ExternalLink,
   Crown,
-  Sparkles,
+  Tag,
   Lock,
   Phone,
   MessageSquare,
@@ -272,7 +272,7 @@ export function PremiumBrandTemplate({
                   <div className="flex items-center justify-between border-b pb-3" style={{ borderColor: border }}>
                     <div>
                       <h2 className="text-lg font-bold tracking-tight flex items-center gap-2" style={{ color: heading }}>
-                        <Sparkles className="w-4 h-4" style={{ color: primary }} />
+                        <Tag className="w-4 h-4" style={{ color: primary }} />
                         Curated Private Assets &amp; Services
                       </h2>
                       <p className="text-xs opacity-75" style={{ color: text }}>Exclusive acquisitions &amp; bespoke mandates</p>

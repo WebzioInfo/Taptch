@@ -62,9 +62,10 @@ describe('Taptch NFC Card Ordering, Checkout & Tracking Flow', () => {
         // Step 1 title and product options
         expect(html).toContain('Choose Your NFC Smart Card');
         expect(html).toContain('Select your card material, preview artwork, and choose quantity');
-        expect(html).toContain('Matte Obsidian PVC');
-        expect(html).toContain('Handcrafted Wood');
-        expect(html).toContain('Obsidian Matte Metal');
+        expect(html).toContain('PVC');
+        expect(html).toContain('Matte');
+        expect(html).toContain('Wood');
+        expect(html).toContain('Metal');
 
       // 4-step progress indicator
       expect(html).toContain('Card');

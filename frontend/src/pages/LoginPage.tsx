@@ -46,7 +46,9 @@ export function LoginPage() {
     setLoading(true);
     try {
       await signIn.email({ email: email.trim(), password });
-      navigate('/dashboard');
+      const searchParams = new URLSearchParams(location.search);
+      const redirectUrl = searchParams.get('redirect') || '/dashboard';
+      navigate(redirectUrl);
     } catch (err: any) {
       setError(err?.message || 'Email or password is incorrect. Check your details and try again.');
     } finally {

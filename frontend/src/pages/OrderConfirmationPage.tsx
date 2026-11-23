@@ -18,7 +18,7 @@ import {
   ChevronRight,
   ArrowRight,
   ShieldCheck,
-  Sparkles,
+  Headphones,
   Loader2,
   AlertCircle,
   FileText,
@@ -192,7 +192,7 @@ export function OrderConfirmationPage() {
                         </div>
                       ) : order.profileAssistanceStatus && order.profileAssistanceStatus !== 'NOT_REQUIRED' ? (
                         <div className="p-3 rounded-xl bg-[var(--accent)]/10 border border-[var(--accent)]/30 flex items-start gap-2">
-                          <Sparkles className="w-4 h-4 text-[var(--accent)] shrink-0 mt-0.5" />
+                          <Headphones className="w-4 h-4 text-[var(--accent)] shrink-0 mt-0.5" />
                           <div>
                             <p className="text-xs font-bold text-[var(--accent)]">Concierge Profile Assistance Requested</p>
                             <p className="text-[11px] text-[var(--ink-muted)]">

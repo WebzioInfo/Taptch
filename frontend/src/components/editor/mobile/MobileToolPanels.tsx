@@ -5,7 +5,6 @@ import {
   Upload,
   Palette,
   Shapes,
-  Sparkles,
   Layers,
   Search,
   Lock,

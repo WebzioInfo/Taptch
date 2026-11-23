@@ -17,7 +17,6 @@ import {
   ArrowLeft,
   Save,
   Globe,
-  Sparkles,
   Smartphone,
   Eye,
   Check,
@@ -32,6 +31,7 @@ import {
   Share2,
   Briefcase,
   ShoppingBag,
+  X,
 } from 'lucide-react';
 
 export function BuilderPage() {
@@ -46,6 +46,8 @@ export function BuilderPage() {
   const [activeTab, setActiveTab] = useState<'theme' | 'identity' | 'socials' | 'businesses' | 'catalogue' | 'seo'>('theme');
   // Mobile preview toggle (when on mobile screen, toggle between form and phone view)
   const [mobileView, setMobileView] = useState<'editor' | 'preview'>('editor');
+  // Live Web Look Modal for Instant Mobile Preview
+  const [isLookModalOpen, setIsLookModalOpen] = useState(false);
 
   // Form State
   const [profileType, setProfileType] = useState<'personal' | 'business'>('personal');
@@ -422,28 +424,16 @@ export function BuilderPage() {
               </div>
             </div>
 
-            {/* Mobile View Toggle Switch */}
-            <div className="lg:hidden flex items-center bg-[var(--bg-raised)] p-0.5 rounded-[var(--radius-sm)] border border-[var(--border)] shrink-0 mx-2">
+            {/* Mobile View Web Look Modal Trigger */}
+            <div className="lg:hidden flex items-center shrink-0 mx-1.5">
               <button
                 type="button"
-                onClick={() => setMobileView('editor')}
-                className={`px-2.5 py-1 rounded-[var(--radius-sm)] text-xs font-medium transition-all ${mobileView === 'editor'
-                    ? 'bg-[var(--accent)] text-[var(--accent-ink)]'
-                    : 'text-[var(--ink-muted)] hover:text-[var(--ink)]'
-                  }`}
+                onClick={() => setIsLookModalOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFF3E9] text-[#FF6A00] border border-[#FF6A00]/30 hover:bg-[#FFE8D6] text-xs font-bold transition-all active:scale-95 shadow-xs"
+                title="Preview Web Profile Look"
               >
-                Edit
-              </button>
-              <button
-                type="button"
-                onClick={() => setMobileView('preview')}
-                className={`px-2.5 py-1 rounded-[var(--radius-sm)] text-xs font-medium flex items-center gap-1 transition-all ${mobileView === 'preview'
-                    ? 'bg-[var(--accent)] text-[var(--accent-ink)]'
-                    : 'text-[var(--ink-muted)] hover:text-[var(--ink)]'
-                  }`}
-              >
-                <Eye className="w-3.5 h-3.5" />
-                <span>Preview</span>
+                <Eye className="w-3.5 h-3.5 text-[#FF6A00]" />
+                <span>View Look</span>
               </button>
             </div>
 
@@ -504,7 +494,7 @@ export function BuilderPage() {
           <div className="flex-1 flex overflow-hidden">
             {/* Left Side: Editor Panels */}
             <div
-              className={`w-full lg:w-3/5 xl:w-7/12 border-r border-[var(--border)] overflow-y-auto p-4 sm:p-8 ${mobileView === 'preview' ? 'hidden lg:block' : 'block'
+              className={`w-full lg:w-3/5 xl:w-7/12 border-r border-[var(--border)] overflow-y-auto p-4 sm:p-8 pb-28 lg:pb-8 ${mobileView === 'preview' ? 'hidden lg:block' : 'block'
                 }`}
             >
               {/* Profile Architecture Selector (Personal vs Business) */}
@@ -602,8 +592,8 @@ export function BuilderPage() {
                       Select your architectural layout. Every theme automatically adapts your contact details and products, immediately visible in the live smartphone simulator.
                     </p>
 
-                    {/* Theme Card Grid with 2px orange border when selected and mono plan tags */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {/* Theme Card Grid with 2px orange border when selected (Responsive 2-column on mobile) */}
+                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
                       {STANDARD_TEMPLATES.map((tpl) => {
                         const canonical = canonicalTemplateId(tpl.id);
                         const isSelected = templateId === canonical || templateId === canonicalTemplateId(tpl.slug);
@@ -616,12 +606,12 @@ export function BuilderPage() {
                             key={tpl.id}
                             onClick={() => handleSelectTheme(tpl.id)}
                             className={`group relative cursor-pointer rounded-[var(--radius-md)] overflow-hidden transition-all duration-150 flex flex-col ${isSelected
-                                ? 'bg-[var(--bg-surface)] border-2 border-[var(--accent)]'
+                                ? 'bg-[var(--bg-surface)] border-2 border-[var(--accent)] ring-1 ring-[var(--accent)]/20 shadow-xs'
                                 : 'bg-[var(--bg-surface)] border border-[var(--border)] hover:border-[var(--border-strong)]'
                               }`}
                           >
-                            {/* Miniature Theme Preview Frame */}
-                            <div className="relative w-full h-24 overflow-hidden bg-black/50 border-b border-[var(--border)] shrink-0">
+                            {/* Miniature Theme Preview Frame (Responsive mobile height) */}
+                            <div className="relative w-full h-16 xs:h-20 sm:h-24 overflow-hidden bg-black/50 border-b border-[var(--border)] shrink-0">
                               <MiniatureThemeCardPreview
                                 templateId={tpl.id}
                                 colors={cardColors}
@@ -632,36 +622,33 @@ export function BuilderPage() {
 
                               {/* Selected Badge Overlay */}
                               {isSelected && (
-                                <div className="absolute top-2 right-2 z-10 flex items-center gap-1 px-1.5 py-0.5 rounded-[var(--radius-sm)] bg-[var(--accent)] text-[var(--accent-ink)] font-mono text-[9px] font-medium uppercase">
-                                  <Check className="w-3 h-3 stroke-[3]" />
-                                  <span>Active</span>
+                                <div className="absolute top-1.5 right-1.5 z-10 flex items-center gap-1 px-1.5 py-0.5 rounded-[var(--radius-sm)] bg-[var(--accent)] text-[var(--accent-ink)] font-mono text-[9px] font-medium uppercase">
+                                  <Check className="w-2.5 h-2.5 stroke-[3]" />
+                                  <span className="hidden xs:inline">Active</span>
                                 </div>
                               )}
                             </div>
 
-                            {/* Theme Card Metadata */}
-                            <div className="p-3 flex-1 flex flex-col justify-between">
+                            {/* Theme Card Metadata (Compact for mobile) */}
+                            <div className="p-2 sm:p-3 flex-1 flex flex-col justify-between">
                               <div>
-                                <div className="flex items-center justify-between gap-1 mb-1">
-                                  <h4 className="font-head text-xs font-medium text-[var(--ink)] truncate">
+                                <div className="flex items-center justify-between gap-1 mb-0.5 sm:mb-1">
+                                  <h4 className="font-head text-xs font-semibold text-[var(--ink)] truncate">
                                     {tpl.name}
                                   </h4>
-                                  <span className="font-mono text-[9px] text-[var(--accent-text)] bg-[var(--accent)]/15 border border-[var(--accent)]/30 px-1.5 py-0.5 rounded-[var(--radius-sm)] font-medium uppercase tracking-[0.04em] shrink-0">
+                                  <span className="font-mono text-[8px] sm:text-[9px] text-[var(--accent-text)] bg-[var(--accent)]/15 border border-[var(--accent)]/30 px-1 py-0.2 rounded-[var(--radius-sm)] font-medium uppercase tracking-[0.04em] shrink-0">
                                     {(tpl.requiredPlanId || 'Free').toUpperCase()}
                                   </span>
                                 </div>
-                                <p className="font-body text-[11px] text-[var(--ink-muted)] line-clamp-1 leading-tight">
+                                <p className="font-body text-[10px] sm:text-[11px] text-[var(--ink-muted)] line-clamp-1 leading-tight">
                                   {tpl.description}
                                 </p>
                               </div>
 
-                              <div className="mt-2.5 pt-2 border-t border-[var(--border)] flex items-center justify-between font-mono text-[10px] text-[var(--ink-muted)]">
+                              <div className="mt-1.5 sm:mt-2.5 pt-1.5 border-t border-[var(--border)] flex items-center justify-between font-mono text-[9px] sm:text-[10px] text-[var(--ink-muted)]">
                                 <span className="capitalize flex items-center gap-1 truncate">
-                                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: cardColors.primary }} />
+                                  <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full shrink-0" style={{ backgroundColor: cardColors.primary }} />
                                   <span className="truncate">{tpl.category}</span>
-                                </span>
-                                <span className="opacity-70 font-mono text-[9px] shrink-0">
-                                  {tpl.id}
                                 </span>
                               </div>
                             </div>
@@ -1304,6 +1291,90 @@ export function BuilderPage() {
               </div>
             )}
           </div>
+
+          {/* Floating Live Web Look Button (Mobile Only) */}
+          <div className="lg:hidden fixed bottom-6 right-4 z-40">
+            <button
+              type="button"
+              onClick={() => setIsLookModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#FF6A00] text-white text-xs font-bold shadow-xl shadow-[#FF6A00]/35 hover:bg-[#E55F00] active:scale-95 transition-all border border-white/20 backdrop-blur-sm"
+              title="Open Live Web Profile Preview"
+            >
+              <Eye className="w-4 h-4 text-white" />
+              <span>View Web Look</span>
+              <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+            </button>
+          </div>
+
+          {/* Live Web View Modal (Mobile Bottom Sheet / Desktop Centered Simulator) */}
+          {isLookModalOpen && (
+            <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+              {/* Click outside backdrop to close */}
+              <div
+                className="absolute inset-0"
+                onClick={() => setIsLookModalOpen(false)}
+              />
+
+              {/* Modal Container */}
+              <div className="relative z-10 w-full sm:max-w-md h-[92vh] sm:h-[85vh] bg-[#0E0F12] text-white rounded-t-[32px] sm:rounded-[36px] border border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-300">
+                {/* Modal Drag Handle & Header */}
+                <div className="pt-2.5 px-4 pb-3 bg-neutral-900/95 border-b border-neutral-800 flex flex-col gap-2 shrink-0">
+                  <div className="w-10 h-1 rounded-full bg-neutral-700 mx-auto" />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <span className="w-2 h-2 rounded-full bg-[#FF6A00] animate-pulse" />
+                      <span className="text-xs font-bold uppercase tracking-wider text-[#FF6A00]">
+                        Live Web Profile
+                      </span>
+                      <span className="text-[10px] text-neutral-400 font-mono hidden xs:inline">
+                        /{slug || 'preview'}
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setIsLookModalOpen(false)}
+                      className="p-1.5 rounded-full bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white transition-colors"
+                      title="Close Preview"
+                      aria-label="Close Preview"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Simulated Live Profile View */}
+                <div className="flex-1 overflow-y-auto bg-black scrollbar-none">
+                  <ProfileRenderer key={templateId} profile={livePreviewData} />
+                </div>
+
+                {/* Modal Footer Actions */}
+                <div className="p-3 bg-neutral-900 border-t border-neutral-800 flex items-center justify-between gap-2.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setIsLookModalOpen(false)}
+                    className="flex-1 py-2.5 px-3 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-semibold transition-all active:scale-95 text-center"
+                  >
+                    ← Back to Editing
+                  </button>
+
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setIsLookModalOpen(false);
+                      saveMutation.mutate(true);
+                    }}
+                    disabled={saveMutation.isPending}
+                    variant="accent"
+                    className="py-2.5 px-4 rounded-xl text-xs font-bold gap-1.5 bg-[#FF6A00] hover:bg-[#E55F00] text-white shadow-none"
+                  >
+                    <Globe className="w-3.5 h-3.5" />
+                    <span>Publish</span>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
         );
 }

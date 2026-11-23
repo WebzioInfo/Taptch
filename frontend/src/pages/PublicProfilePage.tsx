@@ -5,7 +5,7 @@ import { ProfileRenderer } from '../components/templates/ProfileRenderer';
 import { MetaTags } from '../components/seo/MetaTags';
 import { BrandLogo } from '../components/brand';
 import { isReservedUsername } from '../config/reservedUsernames';
-import { Loader2, AlertCircle, RefreshCw, Sparkles, Home, ArrowRight } from 'lucide-react';
+import { Loader2, AlertCircle, RefreshCw, Home, ArrowRight } from 'lucide-react';
 import { Button } from '../components/ui/button';
 
 type ProfileStatus = 'idle' | 'loading' | 'success' | 'not_found' | 'unpublished' | 'error';
@@ -147,8 +147,8 @@ export function PublicProfilePage() {
   if (status === 'unpublished') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#0A0A0C] px-4 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 mb-6">
-          <Sparkles className="w-8 h-8" />
+        <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-6">
+          <AlertCircle className="w-8 h-8" />
         </div>
         <h1 className="text-2xl font-bold text-white mb-2">Profile Unavailable</h1>
         <p className="text-sm text-muted-foreground max-w-md mb-8">

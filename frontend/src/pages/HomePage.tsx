@@ -6,7 +6,6 @@ import { Badge } from '../components/ui/badge';
 import { HeroCardVisual } from '../components/marketing/HeroCardVisual';
 import {
   ArrowRight,
-  Sparkles,
   Zap,
   Smartphone,
   Check,

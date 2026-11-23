@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wifi, Sparkles, RefreshCw } from 'lucide-react';
+import { Wifi, RefreshCw } from 'lucide-react';
 import { renderSideToPreview } from '../../utils/canvasRenderer';
 
 export function getOptimizedCardImageUrl(

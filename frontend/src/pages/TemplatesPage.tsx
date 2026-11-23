@@ -6,7 +6,6 @@ import { Button } from '../components/ui/button';
 import { TemplatePreviewModal } from '../components/templates/TemplatePreviewModal';
 import { STANDARD_TEMPLATES } from '../modules/templates/constants';
 import {
-  Sparkles,
   Eye,
   Search,
   Filter,

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ApiClient } from '../services/api';
 import { Button } from '../components/ui/button';
-import { Plus, ExternalLink, Sparkles, Edit3 } from 'lucide-react';
+import { Plus, ExternalLink, CreditCard, Edit3 } from 'lucide-react';
 
 export function DashboardPage() {
   const { data: profiles = [], isLoading } = useQuery({
@@ -12,7 +12,7 @@ export function DashboardPage() {
   });
 
   return (
-      <div className="p-6 sm:p-8 max-w-6xl mx-auto">
+      <div className="p-4 sm:p-8 max-w-6xl mx-auto">
         {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
             <div>
@@ -45,7 +45,7 @@ export function DashboardPage() {
             ) : profiles.length === 0 ? (
                   <div className="text-center py-16 px-4 rounded-[var(--radius-md)] border border-dashed border-[var(--border)] bg-[var(--bg-surface)]">
                     <div className="w-12 h-12 rounded-[var(--radius-sm)] bg-[var(--bg-raised)] border border-[var(--border)] flex items-center justify-center text-[var(--accent-text)] mx-auto mb-4">
-                      <Sparkles className="w-5 h-5" />
+                      <CreditCard className="w-5 h-5" />
                     </div>
                       <h3 className="font-head text-lg font-medium text-[var(--ink)] mb-1">No Profiles Yet</h3>
                       <p className="font-body text-xs sm:text-sm text-[var(--ink-muted)] max-w-md mx-auto mb-6">

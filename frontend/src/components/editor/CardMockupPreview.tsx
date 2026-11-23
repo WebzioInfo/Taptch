@@ -6,7 +6,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { fabric } from 'fabric';
-import { X, RotateCw, Wifi, Check, Sparkles } from 'lucide-react';
+import { X, RotateCw, Wifi, Check, CreditCard } from 'lucide-react';
 import { useEditorStore } from './useEditorStore';
 import { safeParseCanvasJson, normalizeLiveTextStyle } from '../../utils/canvasJson';
 import { ensureFontsForJson } from '../../studio/fonts/fontLoader';
@@ -127,7 +127,7 @@ export const CardMockupPreview: React.FC<CardMockupPreviewProps> = ({
             {/* Modal Top Header */}
               <div className="w-full flex items-center justify-between pb-4 border-b border-[#E8E8E8]">
                 <div className="flex items-center space-x-2">
-                    <Sparkles className="w-4 h-4 text-[#FF6A00]" />
+                    <CreditCard className="w-4 h-4 text-[#FF6A00]" />
                     <h2 className="text-sm font-bold text-[#171717] uppercase tracking-wider">
                       Live NFC Card 3D Simulation
                     </h2>
