@@ -62,78 +62,30 @@ import {
   type CardMaterial,
 } from '../config/pricing';
 
-interface ProfileOption {
-  id: string;
-  slug: string;
-  displayName: string;
-  profileType: string;
-  avatarUrl?: string;
-  status: string;
-}
-
-export interface OrderTemplateOption {
-  id: string;
-  name: string;
-  style: string;
-  theme: {
-    bg: string;
-    accent: string;
-  };
-}
-
-export const CHECKOUT_TEMPLATES: OrderTemplateOption[] = [
-  {
-    id: 'premium-brand',
-    name: 'Obsidian Luxury',
-    style: 'Black & Gold',
-    theme: { bg: '#0A0A0C', accent: '#D4AF37' },
-  },
-  {
-    id: 'clean-corporate',
-    name: 'Clean Corporate',
-    style: 'Navy & Blue',
-    theme: { bg: '#0A2540', accent: '#38BDF8' },
-  },
-  {
-    id: 'dark-premium',
-    name: 'Dark Premium',
-    style: 'Champagne Gold',
-    theme: { bg: '#08090A', accent: '#C5A880' },
-  },
-  {
-    id: 'soft-modern',
-    name: 'Soft Modern',
-    style: 'Warm Stone',
-    theme: { bg: '#F6F4EE', accent: '#24352D' },
-  },
-  {
-    id: 'creative-agency',
-    name: 'Creative Agency',
-    style: 'Vibrant Indigo',
-    theme: { bg: '#0F172A', accent: '#818CF8' },
-  },
-  {
-    id: 'bold-editorial',
-    name: 'Bold Editorial',
-    style: 'High Contrast',
-    theme: { bg: '#18181B', accent: '#FF6A00' },
-  },
-];
-
-type CheckoutStep = 1 | 2 | 3 | 4;
+type CheckoutStep = 1 | 2 | 3;
 
 const STEPS = [
   { id: 1, label: 'Card' },
-  { id: 2, label: 'Profile' },
-  { id: 3, label: 'Delivery' },
-  { id: 4, label: 'Payment' },
+  { id: 2, label: 'Delivery' },
+  { id: 3, label: 'Payment' },
 ];
 
 export function CheckoutPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
-  const { data: sessionData } = useSession();
+  const { data: sessionData, isPending: isSessionPending } = useSession();
+
+  // Route-level authentication guard: guests cannot enter /checkout directly
+  useEffect(() => {
+    if (!isSessionPending && !sessionData?.user) {
+      const returnUrl =
+        typeof window !== 'undefined'
+          ? window.location.pathname + window.location.search
+          : '/checkout';
+      navigate(`/login?redirect=${encodeURIComponent(returnUrl)}`, { replace: true });
+    }
+  }, [isSessionPending, sessionData?.user, navigate]);
 
   // Wizard state
   const [currentStep, setCurrentStep] = useState<CheckoutStep>(1);
@@ -151,9 +103,23 @@ export function CheckoutPage() {
   // Idempotency Key: preserved per checkout attempt to prevent duplicate orders
   const idempotencyKeyRef = useRef<string>(`idem_${Math.random().toString(36).substring(2, 12)}_${Date.now()}`);
 
-  // Query parameters
-  const queryProductId = searchParams.get('productId') || 'prod_matte_pvc_01';
+  // Local storage draft backup for page refresh resilience
+  const [localDraft] = useState<any>(() => {
+    try {
+      const saved = localStorage.getItem('taptch_checkout_design_draft');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  // Query parameters (prefer explicit URL productId, then saved design's productId, then matching draft)
+  const urlProductId = searchParams.get('productId');
+  const queryProductId = urlProductId || localDraft?.productId || 'prod_pvc_black';
+  const queryVariantId = searchParams.get('variantId') || undefined;
   const queryDesignId = searchParams.get('designId');
+  const queryQuantity = Number(searchParams.get('quantity') || '1');
+  const queryJourneyId = searchParams.get('journeyId');
 
   // Backend Design Fetching: if a designId exists and is not 'draft', query backend
   const { data: fetchedDesign, isLoading: isDesignLoading } = useQuery<any>({
@@ -166,15 +132,8 @@ export function CheckoutPage() {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Local storage draft backup for page refresh resilience
-  const [localDraft] = useState<any>(() => {
-    try {
-      const saved = localStorage.getItem('taptch_checkout_design_draft');
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
-  });
+  const resolvedProductId = urlProductId || fetchedDesign?.productId || localDraft?.productId || 'prod_pvc_black';
+  const activeDraft = localDraft && (!localDraft.productId || localDraft.productId === resolvedProductId) ? localDraft : null;
 
   // In-memory Canvas Editor store state (active when navigating directly from editor)
   const storeFrontJson = useEditorStore((state) => state.frontJson);
@@ -182,14 +141,17 @@ export function CheckoutPage() {
   const storeFrontPreview = useEditorStore((state) => state.frontPreview);
   const storeBackPreview = useEditorStore((state) => state.backPreview);
 
-  // Consolidated JSON states
+  // Consolidated JSON states (only apply canvas JSON when not using a SimpleCardStudio draft)
+  const isSimpleStudioDraft = Boolean(activeDraft?.simpleCard || searchParams.get('name'));
   const effectiveFrontJson = useMemo(() => {
-    return storeFrontJson || fetchedDesign?.frontCanvasJson || localDraft?.frontCanvasJson || '';
-  }, [storeFrontJson, fetchedDesign, localDraft]);
+    if (isSimpleStudioDraft && !fetchedDesign?.frontCanvasJson) return '';
+    return storeFrontJson || fetchedDesign?.frontCanvasJson || activeDraft?.frontCanvasJson || '';
+  }, [isSimpleStudioDraft, storeFrontJson, fetchedDesign, activeDraft]);
 
   const effectiveBackJson = useMemo(() => {
-    return storeBackJson || fetchedDesign?.backCanvasJson || localDraft?.backCanvasJson || '';
-  }, [storeBackJson, fetchedDesign, localDraft]);
+    if (isSimpleStudioDraft && !fetchedDesign?.backCanvasJson) return '';
+    return storeBackJson || fetchedDesign?.backCanvasJson || activeDraft?.backCanvasJson || '';
+  }, [isSimpleStudioDraft, storeBackJson, fetchedDesign, activeDraft]);
 
   // Headless rendering fallback state if previews need to be computed on-the-fly
   const [renderedFrontPreview, setRenderedFrontPreview] = useState<string>('');
@@ -198,12 +160,12 @@ export function CheckoutPage() {
 
   // Consolidated Preview image URLs
   const effectiveFrontPreview = useMemo(() => {
-    return storeFrontPreview || fetchedDesign?.previewUrl || localDraft?.previewUrl || renderedFrontPreview || '';
-  }, [storeFrontPreview, fetchedDesign, localDraft, renderedFrontPreview]);
+    return storeFrontPreview || fetchedDesign?.previewUrl || activeDraft?.previewUrl || renderedFrontPreview || '';
+  }, [storeFrontPreview, fetchedDesign, activeDraft, renderedFrontPreview]);
 
   const effectiveBackPreview = useMemo(() => {
-    return storeBackPreview || fetchedDesign?.backPreviewUrl || localDraft?.backPreviewUrl || renderedBackPreview || '';
-  }, [storeBackPreview, fetchedDesign, localDraft, renderedBackPreview]);
+    return storeBackPreview || fetchedDesign?.backPreviewUrl || activeDraft?.backPreviewUrl || renderedBackPreview || '';
+  }, [storeBackPreview, fetchedDesign, activeDraft, renderedBackPreview]);
 
   // On-the-fly fallback headless render if preview URLs are missing but JSON exists
   useEffect(() => {
@@ -256,66 +218,59 @@ export function CheckoutPage() {
     return 'pvc';
   }, [searchParams, localDraft]);
 
-  // Step 1: Card Configuration
-  const [cardMaterial, setCardMaterial] = useState<CardMaterial>(initialMaterial as CardMaterial);
-
-  useEffect(() => {
-    if (initialMaterial) {
-      setCardMaterial(initialMaterial as CardMaterial);
-    }
-  }, [initialMaterial]);
-  const [quantity, setQuantity] = useState<number>(1);
+  const [quantity, setQuantity] = useState<number>(
+    Number.isFinite(queryQuantity) && queryQuantity >= 1 ? Math.floor(queryQuantity) : 1,
+  );
   const [showTechSpecs, setShowTechSpecs] = useState<boolean>(false);
   const [previewSide, setPreviewSide] = useState<'front' | 'back'>('front');
 
-  // Pricing: Separate Material Rate + Design Rate (Combined price shown to customer)
+  const {
+    data: selectedCatalogProduct,
+    isLoading: isProductLoading,
+    isError: isProductError,
+    refetch: refetchProduct,
+  } = useQuery<any>({
+    queryKey: ['public', 'product', resolvedProductId],
+    queryFn: () => ApiClient.get<any>(`/api/v1/products/${encodeURIComponent(resolvedProductId)}`),
+    enabled: Boolean(resolvedProductId),
+    retry: false,
+  });
+
+  // Card material is strictly locked to the already-selected product (never re-selected in checkout)
+  const cardMaterial: CardMaterial = useMemo(() => {
+    const prodMat = selectedCatalogProduct?.material;
+    if (prodMat === 'metal' || prodMat === 'pvc' || prodMat === 'matte' || prodMat === 'wood') {
+      return prodMat;
+    }
+    return initialMaterial as CardMaterial;
+  }, [selectedCatalogProduct?.material, initialMaterial]);
+
+  // Pricing: Centralized calculation (Backend product/variant price -> Material fallback)
   const pricingBreakdown = useMemo(() => {
     return getCardPricing(cardMaterial);
   }, [cardMaterial]);
 
-  const unitPrice = pricingBreakdown.combinedPrice;
+  const matchedCatalogVariant = useMemo(() => {
+    if (!selectedCatalogProduct?.variants || !queryVariantId) return null;
+    return selectedCatalogProduct.variants.find((v: any) => v.id === queryVariantId) || null;
+  }, [selectedCatalogProduct, queryVariantId]);
+
+  const unitPrice = useMemo(() => {
+    if (matchedCatalogVariant?.price) return Number(matchedCatalogVariant.price);
+    if (selectedCatalogProduct?.material === cardMaterial) {
+      if (selectedCatalogProduct.discountPrice != null) return Number(selectedCatalogProduct.discountPrice);
+      if (selectedCatalogProduct.basePrice != null) return Number(selectedCatalogProduct.basePrice);
+    }
+    return pricingBreakdown.combinedPrice;
+  }, [matchedCatalogVariant, selectedCatalogProduct, cardMaterial, pricingBreakdown.combinedPrice]);
 
   const subtotal = unitPrice * quantity;
   const shippingCost = subtotal >= 2000 ? 0 : 99; // Free above ₹2,000
   const taxAmount = Math.round(subtotal * 0.18); // 18% GST
   const totalAmount = subtotal + shippingCost + taxAmount;
+  const formattedTotal = totalAmount.toLocaleString('en-IN');
 
-  // Step 2: Digital Profile Association
-  const initialPurpose = useMemo<'personal' | 'business'>(() => {
-    const p = searchParams.get('purpose');
-    if (p === 'business') return 'business';
-    if (localDraft?.purpose === 'business' || localDraft?.simpleCard?.purpose === 'business') return 'business';
-    return 'personal';
-  }, [searchParams, localDraft]);
-
-  const [profileUsage, setProfileUsage] = useState<'personal' | 'business'>(initialPurpose);
-
-  useEffect(() => {
-    if (initialPurpose) setProfileUsage(initialPurpose);
-  }, [initialPurpose]);
-
-  const [profileChoice, setProfileChoice] = useState<'attach' | 'assistance'>('attach');
-  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>(() => {
-    const t = searchParams.get('templateId') || searchParams.get('template');
-    if (t) return t;
-    return 'premium-brand';
-  });
-  const [conciergeNotes, setConciergeNotes] = useState<string>('');
-
-  const { data: profiles = [], isLoading: profilesLoading } = useQuery<ProfileOption[]>({
-    queryKey: ['profiles', 'my'],
-    queryFn: () => ApiClient.get<ProfileOption[]>('/api/v1/profiles'),
-    enabled: Boolean(sessionData?.user),
-  });
-
-  useEffect(() => {
-    if (profiles.length > 0 && !selectedProfileId) {
-      setSelectedProfileId(profiles[0].id);
-    }
-  }, [profiles, selectedProfileId]);
-
-  // Step 3: Saved Addresses & Delivery
+  // Step 2: Saved Addresses & Delivery
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [showAddressPicker, setShowAddressPicker] = useState<boolean>(false);
   const [isAddingNewAddress, setIsAddingNewAddress] = useState<boolean>(false);
@@ -434,18 +389,6 @@ export function CheckoutPage() {
       setCurrentStep(2);
       setMaxStepReached((prev) => Math.max(prev, 2) as CheckoutStep);
     } else if (currentStep === 2) {
-      if (profileChoice === 'attach') {
-        if (profiles.length === 0) {
-          // Gracefully fallback to concierge setup when no profiles exist
-          setProfileChoice('assistance');
-        } else if (!selectedProfileId) {
-          setFormBannerError('Please choose a digital profile to attach to your card.');
-          return;
-        }
-      }
-      setCurrentStep(3);
-      setMaxStepReached((prev) => Math.max(prev, 3) as CheckoutStep);
-    } else if (currentStep === 3) {
       if (savedAddresses.length > 0 && !isAddingNewAddress) {
         if (!selectedAddressId) {
           setFormBannerError('Please select a delivery address or enter a new one.');
@@ -480,8 +423,8 @@ export function CheckoutPage() {
           }).catch(() => { });
         }
       }
-      setCurrentStep(4);
-      setMaxStepReached((prev) => Math.max(prev, 4) as CheckoutStep);
+      setCurrentStep(3);
+      setMaxStepReached((prev) => Math.max(prev, 3) as CheckoutStep);
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -676,7 +619,7 @@ export function CheckoutPage() {
 
       const resolvedDesignSnapshot =
         studioDesignSnapshot ||
-        localDraft?.simpleCard ||
+        activeDraft?.simpleCard ||
         (searchParams.get('name')
           ? {
               cardCustomization: {
@@ -684,8 +627,8 @@ export function CheckoutPage() {
                 title: searchParams.get('title') || '',
                 extra: searchParams.get('extra') || '',
                 finish: searchParams.get('finish') || 'gold',
-                style: searchParams.get('style') || 'classic',
-                surface: searchParams.get('surface') || 'metal',
+                style: searchParams.get('style') || 'executive-minimal',
+                surface: searchParams.get('surface') || cardMaterial,
                 material: cardMaterial,
               },
               capturedAt: new Date().toISOString(),
@@ -695,18 +638,12 @@ export function CheckoutPage() {
       const orderPayload = {
         designId: queryDesignId && queryDesignId !== 'draft' ? queryDesignId : (fetchedDesign?.id || undefined),
         designSnapshot: resolvedDesignSnapshot,
-        productId: queryProductId,
+        productId: resolvedProductId,
+        variantId: queryVariantId || activeDraft?.variantId || undefined,
         quantity,
         cardMaterial,
         materialRate: pricingBreakdown.materialRate,
         designRate: pricingBreakdown.designRate,
-        templateId: selectedTemplateId,
-        profileUsage,
-        profileId: profileChoice === 'attach' ? selectedProfileId : null,
-        requestProfileAssistance: profileChoice === 'assistance',
-        profileAssistanceNotes: profileChoice === 'assistance'
-          ? `Template: ${CHECKOUT_TEMPLATES.find((t) => t.id === selectedTemplateId)?.name || selectedTemplateId}. ${conciergeNotes.trim()}`
-          : `Template: ${CHECKOUT_TEMPLATES.find((t) => t.id === selectedTemplateId)?.name || selectedTemplateId}`,
         shippingAddress: shippingAddressPayload,
         paymentMethod,
         idempotencyKey: idempotencyKeyRef.current,
@@ -714,7 +651,14 @@ export function CheckoutPage() {
       };
 
       const createdOrder = await ApiClient.post<any>('/api/v1/orders', orderPayload);
+      if (queryJourneyId) {
+        ApiClient.put('/api/v1/journey/active', {
+          stage: paymentMethod === 'cod' ? 'COMPLETED' : 'PAYMENT_PENDING',
+          orderId: createdOrder.id,
+        }).catch(() => {});
+      }
       await queryClient.invalidateQueries({ queryKey: ['orders'] });
+      await queryClient.invalidateQueries({ queryKey: ['purchase-journey', 'active'] });
       navigate(`/orders/${createdOrder.id}/confirmation`);
     } catch (err: any) {
       console.error('Order submission error:', err);
@@ -900,54 +844,77 @@ export function CheckoutPage() {
               <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 space-y-5 shadow-xs">
                 <div>
                   <h2 className="text-base sm:text-lg font-bold text-zinc-900">
-                    Choose Your NFC Smart Card
+                    Selected NFC Smart Card
                   </h2>
                   <p className="text-xs text-gray-500 mt-0.5">
-                    Select your card material, preview artwork, and choose quantity.
+                    Review your selected card, preview artwork, and choose quantity.
                   </p>
                 </div>
 
-                {/* Material Selection Cards */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
-                  {[
-                    { id: 'pvc', name: 'PVC' },
-                    { id: 'matte', name: 'Matte' },
-                    { id: 'wood', name: 'Wood' },
-                    { id: 'metal', name: 'Metal' },
-                  ].map((mat) => {
-                    const isSelected = cardMaterial === mat.id;
-                    const combinedPrice = getCardPricing(mat.id as CardMaterial).combinedPrice;
-                    return (
-                      <button
-                        key={mat.id}
-                        type="button"
-                        onClick={() => setCardMaterial(mat.id as CardMaterial)}
-                        className={`text-left p-3.5 sm:p-4 rounded-xl border transition-all relative flex flex-col justify-between ${
-                          isSelected
-                            ? 'bg-[#FFF8F3] border-2 border-[#FF6A00] ring-1 ring-[#FF6A00]/20 shadow-xs'
-                            : 'bg-white border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm sm:text-base font-bold text-zinc-900">{mat.name}</span>
-                          <div
-                            className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors shrink-0 ml-1 ${
-                              isSelected
-                                ? 'border-[#FF6A00] bg-[#FF6A00] text-white'
-                                : 'border-gray-300 bg-white'
-                            }`}
-                          >
-                            {isSelected && <Check className="w-2.5 h-2.5 stroke-[3] text-white" />}
-                          </div>
-                        </div>
-                        <div className="pt-2 border-t border-gray-100 flex items-baseline justify-between">
-                          <span className="text-base sm:text-lg font-bold text-zinc-900">₹{combinedPrice.toLocaleString('en-IN')}</span>
-                          <span className="text-[10px] sm:text-[11px] text-gray-400">per card</span>
-                        </div>
-                      </button>
-                    );
-                  })}
+                {/* Selected Product Summary (Read-only — no card type or color switching in checkout) */}
+                {isProductLoading ? (
+                  <div className="p-4 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-between gap-3 animate-pulse">
+                    <div className="flex items-center gap-3">
+                      <div className="w-16 h-10 rounded-lg bg-gray-200" />
+                      <div className="space-y-2">
+                        <div className="h-4 w-40 rounded bg-gray-200" />
+                        <div className="h-3 w-24 rounded bg-gray-200" />
+                      </div>
+                    </div>
+                    <div className="h-5 w-16 rounded bg-gray-200" />
+                  </div>
+                ) : isProductError ? (
+                  <div className="p-4 rounded-xl border border-red-200 bg-red-50 flex items-center justify-between gap-3 text-xs text-red-700">
+                    <span>Unable to load selected product details. Please retry.</span>
+                    <button
+                      type="button"
+                      onClick={() => refetchProduct()}
+                      className="px-3 py-1.5 rounded-lg bg-white border border-red-200 font-semibold hover:bg-red-100 shrink-0"
+                    >
+                      Retry
+                    </button>
+                  </div>
+                ) : (
+                <div className="p-3.5 sm:p-4 rounded-xl border border-gray-200 bg-[#FFF8F3]/60 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    {(matchedCatalogVariant?.imageUrl || selectedCatalogProduct?.imageUrl) && (
+                      <img
+                        src={matchedCatalogVariant?.imageUrl || selectedCatalogProduct?.imageUrl}
+                        alt={selectedCatalogProduct?.name || getProductName(cardMaterial)}
+                        className="w-16 h-10 rounded-lg object-cover border border-gray-200 shrink-0"
+                      />
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-zinc-900 truncate">
+                        {selectedCatalogProduct?.name || getProductName(cardMaterial)}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-gray-600">
+                        <span className="uppercase font-mono text-[10px] px-1.5 py-0.5 rounded bg-white border border-gray-200 text-zinc-800">
+                          {cardMaterial}
+                        </span>
+                        <span className="inline-flex items-center gap-1.5">
+                          <span
+                            className="w-3 h-3 rounded-full border border-black/15 shrink-0"
+                            style={{
+                              backgroundColor:
+                                selectedCatalogProduct?.color || matchedCatalogVariant?.color || '#000000',
+                            }}
+                          />
+                          <span>
+                            {selectedCatalogProduct?.colorName || matchedCatalogVariant?.name || 'Black'}
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <span className="text-sm sm:text-base font-bold text-zinc-900">
+                      ₹{unitPrice.toLocaleString('en-IN')}
+                    </span>
+                    <span className="block text-[10px] text-gray-500">per card</span>
+                  </div>
                 </div>
+                )}
 
                 {/* Live Card Artwork Preview */}
                 <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-200">
@@ -986,7 +953,7 @@ export function CheckoutPage() {
                           ) : (
                             <>
                               <CardPreview
-                                frontUrl={effectiveFrontPreview}
+                                frontUrl={effectiveFrontPreview || matchedCatalogVariant?.imageUrl || selectedCatalogProduct?.imageUrl || ''}
                                 backUrl={effectiveBackPreview}
                                 frontJson={effectiveFrontJson}
                                 backJson={effectiveBackJson}
@@ -1076,268 +1043,8 @@ export function CheckoutPage() {
                   </div>
             )}
 
-                  {/* STEP 2: LINK DIGITAL PROFILE */}
+                  {/* STEP 2: DELIVERY ADDRESS */}
                   {currentStep === 2 && (
-                    <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 space-y-5 shadow-xs">
-                      <div>
-                        <h2 className="text-base sm:text-lg font-bold text-zinc-900">
-                          Link Digital Profile
-                        </h2>
-                        <p className="text-xs text-gray-500 mt-0.5">
-                          Choose what opens when someone taps your physical NFC card with their phone.
-                        </p>
-                      </div>
-
-                      {/* 1. Card Purpose: Personal (1 Profile) vs Business (Multiple Profiles) */}
-                      <div className="p-4 bg-gray-50/90 border border-gray-200 rounded-xl space-y-3">
-                        <div>
-                          <span className="text-xs font-bold uppercase tracking-wider text-zinc-700 block">
-                            Card Purpose
-                          </span>
-                          <p className="text-xs text-gray-500 mt-0.5">
-                            Select whether this card is for individual personal use or for a company team.
-                          </p>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          {/* Personal Option */}
-                          <div
-                            onClick={() => setProfileUsage('personal')}
-                            className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
-                              profileUsage === 'personal'
-                                ? 'bg-white border-2 border-[#FF6A00] ring-1 ring-[#FF6A00]/20 shadow-xs'
-                                : 'bg-white border-gray-200 hover:border-gray-300'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-sm font-bold text-zinc-900 flex items-center gap-1.5">
-                                <User className="w-4 h-4 text-[#FF6A00]" />
-                                Personal (1 Profile)
-                              </span>
-                              {profileUsage === 'personal' && (
-                                <Check className="w-4 h-4 text-[#FF6A00]" />
-                              )}
-                            </div>
-                            <p className="text-xs text-gray-500 leading-relaxed">
-                              Best for 1 person. When anyone taps your card with their phone, it directly opens your <strong>1 personal profile</strong> with your phone, email, WhatsApp, and social links.
-                            </p>
-                          </div>
-
-                          {/* Business Option */}
-                          <div
-                            onClick={() => setProfileUsage('business')}
-                            className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
-                              profileUsage === 'business'
-                                ? 'bg-white border-2 border-indigo-600 ring-1 ring-indigo-600/20 shadow-xs'
-                                : 'bg-white border-gray-200 hover:border-gray-300'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-sm font-bold text-zinc-900 flex items-center gap-1.5">
-                                <Building2 className="w-4 h-4 text-indigo-600" />
-                                Business (Multiple Profiles)
-                              </span>
-                              {profileUsage === 'business' && (
-                                <Check className="w-4 h-4 text-indigo-600" />
-                              )}
-                            </div>
-                            <p className="text-xs text-gray-500 leading-relaxed">
-                              Best for companies & teams. Lets you manage <strong>multiple employee profiles</strong>, company catalogs, brochures, and team leads all in one place.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* 2. Profile Template Selector (Simple, compact & mobile-optimized) */}
-                      <div className="p-3.5 sm:p-4 bg-gray-50/90 border border-gray-200 rounded-xl space-y-2.5">
-                        <div className="flex items-center justify-between gap-2">
-                          <div>
-                            <span className="text-xs font-bold uppercase tracking-wider text-zinc-700 block">
-                              Select Profile Template
-                            </span>
-                            <p className="text-[11px] text-gray-500 mt-0.5">
-                              Choose the layout and style for your digital profile page.
-                            </p>
-                          </div>
-                          <span className="text-[10px] font-semibold text-[#FF6A00] bg-orange-50 px-2 py-0.5 rounded border border-orange-200 shrink-0">
-                            {CHECKOUT_TEMPLATES.find((t) => t.id === selectedTemplateId)?.name || 'Obsidian Luxury'}
-                          </span>
-                        </div>
-
-                        {/* Simple Small Grid for Phones (2 cols mobile, 3 cols tablet+) */}
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                          {CHECKOUT_TEMPLATES.map((tmpl) => {
-                            const isSelected = selectedTemplateId === tmpl.id;
-                            return (
-                              <button
-                                key={tmpl.id}
-                                type="button"
-                                onClick={() => setSelectedTemplateId(tmpl.id)}
-                                className={`p-2.5 rounded-xl border text-left transition-all relative flex flex-col justify-between ${
-                                  isSelected
-                                    ? 'bg-white border-2 border-[#FF6A00] ring-1 ring-[#FF6A00]/20 shadow-xs'
-                                    : 'bg-white border-gray-200 hover:border-gray-300'
-                                }`}
-                              >
-                                <div className="flex items-center justify-between mb-1.5">
-                                  <div className="flex items-center gap-1">
-                                    <span
-                                      className="w-3.5 h-3.5 rounded-full border border-black/10 shadow-2xs shrink-0"
-                                      style={{ backgroundColor: tmpl.theme.bg }}
-                                    />
-                                    <span
-                                      className="w-3.5 h-3.5 rounded-full border border-black/10 shadow-2xs shrink-0"
-                                      style={{ backgroundColor: tmpl.theme.accent }}
-                                    />
-                                  </div>
-                                  {isSelected ? (
-                                    <Check className="w-3.5 h-3.5 text-[#FF6A00] stroke-[3]" />
-                                  ) : (
-                                    <span className="w-3 h-3 rounded-full border border-gray-300" />
-                                  )}
-                                </div>
-                                <div>
-                                  <span className="text-xs font-bold text-zinc-900 block truncate leading-tight">
-                                    {tmpl.name}
-                                  </span>
-                                  <span className="text-[10px] text-gray-400 block truncate mt-0.5">
-                                    {tmpl.style}
-                                  </span>
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      <div className="space-y-3">
-                        {/* Option A: Link an existing profile */}
-                        <label
-                          className={`block p-4 rounded-xl border cursor-pointer transition-all ${profileChoice === 'attach'
-                            ? 'bg-[#FFF8F3] border-2 border-[#FF6A00] ring-1 ring-[#FF6A00]/20 shadow-xs'
-                            : 'bg-white border-gray-200 hover:border-gray-300'
-                            }`}
-                        >
-                          <div className="flex items-start gap-3">
-                            <input
-                              type="radio"
-                              name="profileChoice"
-                              checked={profileChoice === 'attach'}
-                              onChange={() => setProfileChoice('attach')}
-                              className="mt-1 text-[#FF6A00] focus:ring-[#FF6A00] accent-[#FF6A00]"
-                            />
-                            <div className="flex-1">
-                              <span className="text-sm font-bold text-zinc-900 block">
-                                {profileUsage === 'business'
-                                  ? 'Link to my company profile'
-                                  : 'Link to my personal profile (1 Profile)'}
-                              </span>
-                              <span className="text-xs text-gray-500 mt-0.5 block leading-relaxed">
-                                {profileUsage === 'business'
-                                  ? 'Tapping this card will open your company profile. You can also add and assign multiple team member profiles later.'
-                                  : 'Tapping this card will immediately open your personal contact card with phone, email, and social links.'}
-                              </span>
-
-                              {profileChoice === 'attach' && (
-                                <div className="mt-3.5 pt-3 border-t border-gray-200/70">
-                                  {profilesLoading ? (
-                                    <div className="flex items-center gap-2 text-xs text-gray-500 py-2">
-                                      <Loader2 className="w-4 h-4 animate-spin text-[#FF6A00]" />
-                                      Loading your profiles...
-                                    </div>
-                                  ) : profiles.length === 0 ? (
-                                    <div className="p-3 rounded-lg bg-orange-50 border border-orange-200 text-xs text-orange-800">
-                                      No published profiles found on your account. Choose Free Concierge Setup below, and our team will build one for you!
-                                    </div>
-                                  ) : (
-                                    <div className="space-y-2">
-                                      <label className="text-xs font-semibold text-zinc-700 block">Select Profile:</label>
-                                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                        {profiles.map((p) => {
-                                          const isSel = selectedProfileId === p.id;
-                                          return (
-                                            <div
-                                              key={p.id}
-                                              onClick={() => setSelectedProfileId(p.id)}
-                                              className={`p-3 rounded-lg border cursor-pointer flex items-center gap-2.5 transition-colors ${isSel
-                                                ? 'bg-white border-2 border-[#FF6A00] text-zinc-900 shadow-xs'
-                                                : 'bg-gray-50 border-gray-200 text-zinc-700 hover:border-gray-300'
-                                                }`}
-                                            >
-                                              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-bold text-xs text-zinc-700 overflow-hidden shrink-0">
-                                                {p.avatarUrl ? (
-                                                  <img src={p.avatarUrl} alt="" className="w-full h-full object-cover" />
-                                                ) : (
-                                                  p.displayName.slice(0, 2).toUpperCase()
-                                                )}
-                                              </div>
-                                              <div className="flex-1 min-w-0">
-                                                <p className="text-xs font-bold truncate text-zinc-900">{p.displayName}</p>
-                                                <p className="text-[11px] text-gray-500 font-mono truncate">/{p.slug}</p>
-                                              </div>
-                                              {isSel && <Check className="w-4 h-4 text-[#FF6A00] shrink-0" />}
-                                            </div>
-                                          );
-                                        })}
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </label>
-
-                        {/* Option B: Free Concierge Assistance */}
-                        <label
-                          className={`block p-4 rounded-xl border cursor-pointer transition-all ${profileChoice === 'assistance'
-                            ? 'bg-[#FFF8F3] border-2 border-[#FF6A00] ring-1 ring-[#FF6A00]/20 shadow-xs'
-                            : 'bg-white border-gray-200 hover:border-gray-300'
-                            }`}
-                        >
-                          <div className="flex items-start gap-3">
-                            <input
-                              type="radio"
-                              name="profileChoice"
-                              checked={profileChoice === 'assistance'}
-                              onChange={() => setProfileChoice('assistance')}
-                              className="mt-1 text-[#FF6A00] focus:ring-[#FF6A00] accent-[#FF6A00]"
-                            />
-                            <div className="flex-1">
-                              <span className="text-sm font-bold text-zinc-900 block">
-                                {profileUsage === 'business'
-                                  ? 'Free Business & Team Profile Setup'
-                                  : 'Free Personal Profile Setup'}
-                              </span>
-                              <span className="text-xs text-gray-500 mt-0.5 block leading-relaxed">
-                                {profileUsage === 'business'
-                                  ? 'Our onboarding team will contact you to set up multiple employee profiles, company branding, and product catalogs before dispatch.'
-                                  : 'Our specialists will contact you after order placement to build and configure your 1 personal digital profile before dispatch.'}
-                              </span>
-
-                              {profileChoice === 'assistance' && (
-                                <div className="mt-3">
-                                  <label className="text-xs font-semibold text-zinc-700 block mb-1">
-                                    Special Instructions or Details (Optional):
-                                  </label>
-                                  <textarea
-                                    value={conciergeNotes}
-                                    onChange={(e) => setConciergeNotes(e.target.value)}
-                                    placeholder="e.g. Please use my LinkedIn link or contact me on WhatsApp for branding assets..."
-                                    rows={3}
-                                    className="w-full px-3 py-2 text-xs bg-white border border-gray-200 rounded-lg text-zinc-900 placeholder:text-gray-400 focus:outline-none focus:border-[#FF6A00] focus:ring-1 focus:ring-[#FF6A00]"
-                                  />
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </label>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* STEP 3: DELIVERY ADDRESS */}
-                  {currentStep === 3 && (
                     <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 space-y-5 shadow-xs">
                       <div className="flex items-center justify-between">
                         <div>
@@ -1530,8 +1237,8 @@ export function CheckoutPage() {
                     </div>
                   )}
 
-                  {/* STEP 4: REVIEW AND PAYMENT */}
-                  {currentStep === 4 && (
+                  {/* STEP 3: REVIEW AND PAYMENT */}
+                  {currentStep === 3 && (
                     <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 space-y-5 shadow-xs">
                       <div>
                         <h2 className="text-base sm:text-lg font-bold text-zinc-900">
@@ -1551,7 +1258,7 @@ export function CheckoutPage() {
                           </span>
                           <button
                             type="button"
-                            onClick={() => setCurrentStep(3)}
+                            onClick={() => setCurrentStep(2)}
                             className="text-xs font-semibold text-[#FF6A00] hover:underline"
                           >
                             Change
@@ -1687,24 +1394,6 @@ export function CheckoutPage() {
                       </div>
                     </div>
 
-                    {/* Linked Profile Badge */}
-                    <div className="p-2.5 rounded-lg bg-gray-50 border border-gray-200 text-xs space-y-1.5">
-                      <div>
-                        <span className="text-[11px] text-gray-500 block mb-0.5">Card Linked To:</span>
-                        <span className="font-semibold text-[#FF6A00]">
-                          {profileChoice === 'attach'
-                            ? profiles.find((p) => p.id === selectedProfileId)?.displayName || 'Linked Profile'
-                            : 'Free Concierge Setup'}
-                        </span>
-                      </div>
-                      <div className="pt-1 border-t border-gray-200/60 flex items-center justify-between text-[11px]">
-                        <span className="text-gray-500">Theme:</span>
-                        <span className="font-semibold text-zinc-800">
-                          {CHECKOUT_TEMPLATES.find((t) => t.id === selectedTemplateId)?.name || 'Obsidian Luxury'}
-                        </span>
-                      </div>
-                    </div>
-
                     {/* Price Breakdown */}
                     <div className="space-y-2 pt-2 border-t border-gray-100 text-xs text-gray-600">
                       <div className="flex justify-between">
@@ -1729,7 +1418,7 @@ export function CheckoutPage() {
 
                     {/* Desktop Action Buttons */}
                     <div className="pt-2 hidden lg:flex flex-col gap-2">
-                      {currentStep < 4 ? (
+                      {currentStep < 3 ? (
                         <button
                           type="button"
                           onClick={handleNextStep}
@@ -1754,7 +1443,11 @@ export function CheckoutPage() {
                           ) : (
                             <>
                               <ShieldCheck className="w-4 h-4" />
-                              <span>Place Order • ₹{totalAmount}</span>
+                              <span>
+                                {paymentMethod === 'cod'
+                                  ? `Place Order · ₹${formattedTotal}`
+                                  : `Pay ₹${formattedTotal}`}
+                              </span>
                             </>
                           )}
                         </button>
@@ -1808,20 +1501,6 @@ export function CheckoutPage() {
                   </div>
                 </div>
                 <div className="flex justify-between">
-                  <span>Profile Association:</span>
-                  <span className="font-semibold text-[#FF6A00]">
-                    {profileChoice === 'attach'
-                      ? profiles.find((p) => p.id === selectedProfileId)?.displayName || 'Linked Profile'
-                      : 'Free Concierge Setup'}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Theme:</span>
-                  <span className="font-semibold text-zinc-800">
-                    {CHECKOUT_TEMPLATES.find((t) => t.id === selectedTemplateId)?.name || 'Obsidian Luxury'}
-                  </span>
-                </div>
-                <div className="flex justify-between">
                   <span>Express Shipping:</span>
                   <span className={shippingCost === 0 ? 'text-emerald-700 font-semibold' : 'text-zinc-800'}>
                     {shippingCost === 0 ? 'FREE' : `₹${shippingCost}`}
@@ -1869,7 +1548,7 @@ export function CheckoutPage() {
                   </button>
                 )}
 
-                {currentStep < 4 ? (
+                {currentStep < 3 ? (
                   <button
                     type="button"
                     onClick={handleNextStep}
@@ -1888,7 +1567,11 @@ export function CheckoutPage() {
                     {isSubmittingOrder ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
-                      <span>Pay ₹{totalAmount}</span>
+                      <span>
+                        {paymentMethod === 'cod'
+                          ? `Place Order · ₹${formattedTotal}`
+                          : `Pay ₹${formattedTotal}`}
+                      </span>
                     )}
                   </button>
                 )}

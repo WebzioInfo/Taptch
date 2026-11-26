@@ -12,13 +12,11 @@ export function MarketingHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   const navLinks = [
-    { href: '/nfc-business-card', label: 'NFC Cards' },
-    { href: '/digital-business-card', label: 'Digital Card' },
-    { href: '/templates', label: 'Templates' },
+    { href: '/', label: 'Home' },
     { href: '/features', label: 'Features' },
-    { href: '/how-it-works', label: 'How It Works' },
+    { href: '/templates', label: 'Profile Templates' },
+    { href: '/nfc-cards', label: 'NFC Cards' },
     { href: '/pricing', label: 'Pricing' },
-    { href: '/faq', label: 'FAQ' },
   ];
 
   return (
@@ -58,16 +56,16 @@ export function MarketingHeader() {
             <div className="flex items-center space-x-2">
               <Link to="/login">
                 <Button variant="ghost" size="sm" className="text-xs">
-                  Sign In
+                  Login
                 </Button>
               </Link>
-              <Link to="/register">
+              <Link to="/nfc-cards">
                 <Button
                   variant="accent"
                   size="sm"
                   className="text-xs font-medium gap-1.5"
                 >
-                  <span>Get Started</span>
+                  <span>Order NFC Card</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               </Link>

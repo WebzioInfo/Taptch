@@ -12,6 +12,7 @@ export interface PlanEntitlements {
   allowCustomCss: boolean;
   allowCustomDomain: boolean;
   tier: PlanTier;
+  accountType?: 'personal' | 'business' | null;
 }
 
 export const TIER_LIMITS: Record<PlanTier, PlanEntitlements> = {
@@ -59,17 +60,54 @@ export class EntitlementsService {
 
   async getActorEntitlements(actor: ActorContext): Promise<PlanEntitlements> {
     if (actor.isAdmin) {
-      return TIER_LIMITS.max;
+      return { ...TIER_LIMITS.max, accountType: 'business' };
     }
 
-    // Check user's assigned subscription
-    const rows = await this.dbService.db
-      .select({ planId: schema.tenantSubscriptions.planId })
-      .from(schema.tenantSubscriptions)
-      .where(eq(schema.tenantSubscriptions.userId, actor.userId))
-      .limit(1);
+    // Check user's accountType and assigned subscription
+    const [userRows, subRows] = await Promise.all([
+      this.dbService.db
+        .select({ accountType: schema.users.accountType })
+        .from(schema.users)
+        .where(eq(schema.users.id, actor.userId))
+        .limit(1),
+      this.dbService.db
+        .select({ planId: schema.tenantSubscriptions.planId })
+        .from(schema.tenantSubscriptions)
+        .where(eq(schema.tenantSubscriptions.userId, actor.userId))
+        .limit(1),
+    ]);
 
-    const planTier = (rows[0]?.planId as PlanTier) || 'nano';
-    return TIER_LIMITS[planTier] || TIER_LIMITS.nano;
+    const accountType = (userRows[0]?.accountType as 'personal' | 'business' | null) || null;
+    const explicitPlanTier = subRows[0]?.planId as PlanTier | undefined;
+
+    if (explicitPlanTier && TIER_LIMITS[explicitPlanTier]) {
+      const base = TIER_LIMITS[explicitPlanTier];
+      if (accountType === 'business') {
+        return {
+          ...base,
+          maxProfiles: Math.max(base.maxProfiles, 20),
+          maxCards: Math.max(base.maxCards, 50),
+          accountType,
+        };
+      }
+      return { ...base, accountType };
+    }
+
+    if (accountType === 'business') {
+      return {
+        ...TIER_LIMITS.mini,
+        maxProfiles: 20,
+        maxCards: 50,
+        accountType: 'business',
+      };
+    }
+
+    // Personal account (or unset default): strictly 1 profile, 1 card
+    return {
+      ...TIER_LIMITS.nano,
+      maxProfiles: 1,
+      maxCards: 1,
+      accountType: accountType || 'personal',
+    };
   }
 }

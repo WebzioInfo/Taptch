@@ -1,5 +1,6 @@
 import React from 'react';
-import { createBrowserRouter, Navigate, useParams, useLocation } from 'react-router-dom';
+import { createBrowserRouter, Navigate, Outlet, useParams, useLocation } from 'react-router-dom';
+import { GlobalScrollReset } from '../components/common/GlobalScrollReset';
 import { MarketingLayout } from '../layouts/MarketingLayout';
 import { AppLayout } from '../layouts/AppLayout';
 import { HomePage } from '../pages/HomePage';
@@ -21,6 +22,11 @@ import { CheckoutPage } from '../pages/CheckoutPage';
 import { OrderConfirmationPage } from '../pages/OrderConfirmationPage';
 import { OrdersPage } from '../pages/OrdersPage';
 import { OrderTrackingPage } from '../pages/OrderTrackingPage';
+import { NfcCardsPage } from '../pages/NfcCardsPage';
+import { NfcProductDetailPage } from '../pages/NfcProductDetailPage';
+import { NfcResolvePage } from '../pages/NfcResolvePage';
+import { PostPurchaseProfileSetupPage } from '../pages/PostPurchaseProfileSetupPage';
+import { ProtectedRoute } from '../components/auth/ProtectedRoute';
 
 function LegacyProfileRedirect() {
   const { slug } = useParams<{ slug: string }>();
@@ -28,7 +34,19 @@ function LegacyProfileRedirect() {
   return <Navigate to={`/${slug}${location.search}`} replace />;
 }
 
+function RootScrollBoundary() {
+  return (
+    <>
+      <GlobalScrollReset />
+      <Outlet />
+    </>
+  );
+}
+
 export const router = createBrowserRouter([
+  {
+    element: <RootScrollBoundary />,
+    children: [
   // Marketing Routes
   {
     element: <MarketingLayout />,
@@ -36,6 +54,8 @@ export const router = createBrowserRouter([
       { path: '/', element: <HomePage /> },
       { path: '/templates', element: <TemplatesPage /> },
       { path: '/templates/:id', element: <TemplatesPage /> },
+      { path: '/nfc-cards', element: <NfcCardsPage /> },
+      { path: '/nfc-cards/:slug', element: <NfcProductDetailPage /> },
       { path: '/pricing', element: <PricingPage /> },
       { path: '/features', element: <HomePage /> },
       { path: '/how-it-works', element: <HomePage /> },
@@ -67,6 +87,8 @@ export const router = createBrowserRouter([
     element: <AppLayout />,
     children: [
       { path: '/dashboard', element: <DashboardPage /> },
+      { path: '/dashboard/nfc-shop', element: <NfcCardsPage /> },
+      { path: '/dashboard/my-nfc-cards', element: <CardsPage /> },
       { path: '/cards', element: <CardsPage /> },
       { path: '/orders', element: <OrdersPage /> },
       { path: '/leads', element: <LeadsPage /> },
@@ -75,22 +97,29 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // E-Commerce NFC Ordering & Tracking
-  { path: '/checkout', element: <CheckoutPage /> },
-  { path: '/orders/:id/confirmation', element: <OrderConfirmationPage /> },
-  { path: '/orders/:id/track', element: <OrderTrackingPage /> },
-  { path: '/orders/:id', element: <OrderTrackingPage /> },
-
-  // Studio Builder (Full Workspace)
-  { path: '/builder/:id', element: <BuilderPage />, errorElement: <StudioRouteError /> },
-  { path: '/builder/new', element: <BuilderPage />, errorElement: <StudioRouteError /> },
+  // Post-Purchase Digital Profile Setup & Card Attachment (Protected)
+  {
+    element: <ProtectedRoute />,
+    children: [
+      { path: '/profile-setup', element: <PostPurchaseProfileSetupPage /> },
+      { path: '/checkout', element: <CheckoutPage /> },
+      { path: '/orders/:id/confirmation', element: <OrderConfirmationPage /> },
+      { path: '/orders/:id/track', element: <OrderTrackingPage /> },
+      { path: '/orders/:id', element: <OrderTrackingPage /> },
+      { path: '/builder/:id', element: <BuilderPage />, errorElement: <StudioRouteError /> },
+      { path: '/builder/new', element: <BuilderPage />, errorElement: <StudioRouteError /> },
+    ],
+  },
+  { path: '/journey', element: <Navigate to="/nfc-cards" replace /> },
 
   // Live NFC Card Design Studio
   { path: '/studio', element: <DesignStudioPage /> },
   { path: '/studio/:productId', element: <DesignStudioPage /> },
 
-  // Legacy Backward-Compatibility for existing printed NFC cards and QR codes
-  { path: '/p/:slug', element: <LegacyProfileRedirect /> },
+  // Canonical Production NFC Public Resolution & Backward-Compatible /nfc/:token
+  { path: '/b/:uniqueKey', element: <NfcResolvePage expectedProfileType="business" /> },
+  { path: '/p/:uniqueKey', element: <NfcResolvePage expectedProfileType="personal" /> },
+  { path: '/nfc/:token', element: <NfcResolvePage /> },
   { path: '/claim/:token', element: <RegisterPage /> },
 
   // Root Dynamic Public Identity
@@ -98,5 +127,7 @@ export const router = createBrowserRouter([
 
   // Fallback
   { path: '*', element: <Navigate to="/" replace /> },
+    ],
+  },
 ]);
 

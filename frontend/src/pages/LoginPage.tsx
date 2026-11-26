@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { BrandLogo } from '../components/brand';
 import { brandConfig } from '../config/brand';
 import { Button } from '../components/ui/button';
-import { signIn } from '../lib/auth/client';
+import { signIn, useSession, getAuthState } from '../lib/auth/client';
+import { getPendingPurchaseIntent } from '../hooks/usePurchaseJourney';
 import { env } from '../config/env';
 import { Eye, EyeOff, AlertCircle, ArrowRight, Lock, Mail } from 'lucide-react';
 
 export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
+  const { data: session, isPending } = useSession();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -25,6 +29,8 @@ export function LoginPage() {
       setError('Google authorization was cancelled or failed. Please try again.');
     } else if (err === 'google_token_exchange_failed') {
       setError('Could not verify Google credentials. Please check your Google OAuth credentials in backend/.env or sign in with your email and password.');
+    } else if (err === 'oauth_exchange_failed') {
+      setError('Your Google sign-in session expired or could not be verified. Please try signing in again.');
     } else if (err) {
       setError(decodeURIComponent(err));
     }
@@ -45,16 +51,27 @@ export function LoginPage() {
 
     setLoading(true);
     try {
-      await signIn.email({ email: email.trim(), password });
+      const authRes = await signIn.email({ email: email.trim(), password });
+      // Clear any previous user's cached data before setting the new session
+      queryClient.clear();
+      queryClient.setQueryData(['auth', 'session'], authRes);
       const searchParams = new URLSearchParams(location.search);
-      const redirectUrl = searchParams.get('redirect') || '/dashboard';
-      navigate(redirectUrl);
+      const hasPending = Boolean(getPendingPurchaseIntent());
+      const redirectUrl = searchParams.get('redirect') || (hasPending ? '/checkout' : '/dashboard');
+      navigate(redirectUrl, { replace: true });
     } catch (err: any) {
       setError(err?.message || 'Email or password is incorrect. Check your details and try again.');
     } finally {
       setLoading(false);
     }
   };
+
+  if (getAuthState(session, isPending) === 'AUTHENTICATED') {
+    const searchParams = new URLSearchParams(location.search);
+    const hasPending = Boolean(getPendingPurchaseIntent());
+    const dest = searchParams.get('redirect') || (hasPending ? '/checkout' : '/dashboard');
+    return <Navigate to={dest} replace />;
+  }
 
   return (
         <div className="min-h-screen flex items-center justify-center bg-[var(--bg-page)] text-[var(--ink)] font-body px-4 py-12">
@@ -82,7 +99,12 @@ export function LoginPage() {
                   <button
                     type="button"
                     onClick={() => {
-                      const returnTo = typeof window !== 'undefined' ? window.location.origin : '';
+                      const searchParams = new URLSearchParams(location.search);
+                      const redirectPath = searchParams.get('redirect') || '';
+                      const returnTo =
+                        typeof window !== 'undefined'
+                          ? `${window.location.origin}${redirectPath.startsWith('/') ? redirectPath : ''}`
+                          : '';
                       window.location.href = `${env.apiUrl}/api/auth/oauth/google?returnTo=${encodeURIComponent(returnTo)}`;
                     }}
                     className="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-[var(--radius-sm)] bg-[var(--bg-surface)] hover:bg-[var(--bg-page)] text-[var(--ink)] font-medium text-xs border border-[var(--border)] transition-colors active:translate-y-[1px]"
@@ -167,7 +189,10 @@ export function LoginPage() {
 
                     <p className="text-center text-xs text-[var(--ink-muted)] mt-8">
                       Don't have an account?{' '}
-                        <Link to="/register" className="text-[var(--accent-text)] font-medium hover:underline">
+                        <Link
+                          to={`/register${location.search}`}
+                          className="text-[var(--accent-text)] font-medium hover:underline"
+                        >
                           Create account
                         </Link>
                     </p>

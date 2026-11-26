@@ -20,6 +20,7 @@ describe('AuthService & AuthController — Single-Use Ticket Exchange Flow', () 
     };
 
     mockRedisService = {
+      getCacheStatus: vi.fn().mockReturnValue({ mode: 'in-memory', status: 'operational', connected: false }),
       set: vi.fn().mockImplementation((key, val) => {
         cacheStore.set(key, val);
         return Promise.resolve();
@@ -66,7 +67,7 @@ describe('AuthService & AuthController — Single-Use Ticket Exchange Flow', () 
     const code = await authService.createExchangeCode('session_token_123', 'user_id_456');
 
     vi.spyOn(authService, 'getSession').mockResolvedValueOnce({
-      user: { id: 'user_id_456', email: 'test@example.com', name: 'Test User', systemRole: 'user' },
+      user: { id: 'user_id_456', email: 'test@example.com', name: 'Test User', systemRole: 'user', accountType: 'personal' },
       session: { token: 'session_token_123', expiresAt: new Date(Date.now() + 10000) } as any,
     });
 

@@ -51,6 +51,13 @@ export class ApiClient {
     }
 
     if (!response.ok || json.success === false) {
+      if (response.status === 401 && typeof window !== 'undefined') {
+        const hadToken = Boolean(localStorage.getItem('taptch_session_token'));
+        localStorage.removeItem('taptch_session_token');
+        if (hadToken) {
+          window.dispatchEvent(new CustomEvent('taptch:unauthorized'));
+        }
+      }
       const errorMsg = json.error?.message || `Request failed with status ${response.status}`;
       throw new Error(errorMsg);
     }

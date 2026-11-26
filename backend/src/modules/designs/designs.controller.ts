@@ -78,6 +78,16 @@ export class DesignsController {
     return this.designsService.duplicate(actor, id);
   }
 
+  @Post(':id/attach-profile')
+  @ApiOperation({ summary: 'Attach a card design to a customer digital profile' })
+  async attachProfile(
+    @CurrentActor() actor: ActorContext,
+    @Param('id') id: string,
+    @Body() body: { profileId: string },
+  ) {
+    return this.designsService.attachProfile(actor, id, body?.profileId);
+  }
+
   @Delete(':id')
   @ApiOperation({ summary: 'Delete card design' })
   async deleteDesign(@CurrentActor() actor: ActorContext, @Param('id') id: string) {

@@ -63,7 +63,7 @@ describe('OrdersService — Complete Ordering, Preservation & Payment Verificati
       ordersService = new OrdersService(mockDbService);
 
       const orderData: CreateOrderDto = {
-        productId: 'prod_matte_obsidian',
+        productId: 'prod_pvc_black',
         cardMaterial: 'pvc',
         quantity: 1, // unit price = 1499 -> subtotal = 1499 < 2000
         shippingAddress: sampleAddress,
@@ -115,7 +115,7 @@ describe('OrdersService — Complete Ordering, Preservation & Payment Verificati
       ordersService = new OrdersService(mockDbService);
 
       const orderData: CreateOrderDto = {
-        productId: 'prod_matte_obsidian',
+        productId: 'prod_metal_black',
         cardMaterial: 'metal', // unit price = 2499 -> subtotal >= 2000
         quantity: 1,
         shippingAddress: sampleAddress,
@@ -158,7 +158,7 @@ describe('OrdersService — Complete Ordering, Preservation & Payment Verificati
       ordersService = new OrdersService(mockDbService);
 
       const orderData: CreateOrderDto = {
-        productId: 'prod_matte_obsidian',
+        productId: 'prod_pvc_black',
         quantity: 1,
         shippingAddress: sampleAddress,
         idempotencyKey: 'idemp_key_123',
@@ -211,7 +211,7 @@ describe('OrdersService — Complete Ordering, Preservation & Payment Verificati
       };
 
       const orderData: CreateOrderDto = {
-        productId: 'prod_matte_obsidian',
+        productId: 'prod_pvc_black',
         cardMaterial: 'metal',
         quantity: 1,
         designSnapshot,

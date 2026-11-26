@@ -33,6 +33,13 @@ export class AuthGuard implements CanActivate {
       return true;
     }
 
+    const response = context.switchToHttp().getResponse();
+    if (response?.setHeader) {
+      response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+      response.setHeader('Pragma', 'no-cache');
+      response.setHeader('Expires', '0');
+    }
+
     if (!actor) {
       throw new UnauthorizedException('Authentication required to access this resource.');
     }

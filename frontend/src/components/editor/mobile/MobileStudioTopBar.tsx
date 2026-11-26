@@ -203,16 +203,31 @@ export const MobileStudioTopBar: React.FC<MobileStudioTopBarProps> = ({
       const handleOrderNow = async () => {
         setIsOrderingNow(true);
         try {
-          const savedDesignId = await handleSaveDesign(true);
-          if (!savedDesignId) {
-            alert('We could not save your design prior to checkout. Please check your network connection and try again.');
-            setIsOrderingNow(false);
-            return;
-          }
           const pId = product?.id || 'prod_classic_pvc';
           const vId = selectedVariant?.id || 'var_matte_black';
+
+          let savedDesignId: string | null = null;
+          try {
+            savedDesignId = await handleSaveDesign(true);
+          } catch {
+            savedDesignId = null;
+          }
+
+          const nextParams = new URLSearchParams({
+            productId: pId,
+            variantId: vId,
+          });
+          if (savedDesignId && savedDesignId !== 'draft') {
+            nextParams.set('designId', savedDesignId);
+          }
+          const checkoutUrl = `/checkout?${nextParams.toString()}`;
+
           setIsOrderingNow(false);
-          navigate(`/checkout?designId=${encodeURIComponent(savedDesignId)}&productId=${encodeURIComponent(pId)}&variantId=${encodeURIComponent(vId)}`);
+          if (!savedDesignId) {
+            navigate(`/login?redirect=${encodeURIComponent(checkoutUrl)}`);
+            return;
+          }
+          navigate(checkoutUrl);
         } catch (err: any) {
           console.warn('[MobileStudioTopBar] Order now navigate failed:', err);
           setIsOrderingNow(false);

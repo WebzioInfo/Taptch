@@ -3,13 +3,14 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ApiClient } from '../services/api';
 import { Button } from '../components/ui/button';
-import { Plus, ExternalLink, CreditCard, Edit3 } from 'lucide-react';
+import { Plus, ExternalLink, CreditCard, Edit3, AlertCircle, RefreshCw } from 'lucide-react';
 
 export function DashboardPage() {
-  const { data: profiles = [], isLoading } = useQuery({
+  const { data: rawProfiles, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['profiles', 'my'],
     queryFn: () => ApiClient.get<any[]>('/api/v1/profiles'),
   });
+  const profiles = Array.isArray(rawProfiles) ? rawProfiles : [];
 
   return (
       <div className="p-4 sm:p-8 max-w-6xl mx-auto">
@@ -41,6 +42,25 @@ export function DashboardPage() {
                 className="h-52 rounded-[var(--radius-md)] bg-[var(--bg-surface)] border border-[var(--border)] animate-pulse"
               />
                 ))}
+              </div>
+            ) : isError ? (
+              <div className="text-center py-12 px-4 rounded-[var(--radius-md)] border border-rose-200 bg-rose-50/60">
+                <AlertCircle className="w-8 h-8 text-rose-600 mx-auto mb-3" />
+                <h3 className="font-head text-base font-medium text-[#171717] mb-1">
+                  Could not load your digital profiles
+                </h3>
+                <p className="font-body text-xs text-[#666666] max-w-md mx-auto mb-5">
+                  {error instanceof Error ? error.message : 'An unexpected error occurred while fetching profiles.'}
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => refetch()}
+                  className="rounded-[var(--radius-sm)] text-xs font-medium gap-1.5"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Retry</span>
+                </Button>
               </div>
             ) : profiles.length === 0 ? (
                   <div className="text-center py-16 px-4 rounded-[var(--radius-md)] border border-dashed border-[var(--border)] bg-[var(--bg-surface)]">

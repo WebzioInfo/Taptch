@@ -19,6 +19,7 @@ import {
   ArrowRight,
   ShieldCheck,
   Headphones,
+  Sparkles,
   Loader2,
   AlertCircle,
   FileText,
@@ -33,6 +34,8 @@ export function OrderConfirmationPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [copiedOrderId, setCopiedOrderId] = useState(false);
+  const [isRetryingPayment, setIsRetryingPayment] = useState(false);
+  const [retryError, setRetryError] = useState<string | null>(null);
 
   const { data: order, isLoading, error } = useQuery({
     queryKey: ['order', id],
@@ -70,7 +73,30 @@ export function OrderConfirmationPage() {
   const shipping = order.shippingAddress || {};
   const isPaid = order.paymentStatus === 'PAID';
   const isCod = order.paymentMethod === 'cod';
+  const isFailed = order.paymentStatus === 'FAILED' || order.paymentStatus === 'CANCELLED';
+  const isPendingOnline = !isCod && !isPaid && !isFailed;
+  const isVerifiedSuccess = isPaid || (isCod && order.orderStatus === 'ORDER_CONFIRMED');
   const orderRef = order.orderNumber || order.id?.substring(0, 8);
+
+  const handleRetryPayment = async () => {
+    setIsRetryingPayment(true);
+    setRetryError(null);
+    try {
+      await ApiClient.post(`/api/v1/orders/${order.id}/verify-payment`, {
+        paymentMethod: order.paymentMethod || 'upi',
+        simulationStatus: 'SUCCESS',
+      });
+      await ApiClient.put('/api/v1/journey/active', {
+        stage: 'COMPLETED',
+        orderId: order.id,
+      }).catch(() => {});
+      window.location.reload();
+    } catch (err: any) {
+      setRetryError(err?.message || 'Payment verification failed. Please try again.');
+    } finally {
+      setIsRetryingPayment(false);
+    }
+  };
 
   const handleCopyOrderId = () => {
     if (orderRef) {
@@ -100,7 +126,41 @@ export function OrderConfirmationPage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-10 space-y-8">
-        {/* Celebration Header */}
+        {/* Payment Pending / Failed Guard (Never show success before verified) */}
+        {!isVerifiedSuccess ? (
+          <div className="text-center space-y-4 p-8 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)] shadow-sm">
+            <div className="w-16 h-16 rounded-full bg-amber-50 border border-amber-200 text-amber-600 mx-auto flex items-center justify-center">
+              <AlertCircle className="w-8 h-8" />
+            </div>
+            <h1 className="text-2xl font-head font-medium text-[var(--ink)]">
+              {isFailed ? 'Payment Not Completed' : 'Awaiting Payment Verification'}
+            </h1>
+            <p className="text-xs sm:text-sm text-[var(--ink-muted)] max-w-md mx-auto">
+              Order <span className="font-mono font-bold text-[var(--ink)]">#{orderRef}</span> is currently{' '}
+              <span className="font-semibold">{order.paymentStatus}</span>. Complete payment verification to confirm your NFC card production.
+            </p>
+            {retryError && (
+              <p className="text-xs text-rose-600 font-medium">{retryError}</p>
+            )}
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={handleRetryPayment}
+                disabled={isRetryingPayment}
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-[var(--radius-sm)] bg-[#FF6A00] hover:bg-[#E85D00] text-white font-semibold text-xs sm:text-sm transition-colors"
+              >
+                {isRetryingPayment ? 'Verifying Payment...' : 'Complete & Verify Payment'}
+                <ArrowRight className="w-4 h-4" />
+              </button>
+              <Link
+                to={`/orders/${order.id}/track`}
+                className="px-5 py-2.5 rounded-[var(--radius-sm)] border border-[var(--border)] text-xs font-medium text-[var(--ink)] hover:bg-[var(--bg-raised)]"
+              >
+                View Order Status
+              </Link>
+            </div>
+          </div>
+        ) : (
         <div className="text-center space-y-3">
           <div className="w-16 h-16 rounded-full bg-[var(--accent)]/15 border border-[var(--accent)]/30 text-[var(--accent)] mx-auto flex items-center justify-center shadow-lg shadow-[var(--accent)]/10">
             <CheckCircle2 className="w-8 h-8" />
@@ -125,17 +185,50 @@ export function OrderConfirmationPage() {
             Estimated express delivery: 2–4 business days
           </p>
 
-          <div className="pt-2">
-            <Link
-              to={`/orders/${order.id}/track`}
-              className="inline-flex items-center space-x-2 px-6 py-2.5 rounded-[var(--radius-sm)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-ink)] font-semibold text-xs sm:text-sm shadow-sm active:translate-y-[1px] transition-all"
-            >
-              <Truck className="w-4 h-4" />
-              <span>Track Order in Real Time</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
+          <div className="pt-3 flex flex-col items-center gap-3">
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Link
+                to={`/profile-setup?orderId=${encodeURIComponent(order.id)}`}
+                className="inline-flex items-center space-x-2 px-6 py-2.5 rounded-[var(--radius-sm)] bg-[#FF6A00] hover:bg-[#E85D00] text-white font-semibold text-xs sm:text-sm shadow-sm active:translate-y-[1px] transition-all"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>Set Up My Digital Profile</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                to="/cards"
+                className="inline-flex items-center space-x-1.5 px-5 py-2.5 rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--bg-surface)] hover:bg-[var(--bg-raised)] text-[var(--ink)] font-semibold text-xs sm:text-sm transition-colors"
+              >
+                <span>I&apos;ll Do This Later</span>
+              </Link>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-4 pt-1 text-xs">
+              <Link
+                to={`/orders/${order.id}/track`}
+                className="inline-flex items-center gap-1.5 font-medium text-[var(--ink-muted)] hover:text-[var(--ink)]"
+              >
+                <Truck className="w-3.5 h-3.5" />
+                <span>View Order &amp; Tracking</span>
+              </Link>
+              {order.attachedProfile?.slug && (
+                <Link
+                  to={`/${order.attachedProfile.slug}`}
+                  className="inline-flex items-center gap-1 font-medium text-[#FF6A00] hover:underline"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>View My Profile</span>
+                </Link>
+              )}
+              <Link
+                to="/"
+                className="font-medium text-[var(--ink-muted)] hover:text-[var(--ink)]"
+              >
+                Continue Exploring Taptch
+              </Link>
+            </div>
           </div>
         </div>
+        )}
 
         {/* Order Details & Summary Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -177,31 +270,37 @@ export function OrderConfirmationPage() {
                     </div>
             )}
 
-                    {/* Profile Association Card */}
+                    {/* Independent Digital Profile Callout (Optional) */}
                     <div className="pt-3 border-t border-[var(--border)]">
-                      <p className="text-[11px] font-semibold text-[var(--ink-muted)] mb-1.5">Paired Digital Identity</p>
+                      <p className="text-[11px] font-semibold text-[var(--ink-muted)] mb-1.5">Digital Profile (Optional)</p>
                       {order.attachedProfile ? (
                         <div className="p-3 rounded-xl bg-[var(--bg-raised)] border border-[var(--border)] flex items-center justify-between">
                           <div>
                             <p className="text-xs font-bold text-[var(--ink)]">{order.attachedProfile.displayName || order.attachedProfile.name}</p>
-                            <p className="text-[10px] font-mono text-[var(--accent)]">taptch.com/{order.attachedProfile.slug}</p>
+                            <p className="text-[10px] font-mono text-[var(--accent)]">/{order.attachedProfile.slug}</p>
                           </div>
                           <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-[var(--radius-sm)] bg-[var(--accent)]/15 text-[var(--accent)] border border-[var(--accent)]/30">
                             Linked
                           </span>
                         </div>
-                      ) : order.profileAssistanceStatus && order.profileAssistanceStatus !== 'NOT_REQUIRED' ? (
-                        <div className="p-3 rounded-xl bg-[var(--accent)]/10 border border-[var(--accent)]/30 flex items-start gap-2">
-                          <Headphones className="w-4 h-4 text-[var(--accent)] shrink-0 mt-0.5" />
+                      ) : (
+                        <div className="p-3.5 rounded-xl bg-[var(--bg-raised)] border border-[var(--border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                           <div>
-                            <p className="text-xs font-bold text-[var(--accent)]">Concierge Profile Assistance Requested</p>
-                            <p className="text-[11px] text-[var(--ink-muted)]">
-                              Our design team will contact you on WhatsApp/Email to craft your customized luxury profile before card dispatch.
+                            <p className="text-xs font-semibold text-[var(--ink)]">
+                              Your physical card order is confirmed.
+                            </p>
+                            <p className="text-[11px] text-[var(--ink-muted)] mt-0.5">
+                              Create or connect a digital profile to your card anytime from My NFC Cards.
                             </p>
                           </div>
+                          <Link
+                            to="/cards"
+                            className="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#FF6A00] hover:bg-[#E85D00] text-white text-xs font-semibold transition-colors"
+                          >
+                            <Sparkles className="w-3.5 h-3.5" />
+                            <span>Set Up Your Digital Profile</span>
+                          </Link>
                         </div>
-                      ) : (
-                        <p className="text-xs text-[var(--ink-muted)] italic">No profile linked yet.</p>
                       )}
                     </div>
                   </div>

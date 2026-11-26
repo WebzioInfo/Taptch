@@ -18,7 +18,7 @@ export class QrService {
   constructor(
     private dbService: DatabaseService,
     private redisService: RedisService,
-  ) {}
+  ) { }
 
   async resolveToken(token: string, ip?: string, userAgent?: string): Promise<DynamicQRResolution> {
     const cacheKey = `qr:token:${token}`;
@@ -67,7 +67,7 @@ export class QrService {
         const slug = prof[0]?.slug || qr.profileId;
         resolution = {
           token,
-          destinationUrl: `/p/${slug}`,
+          destinationUrl: `/${slug}`,
           type: 'PROFILE',
           targetId: qr.profileId,
         };

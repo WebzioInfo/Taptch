@@ -62,9 +62,10 @@ describe('Taptch Live NFC Card Design Studio — Backend Services', () => {
 
     it('resolves product by ID and loads variants', async () => {
       const service = new ProductsService(mockDbService);
-      const product = await service.findOne('prod_matte_obsidian');
+      const product = await service.findOne('prod_metal_rose_gold');
       expect(product).toBeDefined();
-      expect(product.slug).toBe('obsidian-matte-black-nfc-card');
+      expect(product.slug).toBe('metal-nfc-card-rose-gold');
+      expect(product.color).toBe('#B76E79');
       expect(product.variants).toBeDefined();
     });
 

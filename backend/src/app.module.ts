@@ -20,6 +20,7 @@ import { DesignsModule } from './modules/designs/designs.module';
 import { UploadsModule } from './modules/uploads/uploads.module';
 import { CartModule } from './modules/cart/cart.module';
 import { AddressesModule } from './modules/addresses/addresses.module';
+import { JourneyModule } from './modules/journey/journey.module';
 
 const envSchema = z
   .object({
@@ -73,6 +74,7 @@ function validateEnv(config: Record<string, unknown>) {
     UploadsModule,
     CartModule,
     AddressesModule,
+    JourneyModule,
   ],
 })
 export class AppModule { }

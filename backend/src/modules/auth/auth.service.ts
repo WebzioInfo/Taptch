@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException, BadRequestException, Logger } from '
 import { DatabaseService } from '../../database/database.service';
 import { RedisService } from '../../database/redis.service';
 import * as schema from '../../database/schema';
-import { eq, and, gt } from 'drizzle-orm';
+import { eq, and, gt, sql } from 'drizzle-orm';
 import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
 
@@ -16,33 +16,127 @@ export class AuthService {
   ) {}
 
   /**
-   * Generates a secure, 60-second single-use exchange ticket
-   * Replaces raw session tokens in redirect URLs for maximum security
+   * Generates a secure, 60-second single-use exchange ticket.
+   * Persisted in Redis/memory AND PostgreSQL verifications table so multi-worker deployments
+   * and cross-instance callbacks always resolve reliably.
    */
-  async createExchangeCode(token: string, userId: string): Promise<string> {
+  async createExchangeCode(token: string, userId: string, correlationId?: string): Promise<string> {
     const exchangeCode = crypto.randomBytes(24).toString('base64url');
+    const codeHashPrefix = crypto.createHash('sha256').update(exchangeCode).digest('hex').slice(0, 8);
+    const txTag = correlationId ? ` tx=${correlationId}` : '';
     const key = `auth:code:${exchangeCode}`;
-    await this.redisService.set(key, JSON.stringify({ token, userId }), 60);
+    const payload = JSON.stringify({ token, userId });
+    const cacheMode =
+      typeof this.redisService.getCacheStatus === 'function'
+        ? this.redisService.getCacheStatus().mode
+        : 'cache';
+
+    await this.redisService.set(key, payload, 60);
+
+    try {
+      const inserted = await this.dbService.db
+        .insert(schema.verifications)
+        .values({
+          id: crypto.randomUUID(),
+          identifier: `oauth_exchange:${exchangeCode}`,
+          value: payload,
+          expiresAt: sql`NOW() + interval '60 seconds'` as unknown as Date,
+        })
+        .returning({ expiresAt: schema.verifications.expiresAt });
+
+      const expiresIso = inserted?.[0]?.expiresAt
+        ? new Date(inserted[0].expiresAt).toISOString()
+        : new Date(Date.now() + 60 * 1000).toISOString();
+
+      this.logger.log(
+        `[OAuth]${txTag} Created single-use exchange ticket [${codeHashPrefix}] for user=${userId} storage=${cacheMode}+postgres expiresAt=${expiresIso}`,
+      );
+    } catch (e: any) {
+      this.logger.warn(
+        `[OAuth]${txTag} Could not persist exchange ticket [${codeHashPrefix}] to verifications table (storage=${cacheMode}-only): ${e?.message}`,
+      );
+    }
+
     return exchangeCode;
   }
 
   /**
-   * Consumes a single-use exchange ticket, immediately destroying it from storage
+   * Consumes a single-use exchange ticket, immediately destroying it from storage.
    */
-  async consumeExchangeCode(code: string): Promise<{ token: string; userId: string } | null> {
-    if (!code || typeof code !== 'string') return null;
-    const cleanCode = code.trim();
-    const key = `auth:code:${cleanCode}`;
-    const data = await this.redisService.get(key);
-    if (!data) return null;
-
-    // Single-use guarantee: atomic invalidation on consumption
-    await this.redisService.del(key);
-    try {
-      return JSON.parse(data);
-    } catch {
+  async consumeExchangeCode(code: string, correlationId?: string): Promise<{ token: string; userId: string } | null> {
+    const txTag = correlationId ? ` tx=${correlationId}` : '';
+    if (!code || typeof code !== 'string' || !code.trim()) {
+      this.logger.warn(`[OAuth]${txTag} Exchange rejected: missing_code`);
       return null;
     }
+    const cleanCode = code.trim();
+    const codeHashPrefix = crypto.createHash('sha256').update(cleanCode).digest('hex').slice(0, 8);
+    const key = `auth:code:${cleanCode}`;
+    const cacheMode =
+      typeof this.redisService.getCacheStatus === 'function'
+        ? this.redisService.getCacheStatus().mode
+        : 'cache';
+
+    // 1. Check Redis/cache first
+    const redisData = await this.redisService.get(key);
+    if (redisData) {
+      await this.redisService.del(key);
+      try {
+        await this.dbService.db
+          .delete(schema.verifications)
+          .where(eq(schema.verifications.identifier, `oauth_exchange:${cleanCode}`));
+      } catch {
+        // ignore
+      }
+      try {
+        this.logger.log(`[OAuth]${txTag} Exchange ticket [${codeHashPrefix}] consumed from storage=${cacheMode}`);
+        return JSON.parse(redisData);
+      } catch {
+        this.logger.warn(`[OAuth]${txTag} Exchange rejected [${codeHashPrefix}]: malformed_cache_payload`);
+        return null;
+      }
+    }
+
+    // 2. Fallback to PostgreSQL verifications table (atomic single-use delete)
+    try {
+      const deleted = await this.dbService.db
+        .delete(schema.verifications)
+        .where(
+          and(
+            eq(schema.verifications.identifier, `oauth_exchange:${cleanCode}`),
+            gt(schema.verifications.expiresAt, sql`NOW()`),
+          ),
+        )
+        .returning();
+
+      if (deleted.length > 0 && deleted[0].value) {
+        this.logger.log(
+          `[OAuth]${txTag} Exchange ticket [${codeHashPrefix}] consumed from storage=postgres (cache=${cacheMode} miss)`,
+        );
+        return JSON.parse(deleted[0].value);
+      }
+
+      // Diagnose whether it was missing or expired for safe observability
+      const existing = await this.dbService.db
+        .select({ expiresAt: schema.verifications.expiresAt })
+        .from(schema.verifications)
+        .where(eq(schema.verifications.identifier, `oauth_exchange:${cleanCode}`))
+        .limit(1);
+
+      if (existing.length > 0) {
+        this.logger.warn(
+          `[OAuth]${txTag} Exchange rejected [${codeHashPrefix}]: expired_in_postgres expiresAt=${new Date(existing[0].expiresAt).toISOString()}`,
+        );
+      } else {
+        this.logger.warn(
+          `[OAuth]${txTag} Exchange rejected [${codeHashPrefix}]: not_found_or_already_consumed (checked=${cacheMode}+postgres)`,
+        );
+      }
+    } catch (e: any) {
+      this.logger.warn(`[OAuth]${txTag} Exchange error [${codeHashPrefix}]: ${e?.message}`);
+    }
+
+    return null;
   }
 
   async signIn(email: string, pass: string) {
@@ -137,6 +231,7 @@ export class AuthService {
         email: user.email,
         name: user.name,
         systemRole: user.systemRole,
+        accountType: user.accountType || null,
       },
       session: {
         token,
@@ -145,12 +240,20 @@ export class AuthService {
     };
   }
 
-  async signUp(name: string, email: string, pass: string) {
+  async signUp(name: string, email: string, pass: string, accountType?: string) {
     if (!email || !email.includes('@')) {
       throw new BadRequestException('Enter a valid email address.');
     }
     if (!pass || pass.length < 8) {
       throw new BadRequestException('Password must be at least 8 characters.');
+    }
+
+    let resolvedAccountType: 'personal' | 'business' | null = null;
+    if (accountType !== undefined && accountType !== null && accountType !== '') {
+      if (accountType !== 'personal' && accountType !== 'business') {
+        throw new BadRequestException('Invalid account type. Must be "personal" or "business".');
+      }
+      resolvedAccountType = accountType;
     }
 
     const normalizedEmail = email.trim().toLowerCase();
@@ -173,6 +276,7 @@ export class AuthService {
       name: name.trim(),
       email: normalizedEmail,
       systemRole: 'user',
+      accountType: resolvedAccountType,
     });
 
     await this.dbService.db.insert(schema.accounts).values({
@@ -183,7 +287,108 @@ export class AuthService {
       password: hashedPassword,
     });
 
+    if (resolvedAccountType === 'business') {
+      await this.ensureBusinessOrganization(userId, name.trim());
+    }
+
     return this.signIn(normalizedEmail, pass);
+  }
+
+  private async ensureBusinessOrganization(userId: string, ownerName: string) {
+    try {
+      const existingMembership = await this.dbService.db
+        .select({ organizationId: schema.members.organizationId })
+        .from(schema.members)
+        .where(eq(schema.members.userId, userId))
+        .limit(1);
+
+      if (existingMembership.length > 0) return existingMembership[0].organizationId;
+
+      const orgId = crypto.randomUUID();
+      const orgName = `${ownerName}'s Business`;
+      const slug = `biz-${userId.substring(0, 8)}-${Date.now().toString(36)}`;
+
+      await this.dbService.db.insert(schema.organizations).values({
+        id: orgId,
+        name: orgName,
+        slug,
+      });
+
+      await this.dbService.db.insert(schema.members).values({
+        id: crypto.randomUUID(),
+        organizationId: orgId,
+        userId,
+        role: 'owner',
+        status: 'active',
+      });
+
+      return orgId;
+    } catch (e) {
+      this.logger.warn('Could not initialize default business organization:', e);
+      return null;
+    }
+  }
+
+  async setAccountType(userId: string, accountType: string) {
+    if (accountType !== 'personal' && accountType !== 'business') {
+      throw new BadRequestException('Invalid account type. Must be "personal" or "business".');
+    }
+
+    const [user] = await this.dbService.db
+      .select()
+      .from(schema.users)
+      .where(eq(schema.users.id, userId))
+      .limit(1);
+
+    if (!user) {
+      throw new UnauthorizedException('User account not found.');
+    }
+
+    if (user.accountType && user.accountType !== accountType) {
+      if (user.accountType === 'personal' && accountType === 'business') {
+        throw new BadRequestException(
+          'Your account is registered as Personal. Please use the Business Upgrade flow to convert your account.',
+        );
+      }
+      throw new BadRequestException('Account type is already configured and cannot be downgraded.');
+    }
+
+    if (!user.accountType) {
+      await this.dbService.db
+        .update(schema.users)
+        .set({ accountType, updatedAt: new Date() })
+        .where(eq(schema.users.id, userId));
+
+      if (accountType === 'business') {
+        await this.ensureBusinessOrganization(userId, user.name);
+      }
+    }
+
+    return { accountType };
+  }
+
+  async upgradeToBusiness(userId: string, businessName?: string) {
+    const [user] = await this.dbService.db
+      .select()
+      .from(schema.users)
+      .where(eq(schema.users.id, userId))
+      .limit(1);
+
+    if (!user) {
+      throw new UnauthorizedException('User account not found.');
+    }
+
+    await this.dbService.db
+      .update(schema.users)
+      .set({
+        accountType: 'business',
+        business: businessName?.trim() || user.business || null,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.users.id, userId));
+
+    const orgId = await this.ensureBusinessOrganization(userId, businessName?.trim() || user.name);
+    return { accountType: 'business', organizationId: orgId };
   }
 
   async signOut(token: string) {
@@ -223,6 +428,7 @@ export class AuthService {
         name: user.name,
         email: user.email,
         systemRole: user.systemRole,
+        accountType: user.accountType || null,
       },
     };
   }
@@ -421,6 +627,7 @@ export class AuthService {
         email: normalizedEmail,
         name: googleUser.name || normalizedEmail,
         systemRole,
+        accountType: existingUser?.accountType || null,
       },
       session: {
         token,

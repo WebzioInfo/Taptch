@@ -13,10 +13,6 @@ export interface CreateOrderDto {
   quantity?: number;
   cardMaterial?: 'pvc' | 'metal' | 'wood' | 'matte';
   designTier?: 'standard' | 'premium';
-  profileId?: string | null;
-  templateId?: string;
-  requestProfileAssistance?: boolean;
-  profileAssistanceNotes?: string;
   shippingAddress: {
     fullName: string;
     phone: string;
@@ -88,19 +84,27 @@ export class OrdersService {
           }
         }
 
-        // 3. Fetch latest payment record
-        const paymentRecords = await tx
-          .select()
-          .from(schema.payments)
-          .where(eq(schema.payments.orderId, ord.id))
-          .orderBy(desc(schema.payments.createdAt))
-          .limit(1);
+        // 3. Fetch latest payment record & purchased card allocations
+        const [paymentRecords, purchasedCards] = await Promise.all([
+          tx
+            .select()
+            .from(schema.payments)
+            .where(eq(schema.payments.orderId, ord.id))
+            .orderBy(desc(schema.payments.createdAt))
+            .limit(1),
+          tx
+            .select()
+            .from(schema.purchasedCards)
+            .where(eq(schema.purchasedCards.orderId, ord.id))
+            .orderBy(asc(schema.purchasedCards.unitIndex)),
+        ]);
 
         enrichedOrders.push({
           ...ord,
           items,
           attachedProfile,
           payment: paymentRecords[0] || null,
+          purchasedCards,
         });
       }
 
@@ -163,12 +167,41 @@ export class OrdersService {
         .where(eq(schema.orderStatusHistory.orderId, order.id))
         .orderBy(asc(schema.orderStatusHistory.createdAt));
 
-      // Fetch payment records
-      const paymentRecords = await tx
-        .select()
-        .from(schema.payments)
-        .where(eq(schema.payments.orderId, order.id))
-        .orderBy(desc(schema.payments.createdAt));
+      // Fetch payment records & purchased card allocations
+      const [paymentRecords, purchasedCards] = await Promise.all([
+        tx
+          .select()
+          .from(schema.payments)
+          .where(eq(schema.payments.orderId, order.id))
+          .orderBy(desc(schema.payments.createdAt)),
+        tx
+          .select()
+          .from(schema.purchasedCards)
+          .where(eq(schema.purchasedCards.orderId, order.id))
+          .orderBy(asc(schema.purchasedCards.unitIndex)),
+      ]);
+
+      // Attach profile summary for each purchased card if linked
+      const enrichedPurchasedCards = [];
+      for (const pc of purchasedCards) {
+        let linkedProfile = null;
+        if (pc.profileId) {
+          const [prof] = await tx
+            .select({
+              id: schema.profiles.id,
+              displayName: schema.profiles.displayName,
+              slug: schema.profiles.slug,
+              profileType: schema.profiles.profileType,
+              status: schema.profiles.status,
+              templateId: schema.profiles.templateId,
+            })
+            .from(schema.profiles)
+            .where(eq(schema.profiles.id, pc.profileId))
+            .limit(1);
+          linkedProfile = prof || null;
+        }
+        enrichedPurchasedCards.push({ ...pc, profile: linkedProfile });
+      }
 
       return {
         ...order,
@@ -177,6 +210,7 @@ export class OrdersService {
         statusHistory,
         payment: paymentRecords[0] || null,
         allPayments: paymentRecords,
+        purchasedCards: enrichedPurchasedCards,
       };
     });
   }
@@ -215,32 +249,14 @@ export class OrdersService {
         }
       }
 
-      // 2. Profile Validation: If profile attached, verify ownership
-      let attachedProfileId: string | null = null;
-      let profileAssistanceStatus = data.requestProfileAssistance ? 'REQUESTED' : 'NOT_REQUIRED';
-
-      if (data.profileId) {
-        const [profile] = await tx
-          .select()
-          .from(schema.profiles)
-          .where(
-            and(
-              eq(schema.profiles.id, data.profileId),
-              eq(schema.profiles.ownerId, actor.userId)
-            )
-          )
-          .limit(1);
-
-        if (!profile) {
-          throw new BadRequestException('The selected digital profile does not exist or belongs to another user.');
-        }
-        attachedProfileId = profile.id;
-        profileAssistanceStatus = 'PROFILE_SELECTED';
-      }
+      // 2. Physical Card Order is strictly decoupled from Digital Profile Setup
+      const attachedProfileId: string | null = null;
+      const profileAssistanceStatus = 'NOT_REQUIRED';
 
       // 3. Resolve Product & Pricing on Backend (Never trust client-side prices)
-      const productId = data.productId || 'prod_matte_pvc_01';
+      const productId = data.productId || 'prod_pvc_black';
       let product: any = null;
+      let matchedVariant: any = null;
       try {
         const [p] = await tx
           .select()
@@ -250,7 +266,42 @@ export class OrdersService {
         product = p;
       } catch (e) { }
 
-      // 3. Resolve Product & Pricing on Backend (Material Rate + Design Rate = Combined Unit Price)
+      if (data.productId && !product) {
+        const { SEEDED_CARD_PRODUCTS } = await import('../products/products.service');
+        const seededMatch = SEEDED_CARD_PRODUCTS.find((p) => p.id === data.productId || p.slug === data.productId);
+        if (seededMatch) {
+          product = seededMatch;
+        } else {
+          throw new BadRequestException(`Selected NFC card product "${data.productId}" was not found.`);
+        }
+      }
+
+      if (product && product.isActive === false) {
+        throw new BadRequestException('The selected NFC card product is currently unavailable.');
+      }
+
+      if (product && data.variantId) {
+        try {
+          const [v] = await tx
+            .select()
+            .from(schema.cardProductVariants)
+            .where(
+              and(
+                eq(schema.cardProductVariants.id, data.variantId),
+                eq(schema.cardProductVariants.productId, product.id),
+              ),
+            )
+            .limit(1);
+          if (!v) {
+            throw new BadRequestException('Selected variant does not belong to the chosen product.');
+          }
+          matchedVariant = v;
+        } catch (err) {
+          if (err instanceof BadRequestException) throw err;
+        }
+      }
+
+      // 3. Resolve Product & Pricing on Backend (Variant/Product price -> Material Rate fallback)
       const materialRates: Record<string, number> = {
         pvc: 1099,
         matte: 1099,
@@ -267,8 +318,14 @@ export class OrdersService {
       const selectedMaterial = data.cardMaterial || 'pvc';
       const materialRate = materialRates[selectedMaterial] ?? 1099;
       const designRate = defaultDesignRates[selectedMaterial] ?? 400;
-      const unitPrice = materialRate + designRate; // Combined Price: PVC ₹1499, Matte ₹1499, Wood ₹1999, Metal ₹2499
+      const fallbackUnitPrice = materialRate + designRate;
+      const unitPrice =
+        matchedVariant?.price ??
+        product?.discountPrice ??
+        product?.basePrice ??
+        fallbackUnitPrice;
       const quantity = Math.max(1, data.quantity || 1);
+
       const subtotal = unitPrice * quantity;
       const shippingCost = subtotal >= 2000 ? 0 : 99; // Free shipping above ₹2,000
       const taxAmount = Math.round(subtotal * 0.18); // 18% GST calculation
@@ -319,7 +376,7 @@ export class OrdersService {
           paymentStatus,
           paymentMethod,
           profileAssistanceStatus,
-          profileAssistanceNotes: data.profileAssistanceNotes || null,
+          profileAssistanceNotes: null,
           subtotal,
           shippingCost,
           taxAmount,
@@ -379,28 +436,40 @@ export class OrdersService {
         backPreviewUrl = (data.designSnapshot as any).previewBackUrl || data.designSnapshot.backPreviewUrl || '';
       }
 
-      await tx.insert(schema.orderItems).values({
-        id: crypto.randomUUID(),
-        orderId,
-        productId,
-        productName: product?.name || 'Custom Contactless NFC Card',
-        variantName:
-          data.cardMaterial === 'metal'
-            ? 'Metal NFC Card'
-            : data.cardMaterial === 'wood'
-            ? 'Wood NFC Card'
-            : data.cardMaterial === 'matte'
-            ? 'Matte NFC Card'
-            : 'PVC NFC Card',
-        unitPrice,
-        quantity,
-        total: subtotal,
-        designSnapshotJson: designSnapshotPayload || JSON.stringify({ capturedAt: new Date().toISOString() }),
-        designPreviewUrl,
-        backPreviewUrl,
-        previewFrontUrl: designPreviewUrl,
-        previewBackUrl: backPreviewUrl,
-      });
+      const [insertedItem] = await tx
+        .insert(schema.orderItems)
+        .values({
+          id: crypto.randomUUID(),
+          orderId,
+          productId,
+          productName: product?.name || 'Custom Contactless NFC Card',
+          variantName:
+            matchedVariant?.name ||
+            product?.colorName ||
+            (data.cardMaterial === 'metal'
+              ? 'Metal NFC Card'
+              : data.cardMaterial === 'wood'
+              ? 'Wood NFC Card'
+              : data.cardMaterial === 'matte'
+              ? 'Matte NFC Card'
+              : 'PVC NFC Card'),
+          unitPrice,
+          quantity,
+          total: subtotal,
+          designSnapshotJson: designSnapshotPayload || JSON.stringify({ capturedAt: new Date().toISOString() }),
+          designPreviewUrl: designPreviewUrl || matchedVariant?.imageUrl || product?.imageUrl || null,
+          backPreviewUrl,
+          previewFrontUrl: designPreviewUrl || matchedVariant?.imageUrl || product?.imageUrl || null,
+          previewBackUrl: backPreviewUrl,
+          profileId: attachedProfileId,
+          designId: data.designId || null,
+        })
+        .returning();
+
+      // 6b. If COD (immediately confirmed), allocate purchased cards idempotently
+      if (paymentMethod === 'cod') {
+        await this.allocatePurchasedCards(tx, newOrder, insertedItem);
+      }
 
       // 7. Initial Status History Timeline Event
       const initialHistoryTitle =
@@ -465,6 +534,41 @@ export class OrdersService {
     });
   }
 
+  private async allocatePurchasedCards(tx: any, order: any, orderItem: any) {
+    if (!order || !orderItem) return;
+    const qty = Math.max(1, orderItem.quantity || order.quantity || 1);
+    const hasProfile = Boolean(orderItem.profileId || order.profileId);
+    const resolvedProfileId = orderItem.profileId || order.profileId || null;
+
+    for (let unit = 1; unit <= qty; unit++) {
+      const redirectToken = crypto.randomBytes(6).toString('hex');
+      await tx
+        .insert(schema.purchasedCards)
+        .values({
+          id: crypto.randomUUID(),
+          orderId: order.id,
+          orderItemId: orderItem.id,
+          unitIndex: unit,
+          userId: order.userId,
+          organizationId: null,
+          productId: orderItem.productId,
+          productName: orderItem.productName,
+          variantName: orderItem.variantName,
+          material: order.material || 'pvc',
+          colorName: orderItem.variantName || null,
+          designId: orderItem.designId || null,
+          previewFrontUrl: orderItem.previewFrontUrl || orderItem.designPreviewUrl || null,
+          previewBackUrl: orderItem.previewBackUrl || orderItem.backPreviewUrl || null,
+          redirectToken,
+          destinationType: hasProfile ? 'profile' : null,
+          customDestinationUrl: null,
+          profileId: resolvedProfileId,
+          profileAssignmentStatus: hasProfile ? 'PROFILE_ATTACHED' : 'AWAITING_PROFILE',
+        })
+        .onConflictDoNothing();
+    }
+  }
+
   /**
    * Verify online payment (Razorpay HMAC signature verification & UPI test simulation)
    */
@@ -482,6 +586,20 @@ export class OrdersService {
 
       if (order.userId !== actor.userId && actor.role !== 'admin' && actor.role !== 'super_admin') {
         throw new ForbiddenException('Unauthorized to verify this order.');
+      }
+
+      // Idempotency guard: if already PAID, ensure card allocations exist and return without duplicating
+      if (order.paymentStatus === 'PAID') {
+        const items = await tx
+          .select()
+          .from(schema.orderItems)
+          .where(eq(schema.orderItems.orderId, order.id));
+        if (Array.isArray(items)) {
+          for (const it of items) {
+            await this.allocatePurchasedCards(tx, order, it);
+          }
+        }
+        return order;
       }
 
       const isRazorpay = data.paymentMethod === 'razorpay';
@@ -540,6 +658,16 @@ export class OrdersService {
           updatedBy: 'system:razorpay',
         });
 
+        const items = await tx
+          .select()
+          .from(schema.orderItems)
+          .where(eq(schema.orderItems.orderId, orderId));
+        if (Array.isArray(items)) {
+          for (const it of items) {
+            await this.allocatePurchasedCards(tx, updatedOrder, it);
+          }
+        }
+
         return updatedOrder;
       }
 
@@ -576,6 +704,16 @@ export class OrdersService {
             description: `UPI Test Payment ₹${order.totalAmount} approved. Reference: ${upiRef}.`,
             updatedBy: 'system:upi_simulator',
           });
+
+          const items = await tx
+            .select()
+            .from(schema.orderItems)
+            .where(eq(schema.orderItems.orderId, orderId));
+          if (Array.isArray(items)) {
+            for (const it of items) {
+              await this.allocatePurchasedCards(tx, updatedOrder, it);
+            }
+          }
 
           return updatedOrder;
         } else {

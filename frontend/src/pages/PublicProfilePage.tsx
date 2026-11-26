@@ -97,224 +97,231 @@ export function PublicProfilePage() {
     };
   }, [slug, fetchProfile]);
 
-  // Loading State
+  // Loading State — minimal Taptch loading screen with animated dots-wave indicator
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#0A0A0C] px-4">
-        <BrandLogo variant="symbol" size="md" className="mb-6 animate-pulse" />
-        <Loader2 className="w-8 h-8 text-[#D4AF37] animate-spin mb-4" />
-        <p className="text-xs text-muted-foreground uppercase tracking-widest font-mono">
-          Loading Digital Profile...
-        </p>
-      </div>
-    );
-  }
-
-  // Profile Not Found State (404)
-  if (status === 'not_found') {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#0A0A0C] px-4 text-center">
-        <div className="w-20 h-20 rounded-3xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-6 shadow-xl">
-          <AlertCircle className="w-10 h-10" />
-        </div>
-        <h1 className="text-3xl font-extrabold text-white mb-3 tracking-tight">
-          Profile not found
-        </h1>
-        <p className="text-sm text-neutral-400 max-w-md mb-8 leading-relaxed">
-          We couldn&apos;t find a Taptch profile with this username. The link may be incorrect or the profile may no longer be available.
-        </p>
-        <div className="flex flex-col sm:flex-row items-center gap-3">
-          <Link
-            to="/"
-            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#D4AF37] hover:bg-[#E5C058] text-black font-bold text-xs transition-colors inline-flex items-center justify-center gap-2 shadow-lg"
-          >
-            <Home className="w-4 h-4" />
-            <span>Go to Taptch</span>
-          </Link>
-          <Link
-            to="/register"
-            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold text-xs border border-white/10 transition-colors inline-flex items-center justify-center gap-2"
-          >
-            <span>Create Your Profile</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  // Unpublished / Inactive Profile State
-  if (status === 'unpublished') {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#0A0A0C] px-4 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-6">
-          <AlertCircle className="w-8 h-8" />
-        </div>
-        <h1 className="text-2xl font-bold text-white mb-2">Profile Unavailable</h1>
-        <p className="text-sm text-muted-foreground max-w-md mb-8">
-          This digital identity is currently undergoing updates or has been temporarily set to private.
-        </p>
-        <Link
-          to="/"
-          className="px-6 py-2.5 rounded-xl bg-[#D4AF37] text-black font-bold text-xs hover:bg-[#E5C058] transition-colors"
+        <div
+          className="min-h-screen bg-[#F8F9FB] flex flex-col items-center justify-center p-4 font-body"
+          aria-busy="true"
+          aria-label="Loading Digital Profile"
         >
-          Go to Taptch
-        </Link>
-      </div>
-    );
+          <div className="mb-5">
+            <BrandLogo variant="symbol" size="md" />
+          </div>
+          <div className="flex items-center gap-2" role="status" aria-label="Loading">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#FF6A00] animate-bounce [animation-delay:-0.3s]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#FF6A00] animate-bounce [animation-delay:-0.15s]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#FF6A00] animate-bounce" />
+          </div>
+        </div>
+        );
   }
 
-  // Server / Network Error State (500 or Connection Failed)
-  if (status === 'error') {
+        // Profile Not Found State (404)
+        if (status === 'not_found') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#0A0A0C] px-4 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 mb-6">
-          <AlertCircle className="w-8 h-8" />
+        <div className="min-h-screen flex flex-col items-center justify-center bg-[#0A0A0C] px-4 text-center">
+          <div className="w-20 h-20 rounded-3xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-6 shadow-xl">
+            <AlertCircle className="w-10 h-10" />
+          </div>
+          <h1 className="text-3xl font-extrabold text-white mb-3 tracking-tight">
+            Profile not found
+          </h1>
+          <p className="text-sm text-neutral-400 max-w-md mb-8 leading-relaxed">
+            We couldn&apos;t find a Taptch profile with this username. The link may be incorrect or the profile may no longer be available.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <Link
+              to="/"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#D4AF37] hover:bg-[#E5C058] text-black font-bold text-xs transition-colors inline-flex items-center justify-center gap-2 shadow-lg"
+            >
+              <Home className="w-4 h-4" />
+              <span>Go to Taptch</span>
+            </Link>
+            <Link
+              to="/register"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold text-xs border border-white/10 transition-colors inline-flex items-center justify-center gap-2"
+            >
+              <span>Create Your Profile</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
-        <h1 className="text-2xl font-bold text-white mb-2">Connection Problem</h1>
-        <p className="text-sm text-neutral-400 max-w-md mb-8">
-          {errorMessage || 'We encountered a problem loading this profile. Please try again.'}
-        </p>
-        <div className="flex items-center gap-3">
-          <Button
-            type="button"
-            onClick={() => slug && fetchProfile(slug)}
-            className="px-6 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#E5C058] text-black font-bold text-xs gap-2"
-          >
-            <RefreshCw className="w-4 h-4" />
-            <span>Retry</span>
-          </Button>
+        );
+  }
+
+        // Unpublished / Inactive Profile State
+        if (status === 'unpublished') {
+    return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-[#0A0A0C] px-4 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-6">
+            <AlertCircle className="w-8 h-8" />
+          </div>
+          <h1 className="text-2xl font-bold text-white mb-2">Profile Unavailable</h1>
+          <p className="text-sm text-muted-foreground max-w-md mb-8">
+            This digital identity is currently undergoing updates or has been temporarily set to private.
+          </p>
           <Link
             to="/"
-            className="px-6 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium text-xs border border-white/10"
+            className="px-6 py-2.5 rounded-xl bg-[#D4AF37] text-black font-bold text-xs hover:bg-[#E5C058] transition-colors"
           >
-            Return Home
+            Go to Taptch
           </Link>
         </div>
-      </div>
-    );
+        );
   }
 
-  // Success State -> Render Profile
-  if (!profile) return null;
+        // Server / Network Error State (500 or Connection Failed)
+        if (status === 'error') {
+    return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-[#0A0A0C] px-4 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 mb-6">
+            <AlertCircle className="w-8 h-8" />
+          </div>
+          <h1 className="text-2xl font-bold text-white mb-2">Connection Problem</h1>
+          <p className="text-sm text-neutral-400 max-w-md mb-8">
+            {errorMessage || 'We encountered a problem loading this profile. Please try again.'}
+          </p>
+          <div className="flex items-center gap-3">
+            <Button
+              type="button"
+              onClick={() => slug && fetchProfile(slug)}
+              className="px-6 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#E5C058] text-black font-bold text-xs gap-2"
+            >
+              <RefreshCw className="w-4 h-4" />
+              <span>Retry</span>
+            </Button>
+            <Link
+              to="/"
+              className="px-6 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium text-xs border border-white/10"
+            >
+              Return Home
+            </Link>
+          </div>
+        </div>
+        );
+  }
 
-  const renderData = {
-    id: profile.id,
-    slug: profile.slug,
-    displayName: profile.displayName,
-    headline: profile.headline,
-    bio: profile.bio,
-    avatarUrl: profile.avatarUrl,
-    coverUrl: profile.coverUrl,
-    phone: profile.phone || profile.phoneNumber || profile.directPhone,
-    whatsapp: profile.whatsapp || profile.whatsappNumber || profile.whatsappDirectNumber || profile.customFields?.whatsapp,
-    email: profile.email,
-    website: profile.website,
-    address: profile.address,
-    location: profile.location || profile.address,
-    profileType: profile.profileType || 'personal',
-    socialLinks: profile.socialLinks || [],
-    templateId: profile.templateId || profile.themeId || 'premium-brand',
-    themeConfig: profile.customThemeColors || profile.themeConfig || {},
+        // Success State -> Render Profile
+        if (!profile) return null;
+
+        const renderData = {
+          id: profile.id,
+        slug: profile.slug,
+        displayName: profile.displayName,
+        headline: profile.headline,
+        bio: profile.bio,
+        avatarUrl: profile.avatarUrl,
+        coverUrl: profile.coverUrl,
+        phone: profile.phone || profile.phoneNumber || profile.directPhone,
+        whatsapp: profile.whatsapp || profile.whatsappNumber || profile.whatsappDirectNumber || profile.customFields?.whatsapp,
+        email: profile.email,
+        website: profile.website,
+        address: profile.address,
+        location: profile.location || profile.address,
+        profileType: profile.profileType || 'personal',
+        socialLinks: profile.socialLinks || [],
+        templateId: profile.templateId || profile.themeId || 'premium-brand',
+        themeConfig: profile.customThemeColors || profile.themeConfig || { },
     businesses: (profile.businesses || []).map((b: any) => ({
-      id: b.id,
-      companyName: b.companyName || b.name,
-      name: b.name || b.companyName,
-      tagline: b.jobTitle || b.tagline,
-      roleTitle: b.roleTitle || b.jobTitle || b.tagline,
-      websiteUrl: b.businessWebsite || b.websiteUrl || b.website,
-      website: b.website || b.businessWebsite || b.websiteUrl,
-      address: b.businessAddress || b.address,
-      logoUrl: b.logoUrl,
-      email: b.email || b.businessEmail,
-      phone: b.phone || b.businessPhone,
-      whatsapp: b.whatsapp,
+          id: b.id,
+        companyName: b.companyName || b.name,
+        name: b.name || b.companyName,
+        tagline: b.jobTitle || b.tagline,
+        roleTitle: b.roleTitle || b.jobTitle || b.tagline,
+        websiteUrl: b.businessWebsite || b.websiteUrl || b.website,
+        website: b.website || b.businessWebsite || b.websiteUrl,
+        address: b.businessAddress || b.address,
+        logoUrl: b.logoUrl,
+        email: b.email || b.businessEmail,
+        phone: b.phone || b.businessPhone,
+        whatsapp: b.whatsapp,
     })),
     catalogue: (profile.catalogue || []).map((c: any) => ({
-      id: c.id,
-      title: c.title,
-      type: c.type || c.itemType || 'product',
-      itemType: c.itemType || c.type || 'product',
-      description: c.description,
-      price: c.price,
-      currency: c.currency || '₹',
-      imageUrl: c.imageUrl,
-      actionUrl: c.actionUrl,
-      actionLabel: c.actionLabel || 'Enquire',
+          id: c.id,
+        title: c.title,
+        type: c.type || c.itemType || 'product',
+        itemType: c.itemType || c.type || 'product',
+        description: c.description,
+        price: c.price,
+        currency: c.currency || '₹',
+        imageUrl: c.imageUrl,
+        actionUrl: c.actionUrl,
+        actionLabel: c.actionLabel || 'Enquire',
     })),
     sections: (profile.sections || []).map((s: any) => ({
-      id: s.id,
-      sectionType: s.sectionType,
-      title: s.title,
-      isEnabled: s.isEnabled,
-      displayOrder: s.orderIndex,
-      configJson: s.content,
+          id: s.id,
+        sectionType: s.sectionType,
+        title: s.title,
+        isEnabled: s.isEnabled,
+        displayOrder: s.orderIndex,
+        configJson: s.content,
     })),
   };
 
-  const isBusiness = profile.profileType === 'business';
-  const customSeo = (profile.customFields as Record<string, any> | undefined)?.seo;
+        const isBusiness = profile.profileType === 'business';
+        const customSeo = (profile.customFields as Record<string, any> | undefined)?.seo;
 
-  const pageTitle =
-    customSeo?.title?.trim() ||
-    (isBusiness
-      ? `${profile.displayName} | Official Business Profile`
-      : `${profile.displayName} — ${profile.headline || 'Digital Identity'}`);
+        const pageTitle =
+        customSeo?.title?.trim() ||
+        (isBusiness
+        ? `${profile.displayName} | Official Business Profile`
+        : `${profile.displayName} — ${profile.headline || 'Digital Identity'}`);
 
-  const pageDescription =
-    customSeo?.description?.trim() ||
-    profile.bio ||
-    `Connect with ${profile.displayName} on Taptch. Access direct contact exchange, portfolio, and verified identity.`;
+        const pageDescription =
+        customSeo?.description?.trim() ||
+        profile.bio ||
+        `Connect with ${profile.displayName} on Taptch. Access direct contact exchange, portfolio, and verified identity.`;
 
-  const ogImage =
-    customSeo?.socialImageUrl?.trim() ||
-    profile.coverUrl ||
-    profile.avatarUrl ||
-    'https://taptch.com/og-default.png';
+        const ogImage =
+        customSeo?.socialImageUrl?.trim() ||
+        profile.coverUrl ||
+        profile.avatarUrl ||
+        'https://taptch.com/og-default.png';
 
-  const canonicalUrl = `${window.location.origin}/${profile.slug}`;
-  const robots =
-    profile.status === 'PUBLISHED' || profile.status === 'ACTIVE'
-      ? 'index, follow'
-      : 'noindex, nofollow';
+        const canonicalUrl = `${window.location.origin}/${profile.slug}`;
+        const robots =
+        profile.status === 'PUBLISHED' || profile.status === 'ACTIVE'
+        ? 'index, follow'
+        : 'noindex, nofollow';
 
-  const jsonLd = isBusiness
-    ? {
-      '@context': 'https://schema.org',
-      '@type': 'Organization',
-      name: profile.displayName,
-      description: pageDescription,
-      url: canonicalUrl,
-      logo: ogImage || profile.avatarUrl || undefined,
-      email: profile.email || undefined,
-      telephone: profile.phone || undefined,
+        const jsonLd = isBusiness
+        ? {
+          '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: profile.displayName,
+        description: pageDescription,
+        url: canonicalUrl,
+        logo: ogImage || profile.avatarUrl || undefined,
+        email: profile.email || undefined,
+        telephone: profile.phone || undefined,
     }
-    : {
-      '@context': 'https://schema.org',
-      '@type': 'Person',
-      name: profile.displayName,
-      jobTitle: profile.headline || undefined,
-      description: pageDescription,
-      image: ogImage || profile.avatarUrl || undefined,
-      url: canonicalUrl,
-      email: profile.email || undefined,
-      telephone: profile.phone || undefined,
+        : {
+          '@context': 'https://schema.org',
+        '@type': 'Person',
+        name: profile.displayName,
+        jobTitle: profile.headline || undefined,
+        description: pageDescription,
+        image: ogImage || profile.avatarUrl || undefined,
+        url: canonicalUrl,
+        email: profile.email || undefined,
+        telephone: profile.phone || undefined,
     };
 
-  return (
-    <div className="min-h-screen bg-black">
-      <MetaTags
-        title={pageTitle}
-        description={pageDescription}
-        canonicalUrl={canonicalUrl}
-        ogImage={ogImage}
-        ogType={isBusiness ? 'business.business' : 'profile'}
-        siteName="Taptch"
-        twitterCard="summary_large_image"
-        robots={robots}
-        jsonLd={jsonLd}
-      />
-      <ProfileRenderer profile={renderData as any} />
-    </div>
-  );
+        return (
+        <div className="min-h-screen bg-black">
+          <MetaTags
+            title={pageTitle}
+            description={pageDescription}
+            canonicalUrl={canonicalUrl}
+            ogImage={ogImage}
+            ogType={isBusiness ? 'business.business' : 'profile'}
+            siteName="Taptch"
+            twitterCard="summary_large_image"
+            robots={robots}
+            jsonLd={jsonLd}
+          />
+          <ProfileRenderer profile={renderData as any} />
+        </div>
+        );
 }

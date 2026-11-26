@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, jsonb, varchar, integer, boolean } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, jsonb, varchar, integer, boolean, index } from 'drizzle-orm/pg-core';
 import { organizations, users } from './auth';
 
 /**
@@ -62,6 +62,13 @@ export const profiles = pgTable('profiles', {
   publishedJson: jsonb('published_json').$type<Record<string, unknown>>().default({}),
   version: integer('version').notNull().default(1),
   publishedAt: timestamp('published_at'),
+  /**
+   * Username Locking — prevents slug/username changes after the profile URL has been
+   * physically written to an NFC chip. Once locked, the username is permanent unless
+   * an admin explicitly unlocks it.
+   */
+  usernameLocked: boolean('username_locked').notNull().default(false),
+  usernameLockedAt: timestamp('username_locked_at'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
@@ -134,4 +141,20 @@ export const profileSections = pgTable('profile_sections', {
   configJson: jsonb('config_json').$type<Record<string, unknown>>().notNull().default({}),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+
+/**
+ * Username Aliases Table
+ * When a profile's username (slug) changes before an NFC card is locked to it,
+ * the old username is preserved as an alias so any existing bookmarks or QR codes still resolve.
+ * Once a card is NFC-locked, username changes are blocked entirely.
+ */
+export const usernameAliases = pgTable('username_aliases', {
+  id: varchar('id', { length: 64 }).primaryKey(),
+  profileId: varchar('profile_id', { length: 64 })
+    .notNull()
+    .references(() => profiles.id, { onDelete: 'cascade' }),
+  alias: varchar('alias', { length: 128 }).notNull().unique(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
 });

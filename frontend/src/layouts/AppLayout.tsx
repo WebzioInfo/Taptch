@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { BrandLogo } from '../components/brand';
-import { useSession, signOut } from '../lib/auth/client';
+import { useSession, performCompleteLogout } from '../lib/auth/client';
+import { ProtectedRoute } from '../components/auth/ProtectedRoute';
 import {
   LayoutDashboard,
   CreditCard,
@@ -12,17 +14,25 @@ import {
   X,
   ShieldCheck,
   Headphones,
+  ShoppingBag,
 } from 'lucide-react';
 import { PwaInstallPrompt } from '../components/pwa/PwaInstallPrompt';
 
 export function AppLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { data: session } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const handleLogout = () => {
+    performCompleteLogout(queryClient, navigate, '/');
+  };
+
   const navItems = [
     { to: '/dashboard', label: 'Profiles', icon: LayoutDashboard },
-    { to: '/cards', label: 'Cards', icon: CreditCard },
+    { to: '/dashboard/nfc-shop', label: 'Purchase NFC Cards', icon: ShoppingBag },
+    { to: '/dashboard/my-nfc-cards', label: 'My NFC Cards', icon: CreditCard },
     { to: '/orders', label: 'Orders', icon: Package },
     { to: '/qr', label: 'QR Engine', icon: QrCode },
   ];
@@ -35,6 +45,7 @@ export function AppLayout() {
     .toUpperCase();
 
   return (
+    <ProtectedRoute>
     <div
       data-theme="light"
       className="min-h-screen flex flex-col md:flex-row bg-[#F8F9FB] text-[#171717] font-body selection:bg-orange-100 selection:text-orange-900"
@@ -100,7 +111,8 @@ export function AppLayout() {
                                 </p>
                               </div>
                               <button
-                                onClick={() => signOut().then(() => (window.location.href = '/login'))}
+                                type="button"
+                                onClick={handleLogout}
                                 className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-rose-50 text-rose-600 border border-rose-200 text-xs font-semibold hover:bg-rose-100 transition-colors"
                               >
                                 <LogOut className="w-3.5 h-3.5" />
@@ -180,7 +192,8 @@ export function AppLayout() {
                             </div>
                           </div>
                           <button
-                            onClick={() => signOut().then(() => (window.location.href = '/login'))}
+                            type="button"
+                            onClick={handleLogout}
                             className="p-1.5 text-[#666666] hover:text-rose-600 hover:bg-rose-50 transition-colors rounded-lg"
                             title="Sign Out"
                           >
@@ -191,7 +204,10 @@ export function AppLayout() {
                     </aside>
 
                     {/* Main Content Area */}
-                    <main className="flex-1 overflow-y-auto pb-16 md:pb-0 bg-[#F8F9FB] text-[#171717]">
+                    <main
+                      data-scroll-container="true"
+                      className="flex-1 overflow-y-auto pb-16 md:pb-0 bg-[#F8F9FB] text-[#171717]"
+                    >
                       <Outlet />
                     </main>
 
@@ -217,5 +233,6 @@ export function AppLayout() {
                   })}
                 </nav>
             </div>
-            );
+    </ProtectedRoute>
+  );
 }

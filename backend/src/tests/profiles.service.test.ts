@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ProfilesService } from '../modules/profiles/profiles.service';
 import type { ActorContext } from '../common/types';
-import { BadRequestException, ConflictException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException } from '@nestjs/common';
 
 describe('Taptch Digital Profiles Engine — ProfilesService', () => {
   let mockDbService: any;
@@ -192,6 +192,58 @@ describe('Taptch Digital Profiles Engine — ProfilesService', () => {
         expect.any(String),
         86400,
       );
+    });
+  });
+
+  describe('username rules, locking, and privacy', () => {
+    it('rejects invalid usernames (spaces, leading/trailing hyphens, too short)', async () => {
+      await expect(
+        service.create(mockActor, { displayName: 'Test', slug: 'ab' }),
+      ).rejects.toThrow(BadRequestException);
+
+      await expect(
+        service.create(mockActor, { displayName: 'Test', slug: '-john' }),
+      ).rejects.toThrow(BadRequestException);
+
+      await expect(
+        service.create(mockActor, { displayName: 'Test', slug: 'john-' }),
+      ).rejects.toThrow(BadRequestException);
+
+      await expect(
+        service.create(mockActor, { displayName: 'Test', slug: 'john doe' }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('blocks username changes when profile is NFC-locked', async () => {
+      vi.spyOn(service, 'findOne').mockResolvedValueOnce({
+        id: 'prof_locked',
+        slug: 'john',
+        ownerId: mockActor.userId,
+        usernameLocked: true,
+        status: 'PUBLISHED',
+      } as any);
+
+      await expect(
+        service.update(mockActor, 'prof_locked', { slug: 'john-new' }),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('strips private contact fields when findBySlug is called on an unpublished profile', async () => {
+      mockDbService.db.limit.mockResolvedValueOnce([
+        {
+          id: 'prof_draft',
+          slug: 'private-user',
+          status: 'DRAFT',
+          displayName: 'Secret User',
+          phone: '+91 99999 00000',
+          email: 'secret@example.com',
+        },
+      ]);
+
+      const snapshot = await service.findBySlug('private-user');
+      expect(snapshot.status).toBe('DRAFT');
+      expect((snapshot as any).phone).toBeUndefined();
+      expect((snapshot as any).email).toBeUndefined();
     });
   });
 });

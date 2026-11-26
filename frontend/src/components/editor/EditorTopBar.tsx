@@ -200,20 +200,37 @@ export const EditorTopBar: React.FC<EditorTopBarProps> = ({
         return saveExecution;
       };
 
-      // Direct Checkout Order Now workflow
+      // Direct Checkout Order Now workflow (works for both authenticated and unauthenticated users)
       const handleOrderNow = async () => {
         setIsOrderingNow(true);
         try {
-          const savedDesignId = await handleSaveDesign(true);
-          if (!savedDesignId) {
-            alert('We could not save your design prior to checkout. Please check your network connection and try again.');
-            setIsOrderingNow(false);
-            return;
-          }
           const pId = product?.id || 'prod_classic_pvc';
           const vId = selectedVariant?.id || 'var_matte_black';
+
+          // Attempt backend draft save; if unauthenticated (401), localStorage draft is already persisted
+          let savedDesignId: string | null = null;
+          try {
+            savedDesignId = await handleSaveDesign(true);
+          } catch {
+            savedDesignId = null;
+          }
+
+          const nextParams = new URLSearchParams({
+            productId: pId,
+            variantId: vId,
+          });
+          if (savedDesignId && savedDesignId !== 'draft') {
+            nextParams.set('designId', savedDesignId);
+          }
+          const checkoutUrl = `/checkout?${nextParams.toString()}`;
+
           setIsOrderingNow(false);
-          navigate(`/checkout?designId=${encodeURIComponent(savedDesignId)}&productId=${encodeURIComponent(pId)}&variantId=${encodeURIComponent(vId)}`);
+          if (!savedDesignId) {
+            // Unauthenticated or offline: preserve card configuration in localStorage and redirect to login
+            navigate(`/login?redirect=${encodeURIComponent(checkoutUrl)}`);
+            return;
+          }
+          navigate(checkoutUrl);
         } catch (err: any) {
           console.warn('[EditorTopBar] Order now navigate failed:', err);
           setIsOrderingNow(false);

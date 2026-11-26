@@ -118,6 +118,56 @@ async function migrate() {
   await sql`UPDATE order_items SET preview_front_url = design_preview_url WHERE preview_front_url IS NULL AND design_preview_url IS NOT NULL;`;
   await sql`UPDATE order_items SET preview_back_url = back_preview_url WHERE preview_back_url IS NULL AND back_preview_url IS NOT NULL;`;
 
+  // 0020 Customer Journey & Account Type
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS account_type varchar(32);`;
+  await sql`ALTER TABLE card_designs ADD COLUMN IF NOT EXISTS profile_id varchar(64) REFERENCES profiles(id) ON DELETE SET NULL;`;
+  await sql`ALTER TABLE order_items ADD COLUMN IF NOT EXISTS profile_id varchar(64) REFERENCES profiles(id) ON DELETE SET NULL;`;
+  await sql`ALTER TABLE order_items ADD COLUMN IF NOT EXISTS design_id varchar(64) REFERENCES card_designs(id) ON DELETE SET NULL;`;
+  await sql`
+    CREATE TABLE IF NOT EXISTS purchase_journeys (
+      id varchar(64) PRIMARY KEY,
+      user_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      stage varchar(48) NOT NULL DEFAULT 'ACCOUNT_SETUP',
+      account_type varchar(32),
+      selected_product_id varchar(64),
+      selected_variant_id varchar(64),
+      selected_card_template_id varchar(64),
+      selected_profile_template_id varchar(64),
+      profile_id varchar(64) REFERENCES profiles(id) ON DELETE SET NULL,
+      design_id varchar(64) REFERENCES card_designs(id) ON DELETE SET NULL,
+      quantity integer NOT NULL DEFAULT 1,
+      order_id varchar(64) REFERENCES orders(id) ON DELETE SET NULL,
+      metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+      created_at timestamp NOT NULL DEFAULT now(),
+      updated_at timestamp NOT NULL DEFAULT now()
+    );
+  `;
+
+  // 0021 Post-Purchase Card Allocations
+  await sql`
+    CREATE TABLE IF NOT EXISTS purchased_cards (
+      id varchar(64) PRIMARY KEY,
+      order_id varchar(64) NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+      order_item_id varchar(64) NOT NULL REFERENCES order_items(id) ON DELETE CASCADE,
+      unit_index integer NOT NULL DEFAULT 1,
+      user_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      organization_id text,
+      product_id varchar(64),
+      product_name varchar(128),
+      variant_name varchar(128),
+      material varchar(32) NOT NULL DEFAULT 'pvc',
+      design_id varchar(64) REFERENCES card_designs(id) ON DELETE SET NULL,
+      preview_front_url text,
+      preview_back_url text,
+      profile_id varchar(64) REFERENCES profiles(id) ON DELETE SET NULL,
+      profile_assignment_status varchar(32) NOT NULL DEFAULT 'AWAITING_PROFILE',
+      physical_card_id varchar(64),
+      created_at timestamp NOT NULL DEFAULT now(),
+      updated_at timestamp NOT NULL DEFAULT now()
+    );
+  `;
+  await sql`CREATE UNIQUE INDEX IF NOT EXISTS idx_purchased_cards_item_unit ON purchased_cards (order_item_id, unit_index);`;
+
   console.log('[MIGRATION] Tables & columns verified successfully!');
   await sql.end();
 }

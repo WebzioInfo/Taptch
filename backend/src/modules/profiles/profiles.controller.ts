@@ -33,6 +33,13 @@ export class ProfilesController {
   }
 
   @Public()
+  @Get('check-username/:username')
+  @ApiOperation({ summary: 'Check if a profile username is valid and available' })
+  async checkUsername(@Param('username') username: string) {
+    return this.profilesService.checkUsernameAvailability(username);
+  }
+
+  @Public()
   @Get('by-slug/:slug')
   @ApiOperation({ summary: 'Public profile lookup with snapshot' })
   async getPublicProfile(@Param('slug') slug: string) {

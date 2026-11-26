@@ -22,6 +22,8 @@ export const cards = pgTable('cards', {
   status: varchar('status', { length: 32 }).notNull().default('unclaimed'), // 'unclaimed' | 'active' | 'lost' | 'deactivated'
   batchId: varchar('batch_id', { length: 64 }).references(() => cardBatches.id, { onDelete: 'set null' }),
   profileId: varchar('profile_id', { length: 64 }).references(() => profiles.id, { onDelete: 'set null' }),
+  destinationType: varchar('destination_type', { length: 32 }).notNull().default('profile'), // 'profile' | 'custom_url'
+  customDestinationUrl: text('custom_destination_url'),
   ownerUserId: text('owner_user_id').references(() => users.id, { onDelete: 'set null' }),
   organizationId: text('organization_id').references(() => organizations.id, { onDelete: 'set null' }),
   activatedAt: timestamp('activated_at'),

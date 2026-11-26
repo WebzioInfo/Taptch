@@ -1,6 +1,7 @@
 /**
  * Centralized list of reserved system routes and keywords for the backend.
- * Prevents users from claiming system routes as public profile slugs.
+ * Prevents users from claiming system routes as public profile usernames.
+ * Keep synchronized with frontend/src/config/reservedUsernames.ts and frontend/src/routes/index.tsx.
  */
 export const RESERVED_USERNAMES = new Set<string>([
   '',
@@ -26,9 +27,20 @@ export const RESERVED_USERNAMES = new Set<string>([
   'leads',
   'lead',
   'qr',
+  'dq',
   'settings',
   'builder',
   'claim',
+  'studio',
+  'checkout',
+  'orders',
+  'order',
+  'products',
+  'product',
+  'nfc',
+  'nfc-cards',
+  'journey',
+  'profile-setup',
   'templates',
   'template',
   'pricing',
@@ -40,6 +52,7 @@ export const RESERVED_USERNAMES = new Set<string>([
   'nfc-business-card',
   'digital-business-card',
   'p',
+  'b',
   'profile',
   'profiles',
   'assets',
@@ -69,4 +82,3 @@ export function isReservedUsername(username: string): boolean {
   const clean = username.toLowerCase().trim().replace(/^\/+|\/+$/g, '');
   return RESERVED_USERNAMES.has(clean);
 }
-

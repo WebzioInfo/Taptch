@@ -6,7 +6,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { ZoomIn, ZoomOut, Maximize2, Loader2 } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize2, Loader2, AlertCircle, RefreshCw, ArrowLeft } from 'lucide-react';
 import { useEditorStore } from '../components/editor/useEditorStore';
 import { CanvasStudio } from '../components/editor/CanvasStudio';
 import { EditorTopBar } from '../components/editor/EditorTopBar';
@@ -20,6 +20,7 @@ import { SimpleCardStudio } from '../components/editor/SimpleCardStudio';
 import { ApiClient } from '../services/api';
 import { useIsDesktop } from '../hooks/useMediaQuery';
 import { MobileStudioShell } from '../components/editor/mobile/MobileStudioShell';
+import { getPendingPurchaseIntent, savePendingPurchaseIntent } from '../hooks/usePurchaseJourney';
 
 // Default starter card product for fallback
 const DEFAULT_CARD_PRODUCT = {
@@ -128,8 +129,15 @@ const DEFAULT_MASTER_TEMPLATE = {
 };
 
 export const DesignStudioPage: React.FC = () => {
-  const { productId, designId: paramDesignId } = useParams<{ productId?: string; designId?: string }>();
+  const { productId: paramProductId, designId: paramDesignId } = useParams<{ productId?: string; designId?: string }>();
   const [searchParams] = useSearchParams();
+  const pendingIntent = getPendingPurchaseIntent();
+  const productId = paramProductId || searchParams.get('productId') || pendingIntent?.selectedProductId || undefined;
+  const queryVariantId = searchParams.get('variantId') || pendingIntent?.selectedVariantId || undefined;
+  const resolvedQuantity = Math.max(
+    1,
+    Number(searchParams.get('qty') || searchParams.get('quantity') || pendingIntent?.quantity || 1) || 1,
+  );
   const templateSlug = searchParams.get('template');
   const navigate = useNavigate();
 
@@ -147,6 +155,8 @@ export const DesignStudioPage: React.FC = () => {
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
   const [templates, setTemplates] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [productError, setProductError] = useState<string | null>(null);
+  const [loadNonce, setLoadNonce] = useState(0);
   const isDesktop = useIsDesktop();
 
   // Modals state
@@ -164,17 +174,32 @@ export const DesignStudioPage: React.FC = () => {
 
     async function loadStudioData() {
       setIsLoading(true);
+      setProductError(null);
+      setProduct(null);
+      setSelectedVariant(null);
+
       try {
-        let loadedProduct = DEFAULT_CARD_PRODUCT;
-        if (productId) {
-          try {
-            const prodRes = await ApiClient.get<any>(`/api/v1/products/${productId}`);
-            if (prodRes && prodRes.id) {
-              loadedProduct = prodRes;
-            }
-          } catch (e) {
-            console.warn('[DesignStudioPage] Remote product fetch failed, fallback to default:', e);
+        let existingDesign: any = null;
+        if (paramDesignId) {
+          existingDesign = await ApiClient.get<any>(`/api/v1/designs/${encodeURIComponent(paramDesignId)}`);
+        }
+
+        const targetProductId = productId || existingDesign?.productId;
+        if (!targetProductId) {
+          if (isMounted) {
+            setProductError('No NFC card product was selected. Please choose a product from the catalog.');
+            setIsLoading(false);
           }
+          return;
+        }
+
+        const prodRes = await ApiClient.get<any>(`/api/v1/products/${encodeURIComponent(targetProductId)}`);
+        if (!prodRes || !prodRes.id || prodRes.isActive === false) {
+          if (isMounted) {
+            setProductError('The selected NFC card product could not be found or is currently unavailable.');
+            setIsLoading(false);
+          }
+          return;
         }
 
         let loadedTemplates: any[] = [DEFAULT_MASTER_TEMPLATE];
@@ -189,54 +214,63 @@ export const DesignStudioPage: React.FC = () => {
 
         if (!isMounted) return;
 
-        setProduct(loadedProduct);
-        setSelectedVariant(loadedProduct.variants?.[0] || null);
+        setProduct(prodRes);
+        const matchedVariant =
+          (queryVariantId && prodRes.variants?.find((v: any) => v.id === queryVariantId)) ||
+          prodRes.variants?.[0] ||
+          null;
+        setSelectedVariant(matchedVariant);
+        savePendingPurchaseIntent({
+          selectedProductId: prodRes.id,
+          selectedVariantId: matchedVariant?.id || null,
+          quantity: resolvedQuantity,
+          source: 'studio',
+        });
         setTemplates(loadedTemplates);
 
-        if (paramDesignId) {
-          try {
-            const designRes = await ApiClient.get<any>(`/api/v1/designs/${paramDesignId}`);
-            if (designRes && isMounted) {
-              loadSideConfigs(designRes.frontCanvasJson, designRes.backCanvasJson, designRes.templateId);
-              setDesignName(designRes.name || 'Custom NFC Card');
-              markSaved(designRes.id);
-              setIsLoading(false);
-              return;
+        if (existingDesign && isMounted) {
+          loadSideConfigs(existingDesign.frontCanvasJson, existingDesign.backCanvasJson, existingDesign.templateId);
+          setDesignName(existingDesign.name || prodRes.name || 'Custom NFC Card');
+          markSaved(existingDesign.id);
+          setIsLoading(false);
+          return;
+        }
+
+        // Only populate advanced Fabric canvas store when in advanced mode
+        if (studioMode === 'advanced') {
+          let chosenTemplate = loadedTemplates[0];
+          if (templateSlug) {
+            const matched = loadedTemplates.find((t) => t.slug === templateSlug || t.id === templateSlug);
+            if (matched) chosenTemplate = matched;
+          }
+
+          if (chosenTemplate && isMounted) {
+            loadSideConfigs(
+              chosenTemplate.frontCanvasJson || DEFAULT_MASTER_TEMPLATE.frontCanvasJson,
+              chosenTemplate.backCanvasJson || DEFAULT_MASTER_TEMPLATE.backCanvasJson,
+              chosenTemplate.id
+            );
+            setDesignName(chosenTemplate.name || 'Untitled NFC Card');
+          }
+
+          const recoveryKey = `taptch_recovery_${prodRes.id}_${chosenTemplate?.id || 'custom'}`;
+          const rawRecovery = localStorage.getItem(recoveryKey);
+          if (rawRecovery && isMounted) {
+            try {
+              const parsed = JSON.parse(rawRecovery);
+              if (Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000) {
+                setRecoverySnapshot(parsed);
+              }
+            } catch {
+              localStorage.removeItem(recoveryKey);
             }
-          } catch (e) {
-            console.warn('[DesignStudioPage] Existing design load error:', e);
           }
         }
-
-        let chosenTemplate = loadedTemplates[0];
-        if (templateSlug) {
-          const matched = loadedTemplates.find((t) => t.slug === templateSlug || t.id === templateSlug);
-          if (matched) chosenTemplate = matched;
+      } catch (err: any) {
+        console.error('[DesignStudioPage] Product initialization failed:', err);
+        if (isMounted) {
+          setProductError(err?.message || 'Unable to load the selected NFC card product. Please try again.');
         }
-
-        if (chosenTemplate && isMounted) {
-          loadSideConfigs(
-            chosenTemplate.frontCanvasJson || DEFAULT_MASTER_TEMPLATE.frontCanvasJson,
-            chosenTemplate.backCanvasJson || DEFAULT_MASTER_TEMPLATE.backCanvasJson,
-            chosenTemplate.id
-          );
-          setDesignName(chosenTemplate.name || 'Untitled NFC Card');
-        }
-
-        const recoveryKey = `taptch_recovery_${loadedProduct.id}_${chosenTemplate?.id || 'custom'}`;
-        const rawRecovery = localStorage.getItem(recoveryKey);
-        if (rawRecovery && isMounted) {
-          try {
-            const parsed = JSON.parse(rawRecovery);
-            if (Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000) {
-              setRecoverySnapshot(parsed);
-            }
-          } catch (e) {
-            localStorage.removeItem(recoveryKey);
-          }
-        }
-      } catch (err) {
-        console.error('[DesignStudioPage] Initialization failed:', err);
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -246,7 +280,7 @@ export const DesignStudioPage: React.FC = () => {
     return () => {
       isMounted = false;
     };
-  }, [productId, paramDesignId, templateSlug]);
+  }, [productId, paramDesignId, templateSlug, studioMode, loadNonce]);
 
   // Window unload guard
   useEffect(() => {
@@ -311,19 +345,96 @@ export const DesignStudioPage: React.FC = () => {
     setRecoverySnapshot(null);
   };
 
-  if (studioMode === 'simple') {
-    return <SimpleCardStudio onSwitchToAdvanced={() => setStudioMode('advanced')} />;
-  }
-
   if (isLoading) {
     return (
       <div
         data-theme="light"
-        className="h-screen w-full flex flex-col items-center justify-center bg-[var(--bg-page)] text-[var(--ink)]"
+        className="min-h-screen w-full bg-[#F8F9FA] text-[#1E293B] flex flex-col"
+        aria-busy="true"
+        aria-label="Loading NFC Card Design Studio"
       >
-        <Loader2 className="w-8 h-8 text-[var(--accent)] animate-spin mb-3" />
-        <p className="font-mono text-xs uppercase tracking-wider text-[var(--ink-muted)]">Loading NFC Design Studio...</p>
+        <div className="h-14 sm:h-16 bg-white border-b border-slate-200 px-4 sm:px-8 flex items-center justify-between">
+          <div className="h-5 w-40 rounded-lg bg-slate-200 animate-pulse" />
+          <div className="h-8 w-24 rounded-lg bg-slate-200 animate-pulse" />
+        </div>
+        <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div className="lg:col-span-7 flex flex-col items-center space-y-4">
+            <div className="w-full max-w-[440px] aspect-[1.586/1] rounded-2xl bg-slate-200 animate-pulse border border-slate-300/70 p-6 flex flex-col justify-between">
+              <div className="flex justify-end">
+                <div className="w-7 h-7 rounded-full bg-slate-300 animate-pulse" />
+              </div>
+              <div className="space-y-2.5">
+                <div className="h-5 w-44 rounded bg-slate-300 animate-pulse" />
+                <div className="h-3.5 w-32 rounded bg-slate-300 animate-pulse" />
+              </div>
+            </div>
+            <div className="h-4 w-48 rounded bg-slate-200 animate-pulse" />
+          </div>
+          <div className="lg:col-span-5 space-y-4">
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
+              <div className="h-4 w-36 rounded bg-slate-200 animate-pulse" />
+              <div className="h-10 w-full rounded-xl bg-slate-100 animate-pulse" />
+              <div className="h-10 w-full rounded-xl bg-slate-100 animate-pulse" />
+            </div>
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
+              <div className="h-4 w-32 rounded bg-slate-200 animate-pulse" />
+              <div className="h-11 w-full rounded-xl bg-slate-100 animate-pulse" />
+              <div className="h-11 w-full rounded-xl bg-slate-100 animate-pulse" />
+              <div className="h-11 w-full rounded-xl bg-slate-200 animate-pulse" />
+            </div>
+          </div>
+        </div>
       </div>
+    );
+  }
+
+  if (productError || !product) {
+    return (
+      <div
+        data-theme="light"
+        className="min-h-screen w-full bg-[#F8F9FA] text-[#1E293B] flex flex-col items-center justify-center p-4 text-center"
+      >
+        <div className="max-w-md w-full bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
+          <div className="w-12 h-12 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 mx-auto">
+            <AlertCircle className="w-6 h-6" />
+          </div>
+          <div className="space-y-1">
+            <h2 className="text-base font-bold text-slate-900">Unable to Load Product</h2>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              {productError || 'The selected NFC card product could not be loaded.'}
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
+            <button
+              type="button"
+              onClick={() => setLoadNonce((n) => n + 1)}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#FF6A00] hover:bg-[#E85D00] text-white text-xs font-semibold transition-colors"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Retry</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/nfc-cards')}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to Catalog</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (studioMode === 'simple') {
+    return (
+      <SimpleCardStudio
+        product={product}
+        selectedVariant={selectedVariant}
+        initialQuantity={resolvedQuantity}
+        onSwitchToAdvanced={() => setStudioMode('advanced')}
+      />
     );
   }
 

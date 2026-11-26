@@ -40,6 +40,10 @@ export const env = {
       : 'development'),
   apiUrl: resolveApiUrl(),
   appUrl: resolveAppUrl(),
+  nfcPublicBaseUrl:
+    ((import.meta.env.VITE_NFC_PUBLIC_BASE_URL as string) || 'https://taptch.com')
+      .trim()
+      .replace(/\/+$/, ''),
   supabaseUrl: (import.meta.env.VITE_SUPABASE_URL as string) || '',
   supabaseAnonKey: (import.meta.env.VITE_SUPABASE_ANON_KEY as string) || '',
   isProduction:

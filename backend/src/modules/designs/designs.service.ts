@@ -124,6 +124,23 @@ export class DesignsService {
           }
         }
 
+        // 4b. Validate profileId ownership if provided
+        let resolvedProfileId: string | null = null;
+        if (data?.profileId && typeof data.profileId === 'string') {
+          const [prof] = await tx
+            .select({ id: schema.profiles.id, ownerId: schema.profiles.ownerId })
+            .from(schema.profiles)
+            .where(eq(schema.profiles.id, data.profileId))
+            .limit(1);
+          if (!prof) {
+            throw new NotFoundException(`Profile ${data.profileId} not found.`);
+          }
+          if (prof.ownerId !== actor.userId && !actor.isAdmin) {
+            throw new ForbiddenException('You cannot attach a card design to another user\'s profile.');
+          }
+          resolvedProfileId = prof.id;
+        }
+
         // 5. Check if design already exists: by explicit ID first, or by customer draft
         const targetDesignId = data?.designId || data?.id;
         let existing: any = null;
@@ -174,6 +191,7 @@ export class DesignsService {
               productId: resolvedProductId,
               variantId: resolvedVariantId ?? existing.variantId,
               templateId: resolvedTemplateId ?? existing.templateId,
+              profileId: resolvedProfileId ?? existing.profileId,
               frontCanvasJson,
               backCanvasJson: backCanvasJson !== undefined ? backCanvasJson : existing.backCanvasJson,
               previewUrl: previewUrl || existing.previewUrl,
@@ -198,6 +216,7 @@ export class DesignsService {
             productId: resolvedProductId,
             templateId: resolvedTemplateId,
             variantId: resolvedVariantId,
+            profileId: resolvedProfileId,
             name,
             frontCanvasJson,
             backCanvasJson,
@@ -325,6 +344,37 @@ export class DesignsService {
         .returning();
 
       return duplicated;
+    });
+  }
+
+  async attachProfile(actor: ActorContext, id: string, profileId: string) {
+    await this.findOne(actor, id);
+
+    return this.dbService.withActor(actor, async (tx) => {
+      const [profile] = await tx
+        .select({ id: schema.profiles.id, ownerId: schema.profiles.ownerId })
+        .from(schema.profiles)
+        .where(eq(schema.profiles.id, profileId))
+        .limit(1);
+
+      if (!profile) {
+        throw new NotFoundException(`Profile ${profileId} not found.`);
+      }
+
+      if (profile.ownerId !== actor.userId && !actor.isAdmin) {
+        throw new ForbiddenException('You cannot attach a card design to another user\'s profile.');
+      }
+
+      const [updated] = await tx
+        .update(schema.cardDesigns)
+        .set({
+          profileId,
+          updatedAt: new Date(),
+        })
+        .where(eq(schema.cardDesigns.id, id))
+        .returning();
+
+      return updated;
     });
   }
 

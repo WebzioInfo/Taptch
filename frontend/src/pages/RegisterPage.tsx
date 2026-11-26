@@ -1,18 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { BrandLogo } from '../components/brand';
 import { brandConfig } from '../config/brand';
 import { Button } from '../components/ui/button';
-import { signUp } from '../lib/auth/client';
+import { signUp, useSession, getAuthState } from '../lib/auth/client';
+import { getPendingPurchaseIntent } from '../hooks/usePurchaseJourney';
 import { env } from '../config/env';
-import { AlertCircle, ArrowRight, Lock, Mail, User } from 'lucide-react';
+import { AlertCircle, ArrowRight, Building2, Lock, Mail, User } from 'lucide-react';
 
 export function RegisterPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
+  const { data: session, isPending } = useSession();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [accountType, setAccountType] = useState<'personal' | 'business'>('personal');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -23,8 +28,8 @@ export function RegisterPage() {
       setError('Google Sign-Up is awaiting credentials. Please configure GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in backend/.env.');
     } else if (err === 'google_auth_failed') {
       setError('Google authorization was cancelled or failed. Please try again.');
-    } else if (err === 'google_token_exchange_failed') {
-      setError('Could not verify Google account. Please register with your email address.');
+    } else if (err === 'google_token_exchange_failed' || err === 'oauth_exchange_failed') {
+      setError('Could not verify Google account. Please try again or register with your email address.');
     }
   }, [location.search]);
 
@@ -47,16 +52,26 @@ export function RegisterPage() {
 
     setLoading(true);
     try {
-      await signUp.email({ name: name.trim(), email: email.trim(), password });
+      const authRes = await signUp.email({ name: name.trim(), email: email.trim(), password, accountType });
+      queryClient.clear();
+      queryClient.setQueryData(['auth', 'session'], authRes);
       const searchParams = new URLSearchParams(location.search);
-      const redirectUrl = searchParams.get('redirect') || '/dashboard';
-      navigate(redirectUrl);
+      const hasPending = Boolean(getPendingPurchaseIntent());
+      const redirectUrl = searchParams.get('redirect') || (hasPending ? '/checkout' : '/nfc-cards');
+      navigate(redirectUrl, { replace: true });
     } catch (err: any) {
       setError(err?.message || 'Registration failed. Try again with a different email.');
     } finally {
       setLoading(false);
     }
   };
+
+  if (getAuthState(session, isPending) === 'AUTHENTICATED') {
+    const searchParams = new URLSearchParams(location.search);
+    const hasPending = Boolean(getPendingPurchaseIntent());
+    const dest = searchParams.get('redirect') || (hasPending ? '/checkout' : '/dashboard');
+    return <Navigate to={dest} replace />;
+  }
 
   return (
         <div className="min-h-screen flex items-center justify-center bg-[var(--bg-page)] text-[var(--ink)] font-body px-4 py-12">
@@ -84,7 +99,12 @@ export function RegisterPage() {
                   <button
                     type="button"
                     onClick={() => {
-                      const returnTo = typeof window !== 'undefined' ? window.location.origin : '';
+                      const searchParams = new URLSearchParams(location.search);
+                      const redirectPath = searchParams.get('redirect') || '';
+                      const returnTo =
+                        typeof window !== 'undefined'
+                          ? `${window.location.origin}${redirectPath.startsWith('/') ? redirectPath : ''}`
+                          : '';
                       window.location.href = `${env.apiUrl}/api/auth/oauth/google?returnTo=${encodeURIComponent(returnTo)}`;
                     }}
                     className="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-[var(--radius-sm)] bg-[var(--bg-surface)] hover:bg-[var(--bg-page)] text-[var(--ink)] font-medium text-xs border border-[var(--border)] transition-colors active:translate-y-[1px]"
@@ -110,6 +130,48 @@ export function RegisterPage() {
                   </div>
 
                   <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-xs font-medium text-[var(--ink)] mb-1.5">
+                          Account Type
+                        </label>
+                        <div className="grid grid-cols-2 gap-2.5">
+                          <button
+                            type="button"
+                            onClick={() => setAccountType('personal')}
+                            className={`p-3 rounded-[var(--radius-sm)] border text-left transition-all ${
+                              accountType === 'personal'
+                                ? 'border-[#FF6A00] bg-[#FFF3E9] text-[var(--ink)]'
+                                : 'border-[var(--border)] bg-[var(--bg-surface)] text-[var(--ink-muted)] hover:border-[var(--border-strong)]'
+                            }`}
+                          >
+                            <div className="flex items-center gap-1.5 font-semibold text-xs text-[var(--ink)]">
+                              <User className="w-3.5 h-3.5 text-[#FF6A00]" />
+                              <span>Personal</span>
+                            </div>
+                            <p className="text-[11px] text-[var(--ink-muted)] mt-1">
+                              1 Profile &bull; 1 NFC Card
+                            </p>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setAccountType('business')}
+                            className={`p-3 rounded-[var(--radius-sm)] border text-left transition-all ${
+                              accountType === 'business'
+                                ? 'border-[#FF6A00] bg-[#FFF3E9] text-[var(--ink)]'
+                                : 'border-[var(--border)] bg-[var(--bg-surface)] text-[var(--ink-muted)] hover:border-[var(--border-strong)]'
+                            }`}
+                          >
+                            <div className="flex items-center gap-1.5 font-semibold text-xs text-[var(--ink)]">
+                              <Building2 className="w-3.5 h-3.5 text-[#FF6A00]" />
+                              <span>Business</span>
+                            </div>
+                            <p className="text-[11px] text-[var(--ink-muted)] mt-1">
+                              Multi-Profile &amp; Team Cards
+                            </p>
+                          </button>
+                        </div>
+                    </div>
+
                     <div>
                         <label className="block text-xs font-medium text-[var(--ink)] mb-1">
                           Full Name
@@ -174,7 +236,10 @@ export function RegisterPage() {
 
                     <p className="text-center text-xs text-[var(--ink-muted)] mt-8">
                       Already have an account?{' '}
-                        <Link to="/login" className="text-[var(--accent-text)] font-medium hover:underline">
+                        <Link
+                          to={`/login${location.search}`}
+                          className="text-[var(--accent-text)] font-medium hover:underline"
+                        >
                           Sign In
                         </Link>
                     </p>

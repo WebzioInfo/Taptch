@@ -5,6 +5,8 @@ import { ApiClient } from '../services/api';
 import { Button } from '../components/ui/button';
 import { TemplatePreviewModal } from '../components/templates/TemplatePreviewModal';
 import { STANDARD_TEMPLATES } from '../modules/templates/constants';
+import { useSession } from '../lib/auth/client';
+import { startPurchaseJourney } from '../hooks/usePurchaseJourney';
 import {
   Eye,
   Search,
@@ -15,6 +17,8 @@ import {
 
 export function TemplatesPage() {
   const navigate = useNavigate();
+  const { data: session } = useSession();
+  const isAuthenticated = Boolean(session?.user?.id);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [previewTemplateId, setPreviewTemplateId] = useState<string | null>(null);
@@ -58,7 +62,11 @@ export function TemplatesPage() {
   });
 
   const handleUseTemplate = (templateId: string) => {
-    navigate(`/register?template=${encodeURIComponent(templateId)}`);
+    if (isAuthenticated) {
+      navigate(`/profile-setup?template=${encodeURIComponent(templateId)}`);
+    } else {
+      navigate('/nfc-cards');
+    }
   };
 
   return (

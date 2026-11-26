@@ -2,6 +2,7 @@ import React from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { router } from './routes';
+import { StudioErrorBoundary } from './components/common/StudioErrorBoundary';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -14,9 +15,14 @@ const queryClient = new QueryClient({
 
 export function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
+    <StudioErrorBoundary
+      fallbackTitle="Application Encountered an Error"
+      fallbackMessage="Something went wrong while loading this page. Click Retry to reload safely."
+    >
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </StudioErrorBoundary>
   );
 }
 

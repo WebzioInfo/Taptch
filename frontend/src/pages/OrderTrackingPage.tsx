@@ -29,6 +29,8 @@ import { ApiClient } from '../services/api';
 import { defaultBrandConfig } from '../config/brand';
 import { BrandLogo } from '../components/brand';
 import { CardPreview } from '../components/cards/CardPreview';
+import { DesignAssistanceButton } from '../components/common/DesignAssistanceButton';
+import { buildOrderDesignAssistanceMessage } from '../utils/whatsappAssistance';
 
 const TIMELINE_STEPS = [
   { key: 'CONFIRMED', label: 'Order Confirmed', desc: 'Order verified & placed in production' },
@@ -288,6 +290,17 @@ export function OrderTrackingPage() {
                                       <p className="text-center text-[12px] font-medium text-[#737373] truncate pt-1">
                                         <span className="text-[#161616] font-semibold">{productName}</span> · {variantLabel}
                                       </p>
+
+                                      <div className="pt-1 flex justify-center">
+                                        <DesignAssistanceButton
+                                          message={buildOrderDesignAssistanceMessage({
+                                            orderId: orderNum || order.id,
+                                            productName,
+                                            variantName: variantLabel,
+                                          })}
+                                          className="w-full sm:w-auto"
+                                        />
+                                      </div>
                                     </div>
 
                               {/* 2. 4-Step Vertical Timeline */}

@@ -7,6 +7,7 @@ export const users = pgTable('users', {
   emailVerified: boolean('email_verified').notNull().default(false),
   image: text('image'),
   systemRole: varchar('system_role', { length: 32 }).notNull().default('user'), // 'super_admin' | 'support_admin' | 'user'
+  accountType: varchar('account_type', { length: 32 }), // 'personal' | 'business' | null
   twoFactorEnabled: boolean('two_factor_enabled').notNull().default(false),
   phoneNumber: varchar('phone_number', { length: 32 }),
   phoneNumberVerified: boolean('phone_number_verified').notNull().default(false),
