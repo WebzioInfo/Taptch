@@ -25,8 +25,23 @@ export const CINEMATIC_DEFAULT_PALETTE: ThemeColorsConfig = {
   border: 'rgba(237, 235, 230, 0.1)',
 };
 
+export const DARK_PREMIUM_DEFAULT_PALETTE: ThemeColorsConfig = {
+  primary: '#C5A880',
+  secondary: '#D8BD96',
+  accent: '#C5A880',
+  background: '#08090A',
+  cardBackground: '#121316',
+  surface: '#1A1C20',
+  text: '#F4F4F6',
+  heading: '#F4F4F6',
+  buttonBackground: '#C5A880',
+  buttonText: '#0C0D0E',
+  border: '#22252A',
+};
+
 export const DEFAULT_THEME_PALETTES: Record<string, ThemeColorsConfig> = {
   'cinematic-noir': CINEMATIC_DEFAULT_PALETTE,
+  'dark-premium': DARK_PREMIUM_DEFAULT_PALETTE,
 };
 
 export const PLAN_TIER_RANK: Record<'nano' | 'micro' | 'mini' | 'max', number> = {
@@ -93,6 +108,31 @@ export const STANDARD_TEMPLATES: StandardTemplateDefinition[] = [
       background: '#0A0A0B',
       surface: '#111113',
       text: '#EDEBE6',
+    },
+  },
+  {
+    id: 'dark-premium',
+    slug: 'dark-premium',
+    name: 'Dark Premium',
+    description:
+      'Near-black architectural layout with restrained champagne gold accent, bold Plus Jakarta Sans typography, and high-contrast contact rows.',
+    category: 'luxury',
+    templateType: 'PERSONAL',
+    supportedProfileTypes: ['personal', 'business'],
+    thumbnailUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80',
+    premiumTier: 'nano',
+    requiredPlanId: 'nano',
+    features: [
+      'Champagne Gold Accent',
+      'Plus Jakarta Sans Typography',
+      'Ventures & Catalogue Support',
+      'Direct Coordinates & vCard',
+    ],
+    defaultColors: {
+      primary: '#C5A880',
+      background: '#08090A',
+      surface: '#121316',
+      text: '#F4F4F6',
     },
   },
 ];

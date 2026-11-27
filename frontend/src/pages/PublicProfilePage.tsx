@@ -6,22 +6,10 @@ import { ProfileRenderer, canonicalTemplateId } from '../components/templates/Pr
 import { MetaTags } from '../components/seo/MetaTags';
 import { BrandLogo } from '../components/brand';
 import { env } from '../config/env';
+import { resolveMediaUrl } from '../lib/media-url';
 import { isReservedUsername } from '../config/reservedUsernames';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '../components/ui/button';
-
-function resolveMediaUrl(raw?: string | null): string | undefined {
-  if (!raw) return undefined;
-  const trimmed = raw.trim();
-  if (!trimmed) return undefined;
-  if (/^https?:\/\//i.test(trimmed) || trimmed.startsWith('data:')) {
-    return trimmed;
-  }
-  if (trimmed.startsWith('/') && env.apiUrl) {
-    return `${env.apiUrl}${trimmed}`;
-  }
-  return trimmed;
-}
 
 function isConfirmedNotFoundError(err: unknown): boolean {
   if (!err || typeof err !== 'object') return false;

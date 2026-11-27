@@ -74,7 +74,6 @@ const LEGACY_PERSONAL_TEMPLATE_IDS = new Set([
   'obsidian',
   'premium-brand',
   'clean-corporate',
-  'dark-premium',
   'soft-modern',
   'bold-editorial',
   'ivory-minimal',

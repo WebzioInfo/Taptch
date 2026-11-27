@@ -42,6 +42,25 @@ export const SEEDED_TEMPLATES: TemplateDefinition[] = [
       'Instant vCard & UPI Terminal',
     ],
   },
+  {
+    id: 'dark-premium',
+    slug: 'dark-premium',
+    name: 'Dark Premium',
+    description:
+      'Near-black architectural layout with restrained champagne accent, bold typography, high contrast, and generous spacing.',
+    category: 'luxury',
+    templateType: 'PERSONAL',
+    supportedProfileTypes: ['personal', 'business'],
+    thumbnailUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80',
+    premiumTier: 'nano',
+    defaultColors: { primary: '#C5A880', background: '#08090A', surface: '#121316', text: '#F4F4F6' },
+    features: [
+      'Champagne Gold Accent',
+      'Plus Jakarta Sans Typography',
+      'Ventures & Catalogue Support',
+      'Direct Coordinates & vCard',
+    ],
+  },
 ];
 
 @Injectable()

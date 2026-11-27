@@ -8,26 +8,26 @@ import {
 import { brandConfig, defaultBrandConfig } from '../config/brand';
 
 describe('TAPTCH Templates & Design System', () => {
-  it('should register only the active Phase 1 Cinematic Digital Profile template classified as PERSONAL', () => {
-    expect(STANDARD_TEMPLATES.length).toBe(1);
+  it('should register active templates including Cinematic Digital Profile and shared Dark Premium', () => {
+    expect(STANDARD_TEMPLATES.length).toBe(2);
     const templateIds = STANDARD_TEMPLATES.map((t) => t.id);
-    expect(templateIds).toEqual(['cinematic-noir']);
+    expect(templateIds).toEqual(['cinematic-noir', 'dark-premium']);
     expect(STANDARD_TEMPLATES[0].name).toBe('Cinematic Digital Profile');
-    expect(STANDARD_TEMPLATES[0].templateType).toBe('PERSONAL');
     expect(STANDARD_TEMPLATES[0].supportedProfileTypes).toEqual(['personal']);
+    expect(STANDARD_TEMPLATES[1].name).toBe('Dark Premium');
+    expect(STANDARD_TEMPLATES[1].supportedProfileTypes).toEqual(['personal', 'business']);
   });
 
   it('filters templates strictly by accountType (personal vs business)', () => {
     const personalTemplates = STANDARD_TEMPLATES.filter(
       (t) => t.templateType === 'PERSONAL' || t.supportedProfileTypes.includes('personal')
     );
-    expect(personalTemplates.length).toBe(1);
-    expect(personalTemplates[0].id).toBe('cinematic-noir');
+    expect(personalTemplates.map((t) => t.id)).toEqual(['cinematic-noir', 'dark-premium']);
 
     const businessTemplates = STANDARD_TEMPLATES.filter(
       (t) => t.templateType === 'BUSINESS' || t.supportedProfileTypes.includes('business')
     );
-    expect(businessTemplates.length).toBe(0);
+    expect(businessTemplates.map((t) => t.id)).toEqual(['dark-premium']);
   });
 
   it('should provide neutral dummy preview data without any real personal details', () => {

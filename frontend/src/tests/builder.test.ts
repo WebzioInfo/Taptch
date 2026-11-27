@@ -748,7 +748,7 @@ describe('Taptch Profile Builder — Theme Customization & State Engine', () => 
       expect(canonicalTemplateId('obsidian')).toBe('cinematic-noir');
       expect(canonicalTemplateId('premium-brand')).toBe('cinematic-noir');
       expect(canonicalTemplateId('clean-corporate')).toBe('cinematic-noir');
-      expect(canonicalTemplateId('dark-premium')).toBe('cinematic-noir');
+      expect(canonicalTemplateId('dark-premium')).toBe('dark-premium');
       expect(canonicalTemplateId('soft-modern')).toBe('cinematic-noir');
       expect(canonicalTemplateId('bold-editorial')).toBe('cinematic-noir');
       expect(canonicalTemplateId('ivory-minimal')).toBe('cinematic-noir');

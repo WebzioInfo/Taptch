@@ -2,12 +2,13 @@ import { describe, it, expect } from 'vitest';
 import { SEEDED_TEMPLATES, TemplatesService } from '../modules/templates/templates.service';
 
 describe('Backend Templates Service', () => {
-  it('should expose only the active Phase 1 Cinematic Digital Profile template in SEEDED_TEMPLATES classified as PERSONAL', () => {
-    expect(SEEDED_TEMPLATES.length).toBe(1);
+  it('should expose active templates including Cinematic Digital Profile and shared Dark Premium', () => {
+    expect(SEEDED_TEMPLATES.length).toBe(2);
     const ids = SEEDED_TEMPLATES.map((t) => t.id);
-    expect(ids).toEqual(['cinematic-noir']);
+    expect(ids).toEqual(['cinematic-noir', 'dark-premium']);
     expect(SEEDED_TEMPLATES[0].templateType).toBe('PERSONAL');
     expect(SEEDED_TEMPLATES[0].supportedProfileTypes).toEqual(['personal']);
+    expect(SEEDED_TEMPLATES[1].supportedProfileTypes).toEqual(['personal', 'business']);
   });
 
   it('filters templates by accountType and templateType', async () => {
@@ -15,14 +16,13 @@ describe('Backend Templates Service', () => {
     const service = new TemplatesService(mockDbService);
 
     const personalTemplates = await service.findAll({ accountType: 'personal' });
-    expect(personalTemplates.length).toBe(1);
-    expect(personalTemplates[0].id).toBe('cinematic-noir');
+    expect(personalTemplates.map((t) => t.id)).toEqual(['cinematic-noir', 'dark-premium']);
 
     const businessTemplates = await service.findAll({ accountType: 'business' });
-    expect(businessTemplates.length).toBe(0);
+    expect(businessTemplates.map((t) => t.id)).toEqual(['dark-premium']);
 
     const explicitPersonal = await service.findAll({ templateType: 'PERSONAL' });
-    expect(explicitPersonal.length).toBe(1);
+    expect(explicitPersonal.map((t) => t.id)).toEqual(['cinematic-noir', 'dark-premium']);
 
     const explicitBusiness = await service.findAll({ templateType: 'BUSINESS' });
     expect(explicitBusiness.length).toBe(0);

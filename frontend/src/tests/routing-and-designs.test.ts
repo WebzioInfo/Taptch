@@ -57,9 +57,9 @@ describe('Public Profile Loading State Machine & Error Classification', () => {
 });
 
 describe('Design Systems Migration & Templates Registry', () => {
-  it('includes the active Phase 1 cinematic template in standard catalog', () => {
+  it('includes the active Phase 1 cinematic and Dark Premium templates in standard catalog', () => {
     const templateIds = STANDARD_TEMPLATES.map((t) => t.id);
-    expect(templateIds).toEqual(['cinematic-noir']);
+    expect(templateIds).toEqual(['cinematic-noir', 'dark-premium']);
   });
 
   it('verifies design tokens and typography for Cinematic Digital Profile', () => {

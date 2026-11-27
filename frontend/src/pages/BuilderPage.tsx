@@ -437,7 +437,9 @@ export function BuilderPage() {
       .map((b, i) => ({
         id: b.id || `biz-${i}`,
         companyName: (b.companyName || b.name || '').trim(),
+        tagline: (b.tagline || '').trim() || undefined,
         roleTitle: (b.jobTitle || b.tagline || '').trim() || undefined,
+        status: (b.status || '').trim() || undefined,
         description: (b.description || '').trim() || undefined,
         websiteUrl: (b.websiteUrl || b.businessWebsite || b.website || '').trim() || undefined,
         address: (b.address || b.businessAddress || '').trim() || undefined,
@@ -702,15 +704,14 @@ export function BuilderPage() {
       {notification && (
         <div
           role="alert"
-          className={`fixed top-16 right-4 left-4 sm:left-auto sm:max-w-md z-50 px-3.5 py-2.5 rounded-[var(--radius-md)] shadow-xl flex items-center gap-2.5 text-xs font-medium border ${
-            notification.type === 'success'
-              ? 'bg-[var(--bg-surface)] text-[var(--success)] border-[var(--success)]/40'
-              : notification.type === 'limit_reached'
+          className={`fixed top-16 right-4 left-4 sm:left-auto sm:max-w-md z-50 px-3.5 py-2.5 rounded-[var(--radius-md)] shadow-xl flex items-center gap-2.5 text-xs font-medium border ${notification.type === 'success'
+            ? 'bg-[var(--bg-surface)] text-[var(--success)] border-[var(--success)]/40'
+            : notification.type === 'limit_reached'
               ? 'bg-[var(--bg-surface)] text-[var(--ink)] border-[var(--accent)] ring-1 ring-[var(--accent)]/30'
               : notification.type === 'info'
-              ? 'bg-[var(--bg-surface)] text-[var(--ink)] border-[var(--border)]'
-              : 'bg-[var(--bg-surface)] text-[var(--danger)] border-[var(--danger)]/40'
-          }`}
+                ? 'bg-[var(--bg-surface)] text-[var(--ink)] border-[var(--border)]'
+                : 'bg-[var(--bg-surface)] text-[var(--danger)] border-[var(--danger)]/40'
+            }`}
         >
           {notification.type === 'success' ? (
             <Check className="w-4 h-4 text-[var(--success)] shrink-0" />

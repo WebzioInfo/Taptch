@@ -24,6 +24,7 @@ import { ProfessionalServicesTemplate } from './layouts/ProfessionalServicesTemp
 import { CreativeAgencyTemplate } from './layouts/CreativeAgencyTemplate';
 import { NfcPreviewStudio } from './layouts/NfcPreviewStudio';
 import { CinematicProfileTemplate } from './layouts/CinematicProfileTemplate';
+import { DarkPremiumTemplate } from './layouts/DarkPremiumTemplate';
 import { getTemplateDefaultThemeConfig } from '../../modules/templates/constants';
 
 const LEGACY_PERSONAL_TEMPLATE_IDS = new Set([
@@ -33,7 +34,6 @@ const LEGACY_PERSONAL_TEMPLATE_IDS = new Set([
   'obsidian',
   'premium-brand',
   'clean-corporate',
-  'dark-premium',
   'soft-modern',
   'bold-editorial',
   'ivory-minimal',
@@ -73,13 +73,16 @@ export function canonicalTemplateId(rawId?: string | null, profileType?: string 
 export interface BusinessItem {
   id: string;
   companyName: string;
+  name?: string | null;
   tagline?: string | null;
   roleTitle?: string | null;
   industry?: string | null;
   description?: string | null;
   websiteUrl?: string | null;
+  logoUrl?: string | null;
   brochureUrl?: string | null;
   address?: string | null;
+  status?: string | null;
 }
 
 export interface CatalogueItem {
@@ -236,7 +239,9 @@ export function ProfileRenderer({ profile }: { profile: ProfileRenderData }) {
   const rawTemplateNorm = (profile.templateId || '').toLowerCase().trim();
   const templateId = canonicalTemplateId(profile.templateId, profile.profileType);
   const isKnownTemplate =
-    templateId === 'cinematic-noir' || KNOWN_BUSINESS_TEMPLATE_IDS.has(templateId);
+    templateId === 'cinematic-noir' ||
+    templateId === 'dark-premium' ||
+    KNOWN_BUSINESS_TEMPLATE_IDS.has(templateId);
   if (!rawTemplateNorm || !isKnownTemplate) {
     console.warn('[ProfileRenderer] Unknown or missing templateId:', {
       rawTemplateId: profile.templateId,
@@ -312,6 +317,8 @@ export function ProfileRenderer({ profile }: { profile: ProfileRenderData }) {
         return <ProfessionalServicesTemplate key="professional-services" {...layoutProps} />;
       case 'creative-agency':
         return <CreativeAgencyTemplate key="creative-agency" {...layoutProps} />;
+      case 'dark-premium':
+        return <DarkPremiumTemplate key="dark-premium" {...layoutProps} />;
       case 'cinematic-noir':
         return <CinematicProfileTemplate key="cinematic-noir" {...layoutProps} />;
       case 'unknown':
