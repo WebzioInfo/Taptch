@@ -79,20 +79,21 @@ import { CardsService } from '../modules/cards/cards.service';
             ).rejects.toThrow(ForbiddenException);
           });
 
-          it('buildCanonicalNfcUrl generates https://taptch.com/{username} for profile-attached cards', () => {
+          it('buildCanonicalNfcUrl always generates permanent https://taptch.com/p/{token} regardless of username', () => {
             expect(
               cardsService.buildCanonicalNfcUrl({
                 profileUsername: 'john',
-                redirectToken: 'tok123',
+                redirectToken: '50f8b595acd3',
               }),
-            ).toBe('https://taptch.com/john');
+            ).toBe('https://taptch.com/p/50f8b595acd3');
 
             expect(
               cardsService.buildCanonicalNfcUrl({
                 profileUsername: 'acmecompany',
                 profileType: 'business',
+                redirectToken: 'abc123def456',
               }),
-            ).toBe('https://taptch.com/acmecompany');
+            ).toBe('https://taptch.com/p/abc123def456');
           });
 
           it('resolvePublicNfcToken resolves legacy token to /{username} and unconfigured states safely', async () => {
@@ -157,6 +158,42 @@ import { CardsService } from '../modules/cards/cards.service';
                 status: 'unconfigured',
                 destinationType: null,
                 destinationUrl: null,
+              });
+            });
+
+            it('resolvePublicNfcToken falls back to published profile slug for legacy /p/:slug URLs', async () => {
+              mockDbService.db.select
+                .mockReturnValueOnce({
+                  from: vi.fn().mockReturnValue({
+                    where: vi.fn().mockReturnValue({
+                      limit: vi.fn().mockResolvedValue([]),
+                    }),
+                  }),
+                })
+                .mockReturnValueOnce({
+                  from: vi.fn().mockReturnValue({
+                    where: vi.fn().mockReturnValue({
+                      limit: vi.fn().mockResolvedValue([]),
+                    }),
+                  }),
+                })
+                .mockReturnValueOnce({
+                  from: vi.fn().mockReturnValue({
+                    where: vi.fn().mockReturnValue({
+                      limit: vi.fn().mockResolvedValue([
+                        { slug: 'sinan', status: 'PUBLISHED', profileType: 'personal' },
+                      ]),
+                    }),
+                  }),
+                });
+
+              const slugRes = await cardsService.resolvePublicNfcToken('sinan', 'personal');
+              expect(slugRes).toEqual({
+                status: 'active',
+                destinationType: 'profile',
+                destinationUrl: '/sinan',
+                profileSlug: 'sinan',
+                profileType: 'personal',
               });
             });
           });

@@ -1,0 +1,8 @@
+name = "taptch-profile-proxy"
+main = "src/worker.ts"
+compatibility_date = "2026-11-01"
+
+routes = [
+  { pattern = "taptch.com/*", zone_name = "taptch.com" },
+  { pattern = "www.taptch.com/*", zone_name = "taptch.com" }
+]

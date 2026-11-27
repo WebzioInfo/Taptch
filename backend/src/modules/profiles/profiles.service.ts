@@ -213,9 +213,15 @@ export class ProfilesService {
     const cleanSlug = slug.toLowerCase().trim();
     const cacheKey = `profile:slug:${cleanSlug}`;
 
-    // 1. Redis Cache (<50ms hot path)
+    // 1. Redis Cache (<50ms hot path) + negative cache for 404s
         if (!options?.allowUnpublished) {
-          const cached = await this.redisService.get(cacheKey);
+          const [cached, notFoundCached] = await Promise.all([
+            this.redisService.get(cacheKey),
+            this.redisService.get(`profile:notfound:${cleanSlug}`),
+          ]);
+          if (notFoundCached) {
+            throw new NotFoundException(`Profile "${slug}" not found.`);
+          }
           if (cached) {
             try {
               return JSON.parse(cached);
@@ -249,6 +255,7 @@ export class ProfilesService {
         }
 
         if (rows.length === 0) {
+          await this.redisService.set(`profile:notfound:${cleanSlug}`, '1', 60);
           throw new NotFoundException(`Profile "${slug}" not found.`);
         }
 
@@ -266,6 +273,24 @@ export class ProfilesService {
             slug: profile.slug,
             status: profile.status,
           } as unknown as PublicProfileSnapshot;
+        }
+
+        // Fast path: if pre-compiled publishedJson snapshot exists, serve it directly without 3 extra DB queries
+        const precompiled = profile.publishedJson as Record<string, unknown> | null | undefined;
+        if (
+          !options?.allowUnpublished &&
+          isPubliclyVisible &&
+          precompiled &&
+          typeof precompiled === 'object' &&
+          typeof precompiled.slug === 'string' &&
+          typeof precompiled.displayName === 'string'
+        ) {
+          const fastSnapshot = {
+            ...(precompiled as unknown as PublicProfileSnapshot),
+            status: profile.status,
+          };
+          await this.redisService.set(cacheKey, JSON.stringify(fastSnapshot), 3600);
+          return fastSnapshot;
         }
 
         const [sections, businesses, catalogue] = await Promise.all([

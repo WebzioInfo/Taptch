@@ -24,11 +24,11 @@ function getNfcBaseUrl(): string {
 }
 
   /**
-   * Build the canonical public NFC URL for a card.
+   * Build the permanent NFC chip URL for a card.
    *
-   * New format (profile-based): https://taptch.com/{profileUsername}
-   * Legacy fallback (token-based, for cards without a profile yet):
+   * Every physical NFC card has a permanent URL written once:
    *   https://taptch.com/p/{redirectToken}
+   * This URL NEVER changes when a profile is attached, reassigned, or disconnected.
    */
   function buildNfcUrl(params: {
     profileUsername?: string | null;
@@ -36,17 +36,9 @@ function getNfcBaseUrl(): string {
     profileType?: string | null;
   }): string | null {
     const base = getNfcBaseUrl();
-
-    // Preferred: profile username URL (the new canonical format)
-    if (params.profileUsername) {
-      return `${base}/${encodeURIComponent(params.profileUsername)}`;
-    }
-
-    // Legacy fallback: /p/{token} or /b/{token}
     const token = (params.redirectToken || '').trim();
     if (!token) return null;
-    const prefix = params.profileType === 'business' ? 'b' : 'p';
-    return `${base}/${prefix}/${encodeURIComponent(token)}`;
+    return `${base}/p/${encodeURIComponent(token)}`;
   }
 
   @Injectable()
@@ -121,11 +113,9 @@ function getNfcBaseUrl(): string {
       const matchedProd = productRows[0] || null;
       const linkedProfile = profileRows[0] || null;
 
-        // Build the NFC URL using profile username (preferred) or legacy token fallback
-        const nfcUrl = buildNfcUrl({
-          profileUsername: linkedProfile?.slug || card.profileUsername,
+        // Permanent NFC chip URL is always https://taptch.com/p/{redirectToken}
+        const permanentNfcUrl = buildNfcUrl({
           redirectToken: card.redirectToken,
-          profileType: linkedProfile?.profileType,
         });
 
         enriched.push({
@@ -134,8 +124,8 @@ function getNfcBaseUrl(): string {
           colorName: card.colorName || matchedProd?.colorName || card.variantName || null,
           color: card.color || matchedProd?.color || null,
           previewFrontUrl: card.previewFrontUrl || matchedProd?.imageUrl || null,
-          permanentUrl: nfcUrl,
-          nfcUrl: card.nfcUrl || nfcUrl,
+          permanentUrl: permanentNfcUrl,
+          nfcUrl: permanentNfcUrl,
           order: orderRows[0] || null,
           profile: linkedProfile,
         });
@@ -195,8 +185,8 @@ function getNfcBaseUrl(): string {
       return { ...card, profile };
     }
 
-    // Compute the canonical NFC URL for this profile
-    const nfcUrl = buildNfcUrl({ profileUsername: profile.slug });
+    // Preserve permanent NFC chip URL (https://taptch.com/p/{redirectToken}); never overwrite with username
+    const permanentNfcUrl = buildNfcUrl({ redirectToken: card.redirectToken });
 
     const [updated] = await tx
       .update(schema.purchasedCards)
@@ -205,7 +195,7 @@ function getNfcBaseUrl(): string {
         destinationType: 'profile',
         customDestinationUrl: null,
         profileAssignmentStatus: 'PROFILE_ATTACHED',
-        nfcUrl,
+        nfcUrl: permanentNfcUrl || card.nfcUrl,
         profileUsername: profile.slug,
         updatedAt: new Date(),
       })
@@ -258,13 +248,15 @@ function getNfcBaseUrl(): string {
       throw new ForbiddenException('You do not have permission to configure this card.');
     }
 
+    const permanentNfcUrl = buildNfcUrl({ redirectToken: card.redirectToken });
+
     const [updated] = await tx
       .update(schema.purchasedCards)
       .set({
         profileId: null,
         destinationType: null,
         customDestinationUrl: null,
-        nfcUrl: null,
+        nfcUrl: permanentNfcUrl || card.nfcUrl,
         profileUsername: null,
         profileAssignmentStatus: 'AWAITING_PROFILE',
         updatedAt: new Date(),
@@ -375,18 +367,18 @@ buildCanonicalNfcUrl(params: {
         .from(schema.profiles)
         .where(eq(schema.profiles.id, physicalCard.profileId))
         .limit(1);
-        if (prof && (prof.status === 'PUBLISHED' || prof.status === 'APPROVED')) {
-          const resolvedType = prof.profileType === 'business' ? 'business' : 'personal';
-          if (expectedProfileType && resolvedType !== expectedProfileType) {
-            return { status: 'not_found', destinationType: null, destinationUrl: null };
+        if (prof) {
+          if (prof.status === 'PUBLISHED' || prof.status === 'ACTIVE' || prof.status === 'APPROVED') {
+            const resolvedType = prof.profileType === 'business' ? 'business' : 'personal';
+            return {
+              status: 'active',
+              destinationType: 'profile',
+              destinationUrl: `/${prof.slug}`,
+              profileSlug: prof.slug,
+              profileType: resolvedType,
+            };
           }
-          return {
-            status: 'active',
-            destinationType: 'profile',
-            destinationUrl: `/${prof.slug}`,
-            profileSlug: prof.slug,
-            profileType: resolvedType,
-          };
+          return { status: 'unavailable', destinationType: null, destinationUrl: null };
         }
       }
       return { status: 'unconfigured', destinationType: null, destinationUrl: null };
@@ -399,37 +391,84 @@ buildCanonicalNfcUrl(params: {
       .where(eq(schema.purchasedCards.redirectToken, cleanToken))
       .limit(1);
 
-    if (!purchasedCard) {
-      return { status: 'not_found', destinationType: null, destinationUrl: null };
-    }
-
-    if (purchasedCard.profileId) {
-      const [prof] = await this.dbService.db
-        .select({
-          slug: schema.profiles.slug,
-          status: schema.profiles.status,
-          profileType: schema.profiles.profileType,
-        })
-        .from(schema.profiles)
-        .where(eq(schema.profiles.id, purchasedCard.profileId))
-        .limit(1);
-        if (prof && (prof.status === 'PUBLISHED' || prof.status === 'APPROVED')) {
-          const resolvedType = prof.profileType === 'business' ? 'business' : 'personal';
-          if (expectedProfileType && resolvedType !== expectedProfileType) {
-            return { status: 'not_found', destinationType: null, destinationUrl: null };
+    if (purchasedCard) {
+      if (purchasedCard.profileId) {
+        const [prof] = await this.dbService.db
+          .select({
+            slug: schema.profiles.slug,
+            status: schema.profiles.status,
+            profileType: schema.profiles.profileType,
+          })
+          .from(schema.profiles)
+          .where(eq(schema.profiles.id, purchasedCard.profileId))
+          .limit(1);
+        if (prof) {
+          if (prof.status === 'PUBLISHED' || prof.status === 'ACTIVE' || prof.status === 'APPROVED') {
+            const resolvedType = prof.profileType === 'business' ? 'business' : 'personal';
+            return {
+              status: 'active',
+              destinationType: 'profile',
+              destinationUrl: `/${prof.slug}`,
+              profileSlug: prof.slug,
+              profileType: resolvedType,
+            };
           }
-          return {
-            status: 'active',
-            destinationType: 'profile',
-            destinationUrl: `/${prof.slug}`,
-            profileSlug: prof.slug,
-            profileType: resolvedType,
-          };
+          return { status: 'unavailable', destinationType: null, destinationUrl: null };
         }
       }
 
       return { status: 'unconfigured', destinationType: null, destinationUrl: null };
     }
+
+    // 3. Fallback: if someone opens a legacy /p/{username} URL (e.g. /p/sinan),
+    //    check if the identifier matches a published profile slug or username alias.
+    const normalizedSlug = cleanToken.toLowerCase();
+    let [slugProfile] = await this.dbService.db
+      .select({
+        slug: schema.profiles.slug,
+        status: schema.profiles.status,
+        profileType: schema.profiles.profileType,
+      })
+      .from(schema.profiles)
+      .where(eq(schema.profiles.slug, normalizedSlug))
+      .limit(1);
+
+    if (!slugProfile) {
+      const [aliasRow] = await this.dbService.db
+        .select({ profileId: schema.usernameAliases.profileId })
+        .from(schema.usernameAliases)
+        .where(eq(schema.usernameAliases.alias, normalizedSlug))
+        .limit(1);
+
+      if (aliasRow) {
+        [slugProfile] = await this.dbService.db
+          .select({
+            slug: schema.profiles.slug,
+            status: schema.profiles.status,
+            profileType: schema.profiles.profileType,
+          })
+          .from(schema.profiles)
+          .where(eq(schema.profiles.id, aliasRow.profileId))
+          .limit(1);
+      }
+    }
+
+    if (slugProfile) {
+      if (slugProfile.status === 'PUBLISHED' || slugProfile.status === 'ACTIVE' || slugProfile.status === 'APPROVED') {
+        const resolvedType = slugProfile.profileType === 'business' ? 'business' : 'personal';
+        return {
+          status: 'active',
+          destinationType: 'profile',
+          destinationUrl: `/${slugProfile.slug}`,
+          profileSlug: slugProfile.slug,
+          profileType: resolvedType,
+        };
+      }
+      return { status: 'unavailable', destinationType: null, destinationUrl: null };
+    }
+
+    return { status: 'not_found', destinationType: null, destinationUrl: null };
+  }
 
   // ─── Username-Based Public Resolution ────────────────────────────────────────
 

@@ -80,7 +80,7 @@ export function NfcResolvePage({ expectedProfileType }: NfcResolvePageProps = {}
         aria-label="Resolving NFC destination"
       >
         <div className="mb-5">
-          <BrandLogo variant="symbol" size="md" />
+          {/* <BrandLogo variant="symbol" size="md" /> */}
         </div>
         <div className="flex items-center gap-2" role="status" aria-label="Connecting">
           <span className="w-2.5 h-2.5 rounded-full bg-[#FF6A00] animate-bounce [animation-delay:-0.3s]" />

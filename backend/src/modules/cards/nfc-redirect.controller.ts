@@ -29,7 +29,11 @@ export class NfcRedirectController {
   @Public()
   @Get('api/v1/nfc/:token/resolve')
   @ApiOperation({ summary: 'Resolve permanent NFC token destination without exposing private customer data' })
-  async resolveNfcToken(@Param('token') token: string) {
-    return this.cardsService.resolvePublicNfcToken(token);
+  async resolveNfcToken(
+    @Param('token') token: string,
+    @Query('type') type?: 'business' | 'personal',
+  ) {
+    const expectedType = type === 'business' || type === 'personal' ? type : undefined;
+    return this.cardsService.resolvePublicNfcToken(token, expectedType);
   }
 }

@@ -143,17 +143,12 @@ export function CardsPage() {
 
           const getNfcProfileUrl = (card: any) => {
             if (!card) return '';
-            if (card.profile?.slug) {
-              return `${env.nfcPublicBaseUrl}/${encodeURIComponent(card.profile.slug)}`;
-            }
-            if (card.profileUsername) {
-              return `${env.nfcPublicBaseUrl}/${encodeURIComponent(card.profileUsername)}`;
-            }
-            if (card.nfcUrl) return card.nfcUrl;
-            if (card.permanentUrl) return card.permanentUrl;
+            // Permanent NFC Chip URL is always https://taptch.com/p/{redirectToken}
             if (card.redirectToken) {
               return `${env.nfcPublicBaseUrl}/p/${encodeURIComponent(card.redirectToken)}`;
             }
+            if (card.permanentUrl) return card.permanentUrl;
+            if (card.nfcUrl) return card.nfcUrl;
             return '';
           };
 

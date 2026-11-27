@@ -59,14 +59,36 @@ export class ApiClient {
         }
       }
       const errorMsg = json.error?.message || `Request failed with status ${response.status}`;
-      throw new Error(errorMsg);
+      const error = new Error(errorMsg) as Error & { statusCode?: number };
+      error.statusCode = response.status;
+      throw error;
     }
 
     return (json.data !== undefined ? json.data : (json as unknown as T));
   }
 
-  static get<T>(endpoint: string, headers?: Record<string, string>): Promise<T> {
-    return this.request<T>(endpoint, { method: 'GET', headers });
+  static get<T>(
+    endpoint: string,
+    headersOrOptions?:
+      | Record<string, string>
+      | { headers?: Record<string, string>; signal?: AbortSignal },
+  ): Promise<T> {
+    if (
+      headersOrOptions &&
+      (('signal' in headersOrOptions && headersOrOptions.signal instanceof AbortSignal) ||
+        ('headers' in headersOrOptions && typeof headersOrOptions.headers === 'object'))
+    ) {
+      const opts = headersOrOptions as { headers?: Record<string, string>; signal?: AbortSignal };
+      return this.request<T>(endpoint, {
+        method: 'GET',
+        headers: opts.headers,
+        signal: opts.signal,
+      });
+    }
+    return this.request<T>(endpoint, {
+      method: 'GET',
+      headers: headersOrOptions as Record<string, string> | undefined,
+    });
   }
 
   static post<T>(endpoint: string, body?: unknown, headers?: Record<string, string>): Promise<T> {

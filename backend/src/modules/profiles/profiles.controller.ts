@@ -6,8 +6,10 @@ import {
   Put,
   Param,
   Body,
+  Res,
   UseGuards,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '../../common/guards/auth.guard';
 import { Public } from '../../common/decorators/public.decorator';
@@ -42,8 +44,24 @@ export class ProfilesController {
   @Public()
   @Get('by-slug/:slug')
   @ApiOperation({ summary: 'Public profile lookup with snapshot' })
-  async getPublicProfile(@Param('slug') slug: string) {
-    return this.profilesService.findBySlug(slug);
+  async getPublicProfile(
+    @Param('slug') slug: string,
+    @Res({ passthrough: true }) res?: Response,
+  ) {
+    const profile = await this.profilesService.findBySlug(slug);
+    if (res) {
+      const isPublished =
+        profile?.status === 'PUBLISHED' ||
+        profile?.status === 'ACTIVE' ||
+        profile?.status === 'APPROVED';
+      res.setHeader(
+        'Cache-Control',
+        isPublished
+          ? 'public, max-age=30, s-maxage=120, stale-while-revalidate=300'
+          : 'no-store',
+      );
+    }
+    return profile;
   }
 
   @Get(':id')

@@ -82,7 +82,7 @@ import { validateUsernameFormat, isReservedUsername } from '../config/reservedUs
         expect(plainHtml).toContain('Total Purchased');
         expect(plainHtml).toContain('PVC NFC Card — Black');
         expect(plainHtml).toContain('Metal NFC Card — Black');
-        expect(plainHtml).toContain('https://taptch.com/john');
+        expect(plainHtml).toContain('https://taptch.com/p/abc123def456');
         expect(plainHtml).toContain('@john');
         expect(plainHtml).toContain('Needs profile assignment (legacy card)');
         expect(plainHtml).not.toContain('Custom URL');
