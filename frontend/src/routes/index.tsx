@@ -23,7 +23,6 @@ const PublicProfilePage = lazy(() =>
 );
 const CardsPage = lazy(() => import('../pages/CardsPage').then((m) => ({ default: m.CardsPage })));
 const LeadsPage = lazy(() => import('../pages/LeadsPage').then((m) => ({ default: m.LeadsPage })));
-const QrPage = lazy(() => import('../pages/QrPage').then((m) => ({ default: m.QrPage })));
 const TemplatesPage = lazy(() => import('../pages/TemplatesPage').then((m) => ({ default: m.TemplatesPage })));
 const PricingPage = lazy(() => import('../pages/PricingPage').then((m) => ({ default: m.PricingPage })));
 const BuilderPage = lazy(() => import('../pages/BuilderPage').then((m) => ({ default: m.BuilderPage })));
@@ -129,7 +128,7 @@ export const router = createBrowserRouter([
           { path: '/cards', element: <CardsPage /> },
           { path: '/orders', element: <OrdersPage /> },
           { path: '/leads', element: <LeadsPage /> },
-          { path: '/qr', element: <QrPage /> },
+          { path: '/qr', element: <Navigate to="/dashboard" replace /> },
           { path: '/settings', element: <DashboardPage /> },
         ],
       },

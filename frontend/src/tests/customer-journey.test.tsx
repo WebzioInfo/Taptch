@@ -33,7 +33,7 @@ describe('Customer Purchase Journey & Public Exploration', () => {
 
   it('renders public NFC Cards catalog with all 6 independent products without authentication', () => {
     const html = renderWithProviders(<NfcCardsPage />, '/nfc-cards');
-    expect(html).toContain('Precision-Crafted NFC Smart Cards');
+    expect(html).toContain('NFC Card Catalogue');
     expect(html).toContain('PVC NFC Cards');
     expect(html).toContain('Metal NFC Cards');
     expect(html).toContain('PVC NFC Card — Black');
@@ -49,7 +49,7 @@ describe('Customer Purchase Journey & Public Exploration', () => {
     expect(html).toContain('/products/metal-gold.svg');
     expect(html).toContain('/products/metal-rose-gold.svg');
     expect(html).toContain('View Details');
-    expect(html).toContain('Design This Card');
+    expect(html).toContain('Customize');
   });
 
   it('renders Personal vs Business Account Type selection on RegisterPage', () => {

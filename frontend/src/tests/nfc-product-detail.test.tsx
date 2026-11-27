@@ -67,12 +67,15 @@ describe('NFC Product Catalog & Product Detail Experience', () => {
       </QueryClientProvider>,
     );
 
+    expect(html).toContain('NFC Card Catalogue');
+    expect(html).toContain('All Cards');
+    expect(html).toContain('lg:grid-cols-4');
     expect(html).toContain('Classic White PVC NFC Card');
     expect(html).toContain('Executive Brushed Metal Card');
     expect(html).toContain('/nfc-cards/classic-white-pvc-nfc-card');
     expect(html).toContain('/nfc-cards/executive-brushed-metal-card');
     expect(html).toContain('View Details');
-    expect(html).toContain('Design This Card');
+    expect(html).toContain('Customize');
   });
 
   it('NfcProductDetailPage renders gallery, variants, pricing, specifications, how-it-works, and related products', () => {
