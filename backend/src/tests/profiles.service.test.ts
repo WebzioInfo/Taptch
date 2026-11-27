@@ -361,6 +361,114 @@ describe('Taptch Digital Profiles Engine — ProfilesService', () => {
       await service.publish(mockActor, 'prof_cloud_snap');
       expect(JSON.parse(store.get('profile:slug:cloud-user')!).avatarUrl).toBe(avatarV2);
     });
+
+    it('replaces a venture logo with a Cloudinary URL, publishes, and returns the Cloudinary URL from findBySlug', async () => {
+      const store = new Map<string, string>();
+      mockRedisService.get.mockImplementation(async (k: string) => store.get(k) ?? null);
+      mockRedisService.set.mockImplementation(async (k: string, v: string) => {
+        store.set(k, v);
+        return 'OK';
+      });
+      mockRedisService.del.mockImplementation(async (k: string) => {
+        store.delete(k);
+        return 1;
+      });
+
+      const oldLogoUrl = '/api/v1/uploads/file/3c1b90c5-bc77-4a8d-8902-7e95c31f9a6f.jpg';
+      const newLogoUrl =
+        'https://res.cloudinary.com/dhydmxcq2/image/upload/v1795787153/taptch/u1/logos/c151ea8a-d98c-41c2-8222-00e2fd2b7002.jpg';
+
+      let storedBusinesses = [
+        {
+          id: 'biz_essar',
+          profileId: 'prof_venture_test',
+          name: 'ESSAR Enterprises',
+          tagline: 'Founder & Chairman',
+          description: null,
+          email: null,
+          phone: null,
+          website: 'https://www.essarenterprises.co.in/',
+          address: null,
+          logoUrl: oldLogoUrl,
+          displayOrder: 0,
+        },
+      ];
+
+      const dbProfile: any = {
+        id: 'prof_venture_test',
+        slug: 'venture-user',
+        ownerId: mockActor.userId,
+        displayName: 'Venture User',
+        profileType: 'personal',
+        templateId: 'cinematic-noir',
+        themeId: 'cinematic-noir',
+        status: 'PUBLISHED',
+        publishedJson: {},
+      };
+
+      mockDbService.withActor.mockImplementation(async (_actor: any, fn: (tx: any) => Promise<any>) => {
+        const tx: any = {
+          update: () => ({
+            set: () => ({
+              where: () => ({
+                returning: async () => [{ ...dbProfile, status: 'PUBLISHED' }],
+              }),
+            }),
+          }),
+          delete: () => ({
+            where: async () => {
+              storedBusinesses = [];
+              return [];
+            },
+          }),
+          insert: () => ({
+            values: async (val: any) => {
+              if (val && val.name) {
+                storedBusinesses.push(val);
+              }
+              return [val];
+            },
+          }),
+        };
+        return fn(tx);
+      });
+
+      let whereCall = 0;
+      mockDbService.db.where.mockImplementation(() => {
+        whereCall += 1;
+        // findBySlug queries: 1) profiles, 2) sections, 3) businesses, 4) catalogue
+        const mod = whereCall % 4;
+        const rows = mod === 3 ? [...storedBusinesses] : [];
+        const arr: any = rows;
+        arr.limit = mockDbService.db.limit;
+        arr.orderBy = mockDbService.db.orderBy;
+        arr.returning = mockDbService.db.returning;
+        return arr;
+      });
+      mockDbService.db.orderBy.mockResolvedValue([]);
+      mockDbService.db.limit.mockResolvedValue([{ ...dbProfile }]);
+      mockDbService.db.returning.mockResolvedValue([{ ...dbProfile, status: 'PUBLISHED' }]);
+      vi.spyOn(service, 'findOne').mockResolvedValue({ ...dbProfile } as any);
+
+      // Update venture logo to Cloudinary URL and publish
+      await service.update(mockActor, 'prof_venture_test', {
+        businesses: [
+          {
+            id: 'biz_essar',
+            companyName: 'ESSAR Enterprises',
+            jobTitle: 'Founder & Chairman',
+            logoUrl: newLogoUrl,
+          },
+        ],
+      });
+      expect(mockRedisService.del).toHaveBeenCalledWith('profile:slug:venture-user');
+
+      await service.publish(mockActor, 'prof_venture_test');
+      const publicProfile = await service.findBySlug('venture-user');
+      expect(publicProfile.businesses).toHaveLength(1);
+      expect(publicProfile.businesses[0].companyName).toBe('ESSAR Enterprises');
+      expect(publicProfile.businesses[0].logoUrl).toBe(newLogoUrl);
+    });
   });
 
   describe('username rules, locking, and privacy', () => {

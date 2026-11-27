@@ -1385,12 +1385,11 @@ export function BuilderPage() {
                             label="Company Logo"
                             value={biz.logoUrl || ''}
                             onChange={(nextUrl) => {
-                              const updated = [...businesses];
-                              updated[idx] = {
-                                ...updated[idx],
-                                logoUrl: nextUrl,
-                              };
-                              setBusinesses(updated);
+                              setBusinesses((prev) =>
+                                prev.map((item, itemIdx) =>
+                                  itemIdx === idx ? { ...item, logoUrl: nextUrl } : item,
+                                ),
+                              );
                             }}
                             category="logo"
                             placeholder="https://..."
