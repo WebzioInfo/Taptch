@@ -187,4 +187,78 @@ describe('PublicProfilePage — Minimal 404, Error Handling & Visibility', () =>
     expect(html).toContain('test-123');
     expect(html).toContain('http://localhost:4000/api/v1/uploads/file/db4f8043-3616-4e8f-947d-17fc75cdf9e7.webp');
   });
+
+  it('renders each user own chosen template independently without defaulting business profiles to cinematic-noir', () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    qc.setQueryData(['public-profile', 'user-cinematic'], {
+      id: 'p-a',
+      slug: 'user-cinematic',
+      displayName: 'Alice Personal',
+      profileType: 'personal',
+      status: 'PUBLISHED',
+      templateId: 'cinematic-noir',
+      businesses: [],
+      socialLinks: [],
+      catalogue: [],
+      sections: [],
+    });
+    qc.setQueryData(['public-profile', 'user-corporate'], {
+      id: 'p-b',
+      slug: 'user-corporate',
+      displayName: 'Acme Corp',
+      profileType: 'business',
+      status: 'PUBLISHED',
+      templateId: 'corporate-business',
+      businesses: [],
+      socialLinks: [],
+      catalogue: [],
+      sections: [],
+    });
+    qc.setQueryData(['public-profile', 'shareef'], {
+      id: 'p-shareef',
+      slug: 'shareef',
+      displayName: 'Shareef Business',
+      profileType: 'business',
+      status: 'PUBLISHED',
+      templateId: 'soft-modern',
+      businesses: [],
+      socialLinks: [],
+      catalogue: [],
+      sections: [],
+    });
+
+    const htmlA = renderToString(
+      <QueryClientProvider client={qc}>
+        <MemoryRouter initialEntries={['/user-cinematic']}>
+          <Routes>
+            <Route path="/:slug" element={<PublicProfilePage />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    const htmlB = renderToString(
+      <QueryClientProvider client={qc}>
+        <MemoryRouter initialEntries={['/user-corporate']}>
+          <Routes>
+            <Route path="/:slug" element={<PublicProfilePage />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    const htmlShareef = renderToString(
+      <QueryClientProvider client={qc}>
+        <MemoryRouter initialEntries={['/shareef']}>
+          <Routes>
+            <Route path="/:slug" element={<PublicProfilePage />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    expect(htmlA).toContain('cinematic-noir-root');
+    expect(htmlB).not.toContain('cinematic-noir-root');
+    expect(htmlB).toContain('Acme Corp');
+    expect(htmlShareef).not.toContain('cinematic-noir-root');
+    expect(htmlShareef).toContain('unknown-template-error');
+  });
 });

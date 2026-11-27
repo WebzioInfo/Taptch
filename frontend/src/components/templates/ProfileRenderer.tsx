@@ -54,7 +54,14 @@ const KNOWN_BUSINESS_TEMPLATE_IDS = new Set([
   'creative-agency',
 ]);
 
-export function canonicalTemplateId(rawId?: string | null): string {
+export function canonicalTemplateId(rawId?: string | null, profileType?: string | null): string {
+  const isBusiness = (profileType || '').toLowerCase().trim() === 'business';
+  if (isBusiness) {
+    const norm = (rawId || '').toLowerCase().trim();
+    if (norm === 'zenith-corporate') return 'corporate-business';
+    if (norm === 'catalyst-business') return 'modern-business';
+    return norm;
+  }
   const norm = (rawId || 'cinematic-noir').toLowerCase().trim();
   if (LEGACY_PERSONAL_TEMPLATE_IDS.has(norm)) return 'cinematic-noir';
   if (norm === 'zenith-corporate') return 'corporate-business';
@@ -227,11 +234,21 @@ export function ProfileRenderer({ profile }: { profile: ProfileRenderData }) {
 
   // Dispatch to the specialized layout with canonical ID resolution
   const rawTemplateNorm = (profile.templateId || '').toLowerCase().trim();
-  const templateId = canonicalTemplateId(profile.templateId);
+  const templateId = canonicalTemplateId(profile.templateId, profile.profileType);
   const isKnownTemplate =
-    LEGACY_PERSONAL_TEMPLATE_IDS.has(templateId) || KNOWN_BUSINESS_TEMPLATE_IDS.has(templateId);
-  const resolvedTemplateId = isKnownTemplate ? templateId : 'cinematic-noir';
-  const defaultPalette = getTemplateDefaultThemeConfig(resolvedTemplateId);
+    templateId === 'cinematic-noir' || KNOWN_BUSINESS_TEMPLATE_IDS.has(templateId);
+  if (!rawTemplateNorm || !isKnownTemplate) {
+    console.warn('[ProfileRenderer] Unknown or missing templateId:', {
+      rawTemplateId: profile.templateId,
+      resolvedTemplateId: templateId,
+      profileType: profile.profileType,
+      slug: profile.slug,
+    });
+  }
+  const resolvedTemplateId = isKnownTemplate ? templateId : 'unknown';
+  const defaultPalette = getTemplateDefaultThemeConfig(
+    isKnownTemplate ? resolvedTemplateId : 'cinematic-noir',
+  );
 
   React.useEffect(() => {
     if (!profile.templateId || !isKnownTemplate) {
@@ -296,8 +313,29 @@ export function ProfileRenderer({ profile }: { profile: ProfileRenderData }) {
       case 'creative-agency':
         return <CreativeAgencyTemplate key="creative-agency" {...layoutProps} />;
       case 'cinematic-noir':
-      default:
         return <CinematicProfileTemplate key="cinematic-noir" {...layoutProps} />;
+      case 'unknown':
+      default:
+        return (
+          <div
+            key="unknown-template"
+            data-testid="unknown-template-error"
+            className="min-h-screen flex items-center justify-center bg-neutral-950 text-neutral-100 p-6"
+          >
+            <div className="max-w-md w-full rounded-2xl border border-neutral-800 bg-neutral-900/80 p-6 text-center space-y-2">
+              <p className="text-sm font-semibold text-amber-400">
+                {import.meta.env.DEV
+                  ? `Unknown profile template: "${profile.templateId || '(empty)'}"`
+                  : 'Profile template unavailable'}
+              </p>
+              <p className="text-xs text-neutral-400">
+                {import.meta.env.DEV
+                  ? `Profile "${profile.slug || profile.displayName}" (${profile.profileType || 'unknown'}) references an unregistered template.`
+                  : 'This profile uses a template that is no longer active. Please open the builder to select an active template.'}
+              </p>
+            </div>
+          </div>
+        );
     }
   };
 

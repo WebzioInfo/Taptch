@@ -55,6 +55,12 @@ function clearUserStorage() {
     localStorage.removeItem('taptch_session_token');
     localStorage.removeItem('taptch_checkout_design_draft');
     localStorage.removeItem('taptch_studio_recovery');
+    for (let i = localStorage.length - 1; i >= 0; i -= 1) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('taptch_recovery_')) {
+        localStorage.removeItem(key);
+      }
+    }
     sessionStorage.clear();
   } catch {
     // Ignore storage errors

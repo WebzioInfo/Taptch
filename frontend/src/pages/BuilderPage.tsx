@@ -190,7 +190,10 @@ export function BuilderPage() {
       setEmail(profile.email || '');
       setWebsite(profile.website || '');
       setAddress(profile.address || profile.location || '');
-      const loadedTpl = canonicalTemplateId(profile.templateId || profile.themeId || 'cinematic-noir');
+      const loadedTpl = canonicalTemplateId(
+        profile.templateId || profile.themeId,
+        profile.profileType,
+      );
       setTemplateId(loadedTpl);
       if (typeof profile.customFields?.education === 'string') {
         setEducation(profile.customFields.education);

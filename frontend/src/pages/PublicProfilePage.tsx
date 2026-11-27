@@ -90,7 +90,7 @@ export function PublicProfilePage() {
       location: profile.location || profile.address,
       profileType: profile.profileType || 'personal',
       socialLinks: profile.socialLinks || [],
-      templateId: canonicalTemplateId(profile.templateId || profile.themeId || 'cinematic-noir'),
+      templateId: canonicalTemplateId(profile.templateId || profile.themeId, profile.profileType),
       themeConfig: profile.customThemeColors || profile.themeConfig || {},
       customFields: profile.customFields || {},
       renderSource: isFromNfc ? ('nfc_redirect' as const) : ('public_url' as const),

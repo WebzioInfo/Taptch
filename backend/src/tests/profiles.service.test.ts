@@ -403,5 +403,55 @@ describe('Taptch Digital Profiles Engine — ProfilesService', () => {
       expect(snapshot.themeId).toBe('cinematic-noir');
       expect(snapshot.displayName).toBe('Legacy User');
     });
+
+    it('preserves each user own chosen template across publish and public findBySlug', async () => {
+      mockDbService.db.limit
+        .mockResolvedValueOnce([
+          {
+            id: 'prof_user_a',
+            slug: 'user-a',
+            ownerId: 'user_a',
+            profileType: 'personal',
+            templateId: 'cinematic-noir',
+            themeId: 'cinematic-noir',
+            displayName: 'User A',
+            status: 'PUBLISHED',
+            publishedJson: {
+              id: 'prof_user_a',
+              slug: 'user-a',
+              displayName: 'User A',
+              profileType: 'personal',
+              templateId: 'cinematic-noir',
+              themeId: 'cinematic-noir',
+            },
+          },
+        ])
+        .mockResolvedValueOnce([
+          {
+            id: 'prof_user_b',
+            slug: 'user-b',
+            ownerId: 'user_b',
+            profileType: 'business',
+            templateId: 'corporate-business',
+            themeId: 'corporate-business',
+            displayName: 'User B',
+            status: 'PUBLISHED',
+            publishedJson: {
+              id: 'prof_user_b',
+              slug: 'user-b',
+              displayName: 'User B',
+              profileType: 'business',
+              templateId: 'corporate-business',
+              themeId: 'corporate-business',
+            },
+          },
+        ]);
+
+      const snapA = await service.findBySlug('user-a');
+      const snapB = await service.findBySlug('user-b');
+      expect(snapA.templateId).toBe('cinematic-noir');
+      expect(snapB.templateId).toBe('corporate-business');
+      expect(snapB.templateId).not.toBe('cinematic-noir');
+    });
   });
 });
