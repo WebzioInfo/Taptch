@@ -8,7 +8,7 @@ export interface ImageUploadFieldProps {
   label: string;
   value: string;
   onChange: (nextUrl: string) => void;
-  category?: 'avatar' | 'logo' | 'cover';
+  category?: 'avatar' | 'logo' | 'cover' | 'product';
   placeholder?: string;
   compact?: boolean;
 }
@@ -129,8 +129,13 @@ export function ImageUploadField({
       }
 
       revokeTempUrl();
+      const previousUrl = value;
       setPreviewSrc(persistedUrl);
       onChange(persistedUrl);
+
+      if (previousUrl && previousUrl !== persistedUrl && previousUrl.includes('cloudinary.com')) {
+        ApiClient.post('/api/v1/uploads/cleanup', { url: previousUrl }).catch(() => {});
+      }
     } catch (err) {
       revokeTempUrl();
       setPreviewSrc(value);
@@ -155,11 +160,15 @@ export function ImageUploadField({
   };
 
   const handleRemove = () => {
+    const previousUrl = value;
     revokeTempUrl();
     setUrlError(null);
     setLoadError(null);
     setPreviewSrc('');
     onChange('');
+    if (previousUrl && previousUrl.includes('cloudinary.com')) {
+      ApiClient.post('/api/v1/uploads/cleanup', { url: previousUrl }).catch(() => {});
+    }
   };
 
   const activeError = urlError || loadError;

@@ -307,6 +307,60 @@ describe('Taptch Digital Profiles Engine — ProfilesService', () => {
       expect(secondPublic.bio).toBe('Updated Bio v2');
       expect(secondPublic.status).toBe('PUBLISHED');
     });
+
+    it('stores Cloudinary avatarUrl in publishedJson and Redis cache and updates on republish', async () => {
+      const store = new Map<string, string>();
+      mockRedisService.get.mockImplementation(async (k: string) => store.get(k) ?? null);
+      mockRedisService.set.mockImplementation(async (k: string, v: string) => {
+        store.set(k, v);
+        return 'OK';
+      });
+      mockRedisService.del.mockImplementation(async (k: string) => {
+        store.delete(k);
+        return 1;
+      });
+
+      mockDbService.db.where.mockImplementation(() => {
+        const arr: any = [];
+        arr.limit = mockDbService.db.limit;
+        arr.orderBy = mockDbService.db.orderBy;
+        arr.returning = mockDbService.db.returning;
+        return arr;
+      });
+
+      const avatarV1 = 'https://res.cloudinary.com/demo-cloud/image/upload/v1/taptch/u1/avatars/a1.webp';
+      const avatarV2 = 'https://res.cloudinary.com/demo-cloud/image/upload/v2/taptch/u1/avatars/a2.webp';
+      const dbProfile: any = {
+        id: 'prof_cloud_snap',
+        slug: 'cloud-user',
+        ownerId: mockActor.userId,
+        displayName: 'Cloud User',
+        avatarUrl: avatarV1,
+        profileType: 'personal',
+        templateId: 'cinematic-noir',
+        themeId: 'cinematic-noir',
+        status: 'DRAFT',
+        publishedJson: {},
+      };
+
+      vi.spyOn(service, 'findOne').mockResolvedValue({ ...dbProfile } as any);
+      mockDbService.db.limit.mockResolvedValue([{ ...dbProfile }]);
+      mockDbService.db.returning.mockResolvedValue([{ ...dbProfile, status: 'PUBLISHED' }]);
+
+      await service.publish(mockActor, 'prof_cloud_snap');
+      expect(mockDbService.db.set).toHaveBeenCalledWith(
+        expect.objectContaining({
+          publishedJson: expect.objectContaining({ avatarUrl: avatarV1 }),
+        }),
+      );
+      expect(JSON.parse(store.get('profile:slug:cloud-user')!).avatarUrl).toBe(avatarV1);
+
+      dbProfile.avatarUrl = avatarV2;
+      vi.spyOn(service, 'findOne').mockResolvedValue({ ...dbProfile } as any);
+      mockDbService.db.limit.mockResolvedValue([{ ...dbProfile }]);
+      await service.publish(mockActor, 'prof_cloud_snap');
+      expect(JSON.parse(store.get('profile:slug:cloud-user')!).avatarUrl).toBe(avatarV2);
+    });
   });
 
   describe('username rules, locking, and privacy', () => {

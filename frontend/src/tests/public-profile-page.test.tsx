@@ -261,4 +261,37 @@ describe('PublicProfilePage — Minimal 404, Error Handling & Visibility', () =>
     expect(htmlShareef).not.toContain('cinematic-noir-root');
     expect(htmlShareef).toContain('unknown-template-error');
   });
+
+  it('passes absolute Cloudinary https avatarUrl through unchanged on published public profile page', () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const cloudinaryUrl =
+      'https://res.cloudinary.com/demo-cloud/image/upload/v173000/taptch/user1/avatars/avatar.webp';
+
+    qc.setQueryData(['public-profile', 'cloud-user'], {
+      id: 'p-cloud-1',
+      slug: 'cloud-user',
+      displayName: 'Cloud User',
+      avatarUrl: cloudinaryUrl,
+      profileType: 'personal',
+      status: 'PUBLISHED',
+      templateId: 'dark-premium',
+      businesses: [],
+      socialLinks: [],
+      catalogue: [],
+      sections: [],
+    });
+
+    const html = renderToString(
+      <QueryClientProvider client={qc}>
+        <MemoryRouter initialEntries={['/cloud-user']}>
+          <Routes>
+            <Route path="/:slug" element={<PublicProfilePage />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    expect(html).toContain('tpl-dark-premium');
+    expect(html).toContain(cloudinaryUrl);
+  });
 });

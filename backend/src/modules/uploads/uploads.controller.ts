@@ -7,7 +7,10 @@ import {
   Body,
   Res,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '../../common/guards/auth.guard';
 import { CurrentActor } from '../../common/decorators/current-user.decorator';
@@ -63,14 +66,22 @@ export class UploadsController {
 
   @Post()
   @UseGuards(AuthGuard)
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 5 * 1024 * 1024 } }))
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Multipart upload fallback endpoint' })
-  async uploadFallback(@CurrentActor() actor: ActorContext, @Body() body: any) {
+  @ApiOperation({ summary: 'Multipart upload fallback endpoint (uploads to Cloudinary)' })
+  async uploadFallback(
+    @CurrentActor() actor: ActorContext,
+    @UploadedFile() file: any,
+    @Body() body: any,
+  ) {
+    if (file) {
+      return this.uploadsService.uploadMultipartFile(actor, file, body);
+    }
     return this.uploadsService.recordAsset(actor, {
-      url: body?.url || '/branding/cards/default-card-preview.png',
+      url: body?.url,
       originalName: body?.filename || 'uploaded-file.png',
-      mimeType: 'image/png',
-      sizeBytes: 1024,
+      mimeType: body?.mimeType || 'image/png',
+      sizeBytes: body?.sizeBytes || 0,
     });
   }
 
@@ -80,6 +91,17 @@ export class UploadsController {
   @ApiOperation({ summary: 'List customer uploaded assets' })
   async getMyUploads(@CurrentActor() actor: ActorContext) {
     return this.uploadsService.findAllForActor(actor);
+  }
+
+  @Post('cleanup')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Best-effort cleanup of replaced or removed Cloudinary asset' })
+  async cleanupAsset(
+    @CurrentActor() actor: ActorContext,
+    @Body() body: { url?: string; publicId?: string },
+  ) {
+    return this.uploadsService.cleanupAsset(actor, body);
   }
 
   @Delete(':id')

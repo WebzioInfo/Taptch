@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
 import * as schema from '../../database/schema';
 import { eq, desc, and } from 'drizzle-orm';
@@ -6,67 +6,24 @@ import type { ActorContext } from '../../common/types';
 import * as crypto from 'crypto';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { CloudinaryStorageService } from './cloudinary-storage.service';
+
+const CATEGORY_UPLOAD_CONFIG: Record<
+  'avatar' | 'cover' | 'logo' | 'product',
+  { folderSuffix: string; maxWidth: number; maxHeight: number }
+> = {
+  avatar: { folderSuffix: 'avatars', maxWidth: 1200, maxHeight: 1200 },
+  cover: { folderSuffix: 'covers', maxWidth: 1920, maxHeight: 1080 },
+  logo: { folderSuffix: 'logos', maxWidth: 1024, maxHeight: 1024 },
+  product: { folderSuffix: 'products', maxWidth: 1400, maxHeight: 1400 },
+};
 
 @Injectable()
 export class UploadsService {
-  constructor(private dbService: DatabaseService) { }
-
-  private async uploadToCloudinary(
-    base64Data: string,
-    publicId: string,
-    folder: string,
-  ): Promise<string | null> {
-    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-    const apiKey = process.env.CLOUDINARY_API_KEY;
-    const apiSecret = process.env.CLOUDINARY_API_SECRET;
-
-    if (!cloudName || !apiKey || !apiSecret || !base64Data || !base64Data.startsWith('data:image')) {
-      return null;
-    }
-
-    try {
-      const timestamp = Math.round(new Date().getTime() / 1000);
-      const paramsToSign: Record<string, string> = {
-        folder,
-        invalidate: 'true',
-        overwrite: 'true',
-        public_id: publicId,
-        timestamp: String(timestamp),
-      };
-
-      const sortedKeys = Object.keys(paramsToSign).sort();
-      const stringToSign = sortedKeys.map((k) => `${k}=${paramsToSign[k]}`).join('&') + apiSecret;
-      const signature = crypto.createHash('sha1').update(stringToSign).digest('hex');
-
-      const formData = new URLSearchParams();
-      formData.append('file', base64Data);
-      formData.append('folder', folder);
-      formData.append('public_id', publicId);
-      formData.append('overwrite', 'true');
-      formData.append('invalidate', 'true');
-      formData.append('timestamp', String(timestamp));
-      formData.append('api_key', apiKey);
-      formData.append('signature', signature);
-
-      const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: formData.toString(),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.warn('[UploadsService] Cloudinary upload returned non-200:', errorText);
-        return null;
-      }
-
-      const json = await response.json();
-      return json.secure_url || json.url || null;
-    } catch (err) {
-      console.warn('[UploadsService] Cloudinary upload error:', err);
-      return null;
-    }
-  }
+  constructor(
+    private dbService: DatabaseService,
+    private cloudinaryStorage: CloudinaryStorageService,
+  ) {}
 
   async uploadProfileImage(
     actor: ActorContext,
@@ -93,36 +50,39 @@ export class UploadsService {
     }
 
     const assetId = crypto.randomUUID();
-    const category =
-      dto.category === 'logo' || dto.category === 'cover' || dto.category === 'avatar'
+    const category: 'avatar' | 'cover' | 'logo' | 'product' =
+      dto.category === 'logo' ||
+      dto.category === 'cover' ||
+      dto.category === 'avatar' ||
+      dto.category === 'product'
         ? dto.category
         : 'avatar';
-    const folder = `taptch/customers/${actor.userId}/${category}`;
+    const cfg = CATEGORY_UPLOAD_CONFIG[category];
+    const folder = `taptch/${actor.userId}/${cfg.folderSuffix}`;
 
-    let finalUrl = await this.uploadToCloudinary(dto.dataUrl, assetId, folder);
-    let storageProvider = 'cloudflare_images';
-
-    if (!finalUrl) {
-      const uploadDir = path.resolve(process.cwd(), 'uploads', 'profiles');
-      await fs.mkdir(uploadDir, { recursive: true });
-      const safeFileName = `${assetId}.${ext}`;
-      await fs.writeFile(path.join(uploadDir, safeFileName), buffer);
-      finalUrl = `/api/v1/uploads/file/${safeFileName}`;
-      storageProvider = 'local';
-    }
+    const uploaded = await this.cloudinaryStorage.uploadDataUrl(dto.dataUrl, {
+      folder,
+      publicId: assetId,
+      maxWidth: cfg.maxWidth,
+      maxHeight: cfg.maxHeight,
+    });
 
     await this.dbService.withActor(actor, async (tx) => {
       await tx.insert(schema.mediaAssets).values({
         id: assetId,
         ownerId: actor.userId,
-        storageProvider,
-        storageKey: assetId,
-        storageObjectId: `${category}/${assetId}.${ext}`,
-        assetUrl: finalUrl!,
-        secureUrl: finalUrl!,
+        storageProvider: 'cloudinary',
+        storageKey: uploaded.publicId,
+        storageObjectId: uploaded.publicId,
+        cloudinaryPublicId: uploaded.publicId,
+        assetUrl: uploaded.secureUrl,
+        secureUrl: uploaded.secureUrl,
         assetType: 'image',
         mimeType,
         mediaCategory: category,
+        format: uploaded.format || ext,
+        width: uploaded.width ?? null,
+        height: uploaded.height ?? null,
         fileSize: buffer.length,
         visibilityStatus: 'public',
       });
@@ -130,10 +90,11 @@ export class UploadsService {
 
     return {
       id: assetId,
-      url: finalUrl,
+      url: uploaded.secureUrl,
+      publicId: uploaded.publicId,
       mimeType,
       sizeBytes: buffer.length,
-      storageProvider,
+      storageProvider: 'cloudinary',
     };
   }
 
@@ -163,31 +124,29 @@ export class UploadsService {
     dto: { frontBase64?: string; backBase64?: string; designId?: string },
   ) {
     const designId = dto.designId || crypto.randomUUID();
-    const folder = `taptch/card-previews/${actor.userId}`;
+    const folder = `taptch/${actor.userId}/card-previews`;
 
     let frontUrl: string = dto.frontBase64 || '';
     let backUrl: string = dto.backBase64 || '';
 
     if (dto.frontBase64 && dto.frontBase64.startsWith('data:image')) {
-      const uploadedFront = await this.uploadToCloudinary(
-        dto.frontBase64,
-        `${designId}_front`,
+      const uploadedFront = await this.cloudinaryStorage.uploadDataUrl(dto.frontBase64, {
         folder,
-      );
-      if (uploadedFront) {
-        frontUrl = uploadedFront;
-      }
+        publicId: `${designId}_front`,
+        maxWidth: 1600,
+        maxHeight: 1600,
+      });
+      frontUrl = uploadedFront.secureUrl;
     }
 
     if (dto.backBase64 && dto.backBase64.startsWith('data:image')) {
-      const uploadedBack = await this.uploadToCloudinary(
-        dto.backBase64,
-        `${designId}_back`,
+      const uploadedBack = await this.cloudinaryStorage.uploadDataUrl(dto.backBase64, {
         folder,
-      );
-      if (uploadedBack) {
-        backUrl = uploadedBack;
-      }
+        publicId: `${designId}_back`,
+        maxWidth: 1600,
+        maxHeight: 1600,
+      });
+      backUrl = uploadedBack.secureUrl;
     }
 
     // Persist to card_designs if designId exists
@@ -225,12 +184,15 @@ export class UploadsService {
   }
 
   async generateSignature(actor: ActorContext, assetType = 'image') {
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME?.trim() || '';
+    const apiKey = process.env.CLOUDINARY_API_KEY?.trim() || '';
+    const apiSecret = process.env.CLOUDINARY_API_SECRET?.trim() || '';
+    if (!cloudName || !apiKey || !apiSecret) {
+      throw new ServiceUnavailableException('Cloudinary storage is not configured on the server.');
+    }
+
     const timestamp = Math.round(new Date().getTime() / 1000);
     const folder = `taptch/customers/${actor.userId}/${assetType}s`;
-
-    const cloudName = process.env.CLOUDINARY_CLOUD_NAME || 'taptch-cdn';
-    const apiKey = process.env.CLOUDINARY_API_KEY || 'taptch_api_key';
-    const apiSecret = process.env.CLOUDINARY_API_SECRET || 'taptch_secret';
 
     // Generate SHA-1 HMAC signature for Cloudinary upload protocol
     const signaturePayload = `folder=${folder}&timestamp=${timestamp}${apiSecret}`;
@@ -245,12 +207,90 @@ export class UploadsService {
     };
   }
 
+  async uploadMultipartFile(
+    actor: ActorContext,
+    file: { buffer: Buffer; mimetype?: string; originalname?: string; size?: number },
+    dto?: { category?: string; assetType?: string },
+  ) {
+    if (!file || !file.buffer || file.buffer.length === 0) {
+      throw new BadRequestException('Image file is required.');
+    }
+
+    const ALLOWED_MIMES = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp']);
+    const mimeType = (file.mimetype || '').toLowerCase();
+    if (!ALLOWED_MIMES.has(mimeType)) {
+      throw new BadRequestException('Unsupported image format. Please upload JPG, JPEG, PNG, or WebP.');
+    }
+
+    const MAX_BYTES = 5 * 1024 * 1024;
+    if (file.buffer.length > MAX_BYTES) {
+      throw new BadRequestException('Image must be smaller than 5 MB.');
+    }
+
+    const assetId = crypto.randomUUID();
+    const category: 'avatar' | 'cover' | 'logo' | 'product' =
+      dto?.category === 'logo' ||
+      dto?.category === 'cover' ||
+      dto?.category === 'avatar' ||
+      dto?.category === 'product'
+        ? dto.category
+        : 'product';
+    const cfg = CATEGORY_UPLOAD_CONFIG[category];
+    const folder = `taptch/${actor.userId}/${cfg.folderSuffix}`;
+
+    const uploaded = await this.cloudinaryStorage.uploadBuffer(file.buffer, mimeType, {
+      folder,
+      publicId: assetId,
+      maxWidth: cfg.maxWidth,
+      maxHeight: cfg.maxHeight,
+    });
+
+    await this.dbService.withActor(actor, async (tx) => {
+      await tx.insert(schema.mediaAssets).values({
+        id: assetId,
+        ownerId: actor.userId,
+        storageProvider: 'cloudinary',
+        storageKey: uploaded.publicId,
+        storageObjectId: uploaded.publicId,
+        cloudinaryPublicId: uploaded.publicId,
+        assetUrl: uploaded.secureUrl,
+        secureUrl: uploaded.secureUrl,
+        assetType: dto?.assetType || 'image',
+        mimeType,
+        mediaCategory: category,
+        format: uploaded.format || null,
+        width: uploaded.width ?? null,
+        height: uploaded.height ?? null,
+        fileSize: file.buffer.length,
+        visibilityStatus: 'public',
+      });
+    });
+
+    return {
+      id: assetId,
+      url: uploaded.secureUrl,
+      publicId: uploaded.publicId,
+      storageKey: uploaded.publicId,
+      originalName: file.originalname || 'uploaded-image',
+      mimeType,
+      sizeBytes: file.buffer.length,
+      width: uploaded.width,
+      height: uploaded.height,
+      storageProvider: 'cloudinary',
+    };
+  }
+
   async recordAsset(actor: ActorContext, data: any) {
     if (!data.url) {
       throw new BadRequestException('Asset URL is required.');
     }
 
     const id = crypto.randomUUID();
+    const publicId =
+      data.publicId ||
+      data.storageKey ||
+      this.cloudinaryStorage.extractPublicIdFromUrl(data.url) ||
+      null;
 
     const [record] = await this.dbService.withActor(actor, async (tx) => {
       return tx
@@ -258,14 +298,15 @@ export class UploadsService {
         .values({
           id,
           ownerId: actor.userId,
-          storageProvider: 'cloudflare_images',
-          storageKey: data.storageKey || id,
-          storageObjectId: data.storageKey || id,
+          storageProvider: 'cloudinary',
+          storageKey: publicId || id,
+          storageObjectId: publicId || id,
+          cloudinaryPublicId: publicId,
           assetUrl: data.url,
           secureUrl: data.url,
           assetType: data.assetType || 'image',
           mimeType: data.mimeType || 'image/png',
-          mediaCategory: 'logo',
+          mediaCategory: data.category || 'logo',
           fileSize: data.sizeBytes || 0,
           width: data.width || null,
           height: data.height || null,
@@ -287,6 +328,42 @@ export class UploadsService {
     });
   }
 
+  async cleanupAsset(actor: ActorContext, dto: { url?: string; publicId?: string }) {
+    const publicId =
+      dto?.publicId?.trim() || this.cloudinaryStorage.extractPublicIdFromUrl(dto?.url);
+    if (!publicId) {
+      return { success: false, deleted: false };
+    }
+
+    const ownedPrefixA = `taptch/${actor.userId}/`;
+    const ownedPrefixB = `taptch/customers/${actor.userId}/`;
+    const isOwnedPath = publicId.startsWith(ownedPrefixA) || publicId.startsWith(ownedPrefixB);
+
+    let deleted = false;
+    await this.dbService.withActor(actor, async (tx) => {
+      const [existing] = await tx
+        .select()
+        .from(schema.mediaAssets)
+        .where(
+          and(
+            eq(schema.mediaAssets.ownerId, actor.userId),
+            eq(schema.mediaAssets.cloudinaryPublicId, publicId),
+          ),
+        );
+
+      if (!isOwnedPath && !existing) {
+        return;
+      }
+
+      deleted = await this.cloudinaryStorage.deleteByPublicId(publicId);
+      if (existing) {
+        await tx.delete(schema.mediaAssets).where(eq(schema.mediaAssets.id, existing.id));
+      }
+    });
+
+    return { success: true, deleted, publicId };
+  }
+
   async delete(actor: ActorContext, id: string) {
     return this.dbService.withActor(actor, async (tx) => {
       const [existing] = await tx
@@ -296,6 +373,13 @@ export class UploadsService {
 
       if (!existing) {
         throw new NotFoundException('Asset not found');
+      }
+
+      const publicId =
+        existing.cloudinaryPublicId ||
+        this.cloudinaryStorage.extractPublicIdFromUrl(existing.secureUrl || existing.assetUrl);
+      if (publicId) {
+        await this.cloudinaryStorage.deleteByPublicId(publicId);
       }
 
       await tx.delete(schema.mediaAssets).where(eq(schema.mediaAssets.id, id));

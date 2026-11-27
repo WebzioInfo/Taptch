@@ -187,13 +187,16 @@ describe('Taptch Live NFC Card Design Studio — Backend Services', () => {
 
   describe('UploadsService', () => {
     it('generates cryptographic HMAC signature parameters for direct CDN upload', async () => {
-      const service = new UploadsService(mockDbService);
+      process.env.CLOUDINARY_CLOUD_NAME = 'demo-cloud';
+      process.env.CLOUDINARY_API_KEY = 'demo-key';
+      process.env.CLOUDINARY_API_SECRET = 'demo-secret';
+      const service = new UploadsService(mockDbService, {} as any);
       const res = await service.generateSignature(mockActor, 'image');
 
       expect(res.signature).toBeDefined();
       expect(res.timestamp).toBeGreaterThan(0);
       expect(res.folder).toContain('user_test_123');
-      expect(res.apiKey).toBeDefined();
+      expect(res.apiKey).toBe('demo-key');
     });
   });
 
