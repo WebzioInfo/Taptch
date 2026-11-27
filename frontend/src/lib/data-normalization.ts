@@ -92,7 +92,7 @@ export interface NormalizedProfileState {
  */
 export function normalizeProfileDraft(raw: any): NormalizedProfileState {
   if (!raw || typeof raw !== 'object') {
-    const defaultTpl = 'obsidian-luxury';
+    const defaultTpl = 'cinematic-noir';
     return {
       displayName: '',
       slug: '',
@@ -117,7 +117,7 @@ export function normalizeProfileDraft(raw: any): NormalizedProfileState {
     };
   }
 
-  const rawTemplate = safeLower(raw.templateId || raw.themeId, 'obsidian-luxury');
+  const rawTemplate = safeLower(raw.templateId || raw.themeId, 'cinematic-noir');
   const defaultColors = getTemplateDefaultThemeConfig(rawTemplate);
   const rawCustomColors =
     raw.themeConfig && typeof raw.themeConfig === 'object'

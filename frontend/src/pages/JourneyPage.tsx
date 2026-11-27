@@ -78,7 +78,7 @@ export function JourneyPage() {
   const [businessName, setBusinessName] = useState('');
 
   // Profile template & creation state
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('obsidian-luxury');
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('cinematic-noir');
   const [previewModalTemplateId, setPreviewModalTemplateId] = useState<string | null>(null);
   const [editingProfileId, setEditingProfileId] = useState<string | null>(null);
   const [showMobilePreview, setShowMobilePreview] = useState(false);

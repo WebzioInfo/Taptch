@@ -1,7 +1,7 @@
-import fs from 'fs';
-import path from 'path';
-import dotenv from 'dotenv';
-import postgres from 'postgres';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as dotenv from 'dotenv';
+import postgres = require('postgres');
 import { PGlite } from '@electric-sql/pglite';
 
 // Load local environment files if running standalone via CLI

@@ -120,4 +120,26 @@ import { validateUsernameFormat, isReservedUsername } from '../config/reservedUs
 
           expect(html).toContain("This NFC card hasn&#x27;t been configured yet.");
         });
+
+        it('NfcResolvePage distinguishes not_found from network_error cleanly', () => {
+          const notFoundHtml = renderToString(
+            <MemoryRouter initialEntries={['/p/missing-card?status=not_found']}>
+              <Routes>
+                <Route path="/p/:uniqueKey" element={<NfcResolvePage expectedProfileType="personal" />} />
+              </Routes>
+            </MemoryRouter>,
+          );
+          expect(notFoundHtml).toContain('NFC card not recognized.');
+          expect(notFoundHtml).toContain('Configure My Card');
+
+          const netErrHtml = renderToString(
+            <MemoryRouter initialEntries={['/p/slow-card?status=network_error']}>
+              <Routes>
+                <Route path="/p/:uniqueKey" element={<NfcResolvePage expectedProfileType="personal" />} />
+              </Routes>
+            </MemoryRouter>,
+          );
+          expect(netErrHtml).toContain('Unable to connect right now.');
+          expect(netErrHtml).toContain('Retry');
+        });
       });

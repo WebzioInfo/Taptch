@@ -96,7 +96,7 @@ export function PricingPage() {
   ];
 
   return (
-      <div className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto bg-[var(--bg-page)] text-[var(--ink)]">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 bg-[var(--bg-page)] text-[var(--ink)]">
         <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="font-mono text-[11px] font-medium uppercase tracking-[0.04em] text-[var(--accent-text)]">
               TRANSPARENT VALUE

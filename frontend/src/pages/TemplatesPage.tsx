@@ -23,13 +23,27 @@ export function TemplatesPage() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [previewTemplateId, setPreviewTemplateId] = useState<string | null>(null);
 
+  const userAccountType = (session?.user?.accountType || null) as 'personal' | 'business' | null;
+
   const { data: serverTemplates = [] } = useQuery({
-    queryKey: ['templates'],
-    queryFn: () => ApiClient.get<any[]>('/api/v1/templates'),
+    queryKey: ['templates', userAccountType],
+    queryFn: () => {
+      const url = userAccountType
+        ? `/api/v1/templates?accountType=${encodeURIComponent(userAccountType)}`
+        : '/api/v1/templates';
+      return ApiClient.get<any[]>(url);
+    },
   });
 
-  // Merge server metadata with standard rich templates
-  const allTemplates = STANDARD_TEMPLATES.map((st) => {
+  // Filter and merge standard rich templates with server metadata
+  const allTemplates = STANDARD_TEMPLATES.filter((st) => {
+    if (!userAccountType) return true;
+    const reqType = userAccountType.toUpperCase();
+    return (
+      st.templateType === reqType ||
+      (st.supportedProfileTypes && st.supportedProfileTypes.includes(userAccountType))
+    );
+  }).map((st) => {
     const srv = serverTemplates.find((s) => s.id === st.id || s.slug === st.slug);
     return {
       ...st,
@@ -70,7 +84,7 @@ export function TemplatesPage() {
   };
 
   return (
-    <div className="py-12 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto bg-[var(--bg-page)] text-[var(--ink)] font-body">
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-10 bg-[var(--bg-page)] text-[var(--ink)] font-body">
       {/* Header Banner */}
       <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-16">
         <span className="font-mono text-[11px] font-medium uppercase tracking-[0.04em] text-[var(--accent-text)]">

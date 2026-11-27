@@ -45,11 +45,55 @@ function getUsernameError(username: string): string | null {
 }
 
 const VALID_TEMPLATE_ALIASES = new Set([
+  'cinematic-noir',
+  // Legacy template IDs preserved for existing profile compatibility
+  'obsidian-luxury',
+  'ivory-minimalist',
+  'aurora-creator',
+  'corporate-business',
+  'modern-business',
+  'apex-capital',
+  'industrial-manufacturing',
+  'retail-shopping',
+  'food-restaurant',
+  'clean-corporate',
+  'dark-premium',
+  'soft-modern',
+  'bold-editorial',
   'premium-brand',
+  'professional-services',
   'creative-agency',
   ...SEEDED_TEMPLATES.map((t) => t.id),
   ...SEEDED_TEMPLATES.map((t) => t.slug),
 ]);
+
+const LEGACY_PERSONAL_TEMPLATE_IDS = new Set([
+  '',
+  'cinematic-noir',
+  'obsidian-luxury',
+  'obsidian',
+  'premium-brand',
+  'clean-corporate',
+  'dark-premium',
+  'soft-modern',
+  'bold-editorial',
+  'ivory-minimal',
+  'ivory-minimalist',
+  'aurora-creator',
+  'apex-capital',
+]);
+
+export function resolveActiveTemplateId(rawId?: string | null, profileType?: string | null): string {
+  const norm = (rawId || '').toLowerCase().trim();
+  const isBusiness = (profileType || '').toLowerCase().trim() === 'business';
+  if (isBusiness) {
+    return norm || 'corporate-business';
+  }
+  if (LEGACY_PERSONAL_TEMPLATE_IDS.has(norm)) {
+    return 'cinematic-noir';
+  }
+  return norm || 'cinematic-noir';
+}
 
 @Injectable()
 export class ProfilesService {
@@ -66,7 +110,13 @@ export class ProfilesService {
       return tx
         .select()
         .from(schema.profiles)
-        .where(eq(schema.profiles.ownerId, actor.userId))
+        .where(
+          and(
+            eq(schema.profiles.ownerId, actor.userId),
+            ne(schema.profiles.status, 'DELETED'),
+            ne(schema.profiles.status, 'ARCHIVED')
+          )
+        )
         .orderBy(desc(schema.profiles.createdAt));
     });
   }
@@ -108,8 +158,15 @@ export class ProfilesService {
         .orderBy(asc(schema.profileCatalogueItems.displayOrder)),
     ]);
 
+    const resolvedTemplateId = resolveActiveTemplateId(
+      profile.templateId || profile.themeId,
+      profile.profileType,
+    );
+
     return {
       ...profile,
+      templateId: resolvedTemplateId,
+      themeId: resolvedTemplateId,
       sections,
       businesses: businesses.map((b) => ({
         ...b,
@@ -285,8 +342,14 @@ export class ProfilesService {
           typeof precompiled.slug === 'string' &&
           typeof precompiled.displayName === 'string'
         ) {
+          const resolvedSnapshotTpl = resolveActiveTemplateId(
+            (precompiled.templateId as string | undefined) || profile.templateId || profile.themeId,
+            (precompiled.profileType as string | undefined) || profile.profileType,
+          );
           const fastSnapshot = {
             ...(precompiled as unknown as PublicProfileSnapshot),
+            templateId: resolvedSnapshotTpl,
+            themeId: resolvedSnapshotTpl,
             status: profile.status,
           };
           await this.redisService.set(cacheKey, JSON.stringify(fastSnapshot), 3600);
@@ -310,6 +373,11 @@ export class ProfilesService {
             .orderBy(asc(schema.profileCatalogueItems.displayOrder)),
         ]);
 
+        const resolvedPublicTemplateId = resolveActiveTemplateId(
+          profile.templateId || profile.themeId,
+          profile.profileType,
+        );
+
         const snapshot: PublicProfileSnapshot = {
           id: profile.id,
           slug: profile.slug,
@@ -318,8 +386,8 @@ export class ProfilesService {
           bio: profile.bio,
           avatarUrl: profile.avatarUrl,
           coverUrl: profile.coverUrl,
-          themeId: profile.templateId || 'obsidian-luxury',
-          templateId: profile.templateId || 'obsidian-luxury',
+          themeId: resolvedPublicTemplateId,
+          templateId: resolvedPublicTemplateId,
           customThemeColors: (profile.themeConfig as Record<string, string>) || null,
           themeConfig: (profile.themeConfig as Record<string, unknown>) || null,
           profileType: profile.profileType || 'personal',
@@ -336,6 +404,7 @@ export class ProfilesService {
             id: b.id,
             companyName: b.name,
             jobTitle: b.tagline,
+            description: b.description || null,
             businessEmail: b.email || null,
             businessPhone: b.phone || null,
             businessWebsite: b.website || null,
@@ -373,14 +442,23 @@ export class ProfilesService {
 
   async create(actor: ActorContext, data: any) {
         // 1. Enforce account-type & plan entitlement limits on profile creation
+        let actorAccountType: 'personal' | 'business' | null = null;
         if (this.entitlementsService && !actor.isAdmin) {
           const [entitlements, existingProfiles] = await Promise.all([
             this.entitlementsService.getActorEntitlements(actor),
             this.dbService.db
-              .select({ id: schema.profiles.id })
+              .select({ id: schema.profiles.id, status: schema.profiles.status })
               .from(schema.profiles)
-              .where(eq(schema.profiles.ownerId, actor.userId)),
+              .where(
+                and(
+                  eq(schema.profiles.ownerId, actor.userId),
+                  ne(schema.profiles.status, 'DELETED'),
+                  ne(schema.profiles.status, 'ARCHIVED')
+                )
+              ),
           ]);
+
+          actorAccountType = entitlements.accountType || null;
 
           if (existingProfiles.length >= entitlements.maxProfiles) {
             throw new ForbiddenException(
@@ -389,18 +467,53 @@ export class ProfilesService {
                 : `Your current plan allows up to ${entitlements.maxProfiles} profiles. Please upgrade your plan to add more.`,
             );
           }
+        } else if (!actor.isAdmin) {
+          // If entitlements service not initialized, fetch accountType from user row
+          const [u] = await this.dbService.db
+            .select({ accountType: schema.users.accountType })
+            .from(schema.users)
+            .where(eq(schema.users.id, actor.userId))
+            .limit(1);
+          actorAccountType = (u?.accountType as 'personal' | 'business' | null) || null;
         }
 
-        // 2. Validate templateId if explicitly provided
+        // 2. Validate templateId and profileType against user account type
         const requestedTemplateId = data.templateId || data.themeId;
         if (requestedTemplateId && !VALID_TEMPLATE_ALIASES.has(requestedTemplateId)) {
           const dbTpl = await this.dbService.db
-            .select({ id: schema.templates.id })
+            .select({
+              id: schema.templates.id,
+              supportedProfileTypes: schema.templates.supportedProfileTypes,
+              category: schema.templates.category,
+            })
             .from(schema.templates)
             .where(eq(schema.templates.id, requestedTemplateId))
             .limit(1);
           if (dbTpl.length === 0) {
             throw new BadRequestException(`Invalid profile template ID "${requestedTemplateId}".`);
+          }
+        }
+
+        // Account-type enforcement on profile creation
+        if (!actor.isAdmin && actorAccountType) {
+          // Check requested profileType
+          if (actorAccountType === 'personal' && data.profileType === 'business') {
+            throw new ForbiddenException('Personal accounts cannot create Business & Services profiles. Upgrade to a Business account.');
+          }
+          if (actorAccountType === 'business' && data.profileType === 'personal') {
+            throw new ForbiddenException('Business accounts must create Business profiles.');
+          }
+
+          // Check template compatibility with accountType
+          const targetTplId = requestedTemplateId || 'cinematic-noir';
+          const seededMatch = SEEDED_TEMPLATES.find((t) => t.id === targetTplId || t.slug === targetTplId);
+          if (seededMatch) {
+            if (actorAccountType === 'personal' && seededMatch.templateType === 'BUSINESS') {
+              throw new ForbiddenException(`Template "${seededMatch.name}" is a Business template and is not allowed for Personal accounts.`);
+            }
+            if (actorAccountType === 'business' && seededMatch.templateType === 'PERSONAL' && !seededMatch.supportedProfileTypes.includes('business')) {
+              throw new ForbiddenException(`Template "${seededMatch.name}" is a Personal template and is not allowed for Business accounts.`);
+            }
           }
         }
 
@@ -447,8 +560,8 @@ export class ProfilesService {
                 bio: data.bio || null,
                 avatarUrl: data.avatarUrl || null,
                 coverUrl: data.coverUrl || null,
-                templateId: data.templateId || data.themeId || 'obsidian-luxury',
-                themeId: data.themeId || data.templateId || 'obsidian-luxury',
+                templateId: resolveActiveTemplateId(data.templateId || data.themeId, data.profileType || 'personal'),
+                themeId: resolveActiveTemplateId(data.themeId || data.templateId, data.profileType || 'personal'),
                 themeConfig: data.themeConfig || data.customThemeColors || {},
                 customFields: data.customFields || {},
                 socialLinks: Array.isArray(data.socialLinks) ? data.socialLinks : [],
@@ -484,6 +597,7 @@ export class ProfilesService {
                     profileId,
                     name: b.companyName || b.name,
                     tagline: b.jobTitle || b.tagline || null,
+                    description: b.description || null,
                     logoUrl: b.logoUrl || null,
                     website: b.businessWebsite || b.website || b.websiteUrl || null,
                     address: b.businessAddress || b.address || null,
@@ -591,18 +705,22 @@ export class ProfilesService {
                     location: data.location !== undefined ? data.location : existing.location,
                     socialLinks: data.socialLinks !== undefined ? data.socialLinks : existing.socialLinks,
                     customFields: data.customFields !== undefined ? data.customFields : existing.customFields,
-                    templateId:
+                    templateId: resolveActiveTemplateId(
                       data.templateId !== undefined
                         ? data.templateId
                         : data.themeId !== undefined
                           ? data.themeId
                           : existing.templateId,
-                    themeId:
+                      data.profileType !== undefined ? data.profileType : existing.profileType,
+                    ),
+                    themeId: resolveActiveTemplateId(
                       data.templateId !== undefined
                         ? data.templateId
                         : data.themeId !== undefined
                           ? data.themeId
                           : existing.themeId,
+                      data.profileType !== undefined ? data.profileType : existing.profileType,
+                    ),
                     themeConfig:
                       data.themeConfig !== undefined
                         ? data.themeConfig
@@ -628,6 +746,7 @@ export class ProfilesService {
                         profileId,
                         name: b.companyName || b.name,
                         tagline: b.jobTitle || b.tagline || null,
+                        description: b.description || null,
                         logoUrl: b.logoUrl || null,
                         website: b.businessWebsite || b.website || b.websiteUrl || null,
                         address: b.businessAddress || b.address || null,
@@ -714,8 +833,9 @@ export class ProfilesService {
               // Invalidate any existing stale cache before compiling fresh snapshot
               await this.redisService.del(`profile:slug:${profile.slug.toLowerCase()}`);
 
-              // Pre-compile snapshot directly from fresh DB records
+              // Pre-compile snapshot directly from fresh DB records and mark status PUBLISHED
               const snapshot = await this.findBySlug(profile.slug, { allowUnpublished: true });
+              snapshot.status = 'PUBLISHED';
 
               const [published] = await this.dbService.withActor(actor, async (tx) => {
                 return tx
@@ -730,7 +850,7 @@ export class ProfilesService {
                   .returning();
               });
 
-              // Sync fresh Redis cache for 24h
+              // Sync fresh Redis cache for 24h with PUBLISHED status
               await this.redisService.set(`profile:slug:${profile.slug.toLowerCase()}`, JSON.stringify(snapshot), 86400);
 
               return published;
@@ -763,4 +883,35 @@ export class ProfilesService {
 
               return { success: true };
             }
-          }
+
+  async remove(actor: ActorContext, profileId: string) {
+    const profile = await this.findOne(actor, profileId);
+
+    await this.dbService.withActor(actor, async (tx) => {
+      // Soft-delete by marking status = 'DELETED' so the user's limit is freed
+      await tx
+        .update(schema.profiles)
+        .set({
+          status: 'DELETED',
+          updatedAt: new Date(),
+        })
+        .where(eq(schema.profiles.id, profileId));
+
+      // Detach any cards linked to this deleted profile
+      await tx
+        .update(schema.purchasedCards)
+        .set({
+          profileId: null,
+          profileUsername: null,
+          updatedAt: new Date(),
+        })
+        .where(eq(schema.purchasedCards.profileId, profileId));
+    });
+
+    if (profile?.slug) {
+      await this.redisService.del(`profile:slug:${profile.slug.toLowerCase()}`);
+    }
+
+    return { success: true, id: profileId };
+  }
+}

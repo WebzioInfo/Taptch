@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { isReservedUsername, RESERVED_USERNAMES } from '../config/reservedUsernames';
-import { STANDARD_TEMPLATES } from '../modules/templates/constants';
+import { STANDARD_TEMPLATES, getTemplateDefaultThemeConfig } from '../modules/templates/constants';
 
 describe('Public Profile Dynamic Routing & Reserved Slugs', () => {
   it('correctly protects all system routes from being claimed as usernames', () => {
@@ -57,31 +57,18 @@ describe('Public Profile Loading State Machine & Error Classification', () => {
 });
 
 describe('Design Systems Migration & Templates Registry', () => {
-  it('includes all 4 personal design templates in standard catalog', () => {
+  it('includes the active Phase 1 cinematic template in standard catalog', () => {
     const templateIds = STANDARD_TEMPLATES.map((t) => t.id);
-    expect(templateIds).toContain('clean-corporate');
-    expect(templateIds).toContain('dark-premium');
-    expect(templateIds).toContain('soft-modern');
-    expect(templateIds).toContain('bold-editorial');
+    expect(templateIds).toEqual(['cinematic-noir']);
   });
 
-  it('verifies distinct design tokens and fonts across all 4 templates', () => {
-    const corporate = STANDARD_TEMPLATES.find((t) => t.id === 'clean-corporate');
-    const dark = STANDARD_TEMPLATES.find((t) => t.id === 'dark-premium');
-    const soft = STANDARD_TEMPLATES.find((t) => t.id === 'soft-modern');
-    const editorial = STANDARD_TEMPLATES.find((t) => t.id === 'bold-editorial');
-
-    expect(corporate?.defaultThemeConfig.fontFamily).toBe('Inter');
-    expect(corporate?.defaultThemeConfig.primaryColor).toBe('#0A2540');
-
-    expect(dark?.defaultThemeConfig.fontFamily).toBe('Plus Jakarta Sans');
-    expect(dark?.defaultThemeConfig.primaryColor).toBe('#C5A880');
-
-    expect(soft?.defaultThemeConfig.fontFamily).toBe('Fraunces');
-    expect(soft?.defaultThemeConfig.primaryColor).toBe('#24352D');
-
-    expect(editorial?.defaultThemeConfig.fontFamily).toBe('Space Grotesk');
-    expect(editorial?.defaultThemeConfig.primaryColor).toBe('#000000');
+  it('verifies design tokens and typography for Cinematic Digital Profile', () => {
+    const cinematic = STANDARD_TEMPLATES.find((t) => t.id === 'cinematic-noir');
+    const theme = getTemplateDefaultThemeConfig('cinematic-noir');
+    expect(cinematic?.defaultColors.primary).toBe('#0866F8');
+    expect(cinematic?.defaultColors.background).toBe('#0A0A0B');
+    expect(theme.primary).toBe('#0866F8');
+    expect(theme.background).toBe('#0A0A0B');
   });
 });
 

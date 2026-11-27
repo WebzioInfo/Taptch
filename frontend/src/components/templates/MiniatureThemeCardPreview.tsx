@@ -28,7 +28,7 @@ export const MiniatureThemeCardPreview = React.memo(function MiniatureThemeCardP
   headline,
   avatarUrl,
 }: MiniatureThemeCardPreviewProps) {
-  const normId = (templateId || 'obsidian-luxury').toLowerCase().trim();
+  const normId = (templateId || 'cinematic-noir').toLowerCase().trim();
   const name = displayName?.trim() || 'Alexander Vance';
   const role = headline?.trim() || 'Executive Director';
   const initials =
@@ -79,6 +79,58 @@ export const MiniatureThemeCardPreview = React.memo(function MiniatureThemeCardP
           >
             <Download className="w-2 h-2" />
             <span>Save Contact Card</span>
+          </div>
+        </div>
+      );
+
+    // 1. Cinematic Digital Profile
+    case 'cinematic-noir':
+      return (
+        <div
+          className="h-20 sm:h-22 w-full p-2 flex flex-col justify-between select-none relative overflow-hidden transition-colors"
+          style={{ backgroundColor: '#0A0A0B', color: '#EDEBE6' }}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[6.5px] uppercase tracking-[0.2em] font-semibold" style={{ color: '#0866F8' }}>
+              Cinematic
+            </span>
+            <span className="w-4 h-[1px]" style={{ backgroundColor: '#0866F8' }} />
+          </div>
+
+          <div className="flex items-center gap-2 my-auto">
+            <div
+              className="w-6 h-7 rounded-sm overflow-hidden flex items-center justify-center font-serif text-[10px] shrink-0 border"
+              style={{ borderColor: 'rgba(237, 235, 230, 0.16)', backgroundColor: '#111113', color: '#EDEBE6' }}
+            >
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                <span>{initials}</span>
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <h5 className="font-serif text-[11px] leading-tight tracking-tight truncate" style={{ color: '#EDEBE6' }}>
+                {name}
+              </h5>
+              <p className="text-[7px] uppercase tracking-wider truncate" style={{ color: '#8E8D8A' }}>
+                {role}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex gap-1">
+            <div
+              className="flex-1 py-0.5 px-1 rounded-sm text-center font-semibold text-[7px]"
+              style={{ backgroundColor: '#0866F8', color: '#FFFFFF' }}
+            >
+              Save Contact
+            </div>
+            <div
+              className="flex-1 py-0.5 px-1 rounded-sm text-center font-medium text-[7px] border"
+              style={{ borderColor: 'rgba(237, 235, 230, 0.2)', color: '#EDEBE6' }}
+            >
+              WhatsApp
+            </div>
           </div>
         </div>
       );

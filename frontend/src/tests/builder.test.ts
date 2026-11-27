@@ -43,71 +43,49 @@ describe('Taptch Profile Builder — Theme Customization & State Engine', () => 
     });
   });
 
-  it('correctly maps Obsidian Luxury theme default tokens', () => {
-    const obsidian = getTemplateDefaultThemeConfig('obsidian-luxury');
-    expect(obsidian.primary.toUpperCase()).toBe('#D4AF37');
-    expect(obsidian.background.toUpperCase()).toBe('#0A0A0C');
-    expect(obsidian.cardBackground.toUpperCase()).toBe('#121216');
-  });
-
-  it('correctly maps Clean Corporate theme default tokens', () => {
-    const corporate = getTemplateDefaultThemeConfig('clean-corporate');
-    expect(corporate.primary).toBe('#0A2540');
-    expect(corporate.background).toBe('#F1F5F9');
-    expect(corporate.cardBackground).toBe('#FFFFFF');
-    expect(corporate.text).toBe('#0F172A');
+  it('correctly maps Cinematic Digital Profile default tokens', () => {
+    const cinematic = getTemplateDefaultThemeConfig('cinematic-noir');
+    expect(cinematic.primary.toUpperCase()).toBe('#0866F8');
+    expect(cinematic.background.toUpperCase()).toBe('#0A0A0B');
+    expect(cinematic.cardBackground.toUpperCase()).toBe('#111113');
   });
 
   it('maintains theme customization memory across template switches', () => {
-    // Initial state: Obsidian Luxury
-    let currentTemplate = 'obsidian-luxury';
+    let currentTemplate = 'cinematic-noir';
     let currentColors: ThemeColorsConfig = getTemplateDefaultThemeConfig(currentTemplate);
     const customizationsMap: Record<string, ThemeColorsConfig> = {
       [currentTemplate]: { ...currentColors },
     };
 
-    // 1. User customizes Obsidian Luxury primary color to neon cyan
     currentColors = { ...currentColors, primary: '#00F0FF', background: '#050505' };
     customizationsMap[currentTemplate] = { ...currentColors };
 
-    expect(customizationsMap['obsidian-luxury'].primary).toBe('#00F0FF');
-    expect(customizationsMap['obsidian-luxury'].background).toBe('#050505');
+    expect(customizationsMap['cinematic-noir'].primary).toBe('#00F0FF');
+    expect(customizationsMap['cinematic-noir'].background).toBe('#050505');
 
-    // 2. User switches to Clean Corporate
     const oldTemplate = currentTemplate;
-    currentTemplate = 'clean-corporate';
+    currentTemplate = 'slot-2-reserved';
     customizationsMap[oldTemplate] = { ...currentColors };
+    currentColors = customizationsMap[currentTemplate] || getTemplateDefaultThemeConfig(currentTemplate);
 
-    const newThemeColors = customizationsMap[currentTemplate] || getTemplateDefaultThemeConfig(currentTemplate);
-    currentColors = newThemeColors;
-
-    // Clean corporate defaults should be loaded without corruption from Obsidian
-    expect(currentColors.primary).toBe('#0A2540');
-    expect(currentColors.background).toBe('#F1F5F9');
-
-    // 3. User customizes Clean Corporate
     currentColors = { ...currentColors, primary: '#1D4ED8' };
     customizationsMap[currentTemplate] = { ...currentColors };
 
-    // 4. User switches back to Obsidian Luxury
-    customizationsMap[currentTemplate] = { ...currentColors };
-    currentTemplate = 'obsidian-luxury';
+    currentTemplate = 'cinematic-noir';
     currentColors = customizationsMap[currentTemplate] || getTemplateDefaultThemeConfig(currentTemplate);
 
-    // Previously customized values for Obsidian are restored!
     expect(currentColors.primary).toBe('#00F0FF');
     expect(currentColors.background).toBe('#050505');
-
-    // And Clean Corporate customizations are preserved intact in the map!
-    expect(customizationsMap['clean-corporate'].primary).toBe('#1D4ED8');
+    expect(customizationsMap['slot-2-reserved'].primary).toBe('#1D4ED8');
   });
 
-  it('verifies the new 4-step workflow order starts with Theme & Style', () => {
-    const tabOrder = ['theme', 'identity', 'socials', 'seo'];
+  it('verifies the Personal Profile Builder 4-step workflow order ending with Ventures', () => {
+    const tabOrder = ['theme', 'identity', 'socials', 'businesses'];
     expect(tabOrder[0]).toBe('theme');
     expect(tabOrder[1]).toBe('identity');
     expect(tabOrder[2]).toBe('socials');
-    expect(tabOrder[3]).toBe('seo');
+    expect(tabOrder[3]).toBe('businesses');
+    expect(tabOrder).not.toContain('seo');
   });
 
   it('normalizes Direct Contact Coordinates action links safely', async () => {
@@ -520,14 +498,14 @@ describe('Taptch Profile Builder — Theme Customization & State Engine', () => 
       expect(emptyNormalized.seoTitle).toBe('');
       expect(emptyNormalized.seoDescription).toBe('');
       expect(emptyNormalized.socialImageUrl).toBe('');
-      expect(emptyNormalized.templateId).toBe('obsidian-luxury');
+      expect(emptyNormalized.templateId).toBe('cinematic-noir');
       expect(Array.isArray(emptyNormalized.socialLinks)).toBe(true);
       expect(emptyNormalized.socialLinks.length).toBe(0);
 
       // Test 2: Null / undefined input
       const nullNormalized = normalizeProfileDraft(null);
       expect(nullNormalized.displayName).toBe('');
-      expect(nullNormalized.templateId).toBe('obsidian-luxury');
+      expect(nullNormalized.templateId).toBe('cinematic-noir');
 
       // Test 3: Older draft created before SEO & socialImageUrl additions
       const legacyDraft = {
@@ -764,29 +742,32 @@ describe('Taptch Profile Builder — Theme Customization & State Engine', () => 
   });
 
   describe('Taptch Profile Studio — Mobile Responsiveness & Theme Switching Architecture', () => {
-    it('canonicalTemplateId resolves all standard templates and legacy aliases accurately', () => {
-      // Legacy alias mappings
-      expect(canonicalTemplateId('obsidian-luxury')).toBe('premium-brand');
+    it('canonicalTemplateId maps all obsolete personal templates to cinematic-noir while preserving business templates', () => {
+      // Legacy personal templates safely map to cinematic-noir
+      expect(canonicalTemplateId('obsidian-luxury')).toBe('cinematic-noir');
+      expect(canonicalTemplateId('obsidian')).toBe('cinematic-noir');
+      expect(canonicalTemplateId('premium-brand')).toBe('cinematic-noir');
+      expect(canonicalTemplateId('clean-corporate')).toBe('cinematic-noir');
+      expect(canonicalTemplateId('dark-premium')).toBe('cinematic-noir');
+      expect(canonicalTemplateId('soft-modern')).toBe('cinematic-noir');
+      expect(canonicalTemplateId('bold-editorial')).toBe('cinematic-noir');
+      expect(canonicalTemplateId('ivory-minimal')).toBe('cinematic-noir');
+      expect(canonicalTemplateId('ivory-minimalist')).toBe('cinematic-noir');
+      expect(canonicalTemplateId('aurora-creator')).toBe('cinematic-noir');
+      expect(canonicalTemplateId('apex-capital')).toBe('cinematic-noir');
+
+      // Business templates remain untouched
       expect(canonicalTemplateId('zenith-corporate')).toBe('corporate-business');
       expect(canonicalTemplateId('catalyst-business')).toBe('modern-business');
-      expect(canonicalTemplateId('ivory-minimal')).toBe('professional-services');
-      expect(canonicalTemplateId('ivory-minimalist')).toBe('professional-services');
-      expect(canonicalTemplateId('aurora-creator')).toBe('creative-agency');
-
-      // Canonical ids pass through untouched
-      expect(canonicalTemplateId('premium-brand')).toBe('premium-brand');
-      expect(canonicalTemplateId('clean-corporate')).toBe('clean-corporate');
-      expect(canonicalTemplateId('dark-premium')).toBe('dark-premium');
-      expect(canonicalTemplateId('soft-modern')).toBe('soft-modern');
-      expect(canonicalTemplateId('bold-editorial')).toBe('bold-editorial');
       expect(canonicalTemplateId('retail-showcase')).toBe('retail-showcase');
       expect(canonicalTemplateId('food-restaurant')).toBe('food-restaurant');
       expect(canonicalTemplateId('industrial-logistics')).toBe('industrial-logistics');
-      expect(canonicalTemplateId('apex-capital')).toBe('apex-capital');
 
-      // Empty or invalid fallback
-      expect(canonicalTemplateId(undefined)).toBe('premium-brand');
-      expect(canonicalTemplateId('')).toBe('premium-brand');
+      expect(canonicalTemplateId('cinematic-noir')).toBe('cinematic-noir');
+
+      // Empty or invalid fallback defaults to Cinematic Digital Profile
+      expect(canonicalTemplateId(undefined)).toBe('cinematic-noir');
+      expect(canonicalTemplateId('')).toBe('cinematic-noir');
     });
 
     it('theme switching seamlessly preserves user inputs across all fields without reset', () => {
@@ -810,24 +791,20 @@ describe('Taptch Profile Builder — Theme Customization & State Engine', () => 
         ],
       };
 
-      // Switch theme to 'clean-corporate'
-      let activeTemplate = canonicalTemplateId('clean-corporate');
-      expect(activeTemplate).toBe('clean-corporate');
+      // Switch theme to 'cinematic-noir'
+      let activeTemplate = canonicalTemplateId('cinematic-noir');
+      expect(activeTemplate).toBe('cinematic-noir');
 
       // Profile data must remain identical
       expect(profileData.displayName).toBe('Aarav Singhania');
       expect(profileData.companies).toHaveLength(1);
       expect(profileData.catalogue).toHaveLength(1);
 
-      // Switch to 'bold-editorial'
-      activeTemplate = canonicalTemplateId('bold-editorial');
-      expect(activeTemplate).toBe('bold-editorial');
+      // Legacy slug 'obsidian-luxury' resolves to 'cinematic-noir' without data loss
+      activeTemplate = canonicalTemplateId('obsidian-luxury');
+      expect(activeTemplate).toBe('cinematic-noir');
       expect(profileData.whatsapp).toBe('+91 98765 43210');
       expect(profileData.socialLinks).toHaveLength(2);
-
-      // Switch to 'obsidian-luxury' (legacy slug)
-      activeTemplate = canonicalTemplateId('obsidian-luxury');
-      expect(activeTemplate).toBe('premium-brand');
       expect(profileData.displayName).toBe('Aarav Singhania');
     });
 

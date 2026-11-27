@@ -20,24 +20,46 @@ import { RetailTemplate } from './layouts/RetailTemplate';
 import { FoodRestaurantTemplate } from './layouts/FoodRestaurantTemplate';
 import { CorporateBusinessTemplate } from './layouts/CorporateBusinessTemplate';
 import { ModernBusinessTemplate } from './layouts/ModernBusinessTemplate';
-import { PremiumBrandTemplate } from './layouts/PremiumBrandTemplate';
 import { ProfessionalServicesTemplate } from './layouts/ProfessionalServicesTemplate';
 import { CreativeAgencyTemplate } from './layouts/CreativeAgencyTemplate';
-import { ApexCapitalTemplate } from './layouts/ApexCapitalTemplate';
-import { CleanCorporateTemplate } from './layouts/CleanCorporateTemplate';
-import { DarkPremiumTemplate } from './layouts/DarkPremiumTemplate';
-import { SoftModernTemplate } from './layouts/SoftModernTemplate';
-import { BoldEditorialTemplate } from './layouts/BoldEditorialTemplate';
 import { NfcPreviewStudio } from './layouts/NfcPreviewStudio';
+import { CinematicProfileTemplate } from './layouts/CinematicProfileTemplate';
 import { getTemplateDefaultThemeConfig } from '../../modules/templates/constants';
 
+const LEGACY_PERSONAL_TEMPLATE_IDS = new Set([
+  '',
+  'cinematic-noir',
+  'obsidian-luxury',
+  'obsidian',
+  'premium-brand',
+  'clean-corporate',
+  'dark-premium',
+  'soft-modern',
+  'bold-editorial',
+  'ivory-minimal',
+  'ivory-minimalist',
+  'aurora-creator',
+  'apex-capital',
+]);
+
+const KNOWN_BUSINESS_TEMPLATE_IDS = new Set([
+  'preview-studio',
+  'nfc-preview-studio',
+  'industrial-manufacturing',
+  'retail-shopping',
+  'food-restaurant',
+  'corporate-business',
+  'modern-business',
+  'professional-services',
+  'creative-agency',
+]);
+
 export function canonicalTemplateId(rawId?: string | null): string {
-  const norm = (rawId || 'premium-brand').toLowerCase().trim();
-  if (norm === 'obsidian-luxury') return 'premium-brand';
+  const norm = (rawId || 'cinematic-noir').toLowerCase().trim();
+  if (LEGACY_PERSONAL_TEMPLATE_IDS.has(norm)) return 'cinematic-noir';
   if (norm === 'zenith-corporate') return 'corporate-business';
   if (norm === 'catalyst-business') return 'modern-business';
-  if (norm === 'ivory-minimal' || norm === 'ivory-minimalist') return 'professional-services';
-  if (norm === 'aurora-creator') return 'creative-agency';
+  if (KNOWN_BUSINESS_TEMPLATE_IDS.has(norm)) return norm;
   return norm;
 }
 
@@ -93,7 +115,10 @@ export interface ProfileRenderData {
   gallery?: Array<{ url: string; caption?: string }>;
   brochures?: Array<{ title: string; fileUrl: string; fileSize?: string }>;
   isDemo?: boolean;
+  isEmbedded?: boolean;
   previewPlanId?: string;
+  renderSource?: 'builder' | 'draft' | 'public_url' | 'nfc_redirect';
+  fetchStatus?: string;
   customFields?: Record<string, unknown> | null;
   themeConfig?: Record<string, unknown> | null;
 }
@@ -201,13 +226,47 @@ export function ProfileRenderer({ profile }: { profile: ProfileRenderData }) {
   };
 
   // Dispatch to the specialized layout with canonical ID resolution
+  const rawTemplateNorm = (profile.templateId || '').toLowerCase().trim();
   const templateId = canonicalTemplateId(profile.templateId);
-  const defaultPalette = getTemplateDefaultThemeConfig(templateId);
+  const isKnownTemplate =
+    LEGACY_PERSONAL_TEMPLATE_IDS.has(templateId) || KNOWN_BUSINESS_TEMPLATE_IDS.has(templateId);
+  const resolvedTemplateId = isKnownTemplate ? templateId : 'cinematic-noir';
+  const defaultPalette = getTemplateDefaultThemeConfig(resolvedTemplateId);
+
+  React.useEffect(() => {
+    if (!profile.templateId || !isKnownTemplate) {
+      console.warn(
+        `[ProfileRenderer] Missing or unknown templateId "${rawTemplateNorm || 'empty'}"; falling back to "${resolvedTemplateId}".`,
+      );
+    }
+    if (import.meta.env.DEV) {
+      console.debug('[ProfileRenderer] Template Resolution Diagnostic', {
+        profileId: profile.id,
+        username: profile.slug,
+        apiTemplateId: profile.templateId ?? null,
+        resolvedTemplateId,
+        resolvedComponent:
+          resolvedTemplateId === 'cinematic-noir' ? 'CinematicProfileTemplate' : resolvedTemplateId,
+        renderSource: profile.renderSource || (profile.isEmbedded ? 'builder' : 'public_url'),
+        fetchStatus: profile.fetchStatus || 'loaded',
+      });
+    }
+  }, [
+    profile.id,
+    profile.slug,
+    profile.templateId,
+    rawTemplateNorm,
+    isKnownTemplate,
+    resolvedTemplateId,
+    profile.renderSource,
+    profile.isEmbedded,
+    profile.fetchStatus,
+  ]);
 
   const layoutProps = {
     profile: {
       ...profile,
-      templateId,
+      templateId: resolvedTemplateId,
     },
     onDownloadVCard: handleDownloadVCard,
     onOpenExchange: handleOpenExchange,
@@ -218,15 +277,7 @@ export function ProfileRenderer({ profile }: { profile: ProfileRenderData }) {
   };
 
   const renderLayout = () => {
-    switch (templateId) {
-      case 'clean-corporate':
-        return <CleanCorporateTemplate key="clean-corporate" {...layoutProps} />;
-      case 'dark-premium':
-        return <DarkPremiumTemplate key="dark-premium" {...layoutProps} />;
-      case 'soft-modern':
-        return <SoftModernTemplate key="soft-modern" {...layoutProps} />;
-      case 'bold-editorial':
-        return <BoldEditorialTemplate key="bold-editorial" {...layoutProps} />;
+    switch (resolvedTemplateId) {
       case 'preview-studio':
       case 'nfc-preview-studio':
         return <NfcPreviewStudio key="nfc-preview-studio" {...layoutProps} />;
@@ -244,11 +295,9 @@ export function ProfileRenderer({ profile }: { profile: ProfileRenderData }) {
         return <ProfessionalServicesTemplate key="professional-services" {...layoutProps} />;
       case 'creative-agency':
         return <CreativeAgencyTemplate key="creative-agency" {...layoutProps} />;
-      case 'apex-capital':
-        return <ApexCapitalTemplate key="apex-capital" {...layoutProps} />;
-      case 'premium-brand':
+      case 'cinematic-noir':
       default:
-        return <PremiumBrandTemplate key="premium-brand" {...layoutProps} />;
+        return <CinematicProfileTemplate key="cinematic-noir" {...layoutProps} />;
     }
   };
 
@@ -291,10 +340,10 @@ export function ProfileRenderer({ profile }: { profile: ProfileRenderData }) {
       backgroundColor: background,
       color: text,
     } as React.CSSProperties;
-}, [profile.themeConfig, templateId, defaultPalette]);
+}, [profile.themeConfig, resolvedTemplateId, defaultPalette]);
 
 return (
-    <div key={templateId} className="w-full relative min-h-full transition-colors duration-150" style={themeStyles}>
+    <div key={resolvedTemplateId} className="w-full relative min-h-full transition-colors duration-150" style={themeStyles}>
       {renderLayout()}
 
       {/* QR Code Modal */}

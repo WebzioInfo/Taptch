@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { ProfileRenderer, type ProfileRenderData } from './ProfileRenderer';
 import { getDemoBusinessByTemplate, type DemoBusinessProfile } from '@/lib/mock-data/demo-businesses';
-import { STANDARD_TEMPLATES } from '@/modules/templates/constants';
+import { STANDARD_TEMPLATES, TEMPLATE_PREVIEW_PLACEHOLDER } from '@/modules/templates/constants';
 
 export interface TemplatePreviewModalProps {
   isOpen: boolean;
@@ -69,6 +69,7 @@ export function TemplatePreviewModal({
     renderData = {
       ...customerProfile,
       templateId: selectedTemplateId,
+      isEmbedded: true,
       previewPlanId: 'max',
       displayName: customerProfile.displayName || 'Your Name',
       headline: customerProfile.headline || 'Your Headline',
@@ -86,6 +87,30 @@ export function TemplatePreviewModal({
       catalogue: customerProfile.catalogue && customerProfile.catalogue.length > 0
         ? customerProfile.catalogue
         : [],
+    };
+  } else if (activeTemplate.id === 'cinematic-noir') {
+    renderData = {
+      id: 'preview-cinematic-noir',
+      slug: TEMPLATE_PREVIEW_PLACEHOLDER.slug,
+      displayName: TEMPLATE_PREVIEW_PLACEHOLDER.displayName,
+      headline: TEMPLATE_PREVIEW_PLACEHOLDER.headline,
+      location: TEMPLATE_PREVIEW_PLACEHOLDER.location,
+      bio: TEMPLATE_PREVIEW_PLACEHOLDER.bio,
+      avatarUrl: TEMPLATE_PREVIEW_PLACEHOLDER.avatarUrl,
+      phone: TEMPLATE_PREVIEW_PLACEHOLDER.phone,
+      whatsapp: TEMPLATE_PREVIEW_PLACEHOLDER.whatsapp,
+      email: TEMPLATE_PREVIEW_PLACEHOLDER.email,
+      socialLinks: [{ platform: 'instagram', url: TEMPLATE_PREVIEW_PLACEHOLDER.instagram }],
+      businesses: TEMPLATE_PREVIEW_PLACEHOLDER.businesses,
+      customFields: {
+        education: TEMPLATE_PREVIEW_PLACEHOLDER.education,
+        location: TEMPLATE_PREVIEW_PLACEHOLDER.location,
+        instagram: TEMPLATE_PREVIEW_PLACEHOLDER.instagram,
+        skipIntro: true,
+      },
+      isDemo: true,
+      templateId: selectedTemplateId,
+      previewPlanId: 'max',
     };
   } else {
     renderData = {

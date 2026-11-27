@@ -1,24 +1,42 @@
 import { describe, it, expect } from 'vitest';
-import { STANDARD_TEMPLATES, canAccessTemplate, PLAN_TIER_RANK } from '../modules/templates/constants';
+import {
+  STANDARD_TEMPLATES,
+  TEMPLATE_PREVIEW_PLACEHOLDER,
+  canAccessTemplate,
+  PLAN_TIER_RANK,
+} from '../modules/templates/constants';
 import { brandConfig, defaultBrandConfig } from '../config/brand';
 
 describe('TAPTCH Templates & Design System', () => {
-  it('should register all 13 bespoke luxury templates including the 4 signature designs', () => {
-    expect(STANDARD_TEMPLATES.length).toBe(13);
+  it('should register only the active Phase 1 Cinematic Digital Profile template classified as PERSONAL', () => {
+    expect(STANDARD_TEMPLATES.length).toBe(1);
     const templateIds = STANDARD_TEMPLATES.map((t) => t.id);
-    expect(templateIds).toContain('clean-corporate');
-    expect(templateIds).toContain('dark-premium');
-    expect(templateIds).toContain('soft-modern');
-    expect(templateIds).toContain('bold-editorial');
-    expect(templateIds).toContain('industrial-manufacturing');
-    expect(templateIds).toContain('corporate-business');
-    expect(templateIds).toContain('modern-business');
-    expect(templateIds).toContain('premium-brand');
-    expect(templateIds).toContain('professional-services');
-    expect(templateIds).toContain('retail-shopping');
-    expect(templateIds).toContain('food-restaurant');
-    expect(templateIds).toContain('creative-agency');
-    expect(templateIds).toContain('apex-capital');
+    expect(templateIds).toEqual(['cinematic-noir']);
+    expect(STANDARD_TEMPLATES[0].name).toBe('Cinematic Digital Profile');
+    expect(STANDARD_TEMPLATES[0].templateType).toBe('PERSONAL');
+    expect(STANDARD_TEMPLATES[0].supportedProfileTypes).toEqual(['personal']);
+  });
+
+  it('filters templates strictly by accountType (personal vs business)', () => {
+    const personalTemplates = STANDARD_TEMPLATES.filter(
+      (t) => t.templateType === 'PERSONAL' || t.supportedProfileTypes.includes('personal')
+    );
+    expect(personalTemplates.length).toBe(1);
+    expect(personalTemplates[0].id).toBe('cinematic-noir');
+
+    const businessTemplates = STANDARD_TEMPLATES.filter(
+      (t) => t.templateType === 'BUSINESS' || t.supportedProfileTypes.includes('business')
+    );
+    expect(businessTemplates.length).toBe(0);
+  });
+
+  it('should provide neutral dummy preview data without any real personal details', () => {
+    expect(TEMPLATE_PREVIEW_PLACEHOLDER.displayName).toBe('Alex Morgan');
+    expect(TEMPLATE_PREVIEW_PLACEHOLDER.email).toBe('alex@example.com');
+    expect(TEMPLATE_PREVIEW_PLACEHOLDER.businesses.length).toBeGreaterThan(0);
+    const serialized = JSON.stringify(TEMPLATE_PREVIEW_PLACEHOLDER).toLowerCase();
+    expect(serialized).not.toContain('abdullah');
+    expect(serialized).not.toContain('rikhash');
   });
 
   it('should enforce proper 4-tier plan hierarchy (nano < micro < mini < max)', () => {

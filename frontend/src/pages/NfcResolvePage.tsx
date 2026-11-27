@@ -42,18 +42,29 @@ export function NfcResolvePage({ expectedProfileType }: NfcResolvePageProps = {}
     lastFetchedRef.current = requestKey;
 
     let mounted = true;
+    const controller = new AbortController();
     const timeoutId = window.setTimeout(() => {
+      controller.abort();
       if (mounted) setStatus('network_error');
-    }, 8000);
+    }, 10000);
 
     const typeQuery = expectedProfileType ? `?type=${encodeURIComponent(expectedProfileType)}` : '';
-    ApiClient.get<NfcResolveResponse>(`/api/v1/nfc/${encodeURIComponent(resolvedKey)}/resolve${typeQuery}`)
+    ApiClient.get<NfcResolveResponse>(
+      `/api/v1/nfc/${encodeURIComponent(resolvedKey)}/resolve${typeQuery}`,
+      { signal: controller.signal },
+    )
       .then((res) => {
         window.clearTimeout(timeoutId);
         if (!mounted) return;
         if (res?.status === 'active' && res.destinationUrl) {
           if (res.destinationUrl.startsWith('/')) {
-            navigate(res.destinationUrl, { replace: true });
+            navigate(res.destinationUrl, { replace: true, state: { fromNfcRedirect: true } });
+          } else if (
+            typeof window !== 'undefined' &&
+            res.destinationUrl.startsWith(window.location.origin)
+          ) {
+            const rel = res.destinationUrl.slice(window.location.origin.length) || '/';
+            navigate(rel, { replace: true, state: { fromNfcRedirect: true } });
           } else {
             window.location.replace(res.destinationUrl);
           }
@@ -61,13 +72,22 @@ export function NfcResolvePage({ expectedProfileType }: NfcResolvePageProps = {}
         }
         setStatus(res?.status || 'unconfigured');
       })
-      .catch(() => {
+      .catch((err: unknown) => {
         window.clearTimeout(timeoutId);
-        if (mounted) setStatus('network_error');
+        if (!mounted) return;
+        const anyErr = err as { statusCode?: number; status?: number; message?: string } | null;
+        const statusCode = anyErr?.statusCode ?? anyErr?.status;
+        if (statusCode === 404) {
+          setStatus('not_found');
+        } else {
+          setStatus('network_error');
+        }
       });
 
     return () => {
       mounted = false;
+      lastFetchedRef.current = null;
+      controller.abort();
       window.clearTimeout(timeoutId);
     };
   }, [resolvedKey, expectedProfileType, presetStatus, retryNonce, navigate]);

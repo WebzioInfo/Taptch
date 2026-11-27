@@ -1,19 +1,36 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ApiClient } from '../services/api';
 import { Button } from '../components/ui/button';
-import { Plus, ExternalLink, CreditCard, Edit3, AlertCircle, RefreshCw } from 'lucide-react';
+import { Plus, ExternalLink, CreditCard, Edit3, AlertCircle, RefreshCw, Trash2, Loader2, Sparkles } from 'lucide-react';
 
 export function DashboardPage() {
+  const queryClient = useQueryClient();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
   const { data: rawProfiles, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['profiles', 'my'],
     queryFn: () => ApiClient.get<any[]>('/api/v1/profiles'),
   });
   const profiles = Array.isArray(rawProfiles) ? rawProfiles : [];
 
+  const deleteMutation = useMutation({
+    mutationFn: async (profileId: string) => {
+      setDeletingId(profileId);
+      return ApiClient.delete(`/api/v1/profiles/${profileId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profiles'] });
+      setDeletingId(null);
+    },
+    onError: () => {
+      setDeletingId(null);
+    },
+  });
+
   return (
-      <div className="p-4 sm:p-8 max-w-6xl mx-auto">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
         {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
             <div>
@@ -35,7 +52,7 @@ export function DashboardPage() {
           {/* Profiles Grid */}
           <div className="mt-8">
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 {[1, 2, 3].map((i) => (
               <div
                 key={i}
@@ -79,7 +96,7 @@ export function DashboardPage() {
                       </Link>
                   </div>
                   ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                               {profiles.map((p) => {
                                 const isPublished = p.status === 'PUBLISHED';
                                 return (
@@ -112,15 +129,36 @@ export function DashboardPage() {
                   </div>
 
                   <div className="mt-6 pt-4 border-t border-[var(--border)] flex items-center justify-between font-body text-xs">
-                    <Link
-                      to={`/builder/${p.id}`}
-                      className="flex items-center text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
-                    >
-                      <Edit3 className="w-3.5 h-3.5 mr-1" />
-                      <span>Edit studio</span>
-                    </Link>
+                    <div className="flex items-center gap-3">
+                      <Link
+                        to={`/builder/${p.id}`}
+                        className="flex items-center text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
+                      >
+                        <Edit3 className="w-3.5 h-3.5 mr-1" />
+                        <span>Edit</span>
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (window.confirm(`Are you sure you want to delete profile "${p.displayName || p.slug}"?`)) {
+                            deleteMutation.mutate(p.id);
+                          }
+                        }}
+                        disabled={deletingId === p.id}
+                        className="flex items-center text-[var(--ink-muted)] hover:text-[var(--danger)] transition-colors disabled:opacity-50"
+                        title="Delete Profile"
+                      >
+                        {deletingId === p.id ? (
+                          <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-3.5 h-3.5 mr-1" />
+                        )}
+                        <span>Delete</span>
+                      </button>
+                    </div>
+
                     <a
-                      href={`/p/${p.slug || p.id}`}
+                      href={`/${p.slug || p.id}`}
                       target="_blank"
                       rel="noreferrer"
                       className="flex items-center text-[var(--accent-text)] font-medium hover:underline"

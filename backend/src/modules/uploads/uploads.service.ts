@@ -4,6 +4,8 @@ import * as schema from '../../database/schema';
 import { eq, desc, and } from 'drizzle-orm';
 import type { ActorContext } from '../../common/types';
 import * as crypto from 'crypto';
+import * as fs from 'fs/promises';
+import * as path from 'path';
 
 @Injectable()
 export class UploadsService {
@@ -63,6 +65,96 @@ export class UploadsService {
     } catch (err) {
       console.warn('[UploadsService] Cloudinary upload error:', err);
       return null;
+    }
+  }
+
+  async uploadProfileImage(
+    actor: ActorContext,
+    dto: { dataUrl?: string; filename?: string; category?: string },
+  ) {
+    if (!dto?.dataUrl || typeof dto.dataUrl !== 'string') {
+      throw new BadRequestException('Image dataUrl is required.');
+    }
+
+    const match = dto.dataUrl.match(/^data:image\/(jpeg|jpg|png|webp);base64,([A-Za-z0-9+/=\s]+)$/i);
+    if (!match) {
+      throw new BadRequestException('Unsupported image format. Please upload JPG, JPEG, PNG, or WebP.');
+    }
+
+    const rawExt = match[1].toLowerCase();
+    const ext = rawExt === 'jpeg' ? 'jpg' : rawExt;
+    const mimeType = `image/${rawExt === 'jpg' ? 'jpeg' : rawExt}`;
+    const base64Body = match[2].replace(/\s+/g, '');
+    const buffer = Buffer.from(base64Body, 'base64');
+
+    const MAX_BYTES = 5 * 1024 * 1024;
+    if (buffer.length === 0 || buffer.length > MAX_BYTES) {
+      throw new BadRequestException('Image must be smaller than 5 MB.');
+    }
+
+    const assetId = crypto.randomUUID();
+    const category =
+      dto.category === 'logo' || dto.category === 'cover' || dto.category === 'avatar'
+        ? dto.category
+        : 'avatar';
+    const folder = `taptch/customers/${actor.userId}/${category}`;
+
+    let finalUrl = await this.uploadToCloudinary(dto.dataUrl, assetId, folder);
+    let storageProvider = 'cloudflare_images';
+
+    if (!finalUrl) {
+      const uploadDir = path.resolve(process.cwd(), 'uploads', 'profiles');
+      await fs.mkdir(uploadDir, { recursive: true });
+      const safeFileName = `${assetId}.${ext}`;
+      await fs.writeFile(path.join(uploadDir, safeFileName), buffer);
+      finalUrl = `/api/v1/uploads/file/${safeFileName}`;
+      storageProvider = 'local';
+    }
+
+    await this.dbService.withActor(actor, async (tx) => {
+      await tx.insert(schema.mediaAssets).values({
+        id: assetId,
+        ownerId: actor.userId,
+        storageProvider,
+        storageKey: assetId,
+        storageObjectId: `${category}/${assetId}.${ext}`,
+        assetUrl: finalUrl!,
+        secureUrl: finalUrl!,
+        assetType: 'image',
+        mimeType,
+        mediaCategory: category,
+        fileSize: buffer.length,
+        visibilityStatus: 'public',
+      });
+    });
+
+    return {
+      id: assetId,
+      url: finalUrl,
+      mimeType,
+      sizeBytes: buffer.length,
+      storageProvider,
+    };
+  }
+
+  async getLocalProfileImage(filename: string): Promise<{ buffer: Buffer; mimeType: string }> {
+    if (!/^[a-zA-Z0-9-]+\.(jpg|jpeg|png|webp)$/i.test(filename)) {
+      throw new BadRequestException('Invalid file name.');
+    }
+
+    const filePath = path.resolve(process.cwd(), 'uploads', 'profiles', filename);
+    try {
+      const buffer = await fs.readFile(filePath);
+      const ext = filename.split('.').pop()?.toLowerCase() || 'png';
+      const mimeType =
+        ext === 'jpg' || ext === 'jpeg'
+          ? 'image/jpeg'
+          : ext === 'webp'
+            ? 'image/webp'
+            : 'image/png';
+      return { buffer, mimeType };
+    } catch {
+      throw new NotFoundException('Uploaded image not found.');
     }
   }
 

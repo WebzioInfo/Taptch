@@ -103,8 +103,10 @@ describe('Taptch Digital Profiles Engine — ProfilesService', () => {
     });
 
     it('rejects duplicate slugs on profile creation', async () => {
-      // Mock existing slug collision
-      mockDbService.db.limit.mockResolvedValueOnce([{ id: 'existing_prof_01' }]);
+      // Mock user lookup first (if entitlementsService is undefined)
+      mockDbService.db.limit
+        .mockResolvedValueOnce([]) // for user accountType query
+        .mockResolvedValueOnce([{ id: 'existing_prof_01' }]); // for slug collision check
 
       await expect(
         service.create(mockActor, {
@@ -112,6 +114,61 @@ describe('Taptch Digital Profiles Engine — ProfilesService', () => {
           slug: 'taken-slug',
         }),
       ).rejects.toThrow(ConflictException);
+    });
+
+    it('enforces accountType boundary: personal account cannot create business profile', async () => {
+      // Mock user lookup returning personal accountType
+      mockDbService.db.limit.mockResolvedValueOnce([{ accountType: 'personal' }]);
+
+      await expect(
+        service.create(mockActor, {
+          displayName: 'Jane Doe',
+          slug: 'jane-doe',
+          profileType: 'business',
+        }),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('enforces template classification boundary: personal account cannot create profile with business template', async () => {
+      // Mock user lookup returning personal accountType
+      mockDbService.db.limit.mockResolvedValueOnce([{ accountType: 'personal' }]);
+
+      await expect(
+        service.create(mockActor, {
+          displayName: 'Jane Doe',
+          slug: 'jane-doe',
+          profileType: 'personal',
+          templateId: 'corporate-pro',
+        }),
+      ).rejects.toThrow();
+    });
+
+    it('excludes DELETED and ARCHIVED profiles when counting user profiles against limit', async () => {
+      const mockEntitlementsService: any = {
+        getActorEntitlements: vi.fn().mockResolvedValue({
+          maxProfiles: 1,
+          accountType: 'personal',
+          tier: 'nano',
+        }),
+      };
+
+      const customService = new ProfilesService(
+        mockDbService,
+        mockRedisService,
+        mockEntitlementsService
+      );
+
+      // The count query selects profiles with ne(status, 'DELETED') and ne(status, 'ARCHIVED')
+      // Simulate that user had 1 deleted profile, so active count is 0
+      mockDbService.db.where.mockReturnValueOnce(Promise.resolve([])); // 0 active profiles
+
+      const res = await customService.create(mockActor, {
+        displayName: 'Allowed Profile',
+        slug: 'allowed-profile',
+      });
+
+      expect(res).toBeDefined();
+      expect(mockEntitlementsService.getActorEntitlements).toHaveBeenCalled();
     });
   });
 
@@ -244,6 +301,50 @@ describe('Taptch Digital Profiles Engine — ProfilesService', () => {
       expect(snapshot.status).toBe('DRAFT');
       expect((snapshot as any).phone).toBeUndefined();
       expect((snapshot as any).email).toBeUndefined();
+    });
+  });
+
+  describe('delete profile (remove)', () => {
+    it('soft-deletes profile by marking status=DELETED, invalidates Redis, and detaches cards', async () => {
+      vi.spyOn(service, 'findOne').mockResolvedValueOnce({
+        id: 'prof_to_delete',
+        slug: 'mark-to-delete',
+        ownerId: mockActor.userId,
+      } as any);
+
+      const result = await service.remove(mockActor, 'prof_to_delete');
+      expect(result).toEqual({ success: true, id: 'prof_to_delete' });
+      expect(mockDbService.db.update).toHaveBeenCalled();
+      expect(mockRedisService.del).toHaveBeenCalledWith('profile:slug:mark-to-delete');
+    });
+  });
+
+  describe('template restoration and legacy migration', () => {
+    it('resolves legacy personal template IDs to cinematic-noir in findOne and findBySlug', async () => {
+      mockDbService.db.limit.mockResolvedValueOnce([
+        {
+          id: 'prof_legacy',
+          slug: 'legacy-user',
+          ownerId: mockActor.userId,
+          profileType: 'personal',
+          templateId: 'obsidian-luxury',
+          themeId: 'obsidian',
+          displayName: 'Legacy User',
+          status: 'PUBLISHED',
+          publishedJson: {
+            id: 'prof_legacy',
+            slug: 'legacy-user',
+            displayName: 'Legacy User',
+            profileType: 'personal',
+            templateId: 'obsidian-luxury',
+          },
+        },
+      ]);
+
+      const snapshot = await service.findBySlug('legacy-user');
+      expect(snapshot.templateId).toBe('cinematic-noir');
+      expect(snapshot.themeId).toBe('cinematic-noir');
+      expect(snapshot.displayName).toBe('Legacy User');
     });
   });
 });

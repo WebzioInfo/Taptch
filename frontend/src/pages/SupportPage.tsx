@@ -66,7 +66,7 @@ export function SupportPage() {
   });
 
   return (
-    <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-8 bg-[#F8F9FB] min-h-screen text-[#171717] font-body">
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6 bg-[#F8F9FB] min-h-screen text-[#171717] font-body">
       {/* Support Cockpit Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#E8E8E8]">
         <div>

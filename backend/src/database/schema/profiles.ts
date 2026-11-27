@@ -55,8 +55,8 @@ export const profiles = pgTable('profiles', {
   videos: jsonb('videos').$type<{ title: string; videoUrl: string; thumbnailUrl?: string }[]>().notNull().default([]),
   brochures: jsonb('brochures').$type<{ title: string; fileUrl: string; fileSize?: string }[]>().notNull().default([]),
   customFields: jsonb('custom_fields').$type<Record<string, unknown>>().notNull().default({}),
-  templateId: varchar('template_id', { length: 64 }).notNull().default('obsidian-luxury'),
-  themeId: varchar('theme_id', { length: 64 }).notNull().default('obsidian'), // Legacy alias
+  templateId: varchar('template_id', { length: 64 }).notNull().default('cinematic-noir'),
+  themeId: varchar('theme_id', { length: 64 }).notNull().default('cinematic-noir'), // Legacy alias
   themeConfig: jsonb('theme_config').$type<Record<string, unknown>>().notNull().default({}),
   status: varchar('status', { length: 32 }).notNull().default('DRAFT'), // 'DRAFT' | 'PENDING_PUBLICATION' | 'UNDER_REVIEW' | 'PLAN_PENDING' | 'APPROVED' | 'PUBLISHED' | 'REJECTED' | 'SUSPENDED' | 'UNPUBLISHED'
   publishedJson: jsonb('published_json').$type<Record<string, unknown>>().default({}),

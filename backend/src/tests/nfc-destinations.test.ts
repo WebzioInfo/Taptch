@@ -119,7 +119,7 @@ import { CardsService } from '../modules/cards/cards.service';
                 from: vi.fn().mockReturnValue({
                   where: vi.fn().mockReturnValue({
                     limit: vi.fn().mockResolvedValue([
-                      { slug: 'john', status: 'PUBLISHED', profileType: 'personal' },
+                      { id: 'prof_john', slug: 'john', status: 'PUBLISHED', profileType: 'personal', templateId: 'cinematic-noir' },
                     ]),
                   }),
                 }),
@@ -130,8 +130,10 @@ import { CardsService } from '../modules/cards/cards.service';
                 status: 'active',
                 destinationType: 'profile',
                 destinationUrl: '/john',
+                profileId: 'prof_john',
                 profileSlug: 'john',
                 profileType: 'personal',
+                templateId: 'cinematic-noir',
               });
 
               // 2. Unconfigured card
@@ -181,7 +183,7 @@ import { CardsService } from '../modules/cards/cards.service';
                   from: vi.fn().mockReturnValue({
                     where: vi.fn().mockReturnValue({
                       limit: vi.fn().mockResolvedValue([
-                        { slug: 'sinan', status: 'PUBLISHED', profileType: 'personal' },
+                        { id: 'prof_sinan', slug: 'sinan', status: 'PUBLISHED', profileType: 'personal', templateId: 'obsidian-luxury' },
                       ]),
                     }),
                   }),
@@ -192,8 +194,10 @@ import { CardsService } from '../modules/cards/cards.service';
                 status: 'active',
                 destinationType: 'profile',
                 destinationUrl: '/sinan',
+                profileId: 'prof_sinan',
                 profileSlug: 'sinan',
                 profileType: 'personal',
+                templateId: 'cinematic-noir',
               });
             });
           });

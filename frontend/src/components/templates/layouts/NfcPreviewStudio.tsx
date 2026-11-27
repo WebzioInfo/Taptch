@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
 import type { ProfileRenderData } from '../ProfileRenderer';
-import { CleanCorporateTemplate } from './CleanCorporateTemplate';
-import { DarkPremiumTemplate } from './DarkPremiumTemplate';
-import { SoftModernTemplate } from './SoftModernTemplate';
-import { BoldEditorialTemplate } from './BoldEditorialTemplate';
+import { CinematicProfileTemplate } from './CinematicProfileTemplate';
 import './index-preview.css';
 
 interface NfcPreviewStudioProps {
@@ -14,7 +11,7 @@ interface NfcPreviewStudioProps {
   copiedUrl: boolean;
   onCopyLink: () => void;
   previewPlanId?: string;
-  initialTemplate?: 'clean-corporate' | 'dark-premium' | 'soft-modern' | 'bold-editorial';
+  initialTemplate?: 'cinematic-noir';
 }
 
 export function NfcPreviewStudio({
@@ -25,21 +22,16 @@ export function NfcPreviewStudio({
   copiedUrl,
   onCopyLink,
   previewPlanId,
-  initialTemplate = 'clean-corporate',
+  initialTemplate = 'cinematic-noir',
 }: NfcPreviewStudioProps) {
-  const [selectedTemplate, setSelectedTemplate] = useState<
-    'clean-corporate' | 'dark-premium' | 'soft-modern' | 'bold-editorial'
-  >(initialTemplate);
+  const [selectedTemplate, setSelectedTemplate] = useState<'cinematic-noir'>(initialTemplate);
 
   const templates = [
-    { id: 'clean-corporate' as const, index: '01', label: 'Clean Corporate' },
-    { id: 'dark-premium' as const, index: '02', label: 'Dark Premium' },
-    { id: 'soft-modern' as const, index: '03', label: 'Soft Modern' },
-    { id: 'bold-editorial' as const, index: '04', label: 'Bold Editorial' },
+    { id: 'cinematic-noir' as const, index: '01', label: 'Cinematic Digital Profile' },
   ];
 
   const layoutProps = {
-    profile: { ...profile, templateId: selectedTemplate },
+    profile: { ...profile, templateId: selectedTemplate, isEmbedded: true },
     onDownloadVCard,
     onOpenExchange,
     onOpenQr,
@@ -49,17 +41,7 @@ export function NfcPreviewStudio({
   };
 
   const renderActiveTemplate = () => {
-    switch (selectedTemplate) {
-      case 'dark-premium':
-        return <DarkPremiumTemplate {...layoutProps} />;
-      case 'soft-modern':
-        return <SoftModernTemplate {...layoutProps} />;
-      case 'bold-editorial':
-        return <BoldEditorialTemplate {...layoutProps} />;
-      case 'clean-corporate':
-      default:
-        return <CleanCorporateTemplate {...layoutProps} />;
-    }
+    return <CinematicProfileTemplate {...layoutProps} />;
   };
 
   return (

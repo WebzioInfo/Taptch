@@ -4,6 +4,7 @@ import {
   Post,
   Patch,
   Put,
+  Delete,
   Param,
   Body,
   Res,
@@ -115,6 +116,16 @@ export class ProfilesController {
     @Body() body: { sections: any[] },
   ) {
     return this.profilesService.updateSections(actor, id, body?.sections || []);
+  }
+
+  @Delete(':id')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete profile and release entitlement' })
+  async deleteProfile(
+    @CurrentActor() actor: ActorContext,
+    @Param('id') id: string,
+  ) {
+    return this.profilesService.remove(actor, id);
   }
 }
 

@@ -60,6 +60,10 @@ describe('PublicProfilePage — Minimal 404, Error Handling & Visibility', () =>
       profileType: 'personal',
       status: 'PUBLISHED',
       templateId: 'clean-corporate',
+      customFields: {
+        education: 'B.Tech Computer Science',
+        upiId: 'sinan@okaxis',
+      },
       sections: [
         { id: 's1', sectionType: 'contact_info', title: 'Contact', isEnabled: true, orderIndex: 0, content: {} },
         { id: 's2', sectionType: 'bio', title: 'Hidden Bio', isEnabled: false, orderIndex: 1, content: {} },
@@ -80,6 +84,74 @@ describe('PublicProfilePage — Minimal 404, Error Handling & Visibility', () =>
     );
 
     expect(html).toContain('Muhammed');
+    expect(html).toContain('cinematic-noir-root');
+    expect(html).toContain('B.Tech Computer Science');
     expect(html).not.toContain('Profile not found');
+  });
+
+  it('renders complete saved user data (bio, ventures, locations, websites, education, socials, UPI) in Cinematic template', () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    qc.setQueryData(['public-profile', 'rohan-kapoor'], {
+      id: 'prof-rohan-1',
+      slug: 'rohan-kapoor',
+      displayName: 'Rohan Kapoor',
+      headline: 'Industrial Architect',
+      bio: 'Designing sustainable urban spaces.',
+      location: 'Kochi, Kerala',
+      avatarUrl: 'https://cdn.example.com/rohan.jpg',
+      profileType: 'personal',
+      status: 'PUBLISHED',
+      templateId: 'cinematic-noir',
+      customFields: {
+        education: 'M.Arch, SPA Delhi',
+        upiId: 'rohan@okhdfcbank',
+        upiPayeeName: 'Rohan Kapoor',
+      },
+      businesses: [
+        {
+          id: 'biz-1',
+          companyName: 'Kapoor Atelier',
+          jobTitle: 'Principal',
+          description: 'Urban architecture studio',
+          businessWebsite: 'https://kapooratelier.example',
+          businessAddress: 'Kochi',
+        },
+        {
+          id: 'biz-2',
+          companyName: 'TimberCraft',
+          jobTitle: 'Co-Founder',
+          description: 'Modular timber systems',
+          businessWebsite: 'https://timbercraft.example',
+          businessAddress: 'Bengaluru',
+        },
+      ],
+      socialLinks: [{ platform: 'instagram', username: 'rohan.arch', url: 'https://instagram.com/rohan.arch' }],
+      catalogue: [],
+      sections: [],
+    });
+
+    const html = renderToString(
+      <QueryClientProvider client={qc}>
+        <MemoryRouter initialEntries={['/rohan-kapoor']}>
+          <Routes>
+            <Route path="/:slug" element={<PublicProfilePage />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    expect(html).toContain('cinematic-noir-root');
+    expect(html).toContain('Rohan Kapoor');
+    expect(html).toContain('Industrial Architect');
+    expect(html).toContain('Designing sustainable urban spaces.');
+    expect(html).toContain('Kapoor Atelier');
+    expect(html).toContain('TimberCraft');
+    expect(html).toContain('Kochi');
+    expect(html).toContain('Bengaluru');
+    expect(html).toContain('https://kapooratelier.example/');
+    expect(html).toContain('https://timbercraft.example/');
+    expect(html).toContain('M.Arch, SPA Delhi');
+    expect(html).toContain('@rohan.arch');
+    expect(html).toContain('Pay via UPI');
   });
 });

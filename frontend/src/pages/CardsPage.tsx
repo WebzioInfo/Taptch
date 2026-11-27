@@ -161,7 +161,7 @@ export function CardsPage() {
             };
 
             return (
-              <div className="p-4 sm:p-8 max-w-6xl mx-auto font-body text-[var(--ink)] space-y-8">
+              <div className="w-full px-4 sm:px-6 lg:px-8 py-5 sm:py-6 font-body text-[var(--ink)] space-y-6">
                 {/* 1. Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
                   <div>
@@ -271,7 +271,7 @@ export function CardsPage() {
                       </Link>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="space-y-4">
                       {purchasedCards.map((card) => {
                         const isProfileAttached = Boolean(card.profileId && card.profile);
                         const isRegistered = Boolean(card.physicalCardId);
@@ -291,9 +291,10 @@ export function CardsPage() {
                         return (
                           <div
                             key={card.id}
-                            className="p-5 rounded-2xl bg-white border border-[var(--border)] flex flex-col justify-between gap-4 shadow-xs"
+                            className="p-4 sm:p-5 rounded-2xl bg-white border border-[var(--border)] grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 items-center shadow-xs"
                           >
-                            <div className="flex items-start gap-4">
+                            {/* LEFT 50%: Card Preview, Title, Status, Attached Profile */}
+                            <div className="flex items-start gap-4 min-w-0">
                               <div className="w-[104px] h-[66px] rounded-[8px] overflow-hidden border border-[var(--border)] shrink-0 bg-[#161616]">
                                 <CardPreview
                                   frontUrl={card.previewFrontUrl}
@@ -344,94 +345,93 @@ export function CardsPage() {
                                   </span>
                                 </div>
 
-                                {/* Attached Profile Summary */}
-                                <div className="pt-1 text-xs">
-                                    {
-                                      isProfileAttached?(
-                          <div className = "flex items-center gap-1.5 text-emerald-700" >
-                            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                            <span className="font-medium truncate">
-                              {card.profile.displayName} (@{card.profile.slug})
-                            </span>
-                            <span className="text-[10px] uppercase px-1.5 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-700 shrink-0">
-                              {card.profile.profileType === 'business' ? 'Business' : 'Personal'}
-                            </span>
-                          </div>
+                                <div className="pt-0.5 text-xs">
+                                  {isProfileAttached ? (
+                                    <div className="flex items-center gap-1.5 text-emerald-700">
+                                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                                      <span className="font-medium truncate">
+                                        {card.profile.displayName} (@{card.profile.slug})
+                                      </span>
+                                      <span className="text-[10px] uppercase px-1.5 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-700 shrink-0">
+                                        {card.profile.profileType === 'business' ? 'Business' : 'Personal'}
+                                      </span>
+                                    </div>
                                   ) : hasLegacyCustomUrl ? (
-                                  <div className="flex items-center gap-1.5 text-amber-700">
-                                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                                    <span className="font-medium truncate">
-                                      Needs profile assignment (legacy card)
-                                    </span>
-                                  </div>
+                                    <div className="flex items-center gap-1.5 text-amber-700">
+                                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                                      <span className="font-medium truncate">
+                                        Needs profile assignment (legacy card)
+                                      </span>
+                                    </div>
                                   ) : (
-                                  <div className="flex items-center gap-1.5 text-[#FF6A00]">
-                                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                                    <span className="font-medium">No profile attached yet</span>
-                                  </div>
-                        )}
+                                    <div className="flex items-center gap-1.5 text-[#FF6A00]">
+                                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                                      <span className="font-medium">No profile attached yet</span>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </div>
 
-                              {/* NFC Chip URL Row */ }
-                  {nfcUrl && (
-                              <div className="px-3 py-2 rounded-xl bg-[#F8F9FB] border border-[var(--border)] flex items-center justify-between gap-2 text-[11px]">
-                                <div className="min-w-0">
-                                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--ink-muted)] block">
-                                    {isProfileAttached ? 'NFC Public Profile URL' : 'Legacy NFC URL'}
-                                  </span>
-                                  <span className="font-mono text-[var(--ink)] truncate block">{nfcUrl}</span>
+                            {/* RIGHT 50%: Permanent NFC URL & Configuration Action */}
+                            <div className="flex flex-col gap-3 pt-3 lg:pt-0 border-t lg:border-t-0 lg:border-l border-[var(--border)] lg:pl-6 min-w-0">
+                              {nfcUrl && (
+                                <div className="px-3 py-2 rounded-xl bg-[#F8F9FB] border border-[var(--border)] flex items-center justify-between gap-2 text-[11px]">
+                                  <div className="min-w-0">
+                                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--ink-muted)] block">
+                                      Permanent NFC URL
+                                    </span>
+                                    <span className="font-mono text-[var(--ink)] truncate block">{nfcUrl}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1 shrink-0">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleCopyNfcUrl(card.id, card)}
+                                      aria-label="Copy NFC URL"
+                                      className="p-1.5 rounded-lg border border-[var(--border)] bg-white hover:border-[#FF6A00] text-[var(--ink-muted)] hover:text-[#171717]"
+                                    >
+                                      {copiedCardId === card.id ? (
+                                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                      ) : (
+                                        <Copy className="w-3.5 h-3.5" />
+                                      )}
+                                    </button>
+                                    <a
+                                      href={nfcUrl}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      aria-label="Open NFC URL"
+                                      className="p-1.5 rounded-lg border border-[var(--border)] bg-white hover:border-[#FF6A00] text-[var(--ink-muted)] hover:text-[#FF6A00]"
+                                    >
+                                      <ExternalLink className="w-3.5 h-3.5" />
+                                    </a>
+                                  </div>
                                 </div>
-                                <div className="flex items-center gap-1 shrink-0">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleCopyNfcUrl(card.id, card)}
-                                    aria-label="Copy NFC URL"
-                                    className="p-1.5 rounded-lg border border-[var(--border)] bg-white hover:border-[#FF6A00] text-[var(--ink-muted)] hover:text-[#171717]"
-                                  >
-                                    {copiedCardId === card.id ? (
-                                      <Check className="w-3.5 h-3.5 text-emerald-600" />
-                                    ) : (
-                                      <Copy className="w-3.5 h-3.5" />
-                                    )}
-                                  </button>
-                                  <a
-                                    href={nfcUrl}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    aria-label="Open NFC URL"
-                                    className="p-1.5 rounded-lg border border-[var(--border)] bg-white hover:border-[#FF6A00] text-[var(--ink-muted)] hover:text-[#FF6A00]"
-                                  >
-                                    <ExternalLink className="w-3.5 h-3.5" />
-                                  </a>
-                                </div>
-                              </div>
-                            )}
+                              )}
 
-                            {/* Footer Actions */}
-                            <div className="pt-2 border-t border-[var(--border)] flex items-center justify-between gap-3">
-                              <span className="text-[11px] text-[var(--ink-muted)]">
-                                {updatedLabel ? `Updated ${updatedLabel}` : ''}
-                              </span>
-                    <Button
-                      type="button"
-                      variant={isProfileAttached ? 'outline' : 'accent'}
-                      onClick={() => openManageDestination(card)}
-                      className={`text-xs font-semibold gap-1.5 ${
-                        isProfileAttached
-                          ? ''
-                          : 'bg-[#FF6A00] hover:bg-[#E85D00] text-white'
-                      }`}
-                    >
-                              <Link2 className="w-3.5 h-3.5" />
-                              <span>{isProfileAttached ? 'Change Profile' : 'Select Profile'}</span>
-                            </Button>
+                              <div className="flex items-center justify-between gap-3">
+                                <span className="text-[11px] text-[var(--ink-muted)] truncate">
+                                  {updatedLabel ? `Updated ${updatedLabel}` : ''}
+                                </span>
+                                <Button
+                                  type="button"
+                                  variant={isProfileAttached ? 'outline' : 'accent'}
+                                  onClick={() => openManageDestination(card)}
+                                  className={`text-xs font-semibold gap-1.5 shrink-0 ${
+                                    isProfileAttached
+                                      ? ''
+                                      : 'bg-[#FF6A00] hover:bg-[#E85D00] text-white'
+                                  }`}
+                                >
+                                  <Link2 className="w-3.5 h-3.5" />
+                                  <span>{isProfileAttached ? 'Change Profile' : 'Select Profile'}</span>
+                                </Button>
+                              </div>
+                            </div>
                           </div>
-                </div>
-                  );
-            })}
-              </div>
+                        );
+                      })}
+                    </div>
             )
           }
       </section >

@@ -8,6 +8,7 @@ import { DatabaseService } from '../../database/database.service';
 import * as schema from '../../database/schema';
 import { eq, desc, asc } from 'drizzle-orm';
 import type { ActorContext } from '../../common/types';
+import { resolveActiveTemplateId } from '../profiles/profiles.service';
 
 /**
  * Public base URL for NFC chip encoding.
@@ -338,8 +339,10 @@ buildCanonicalNfcUrl(params: {
   status: 'active' | 'unconfigured' | 'unavailable' | 'not_found';
   destinationType: 'profile' | 'custom_url' | null;
   destinationUrl: string | null;
+  profileId?: string | null;
   profileSlug?: string | null;
   profileType?: 'business' | 'personal' | null;
+  templateId?: string | null;
 } > {
   const cleanToken = (token || '').trim();
   if(!cleanToken) {
@@ -360,9 +363,11 @@ buildCanonicalNfcUrl(params: {
     if (physicalCard.profileId) {
       const [prof] = await this.dbService.db
         .select({
+          id: schema.profiles.id,
           slug: schema.profiles.slug,
           status: schema.profiles.status,
           profileType: schema.profiles.profileType,
+          templateId: schema.profiles.templateId,
         })
         .from(schema.profiles)
         .where(eq(schema.profiles.id, physicalCard.profileId))
@@ -374,8 +379,10 @@ buildCanonicalNfcUrl(params: {
               status: 'active',
               destinationType: 'profile',
               destinationUrl: `/${prof.slug}`,
+              profileId: prof.id,
               profileSlug: prof.slug,
               profileType: resolvedType,
+              templateId: resolveActiveTemplateId(prof.templateId, prof.profileType),
             };
           }
           return { status: 'unavailable', destinationType: null, destinationUrl: null };
@@ -395,9 +402,11 @@ buildCanonicalNfcUrl(params: {
       if (purchasedCard.profileId) {
         const [prof] = await this.dbService.db
           .select({
+            id: schema.profiles.id,
             slug: schema.profiles.slug,
             status: schema.profiles.status,
             profileType: schema.profiles.profileType,
+            templateId: schema.profiles.templateId,
           })
           .from(schema.profiles)
           .where(eq(schema.profiles.id, purchasedCard.profileId))
@@ -409,8 +418,10 @@ buildCanonicalNfcUrl(params: {
               status: 'active',
               destinationType: 'profile',
               destinationUrl: `/${prof.slug}`,
+              profileId: prof.id,
               profileSlug: prof.slug,
               profileType: resolvedType,
+              templateId: resolveActiveTemplateId(prof.templateId, prof.profileType),
             };
           }
           return { status: 'unavailable', destinationType: null, destinationUrl: null };
@@ -425,9 +436,11 @@ buildCanonicalNfcUrl(params: {
     const normalizedSlug = cleanToken.toLowerCase();
     let [slugProfile] = await this.dbService.db
       .select({
+        id: schema.profiles.id,
         slug: schema.profiles.slug,
         status: schema.profiles.status,
         profileType: schema.profiles.profileType,
+        templateId: schema.profiles.templateId,
       })
       .from(schema.profiles)
       .where(eq(schema.profiles.slug, normalizedSlug))
@@ -443,9 +456,11 @@ buildCanonicalNfcUrl(params: {
       if (aliasRow) {
         [slugProfile] = await this.dbService.db
           .select({
+            id: schema.profiles.id,
             slug: schema.profiles.slug,
             status: schema.profiles.status,
             profileType: schema.profiles.profileType,
+            templateId: schema.profiles.templateId,
           })
           .from(schema.profiles)
           .where(eq(schema.profiles.id, aliasRow.profileId))
@@ -460,8 +475,10 @@ buildCanonicalNfcUrl(params: {
           status: 'active',
           destinationType: 'profile',
           destinationUrl: `/${slugProfile.slug}`,
+          profileId: slugProfile.id,
           profileSlug: slugProfile.slug,
           profileType: resolvedType,
+          templateId: resolveActiveTemplateId(slugProfile.templateId, slugProfile.profileType),
         };
       }
       return { status: 'unavailable', destinationType: null, destinationUrl: null };

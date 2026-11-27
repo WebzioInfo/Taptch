@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ApiClient } from '../services/api';
-import { ProfileRenderer } from '../components/templates/ProfileRenderer';
+import { ProfileRenderer, canonicalTemplateId } from '../components/templates/ProfileRenderer';
 import { MetaTags } from '../components/seo/MetaTags';
 import { BrandLogo } from '../components/brand';
 import { env } from '../config/env';
@@ -20,8 +20,10 @@ function isConfirmedNotFoundError(err: unknown): boolean {
 
 export function PublicProfilePage() {
   const { slug } = useParams<{ slug: string }>();
+  const location = useLocation();
   const cleanSlug = (slug || '').trim().toLowerCase();
   const isReserved = !cleanSlug || isReservedUsername(cleanSlug);
+  const isFromNfc = Boolean((location.state as { fromNfcRedirect?: boolean } | null)?.fromNfcRedirect);
 
   const {
     data: profile,
@@ -31,10 +33,21 @@ export function PublicProfilePage() {
     refetch,
   } = useQuery<any>({
     queryKey: ['public-profile', cleanSlug],
-    queryFn: ({ signal }) =>
-      ApiClient.get<any>(`/api/v1/profiles/by-slug/${encodeURIComponent(cleanSlug)}`, {
-        signal,
-      }),
+    queryFn: async ({ signal }) => {
+      const timeoutController = new AbortController();
+      const timeoutId = window.setTimeout(() => timeoutController.abort(), 10000);
+      const onParentAbort = () => timeoutController.abort();
+      signal?.addEventListener('abort', onParentAbort, { once: true });
+
+      try {
+        return await ApiClient.get<any>(`/api/v1/profiles/by-slug/${encodeURIComponent(cleanSlug)}`, {
+          signal: timeoutController.signal,
+        });
+      } finally {
+        window.clearTimeout(timeoutId);
+        signal?.removeEventListener('abort', onParentAbort);
+      }
+    },
     enabled: !isReserved,
     retry: false, // Never retry confirmed 404s or missing profiles
     staleTime: 60 * 1000,
@@ -63,14 +76,18 @@ export function PublicProfilePage() {
       location: profile.location || profile.address,
       profileType: profile.profileType || 'personal',
       socialLinks: profile.socialLinks || [],
-      templateId: profile.templateId || profile.themeId || 'premium-brand',
+      templateId: canonicalTemplateId(profile.templateId || profile.themeId || 'cinematic-noir'),
       themeConfig: profile.customThemeColors || profile.themeConfig || {},
+      customFields: profile.customFields || {},
+      renderSource: isFromNfc ? ('nfc_redirect' as const) : ('public_url' as const),
+      fetchStatus: 'loaded',
       businesses: (profile.businesses || []).map((b: any) => ({
         id: b.id,
         companyName: b.companyName || b.name,
         name: b.name || b.companyName,
         tagline: b.jobTitle || b.tagline,
         roleTitle: b.roleTitle || b.jobTitle || b.tagline,
+        description: b.description || undefined,
         websiteUrl: b.businessWebsite || b.websiteUrl || b.website,
         website: b.website || b.businessWebsite || b.websiteUrl,
         address: b.businessAddress || b.address,

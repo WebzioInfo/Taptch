@@ -83,7 +83,7 @@ export function PostPurchaseProfileSetupPage() {
   const [step, setStep] = useState<SetupStep>('select-card');
   const [selectedCardId, setSelectedCardId] = useState<string | null>(queryCardId);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>(
-    queryTemplateId ? canonicalTemplateId(queryTemplateId) : 'obsidian-luxury',
+    queryTemplateId ? canonicalTemplateId(queryTemplateId) : 'cinematic-noir',
   );
   const [previewModalTemplateId, setPreviewModalTemplateId] = useState<string | null>(null);
   const [mode, setMode] = useState<'new' | 'existing'>('new');
@@ -191,6 +191,7 @@ export function PostPurchaseProfileSetupPage() {
       businesses: companyName ? [{ id: 'b1', companyName, name: companyName, jobTitle: companyRole }] : [],
       catalogue: [],
       sections: [],
+      isEmbedded: true,
     }),
     [
       slug,
@@ -351,7 +352,7 @@ export function PostPurchaseProfileSetupPage() {
           </div>
         </header>
 
-        <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6">
+        <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-5 sm:py-7 space-y-6">
           {error && (
             <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-rose-700 text-xs">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -359,16 +360,23 @@ export function PostPurchaseProfileSetupPage() {
             </div>
           )}
 
-          {/* STEP 1: SELECT PURCHASED CARD */}
+          {/* STEP 1: SELECT PURCHASED CARD (50/50 Horizontal Desktop Setup Cards) */}
           {step === 'select-card' && (
-            <div className="max-w-4xl mx-auto space-y-6">
-              <div className="bg-white rounded-2xl border border-[#E8E8E8] p-6 shadow-xs">
-                <h1 className="font-head text-2xl font-semibold text-[#171717]">
-                  Select a Purchased NFC Card
-                </h1>
-                <p className="text-xs sm:text-sm text-[#666666] mt-1">
-                  Choose which NFC card you want to configure and attach a digital profile to.
-                </p>
+            <div className="w-full space-y-5">
+              <div className="bg-white rounded-2xl border border-[#E8E8E8] p-5 sm:p-6 shadow-xs space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-[#E8E8E8]">
+                  <div>
+                    <h1 className="font-head text-xl sm:text-2xl font-semibold text-[#171717]">
+                      NFC Card Setup
+                    </h1>
+                    <p className="text-xs sm:text-sm text-[#666666] mt-0.5">
+                      Choose an NFC card below to configure its profile and tap destination.
+                    </p>
+                  </div>
+                  <span className="font-mono text-xs font-semibold text-[#FF6A00] bg-[#FFF3E9] px-3 py-1 rounded-full border border-[#FF6A00]/20 self-start sm:self-auto">
+                    {purchasedCards.length} {purchasedCards.length === 1 ? 'Card' : 'Cards'}
+                  </span>
+                </div>
 
                 {purchasedCards.length === 0 ? (
                   <div className="text-center py-12 space-y-3">
@@ -384,49 +392,78 @@ export function PostPurchaseProfileSetupPage() {
                     </Link>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-                    {purchasedCards.map((card) => {
+                  <div className="space-y-4">
+                    {purchasedCards.map((card, idx) => {
                       const isAttached = card.profileAssignmentStatus === 'PROFILE_ATTACHED';
                       return (
                         <div
                           key={card.id}
-                          className={`p-4 rounded-xl border transition-all flex flex-col justify-between gap-4 ${selectedCardId === card.id
-                              ? 'border-[#FF6A00] bg-[#FFF3E9]/50'
+                          className={`p-4 sm:p-5 rounded-xl border transition-all grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-center ${
+                            selectedCardId === card.id
+                              ? 'border-[#FF6A00] bg-[#FFF3E9]/40'
                               : 'border-[#E8E8E8] bg-[#F8F9FA]'
-                            }`}
+                          }`}
                         >
-                          <div className="flex items-center gap-3.5">
-                            <div className="w-[92px] h-[58px] rounded-[6px] overflow-hidden border border-[#E8E8E8] shrink-0 bg-[#161616]">
+                          {/* LEFT 50%: Step/Icon, Title, Description, Status */}
+                          <div className="flex items-start sm:items-center gap-4 min-w-0">
+                            <div className="w-[96px] h-[60px] rounded-[6px] overflow-hidden border border-[#E8E8E8] shrink-0 bg-[#161616]">
                               <CardPreview
                                 frontUrl={card.previewFrontUrl}
                                 backUrl={card.previewBackUrl}
-                                width="92px"
-                                height="58px"
+                                width="96px"
+                                height="60px"
                                 cloudinaryWidth={240}
                               />
                             </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="text-xs font-mono text-[#666666]">
-                                Order #{card.order?.orderNumber || card.orderId?.slice(0, 8)} &bull; Card #{card.unitIndex}
-                              </p>
-                              <h3 className="font-semibold text-sm text-[#171717] truncate">
+                            <div className="min-w-0 flex-1 space-y-1">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="font-mono text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-white border border-[#E8E8E8] text-[#666666]">
+                                  Card #{card.unitIndex || idx + 1}
+                                </span>
+                                <span
+                                  className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                                    isAttached
+                                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                      : 'bg-amber-50 text-amber-700 border border-amber-200'
+                                  }`}
+                                >
+                                  {isAttached ? 'Profile Attached' : 'Setup Pending'}
+                                </span>
+                              </div>
+                              <h3 className="font-semibold text-sm sm:text-base text-[#171717] truncate">
                                 {card.productName}
                               </h3>
-                              <p className={`text-[11px] font-semibold mt-0.5 ${isAttached ? 'text-[#16A36A]' : 'text-[#FF6A00]'}`}>
-                                {isAttached ? `Attached: ${card.profile?.displayName || 'Profile'}` : 'Profile Not Set Up'}
+                              <p className="text-xs text-[#666666] truncate">
+                                Order #{card.order?.orderNumber || card.orderId?.slice(0, 8)}
+                                {isAttached && card.profile?.displayName
+                                  ? ` · Linked to ${card.profile.displayName}`
+                                  : ' · Ready for digital profile setup'}
                               </p>
                             </div>
                           </div>
 
-                          <Button
-                            variant="accent"
-                            size="sm"
-                            onClick={() => handleSelectCardAndContinue(card.id)}
-                            className="w-full bg-[#FF6A00] hover:bg-[#E85D00] text-white text-xs"
-                          >
-                            {isAttached ? 'Change / Reassign Profile' : 'Set Up Profile for This Card'}
-                            <ArrowRight className="w-3.5 h-3.5 ml-1" />
-                          </Button>
+                          {/* RIGHT 50%: Configuration Status & Action Controls */}
+                          <div className="flex flex-col sm:flex-row md:justify-end items-stretch sm:items-center gap-3 pt-3 md:pt-0 border-t md:border-t-0 md:border-l border-[#E8E8E8] md:pl-6">
+                            <div className="min-w-0 flex-1 md:text-right">
+                              <span className="text-[10px] font-mono uppercase tracking-wider text-[#666666] block">
+                                Destination
+                              </span>
+                              <span className="font-mono text-xs text-[#171717] truncate block">
+                                {isAttached && card.profile?.slug
+                                  ? `https://taptch.com/${card.profile.slug}`
+                                  : 'Not assigned yet'}
+                              </span>
+                            </div>
+                            <Button
+                              variant="accent"
+                              size="sm"
+                              onClick={() => handleSelectCardAndContinue(card.id)}
+                              className="bg-[#FF6A00] hover:bg-[#E85D00] text-white text-xs font-semibold shrink-0 px-4"
+                            >
+                              {isAttached ? 'Change / Reassign Profile' : 'Set Up Profile'}
+                              <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                            </Button>
+                          </div>
                         </div>
                       );
                     })}
@@ -467,7 +504,13 @@ export function PostPurchaseProfileSetupPage() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {STANDARD_TEMPLATES.map((tpl) => {
+                {STANDARD_TEMPLATES.filter((tpl) => {
+                  const req = accountType.toUpperCase();
+                  return (
+                    tpl.templateType === req ||
+                    (tpl.supportedProfileTypes && tpl.supportedProfileTypes.includes(accountType))
+                  );
+                }).map((tpl) => {
                   const isSelected = canonicalTemplateId(tpl.id) === canonicalTemplateId(selectedTemplateId);
                   return (
                     <div
@@ -579,39 +622,54 @@ export function PostPurchaseProfileSetupPage() {
               )}
 
               {mode === 'existing' && existingProfiles.length > 0 ? (
-                <div className="bg-white rounded-2xl border border-[#E8E8E8] p-6 space-y-4 max-w-3xl">
-                  <h2 className="text-sm font-bold text-[#171717]">Select an Existing Profile to Attach</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {existingProfiles.map((prof) => (
-                      <button
-                        key={prof.id}
-                        type="button"
-                        onClick={() => setSelectedExistingProfileId(prof.id)}
-                        className={`p-4 rounded-xl border text-left transition-all ${selectedExistingProfileId === prof.id
-                            ? 'border-[#FF6A00] bg-[#FFF3E9]'
-                            : 'border-[#E8E8E8] hover:border-zinc-300'
-                          }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold text-sm text-[#171717]">{prof.displayName}</span>
-                          {selectedExistingProfileId === prof.id && (
-                            <Check className="w-4 h-4 text-[#FF6A00]" />
-                          )}
-                        </div>
-                        <p className="text-xs font-mono text-[#666666] mt-0.5">/{prof.slug}</p>
-                      </button>
-                    ))}
+                <div className="bg-white rounded-2xl border border-[#E8E8E8] p-5 sm:p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                  {/* LEFT 50%: Context & Instructions */}
+                  <div className="space-y-2">
+                    <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#FF6A00]">
+                      Attach Existing Profile
+                    </span>
+                    <h2 className="font-head text-lg font-semibold text-[#171717]">
+                      Select an Existing Profile to Link
+                    </h2>
+                    <p className="text-xs text-[#666666] leading-relaxed">
+                      Choose one of your existing digital profiles on the right. Tapping your physical NFC card will immediately resolve to that profile&apos;s public URL.
+                    </p>
                   </div>
-                  <div className="pt-2 flex justify-end">
-                    <Button
-                      variant="accent"
-                      onClick={handleAttachExistingProfile}
-                      disabled={isSubmitting || !selectedExistingProfileId}
-                      className="bg-[#FF6A00] hover:bg-[#E85D00] text-white text-xs font-semibold px-6"
-                    >
-                      {isSubmitting ? 'Attaching...' : 'Attach Selected Profile to Card'}
-                      <ArrowRight className="w-4 h-4 ml-1.5" />
-                    </Button>
+
+                  {/* RIGHT 50%: Profile Selection & Action */}
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {existingProfiles.map((prof) => (
+                        <button
+                          key={prof.id}
+                          type="button"
+                          onClick={() => setSelectedExistingProfileId(prof.id)}
+                          className={`p-3.5 rounded-xl border text-left transition-all ${selectedExistingProfileId === prof.id
+                              ? 'border-[#FF6A00] bg-[#FFF3E9]'
+                              : 'border-[#E8E8E8] hover:border-zinc-300'
+                            }`}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-semibold text-sm text-[#171717] truncate">{prof.displayName}</span>
+                            {selectedExistingProfileId === prof.id && (
+                              <Check className="w-4 h-4 text-[#FF6A00] shrink-0" />
+                            )}
+                          </div>
+                          <p className="text-xs font-mono text-[#666666] mt-0.5 truncate">/{prof.slug}</p>
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex justify-end">
+                      <Button
+                        variant="accent"
+                        onClick={handleAttachExistingProfile}
+                        disabled={isSubmitting || !selectedExistingProfileId}
+                        className="w-full sm:w-auto bg-[#FF6A00] hover:bg-[#E85D00] text-white text-xs font-semibold px-6"
+                      >
+                        {isSubmitting ? 'Attaching...' : 'Attach Selected Profile to Card'}
+                        <ArrowRight className="w-4 h-4 ml-1.5" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -657,14 +715,9 @@ export function PostPurchaseProfileSetupPage() {
                       </div>
                       <div>
                         <label className="block text-xs font-medium text-[#171717] mb-1">Profile Type</label>
-                        <select
-                          value={profileType}
-                          onChange={(e) => setProfileType(e.target.value as 'personal' | 'business')}
-                          className="w-full px-3 py-2 rounded-lg border border-[#E8E8E8] text-sm bg-white"
-                        >
-                          <option value="personal">Personal</option>
-                          <option value="business">Business</option>
-                        </select>
+                        <div className="w-full px-3 py-2 rounded-lg border border-[#E8E8E8] text-sm bg-gray-50 text-gray-700 capitalize font-medium">
+                          {profileType === 'business' ? 'Business Profile' : 'Personal Profile'}
+                        </div>
                       </div>
                     </div>
 
