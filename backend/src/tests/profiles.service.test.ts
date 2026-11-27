@@ -250,6 +250,63 @@ describe('Taptch Digital Profiles Engine — ProfilesService', () => {
         86400,
       );
     });
+
+    it('re-publishing after editing bio overwrites publishedJson and Redis so findBySlug returns the new bio immediately', async () => {
+      // Simulate real Redis get/set/del behavior
+      const store = new Map<string, string>();
+      mockRedisService.get.mockImplementation(async (k: string) => store.get(k) ?? null);
+      mockRedisService.set.mockImplementation(async (k: string, v: string) => {
+        store.set(k, v);
+        return 'OK';
+      });
+      mockRedisService.del.mockImplementation(async (k: string) => {
+        store.delete(k);
+        return 1;
+      });
+
+      // Make where() chainable (.limit/.orderBy/.returning) and awaitable as [] for businesses query
+      mockDbService.db.where.mockImplementation(() => {
+        const arr: any = [];
+        arr.limit = mockDbService.db.limit;
+        arr.orderBy = mockDbService.db.orderBy;
+        arr.returning = mockDbService.db.returning;
+        return arr;
+      });
+
+      const dbProfile: any = {
+        id: 'prof_bio_test',
+        slug: 'bio-user',
+        ownerId: mockActor.userId,
+        displayName: 'Bio User',
+        bio: 'Initial Bio v1',
+        profileType: 'personal',
+        templateId: 'cinematic-noir',
+        themeId: 'cinematic-noir',
+        status: 'DRAFT',
+        publishedJson: {},
+      };
+
+      // Mock findOne / findBySlug DB queries for publish #1
+      vi.spyOn(service, 'findOne').mockResolvedValue({ ...dbProfile } as any);
+      mockDbService.db.limit.mockResolvedValue([{ ...dbProfile }]);
+      mockDbService.db.returning.mockResolvedValue([{ ...dbProfile, status: 'PUBLISHED' }]);
+
+      await service.publish(mockActor, 'prof_bio_test');
+      const firstPublic = await service.findBySlug('bio-user');
+      expect(firstPublic.bio).toBe('Initial Bio v1');
+      expect(firstPublic.status).toBe('PUBLISHED');
+
+      // Now edit bio to v2 and re-publish
+      dbProfile.bio = 'Updated Bio v2';
+      vi.spyOn(service, 'findOne').mockResolvedValue({ ...dbProfile } as any);
+      mockDbService.db.limit.mockResolvedValue([{ ...dbProfile }]);
+      mockDbService.db.returning.mockResolvedValue([{ ...dbProfile, status: 'PUBLISHED' }]);
+
+      await service.publish(mockActor, 'prof_bio_test');
+      const secondPublic = await service.findBySlug('bio-user');
+      expect(secondPublic.bio).toBe('Updated Bio v2');
+      expect(secondPublic.status).toBe('PUBLISHED');
+    });
   });
 
   describe('username rules, locking, and privacy', () => {

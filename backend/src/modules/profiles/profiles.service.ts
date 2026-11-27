@@ -816,12 +816,14 @@ export class ProfilesService {
                 return res;
               });
 
-              // Invalidate Redis cache
+              // Invalidate Redis cache (including negative cache if slug was visited before update)
               if (existing?.slug) {
                 await this.redisService.del(`profile:slug:${existing.slug.toLowerCase()}`);
+                await this.redisService.del(`profile:notfound:${existing.slug.toLowerCase()}`);
               }
               if (updated?.slug && updated.slug !== existing?.slug) {
                 await this.redisService.del(`profile:slug:${updated.slug.toLowerCase()}`);
+                await this.redisService.del(`profile:notfound:${updated.slug.toLowerCase()}`);
               }
 
               return updated;
@@ -829,9 +831,13 @@ export class ProfilesService {
 
   async publish(actor: ActorContext, profileId: string) {
               const profile = await this.findOne(actor, profileId);
+              const cleanSlug = profile.slug.toLowerCase();
 
-              // Invalidate any existing stale cache before compiling fresh snapshot
-              await this.redisService.del(`profile:slug:${profile.slug.toLowerCase()}`);
+              // Invalidate any existing stale cache (positive and negative) before compiling fresh snapshot
+              await Promise.all([
+                this.redisService.del(`profile:slug:${cleanSlug}`),
+                this.redisService.del(`profile:notfound:${cleanSlug}`),
+              ]);
 
               // Pre-compile snapshot directly from fresh DB records and mark status PUBLISHED
               const snapshot = await this.findBySlug(profile.slug, { allowUnpublished: true });

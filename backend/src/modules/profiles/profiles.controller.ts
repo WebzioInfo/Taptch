@@ -51,16 +51,12 @@ export class ProfilesController {
   ) {
     const profile = await this.profilesService.findBySlug(slug);
     if (res) {
-      const isPublished =
-        profile?.status === 'PUBLISHED' ||
-        profile?.status === 'ACTIVE' ||
-        profile?.status === 'APPROVED';
       res.setHeader(
         'Cache-Control',
-        isPublished
-          ? 'public, max-age=30, s-maxage=120, stale-while-revalidate=300'
-          : 'no-store',
+        'no-cache, no-store, must-revalidate',
       );
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
     }
     return profile;
   }

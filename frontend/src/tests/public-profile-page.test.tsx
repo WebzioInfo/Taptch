@@ -154,4 +154,37 @@ describe('PublicProfilePage — Minimal 404, Error Handling & Visibility', () =>
     expect(html).toContain('@rohan.arch');
     expect(html).toContain('Pay via UPI');
   });
+
+  it('resolves relative /api/v1/uploads/file/... avatarUrl to an absolute URL using API base URL', () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    qc.setQueryData(['public-profile', 'sdf'], {
+      id: '50ee4289-0653-4a7c-b1db-05405d3fbe9e',
+      slug: 'sdf',
+      displayName: 'dafs',
+      headline: 'sdfsd',
+      bio: 'test-123',
+      address: 'sddfsdf',
+      avatarUrl: '/api/v1/uploads/file/db4f8043-3616-4e8f-947d-17fc75cdf9e7.webp',
+      profileType: 'personal',
+      status: 'PUBLISHED',
+      templateId: 'cinematic-noir',
+      businesses: [],
+      socialLinks: [],
+      catalogue: [],
+      sections: [],
+    });
+
+    const html = renderToString(
+      <QueryClientProvider client={qc}>
+        <MemoryRouter initialEntries={['/sdf']}>
+          <Routes>
+            <Route path="/:slug" element={<PublicProfilePage />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    expect(html).toContain('test-123');
+    expect(html).toContain('http://localhost:4000/api/v1/uploads/file/db4f8043-3616-4e8f-947d-17fc75cdf9e7.webp');
+  });
 });

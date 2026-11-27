@@ -10,6 +10,19 @@ import { isReservedUsername } from '../config/reservedUsernames';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '../components/ui/button';
 
+function resolveMediaUrl(raw?: string | null): string | undefined {
+  if (!raw) return undefined;
+  const trimmed = raw.trim();
+  if (!trimmed) return undefined;
+  if (/^https?:\/\//i.test(trimmed) || trimmed.startsWith('data:')) {
+    return trimmed;
+  }
+  if (trimmed.startsWith('/') && env.apiUrl) {
+    return `${env.apiUrl}${trimmed}`;
+  }
+  return trimmed;
+}
+
 function isConfirmedNotFoundError(err: unknown): boolean {
   if (!err || typeof err !== 'object') return false;
   const anyErr = err as { statusCode?: number; status?: number; message?: string };
@@ -50,7 +63,8 @@ export function PublicProfilePage() {
     },
     enabled: !isReserved,
     retry: false, // Never retry confirmed 404s or missing profiles
-    staleTime: 60 * 1000,
+    staleTime: 0,
+    refetchOnMount: 'always',
     gcTime: 5 * 60 * 1000,
   });
 
@@ -62,8 +76,8 @@ export function PublicProfilePage() {
       displayName: profile.displayName,
       headline: profile.headline,
       bio: profile.bio,
-      avatarUrl: profile.avatarUrl,
-      coverUrl: profile.coverUrl,
+      avatarUrl: resolveMediaUrl(profile.avatarUrl),
+      coverUrl: resolveMediaUrl(profile.coverUrl),
       phone: profile.phone || profile.phoneNumber || profile.directPhone,
       whatsapp:
         profile.whatsapp ||
@@ -91,7 +105,7 @@ export function PublicProfilePage() {
         websiteUrl: b.businessWebsite || b.websiteUrl || b.website,
         website: b.website || b.businessWebsite || b.websiteUrl,
         address: b.businessAddress || b.address,
-        logoUrl: b.logoUrl,
+        logoUrl: resolveMediaUrl(b.logoUrl),
         email: b.email || b.businessEmail,
         phone: b.phone || b.businessPhone,
         whatsapp: b.whatsapp,
