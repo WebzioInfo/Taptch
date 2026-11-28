@@ -4,6 +4,7 @@ import { MapPin, ExternalLink } from 'lucide-react';
 import type { BusinessItem, ProfileRenderData } from '../ProfileRenderer';
 import { TEMPLATE_PREVIEW_PLACEHOLDER } from '@/modules/templates/constants';
 import { buildSocialProfileUrl } from '@/modules/social/platforms';
+import { WhatsAppIcon, getSocialPlatformIcon } from '@/lib/social-icons';
 import './cinematic-noir.css';
 
 export interface CinematicProfileTemplateProps {
@@ -382,7 +383,8 @@ export function CinematicProfileTemplate({
                     rel="noopener noreferrer"
                     className="cn-btn-hero-action cn-btn-hero-secondary"
                   >
-                    WhatsApp
+                    <WhatsAppIcon className="w-[19px] h-[19px] shrink-0 text-[#25D366]" size={19} aria-hidden="true" />
+                    <span>WhatsApp</span>
                   </a>
                 )}
               </div>
@@ -429,7 +431,6 @@ export function CinematicProfileTemplate({
               {showVentures && businesses.length > 0 && (
                 <div className="cn-ventures-list">
                   {businesses.map((biz, idx) => {
-                    const num = String(idx + 1).padStart(2, '0');
                     const href = normalizeUrl(biz.websiteUrl);
                     const logoUrl = (biz as { logoUrl?: string | null }).logoUrl;
                     const role = biz.roleTitle || biz.tagline || '';
@@ -441,7 +442,6 @@ export function CinematicProfileTemplate({
                     const content = (
                       <>
                         <div className="cn-venture-left">
-                          <span className="cn-venture-num">{num}</span>
                           <div className="cn-logo-tile">
                             {logoUrl ? (
                               <img src={logoUrl} alt={biz.companyName} loading="lazy" />
@@ -565,11 +565,17 @@ export function CinematicProfileTemplate({
                   href={channel.href}
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label={`${channel.platformName}: ${channel.handle}`}
                   className="cn-btn-action-row"
                 >
-                  <div className="cn-action-row-left">
-                    <span className="cn-action-tag">{channel.platformName}</span>
-                    <span className="cn-action-main-value">{channel.handle}</span>
+                  <div className="cn-action-row-left cn-action-row-qr-wrap">
+                    <span className="shrink-0 flex items-center justify-center">
+                      {getSocialPlatformIcon(channel.id, 'w-4 h-4', 16, { branded: true })}
+                    </span>
+                    <div className="flex flex-col min-w-0">
+                      <span className="cn-action-tag">{channel.platformName}</span>
+                      <span className="cn-action-main-value">{channel.handle}</span>
+                    </div>
                   </div>
                   <span className="cn-action-row-right">↗</span>
                 </a>

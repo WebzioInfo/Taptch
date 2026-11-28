@@ -198,9 +198,9 @@ describe('Taptch Profile Builder — Theme Customization & State Engine', () => 
         extractSocialHandle,
       } = await import('../lib/socials');
 
-      expect(SUPPORTED_SOCIAL_PLATFORMS.length).toBe(14);
+      expect(SUPPORTED_SOCIAL_PLATFORMS.length).toBe(18);
 
-      // Verify canonical URL building for all 14 platforms
+      // Verify canonical URL building for all 18 platforms
       expect(normalizeSocialUrl('instagram', '@vikram')).toBe('https://instagram.com/vikram');
       expect(normalizeSocialUrl('instagram', 'https://instagram.com/vikram')).toBe('https://instagram.com/vikram');
       expect(normalizeSocialUrl('linkedin', 'vikram-director')).toBe('https://linkedin.com/in/vikram-director');

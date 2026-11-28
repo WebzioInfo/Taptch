@@ -184,7 +184,8 @@ export const SOCIAL_PLATFORM_MAP: Record<string, SocialPlatformConfig> = Object.
 export function getSocialPlatform(platformId?: string | null): SocialPlatformConfig | null {
   if (!platformId) return null;
   const norm = platformId.toLowerCase().trim();
-  return SOCIAL_PLATFORM_MAP[norm] || null;
+  const alias = norm === 'x' || norm === 'x (twitter)' || norm === 'x-twitter' ? 'twitter' : norm;
+  return SOCIAL_PLATFORM_MAP[alias] || null;
 }
 
 /**
@@ -217,6 +218,12 @@ export function extractSocialUsername(platformId: string, rawInput?: string | nu
     } catch {
       return '';
     }
+  }
+
+  // Strip platform path prefix (e.g. u/ or user/ for Reddit, in/ for LinkedIn) if typed without full URL
+  if (platform?.pathPrefixRegex) {
+    const withSlash = value.startsWith('/') ? value : `/${value}`;
+    value = withSlash.replace(platform.pathPrefixRegex, '').replace(/^\/+/, '');
   }
 
   // Strip any leading @ symbols

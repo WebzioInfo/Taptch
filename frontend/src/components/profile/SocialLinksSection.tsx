@@ -80,8 +80,8 @@ export function SocialLinksSection({
                 style={{ backgroundColor: cardBg, borderColor: border, color: text }}
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="shrink-0" style={{ color: accent }}>
-                    {getSocialPlatformIcon(link.platform, 'w-4 h-4')}
+                  <span className="shrink-0">
+                    {getSocialPlatformIcon(link.platform, 'w-4 h-4', 16, { branded: true })}
                   </span>
                   <div className="truncate">
                     <span className="font-bold block text-[11px] truncate">{platformName}</span>
@@ -126,8 +126,8 @@ export function SocialLinksSection({
                   color: text,
                 }}
               >
-                <span className="shrink-0" style={{ color: accent }}>
-                  {getSocialPlatformIcon(link.platform, 'w-3.5 h-3.5')}
+                <span className="shrink-0">
+                  {getSocialPlatformIcon(link.platform, 'w-3.5 h-3.5', 14, { branded: true })}
                 </span>
                 <span className="text-[11px] font-medium">{platformName}</span>
               </a>
@@ -164,8 +164,8 @@ export function SocialLinksSection({
                 className="p-2.5 rounded-xl border flex items-center gap-2.5 text-xs transition-all hover:border-purple-400/50 hover:bg-purple-950/30 group"
                 style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', borderColor: border, color: text }}
               >
-                <div className="p-2 rounded-lg bg-purple-900/40 text-purple-300 border border-purple-500/20 group-hover:scale-110 transition-transform shrink-0">
-                  {getSocialPlatformIcon(link.platform, 'w-3.5 h-3.5')}
+                <div className="p-2 rounded-lg bg-purple-900/40 text-purple-200 border border-purple-500/20 group-hover:scale-110 transition-transform shrink-0">
+                  {getSocialPlatformIcon(link.platform, 'w-3.5 h-3.5', 14, { branded: true })}
                 </div>
                 <div className="min-w-0 flex-1">
                   <span className="font-semibold block text-white text-[11px] truncate">{platformName}</span>
@@ -221,12 +221,12 @@ export function SocialLinksSection({
               <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border transition-transform group-hover:scale-105"
                 style={{
-                  backgroundColor: `${accent}18`,
-                  borderColor: `${accent}40`,
-                  color: accent,
+                  backgroundColor: `${accent}14`,
+                  borderColor: `${accent}33`,
+                  color: heading,
                 }}
               >
-                {getSocialPlatformIcon(link.platform, 'w-4 h-4')}
+                {getSocialPlatformIcon(link.platform, 'w-4 h-4', 16, { branded: true })}
               </div>
               <div className="min-w-0 flex-1">
                 <span className="font-semibold block text-xs truncate" style={{ color: heading }}>

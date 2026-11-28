@@ -1310,7 +1310,7 @@ export function BuilderPage() {
                       {/* Card Header: Venture number on left, Up/Down/Delete on right */}
                       <div className="flex items-center justify-between pb-1 border-b border-[var(--border)]/50">
                         <span className="font-mono text-[10px] text-[var(--accent-text)] font-semibold uppercase tracking-wider">
-                          Venture #{String(idx + 1).padStart(2, '0')}
+                          Venture
                         </span>
                         <div className="flex items-center gap-0.5">
                           <button

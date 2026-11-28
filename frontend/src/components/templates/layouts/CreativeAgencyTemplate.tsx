@@ -24,6 +24,7 @@ import type { UpiPaymentConfig } from '@/lib/upi';
 import { DirectContactSection } from '@/components/profile/DirectContactSection';
 import { SocialLinksSection } from '@/components/profile/SocialLinksSection';
 import { formatTelLink, formatWhatsAppLink } from '@/lib/contact-utils';
+import { WhatsAppIcon } from '@/lib/social-icons';
 
 import { TemplateContactForm } from '../TemplateContactForm';
 
@@ -94,33 +95,33 @@ export function CreativeAgencyTemplate({
             </div>
           </div>
 
-            <div className="px-5 pb-6 pt-0 relative flex flex-col items-center text-center -mt-14 sm:-mt-16">
-              <div className="h-28 w-28 sm:h-32 sm:w-32 rounded-2xl border-4 border-[#151833] overflow-hidden bg-purple-950 flex items-center justify-center font-bold text-3xl shadow-2xl shrink-0 text-purple-400">
-                {profile.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={profile.avatarUrl}
-                    alt={profile.displayName}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span>{profile.displayName.charAt(0)}</span>
-                )}
-              </div>
-
-                    <div className="w-full min-w-0 mt-4 space-y-1.5 px-2">
-                      <div className="flex items-center justify-center gap-2">
-                        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white break-words">
-                          {profile.displayName}
-                        </h1>
-                        <ShieldCheck className="h-5 w-5 text-purple-400 shrink-0" />
-                      </div>
-                      {profile.headline && (
-                          <p className="text-sm font-medium text-purple-200/90 leading-snug break-words max-w-sm mx-auto">
-                            {profile.headline}
-                          </p>
+          <div className="px-5 pb-6 pt-0 relative flex flex-col items-center text-center -mt-14 sm:-mt-16">
+            <div className="h-28 w-28 sm:h-32 sm:w-32 rounded-2xl border-4 border-[#151833] overflow-hidden bg-purple-950 flex items-center justify-center font-bold text-3xl shadow-2xl shrink-0 text-purple-400">
+              {profile.avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={profile.avatarUrl}
+                  alt={profile.displayName}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span>{profile.displayName.charAt(0)}</span>
               )}
-                          {profile.businesses?.[0]?.companyName && (
+            </div>
+
+            <div className="w-full min-w-0 mt-4 space-y-1.5 px-2">
+              <div className="flex items-center justify-center gap-2">
+                <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white break-words">
+                  {profile.displayName}
+                </h1>
+                <ShieldCheck className="h-5 w-5 text-purple-400 shrink-0" />
+              </div>
+              {profile.headline && (
+                <p className="text-sm font-medium text-purple-200/90 leading-snug break-words max-w-sm mx-auto">
+                  {profile.headline}
+                </p>
+              )}
+              {profile.businesses?.[0]?.companyName && (
                 <p className="text-xs text-purple-300 font-medium break-words">
                   {profile.businesses[0].companyName}
                   {profile.businesses[0].roleTitle && ` • ${profile.businesses[0].roleTitle}`}
@@ -170,7 +171,7 @@ export function CreativeAgencyTemplate({
                         variant="outline"
                         className="w-full border-emerald-400/40 bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 text-xs h-9 px-3 gap-1.5"
                       >
-                        <MessageSquare className="h-3.5 w-3.5 shrink-0" />
+                        <WhatsAppIcon className="h-3.5 w-3.5 shrink-0 text-[#25D366]" aria-hidden="true" />
                         <span>WhatsApp</span>
                       </Button>
                     </a>
@@ -357,6 +358,6 @@ export function CreativeAgencyTemplate({
         </footer>
       </div>
     </div>
-                      );
+  );
 }
 

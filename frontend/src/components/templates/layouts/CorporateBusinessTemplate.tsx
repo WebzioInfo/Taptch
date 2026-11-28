@@ -26,6 +26,7 @@ import type { UpiPaymentConfig } from '@/lib/upi';
 import { DirectContactSection } from '@/components/profile/DirectContactSection';
 import { SocialLinksSection } from '@/components/profile/SocialLinksSection';
 import { formatTelLink, formatWhatsAppLink } from '@/lib/contact-utils';
+import { WhatsAppIcon } from '@/lib/social-icons';
 
 import { TemplateContactForm } from '../TemplateContactForm';
 
@@ -194,7 +195,7 @@ export function CorporateBusinessTemplate({
                                   variant="outline"
                                   className="w-full border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-xs h-9 px-3 gap-1.5"
                                 >
-                                  <MessageSquare className="h-3.5 w-3.5 shrink-0" />
+                                  <WhatsAppIcon className="h-3.5 w-3.5 shrink-0 text-[#25D366]" aria-hidden="true" />
                                   <span>WhatsApp</span>
                                 </Button>
                               </a>

@@ -209,6 +209,64 @@ export interface SocialPlatformConfig {
       },
       validate: (val) => Boolean(val.trim()),
     },
+    threads: {
+      id: 'threads',
+      name: 'Threads',
+      placeholder: '@username or threads.net/@username',
+      prefixUrl: 'https://threads.net/@',
+      domain: 'threads.net',
+      sanitizeUsername: defaultSanitizer,
+      buildUrl: (val) => {
+        const clean = defaultSanitizer(val);
+        if (clean.startsWith('http://') || clean.startsWith('https://')) return clean;
+        const handle = clean.startsWith('@') ? clean : `@${clean}`;
+        return `https://threads.net/${handle}`;
+      },
+      validate: (val) => Boolean(val.trim()),
+    },
+    twitch: {
+      id: 'twitch',
+      name: 'Twitch',
+      placeholder: 'username or twitch.tv/username',
+      prefixUrl: 'https://twitch.tv/',
+      domain: 'twitch.tv',
+      sanitizeUsername: defaultSanitizer,
+      buildUrl: (val) => {
+        const clean = defaultSanitizer(val);
+        if (clean.startsWith('http://') || clean.startsWith('https://')) return clean;
+        return `https://twitch.tv/${clean}`;
+      },
+      validate: (val) => Boolean(val.trim()),
+    },
+    medium: {
+      id: 'medium',
+      name: 'Medium',
+      placeholder: '@username or medium.com/@username',
+      prefixUrl: 'https://medium.com/@',
+      domain: 'medium.com',
+      sanitizeUsername: defaultSanitizer,
+      buildUrl: (val) => {
+        const clean = defaultSanitizer(val);
+        if (clean.startsWith('http://') || clean.startsWith('https://')) return clean;
+        const handle = clean.startsWith('@') ? clean : `@${clean}`;
+        return `https://medium.com/${handle}`;
+      },
+      validate: (val) => Boolean(val.trim()),
+    },
+    reddit: {
+      id: 'reddit',
+      name: 'Reddit',
+      placeholder: 'username or reddit.com/u/username',
+      prefixUrl: 'https://reddit.com/u/',
+      domain: 'reddit.com',
+      sanitizeUsername: defaultSanitizer,
+      buildUrl: (val) => {
+        const clean = defaultSanitizer(val);
+        if (clean.startsWith('http://') || clean.startsWith('https://')) return clean;
+        return `https://reddit.com/u/${clean.replace(/^u\//i, '')}`;
+      },
+      validate: (val) => Boolean(val.trim()),
+    },
     website: {
       id: 'website',
       name: 'Website / Portfolio',
@@ -242,6 +300,10 @@ export interface SocialPlatformConfig {
     { id: 'dribbble', name: 'Dribbble', placeholder: 'username or dribbble.com/username' },
     { id: 'pinterest', name: 'Pinterest', placeholder: 'username or pinterest.com/username' },
     { id: 'snapchat', name: 'Snapchat', placeholder: 'username or snapchat.com/add/username' },
+    { id: 'threads', name: 'Threads', placeholder: '@username or threads.net/@username' },
+    { id: 'twitch', name: 'Twitch', placeholder: 'username or twitch.tv/username' },
+    { id: 'medium', name: 'Medium', placeholder: '@username or medium.com/@username' },
+    { id: 'reddit', name: 'Reddit', placeholder: 'username or reddit.com/u/username' },
     { id: 'website', name: 'Website / Link', placeholder: 'https://yourportfolio.com' },
   ];
 

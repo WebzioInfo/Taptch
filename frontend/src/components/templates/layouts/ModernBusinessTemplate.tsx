@@ -25,6 +25,7 @@ import type { UpiPaymentConfig } from '@/lib/upi';
 import { DirectContactSection } from '@/components/profile/DirectContactSection';
 import { SocialLinksSection } from '@/components/profile/SocialLinksSection';
 import { formatTelLink, formatWhatsAppLink } from '@/lib/contact-utils';
+import { WhatsAppIcon } from '@/lib/social-icons';
 
 import { TemplateContactForm } from '../TemplateContactForm';
 
@@ -105,33 +106,33 @@ export function ModernBusinessTemplate({
             </div>
           </div>
 
-            <div className="px-5 pb-6 pt-0 relative flex flex-col items-center text-center -mt-14 sm:-mt-16">
-              <div className="h-28 w-28 sm:h-32 sm:w-32 rounded-2xl border-4 border-[#064e3b] overflow-hidden bg-emerald-950 flex items-center justify-center font-bold text-3xl shadow-2xl shrink-0">
-                {profile.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={profile.avatarUrl}
-                    alt={profile.displayName}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-emerald-400">{profile.displayName.charAt(0)}</span>
-                )}
-              </div>
-
-                    <div className="w-full min-w-0 mt-4 space-y-1.5 px-2">
-                      <div className="flex items-center justify-center gap-2">
-                        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white break-words">
-                          {profile.displayName}
-                        </h1>
-                        <ShieldCheck className="h-5 w-5 text-emerald-400 shrink-0" />
-                      </div>
-                      {profile.headline && (
-                          <p className="text-sm font-medium text-emerald-100 leading-snug break-words max-w-sm mx-auto">
-                            {profile.headline}
-                          </p>
+          <div className="px-5 pb-6 pt-0 relative flex flex-col items-center text-center -mt-14 sm:-mt-16">
+            <div className="h-28 w-28 sm:h-32 sm:w-32 rounded-2xl border-4 border-[#064e3b] overflow-hidden bg-emerald-950 flex items-center justify-center font-bold text-3xl shadow-2xl shrink-0">
+              {profile.avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={profile.avatarUrl}
+                  alt={profile.displayName}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-emerald-400">{profile.displayName.charAt(0)}</span>
               )}
-                          {primaryBusiness?.companyName && (
+            </div>
+
+            <div className="w-full min-w-0 mt-4 space-y-1.5 px-2">
+              <div className="flex items-center justify-center gap-2">
+                <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white break-words">
+                  {profile.displayName}
+                </h1>
+                <ShieldCheck className="h-5 w-5 text-emerald-400 shrink-0" />
+              </div>
+              {profile.headline && (
+                <p className="text-sm font-medium text-emerald-100 leading-snug break-words max-w-sm mx-auto">
+                  {profile.headline}
+                </p>
+              )}
+              {primaryBusiness?.companyName && (
                 <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-emerald-200/80 pt-1">
                   <span className="flex items-center gap-1.5">
                     <Building className="h-3.5 w-3.5 text-emerald-400" />
@@ -189,7 +190,7 @@ export function ModernBusinessTemplate({
                         variant="outline"
                         className="w-full border-emerald-400/50 bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 text-xs h-9 px-3 gap-1.5"
                       >
-                        <MessageSquare className="h-3.5 w-3.5 shrink-0" />
+                        <WhatsAppIcon className="h-3.5 w-3.5 shrink-0 text-[#25D366]" aria-hidden="true" />
                         <span>WhatsApp</span>
                       </Button>
                     </a>
@@ -282,27 +283,24 @@ export function ModernBusinessTemplate({
               <button
                 type="button"
                 onClick={() => setActiveTab('all')}
-                className={`px-3 py-1 text-xs rounded-lg font-medium transition-colors ${
-                  activeTab === 'all' ? 'bg-emerald-500 text-slate-950 font-bold' : 'text-emerald-300 hover:text-white'
-                }`}
+                className={`px-3 py-1 text-xs rounded-lg font-medium transition-colors ${activeTab === 'all' ? 'bg-emerald-500 text-slate-950 font-bold' : 'text-emerald-300 hover:text-white'
+                  }`}
               >
                 All ({catalogue.length})
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab('products')}
-                className={`px-3 py-1 text-xs rounded-lg font-medium transition-colors ${
-                  activeTab === 'products' ? 'bg-emerald-500 text-slate-950 font-bold' : 'text-emerald-300 hover:text-white'
-                }`}
+                className={`px-3 py-1 text-xs rounded-lg font-medium transition-colors ${activeTab === 'products' ? 'bg-emerald-500 text-slate-950 font-bold' : 'text-emerald-300 hover:text-white'
+                  }`}
               >
                 Products
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab('services')}
-                className={`px-3 py-1 text-xs rounded-lg font-medium transition-colors ${
-                  activeTab === 'services' ? 'bg-emerald-500 text-slate-950 font-bold' : 'text-emerald-300 hover:text-white'
-                }`}
+                className={`px-3 py-1 text-xs rounded-lg font-medium transition-colors ${activeTab === 'services' ? 'bg-emerald-500 text-slate-950 font-bold' : 'text-emerald-300 hover:text-white'
+                  }`}
               >
                 Services
               </button>
@@ -403,5 +401,5 @@ export function ModernBusinessTemplate({
         </footer>
       </div>
     </div>
-                      );
+  );
 }

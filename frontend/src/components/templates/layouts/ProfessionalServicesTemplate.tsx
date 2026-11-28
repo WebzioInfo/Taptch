@@ -24,6 +24,7 @@ import type { UpiPaymentConfig } from '@/lib/upi';
 import { DirectContactSection } from '@/components/profile/DirectContactSection';
 import { SocialLinksSection } from '@/components/profile/SocialLinksSection';
 import { formatTelLink, formatWhatsAppLink } from '@/lib/contact-utils';
+import { WhatsAppIcon } from '@/lib/social-icons';
 
 import { TemplateContactForm } from '../TemplateContactForm';
 
@@ -96,33 +97,33 @@ export function ProfessionalServicesTemplate({
             </div>
           </div>
 
-            <div className="px-5 pb-6 pt-0 relative flex flex-col items-center text-center -mt-14 sm:-mt-16">
-              <div className="h-28 w-28 sm:h-32 sm:w-32 rounded-2xl border-4 border-white overflow-hidden bg-[#FAF8F5] flex items-center justify-center font-bold text-3xl shadow-xl shrink-0 text-[#8C6D3B]">
-                {profile.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={profile.avatarUrl}
-                    alt={profile.displayName}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span>{profile.displayName.charAt(0)}</span>
-                )}
-              </div>
-
-                    <div className="w-full min-w-0 mt-4 space-y-1.5 px-2">
-                      <div className="flex items-center justify-center gap-2">
-                        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1E1E24] font-serif break-words">
-                          {profile.displayName}
-                        </h1>
-                        <ShieldCheck className="h-5 w-5 text-[#8C6D3B] shrink-0" />
-                      </div>
-                      {profile.headline && (
-                          <p className="text-sm text-[#4A4A52] leading-snug font-serif break-words max-w-sm mx-auto">
-                            {profile.headline}
-                          </p>
+          <div className="px-5 pb-6 pt-0 relative flex flex-col items-center text-center -mt-14 sm:-mt-16">
+            <div className="h-28 w-28 sm:h-32 sm:w-32 rounded-2xl border-4 border-white overflow-hidden bg-[#FAF8F5] flex items-center justify-center font-bold text-3xl shadow-xl shrink-0 text-[#8C6D3B]">
+              {profile.avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={profile.avatarUrl}
+                  alt={profile.displayName}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span>{profile.displayName.charAt(0)}</span>
               )}
-                          {primaryBusiness?.companyName && (
+            </div>
+
+            <div className="w-full min-w-0 mt-4 space-y-1.5 px-2">
+              <div className="flex items-center justify-center gap-2">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1E1E24] font-serif break-words">
+                  {profile.displayName}
+                </h1>
+                <ShieldCheck className="h-5 w-5 text-[#8C6D3B] shrink-0" />
+              </div>
+              {profile.headline && (
+                <p className="text-sm text-[#4A4A52] leading-snug font-serif break-words max-w-sm mx-auto">
+                  {profile.headline}
+                </p>
+              )}
+              {primaryBusiness?.companyName && (
                 <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-[#71717A] pt-1">
                   <span className="flex items-center gap-1.5">
                     <Building className="h-3.5 w-3.5 text-[#8C6D3B]" />
@@ -180,7 +181,7 @@ export function ProfessionalServicesTemplate({
                         variant="outline"
                         className="w-full border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 text-xs h-9 px-3 gap-1.5"
                       >
-                        <MessageSquare className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                        <WhatsAppIcon className="h-3.5 w-3.5 text-[#25D366] shrink-0" aria-hidden="true" />
                         <span>WhatsApp</span>
                       </Button>
                     </a>
@@ -350,5 +351,5 @@ export function ProfessionalServicesTemplate({
         </footer>
       </div>
     </div>
-                      );
+  );
 }

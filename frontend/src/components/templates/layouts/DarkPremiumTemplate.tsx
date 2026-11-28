@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { MapPin, Phone, MessageSquare, Bookmark, ExternalLink } from 'lucide-react';
+import { MapPin, Phone, Bookmark, ExternalLink } from 'lucide-react';
+import { WhatsAppIcon } from '@/lib/social-icons';
 import type { TemplateLayoutProps } from './types';
 import { resolveMediaUrl } from '@/lib/media-url';
 import { formatTelLink, formatWhatsAppLink } from '@/lib/contact-utils';
@@ -150,7 +151,7 @@ export function DarkPremiumTemplate({ profile, onDownloadVCard }: TemplateLayout
                     rel="noopener noreferrer"
                     className="btn btn-secondary"
                   >
-                    <MessageSquare className="icon" aria-hidden="true" />
+                    <WhatsAppIcon className="w-[19px] h-[19px] shrink-0 text-[#25D366]" size={19} aria-hidden="true" />
                     <span>WhatsApp</span>
                   </a>
                 )}
