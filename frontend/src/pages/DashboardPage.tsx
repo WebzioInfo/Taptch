@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ApiClient } from '../services/api';
 import { Button } from '../components/ui/button';
+import { Modal } from '../components/ui/modal';
 import { Plus, ExternalLink, CreditCard, Edit3, AlertCircle, RefreshCw, Trash2, Loader2, Sparkles } from 'lucide-react';
 
 export function DashboardPage() {
@@ -15,6 +16,9 @@ export function DashboardPage() {
   });
   const profiles = Array.isArray(rawProfiles) ? rawProfiles : [];
 
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [confirmName, setConfirmName] = useState('');
+
   const deleteMutation = useMutation({
     mutationFn: async (profileId: string) => {
       setDeletingId(profileId);
@@ -22,7 +26,12 @@ export function DashboardPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profiles'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-profiles'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-cards'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-overview'] });
       setDeletingId(null);
+      setDeleteTarget(null);
+      setConfirmName('');
     },
     onError: () => {
       setDeletingId(null);
@@ -30,76 +39,76 @@ export function DashboardPage() {
   });
 
   return (
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
-        {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
-            <div>
-                <h1 className="font-head text-2xl font-medium tracking-tight text-[var(--ink)]">
-                  Digital Profiles
-                </h1>
-                <p className="font-body text-sm text-[var(--ink-muted)] mt-1">
-                  Manage your personal and business contactless cards
-                </p>
-            </div>
-            <Link to="/builder/new">
-                <Button variant="accent" className="rounded-[var(--radius-sm)] text-xs font-medium gap-1.5 shadow-none">
-                  <Plus className="w-4 h-4" />
-                  <span>Create New Profile</span>
-                </Button>
-            </Link>
-          </div>
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
+        <div>
+          <h1 className="font-head text-2xl font-medium tracking-tight text-[var(--ink)]">
+            Digital Profiles
+          </h1>
+          <p className="font-body text-sm text-[var(--ink-muted)] mt-1">
+            Manage your personal and business contactless cards
+          </p>
+        </div>
+        <Link to="/builder/new">
+          <Button variant="accent" className="rounded-[var(--radius-sm)] text-xs font-medium gap-1.5 shadow-none">
+            <Plus className="w-4 h-4" />
+            <span>Create New Profile</span>
+          </Button>
+        </Link>
+      </div>
 
-          {/* Profiles Grid */}
-          <div className="mt-8">
-            {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                {[1, 2, 3].map((i) => (
+      {/* Profiles Grid */}
+      <div className="mt-8">
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {[1, 2, 3].map((i) => (
               <div
                 key={i}
                 className="h-52 rounded-[var(--radius-md)] bg-[var(--bg-surface)] border border-[var(--border)] animate-pulse"
               />
-                ))}
-              </div>
-            ) : isError ? (
-              <div className="text-center py-12 px-4 rounded-[var(--radius-md)] border border-rose-200 bg-rose-50/60">
-                <AlertCircle className="w-8 h-8 text-rose-600 mx-auto mb-3" />
-                <h3 className="font-head text-base font-medium text-[#171717] mb-1">
-                  Could not load your digital profiles
-                </h3>
-                <p className="font-body text-xs text-[#666666] max-w-md mx-auto mb-5">
-                  {error instanceof Error ? error.message : 'An unexpected error occurred while fetching profiles.'}
-                </p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => refetch()}
-                  className="rounded-[var(--radius-sm)] text-xs font-medium gap-1.5"
-                >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  <span>Retry</span>
-                </Button>
-              </div>
-            ) : profiles.length === 0 ? (
-                  <div className="text-center py-16 px-4 rounded-[var(--radius-md)] border border-dashed border-[var(--border)] bg-[var(--bg-surface)]">
-                    <div className="w-12 h-12 rounded-[var(--radius-sm)] bg-[var(--bg-raised)] border border-[var(--border)] flex items-center justify-center text-[var(--accent-text)] mx-auto mb-4">
-                      <CreditCard className="w-5 h-5" />
-                    </div>
-                      <h3 className="font-head text-lg font-medium text-[var(--ink)] mb-1">No Profiles Yet</h3>
-                      <p className="font-body text-xs sm:text-sm text-[var(--ink-muted)] max-w-md mx-auto mb-6">
-                        Create your first digital profile to start sharing your contacts, portfolio, and socials with a single contactless tap.
-                      </p>
-                      <Link to="/builder/new">
-                          <Button variant="accent" className="rounded-[var(--radius-sm)] text-xs font-medium gap-1.5">
-                            <Plus className="w-4 h-4" />
-                            <span>Build My First Card</span>
-                          </Button>
-                      </Link>
-                  </div>
-                  ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                              {profiles.map((p) => {
-                                const isPublished = p.status === 'PUBLISHED';
-                                return (
+            ))}
+          </div>
+        ) : isError ? (
+          <div className="text-center py-12 px-4 rounded-[var(--radius-md)] border border-rose-200 bg-rose-50/60">
+            <AlertCircle className="w-8 h-8 text-rose-600 mx-auto mb-3" />
+            <h3 className="font-head text-base font-medium text-[#171717] mb-1">
+              Could not load your digital profiles
+            </h3>
+            <p className="font-body text-xs text-[#666666] max-w-md mx-auto mb-5">
+              {error instanceof Error ? error.message : 'An unexpected error occurred while fetching profiles.'}
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => refetch()}
+              className="rounded-[var(--radius-sm)] text-xs font-medium gap-1.5"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Retry</span>
+            </Button>
+          </div>
+        ) : profiles.length === 0 ? (
+          <div className="text-center py-16 px-4 rounded-[var(--radius-md)] border border-dashed border-[var(--border)] bg-[var(--bg-surface)]">
+            <div className="w-12 h-12 rounded-[var(--radius-sm)] bg-[var(--bg-raised)] border border-[var(--border)] flex items-center justify-center text-[var(--accent-text)] mx-auto mb-4">
+              <CreditCard className="w-5 h-5" />
+            </div>
+            <h3 className="font-head text-lg font-medium text-[var(--ink)] mb-1">No Profiles Yet</h3>
+            <p className="font-body text-xs sm:text-sm text-[var(--ink-muted)] max-w-md mx-auto mb-6">
+              Create your first digital profile to start sharing your contacts, portfolio, and socials with a single contactless tap.
+            </p>
+            <Link to="/builder/new">
+              <Button variant="accent" className="rounded-[var(--radius-sm)] text-xs font-medium gap-1.5">
+                <Plus className="w-4 h-4" />
+                <span>Build My First Card</span>
+              </Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {profiles.map((p) => {
+              const isPublished = p.status === 'PUBLISHED';
+              return (
                 <div
                   key={p.id}
                   className="p-6 rounded-[var(--radius-md)] bg-[var(--bg-surface)] border border-[var(--border)] hover:border-[var(--border-strong)] transition-colors flex flex-col justify-between"
@@ -107,11 +116,10 @@ export function DashboardPage() {
                   <div>
                     <div className="flex items-center justify-between mb-4">
                       <span
-                        className={`px-2 py-0.5 rounded-[var(--radius-sm)] font-mono text-[10px] font-medium uppercase tracking-[0.04em] ${
-                          isPublished
-                            ? 'bg-[var(--success)]/15 text-[var(--success)] border border-[var(--success)]/30'
-                            : 'bg-[var(--bg-raised)] text-[var(--ink-muted)] border border-[var(--border)]'
-                        }`}
+                        className={`px-2 py-0.5 rounded-[var(--radius-sm)] font-mono text-[10px] font-medium uppercase tracking-[0.04em] ${isPublished
+                          ? 'bg-[var(--success)]/15 text-[var(--success)] border border-[var(--success)]/30'
+                          : 'bg-[var(--bg-raised)] text-[var(--ink-muted)] border border-[var(--border)]'
+                          }`}
                       >
                         {isPublished ? 'Published' : 'Draft'}
                       </span>
@@ -140,9 +148,8 @@ export function DashboardPage() {
                       <button
                         type="button"
                         onClick={() => {
-                          if (window.confirm(`Are you sure you want to delete profile "${p.displayName || p.slug}"?`)) {
-                            deleteMutation.mutate(p.id);
-                          }
+                          setDeleteTarget({ id: p.id, name: p.displayName || p.slug });
+                          setConfirmName('');
                         }}
                         disabled={deletingId === p.id}
                         className="flex items-center text-[var(--ink-muted)] hover:text-[var(--danger)] transition-colors disabled:opacity-50"
@@ -168,11 +175,74 @@ export function DashboardPage() {
                     </a>
                   </div>
                 </div>
-                        );
+              );
             })}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                );
+          </div >
+        )
+        }
+        <Modal
+          open={Boolean(deleteTarget)}
+          onClose={() => {
+            setDeleteTarget(null);
+            setConfirmName('');
+          }}
+          title="Delete profile?"
+          size="sm"
+          footer={
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setDeleteTarget(null);
+                  setConfirmName('');
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                disabled={
+                  !deleteTarget ||
+                  confirmName.trim() !== deleteTarget.name ||
+                  deleteMutation.isPending
+                }
+                onClick={() => {
+                  if (deleteTarget) {
+                    deleteMutation.mutate(deleteTarget.id, {
+                      onSuccess: () => {
+                        setDeleteTarget(null);
+                        setConfirmName('');
+                      },
+                    });
+                  }
+                }}
+              >
+                {deleteMutation.isPending ? 'Deleting...' : 'Delete Profile'}
+              </Button>
+            </div>
+          }
+        >
+          <div className="space-y-3 text-sm text-[#5B5B57]">
+            <p>
+              Your card will stop working until you assign it a new profile.
+            </p>
+            <p>
+              Type{' '}
+              <span className="font-semibold text-[#161616]">
+                {deleteTarget?.name}
+              </span>{' '}
+              to confirm deletion.
+            </p>
+            <input
+              type="text"
+              value={confirmName}
+              onChange={(e) => setConfirmName(e.target.value)}
+              placeholder={deleteTarget?.name || ''}
+              className="w-full rounded-lg border border-[#E3E3DF] px-3 py-2 text-sm text-[#161616] focus:border-[#161616] focus:outline-none"
+            />
+          </div>
+        </Modal>
+      </div >
+    </div >
+  );
 }

@@ -421,6 +421,10 @@ export class AuthService {
     if (rows.length === 0) return null;
 
     const { session, user } = rows[0];
+    if (user.status === 'suspended' || user.status === 'deactivated') {
+      return null;
+    }
+
     return {
       session,
       user: {

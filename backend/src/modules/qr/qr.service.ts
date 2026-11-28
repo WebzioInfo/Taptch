@@ -5,9 +5,10 @@ import {
   Logger,
 } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
+import { activeProfiles } from '../../database/scopes';
 import { RedisService } from '../../database/redis.service';
 import * as schema from '../../database/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and } from 'drizzle-orm';
 import type { ActorContext, DynamicQRResolution } from '../../common/types';
 import * as crypto from 'crypto';
 
@@ -61,7 +62,7 @@ export class QrService {
         const prof = await this.dbService.db
           .select({ slug: schema.profiles.slug })
           .from(schema.profiles)
-          .where(eq(schema.profiles.id, qr.profileId))
+          .where(and(eq(schema.profiles.id, qr.profileId), activeProfiles()))
           .limit(1);
 
         const slug = prof[0]?.slug || qr.profileId;

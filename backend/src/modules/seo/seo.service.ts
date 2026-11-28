@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
 import * as schema from '../../database/schema';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
+import { activeProfiles } from '../../database/scopes';
 
 export interface ProfileSeoMetadata {
   title: string;
@@ -37,7 +38,7 @@ export class SeoService {
     const [profile] = await this.dbService.db
       .select()
       .from(schema.profiles)
-      .where(eq(schema.profiles.slug, slug))
+      .where(and(eq(schema.profiles.slug, slug), activeProfiles()))
       .limit(1);
 
     if (!profile) {
@@ -108,10 +109,10 @@ export class SeoService {
         sameAs: socialUrls,
         address: profile.address
           ? {
-              '@type': 'PostalAddress',
-              streetAddress: profile.address,
-              addressLocality: profile.location || undefined,
-            }
+            '@type': 'PostalAddress',
+            streetAddress: profile.address,
+            addressLocality: profile.location || undefined,
+          }
           : undefined,
       };
     } else {
@@ -147,7 +148,7 @@ export class SeoService {
         updatedAt: schema.profiles.updatedAt,
       })
       .from(schema.profiles)
-      .where(eq(schema.profiles.status, 'PUBLISHED'));
+      .where(and(eq(schema.profiles.status, 'PUBLISHED'), activeProfiles()));
 
     const staticPages = [
       { loc: `${this.baseUrl}/`, priority: '1.0', changefreq: 'daily' },

@@ -35,7 +35,7 @@ export const financialTransactions = pgTable('financial_transactions', {
   currency: varchar('currency', { length: 8 }).notNull().default('INR'),
   status: varchar('status', { length: 32 }).notNull().default('settled'), // 'settled' | 'pending' | 'reversed'
   paymentMethod: varchar('payment_method', { length: 32 }).notNull().default('manual_offline'), // 'upi' | 'bank_transfer' | 'manual_offline' | 'waived'
-  referenceNumber: varchar('128'),
+  referenceNumber: varchar('reference_number', { length: 128 }),
   settledAt: timestamp('settled_at'),
   notes: text('notes'),
   createdAt: timestamp('created_at').notNull().defaultNow(),

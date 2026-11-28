@@ -43,6 +43,17 @@ export class OrdersController {
       return this.ordersService.verifyPayment(id, actor, body);
     }
 
+    @Post(':id/simulate-payment')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Simulate payment outcome in development/test mode' })
+    async simulatePayment(
+      @Param('id') id: string,
+      @CurrentActor() actor: ActorContext,
+      @Body() body: { outcome: 'success' | 'failed' | 'cancelled' | 'pending' },
+    ) {
+      return this.ordersService.simulatePayment(id, actor, body?.outcome || 'success');
+    }
+
     @Post(':id/cancel')
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Cancel pending or confirmed card order' })

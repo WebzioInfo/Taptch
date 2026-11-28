@@ -11,24 +11,24 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-[var(--ink)] text-[var(--bg-page)] hover:opacity-90 shadow-none font-medium',
+        'bg-[var(--accent)] text-[var(--accent-ink)] hover:bg-[var(--accent-hover)] active:bg-[var(--accent-pressed)] font-semibold shadow-none',
         accent:
-          'bg-[var(--accent)] text-[var(--accent-ink)] hover:bg-[var(--accent-hover)] font-medium shadow-none',
+        'bg-[var(--accent)] text-[var(--accent-ink)] hover:bg-[var(--accent-hover)] active:bg-[var(--accent-pressed)] font-semibold shadow-none',
         secondary:
-          'bg-[var(--bg-surface)] text-[var(--ink)] border border-[var(--border)] hover:bg-[var(--bg-raised)] hover:border-[var(--border-strong)]',
+        'bg-[var(--bg-surface)] text-[var(--ink)] border border-[var(--border-strong)] hover:bg-[var(--bg-raised)] font-medium',
         outline:
-          'border border-[var(--border)] bg-transparent text-[var(--ink)] hover:bg-[var(--bg-surface)] hover:border-[var(--border-strong)]',
+        'bg-[var(--bg-surface)] text-[var(--ink)] border border-[var(--border-strong)] hover:bg-[var(--bg-raised)] font-medium',
         ghost:
-          'text-[var(--ink)] hover:bg-[var(--bg-surface)] hover:text-[var(--ink)]',
+        'text-[var(--ink)] hover:bg-[var(--bg-raised)] hover:text-[var(--ink)]',
         link:
-          'text-[var(--accent-text)] underline-offset-4 hover:underline p-0 h-auto font-medium',
+        'text-[var(--accent-text)] underline-offset-4 hover:underline p-0 h-auto font-semibold',
         destructive:
-          'bg-[var(--danger)] text-white hover:opacity-90 shadow-none',
+        'bg-[var(--danger)] text-white hover:opacity-90 font-semibold shadow-none',
         // Backward compatibility mappings
         gold:
-          'bg-[var(--accent)] text-[var(--accent-ink)] hover:bg-[var(--accent-hover)] font-medium',
+        'bg-[var(--accent)] text-[var(--accent-ink)] hover:bg-[var(--accent-hover)] active:bg-[var(--accent-pressed)] font-semibold',
         primary:
-          'bg-[var(--accent)] text-[var(--accent-ink)] hover:bg-[var(--accent-hover)] font-medium',
+        'bg-[var(--accent)] text-[var(--accent-ink)] hover:bg-[var(--accent-hover)] active:bg-[var(--accent-pressed)] font-semibold',
       },
       size: {
         default: 'h-9 px-4 py-2 text-sm',
@@ -46,7 +46,7 @@ const buttonVariants = cva(
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 

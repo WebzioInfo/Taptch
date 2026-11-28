@@ -45,6 +45,8 @@ function OrderCardSkeleton() {
             const {data: orders = [], isLoading, error } = useQuery<any[]>({
               queryKey: ['orders', 'my'],
     queryFn: () => ApiClient.get<any[]>('/api/v1/orders'),
+    refetchOnWindowFocus: true,
+    refetchInterval: 30_000,
   });
 
   const formatDate = (dateStr?: string) => {
@@ -309,6 +311,17 @@ function OrderCardSkeleton() {
                                               <span className={`${status.textColor} truncate`}>
                                                 {status.label}
                                               </span>
+                                              {Array.isArray(ord.purchasedCards) &&
+                                                ord.purchasedCards.some(
+                                                  (c: any) =>
+                                                    c.status === 'SUSPENDED' || c.status === 'LOST',
+                                                ) && (
+                                                  <span className="px-1.5 py-0.5 rounded bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-semibold">
+                                                    {ord.purchasedCards.some((c: any) => c.status === 'LOST')
+                                                      ? 'Card Lost'
+                                                      : 'Card Suspended'}
+                                                  </span>
+                                                )}
                                             </div>
                                           </div>
                                         </div>

@@ -70,3 +70,14 @@ export const activationAttempts = pgTable('activation_attempts', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
+export const blockedCardScans = pgTable('blocked_card_scans', {
+  id: varchar('id', { length: 64 }).primaryKey(),
+  cardId: varchar('card_id', { length: 64 }).notNull(),
+  cardStatus: varchar('card_status', { length: 32 }).notNull(), // 'SUSPENDED' | 'LOST'
+  deviceCategory: varchar('device_category', { length: 32 }),
+  country: varchar('country', { length: 64 }),
+  city: varchar('city', { length: 64 }),
+  visitorHash: varchar('visitor_hash', { length: 64 }).notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+

@@ -25,6 +25,57 @@ export class CardsController {
     return this.cardsService.findPurchasedCardsForActor(actor);
   }
 
+  @Get('purchased/:id')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get a single purchased NFC card allocation for the authenticated user' })
+  async getPurchasedCardById(
+    @CurrentActor() actor: ActorContext,
+    @Param('id') id: string,
+  ) {
+    return this.cardsService.findPurchasedCardByIdForActor(actor, id);
+  }
+
+  @Post('purchased/:id/regenerate-url')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Regenerate NFC URL for a purchased card (rejected when suspended or lost)' })
+  async regeneratePurchasedCardUrl(
+    @CurrentActor() actor: ActorContext,
+    @Param('id') id: string,
+  ) {
+    return this.cardsService.regeneratePurchasedCardUrlForActor(actor, id);
+  }
+
+  @Patch('purchased/:id/settings')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update feature settings for a purchased card (rejected when suspended or lost)' })
+  async updatePurchasedCardSettings(
+    @CurrentActor() actor: ActorContext,
+    @Param('id') id: string,
+    @Body() body: { featureFlags?: Record<string, unknown>; customDestinationUrl?: string | null },
+  ) {
+    return this.cardsService.updatePurchasedCardSettingsForActor(actor, id, body);
+  }
+
+  @Get('purchased/:id/qr')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get QR payload for a purchased card (rejected when suspended or lost)' })
+  async getPurchasedCardQr(
+    @CurrentActor() actor: ActorContext,
+    @Param('id') id: string,
+  ) {
+    return this.cardsService.getPurchasedCardQrForActor(actor, id);
+  }
+
+  @Delete('purchased/:id')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete a purchased card (rejected when suspended or lost)' })
+  async deletePurchasedCard(
+    @CurrentActor() actor: ActorContext,
+    @Param('id') id: string,
+  ) {
+    return this.cardsService.deletePurchasedCardForActor(actor, id);
+  }
+
   @Post('purchased/:id/attach-profile')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Attach or change digital profile on a purchased NFC card allocation' })
@@ -84,12 +135,12 @@ export class CardsController {
 
   @Post(':id/link')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Link physical NFC card to a digital profile' })
+  @ApiOperation({ summary: 'Link physical NFC card to a digital profile (requires activationCode for unclaimed cards)' })
   async linkCard(
     @CurrentActor() actor: ActorContext,
     @Param('id') id: string,
-    @Body() body: { profileId: string },
+    @Body() body: { profileId: string; activationCode?: string },
   ) {
-    return this.cardsService.linkCardToProfile(actor, id, body?.profileId);
+    return this.cardsService.linkCardToProfile(actor, id, body?.profileId, body?.activationCode);
   }
 }

@@ -69,6 +69,7 @@ export const profiles = pgTable('profiles', {
    */
   usernameLocked: boolean('username_locked').notNull().default(false),
   usernameLockedAt: timestamp('username_locked_at'),
+  deletedAt: timestamp('deleted_at'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });

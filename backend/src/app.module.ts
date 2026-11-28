@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { z } from 'zod';
 import { DatabaseModule } from './database/database.module';
 import { RedisModule } from './database/redis.module';
@@ -55,6 +57,13 @@ function validateEnv(config: Record<string, unknown>) {
       envFilePath: ['backend/.env', '.env.local', '.env'],
       validate: validateEnv,
     }),
+    ThrottlerModule.forRoot([
+      {
+        name: 'default',
+        ttl: 60000,
+        limit: 120,
+      },
+    ]),
     DatabaseModule,
     RedisModule,
     HealthModule,
@@ -75,6 +84,12 @@ function validateEnv(config: Record<string, unknown>) {
     CartModule,
     AddressesModule,
     JourneyModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule { }

@@ -1,4 +1,10 @@
-import { Injectable, BadRequestException, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  ForbiddenException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
 import * as schema from '../../database/schema';
 import { eq, desc, and } from 'drizzle-orm';
@@ -23,7 +29,7 @@ export class UploadsService {
   constructor(
     private dbService: DatabaseService,
     private cloudinaryStorage: CloudinaryStorageService,
-  ) {}
+  ) { }
 
   async uploadProfileImage(
     actor: ActorContext,
@@ -52,9 +58,9 @@ export class UploadsService {
     const assetId = crypto.randomUUID();
     const category: 'avatar' | 'cover' | 'logo' | 'product' =
       dto.category === 'logo' ||
-      dto.category === 'cover' ||
-      dto.category === 'avatar' ||
-      dto.category === 'product'
+        dto.category === 'cover' ||
+        dto.category === 'avatar' ||
+        dto.category === 'product'
         ? dto.category
         : 'avatar';
     const cfg = CATEGORY_UPLOAD_CONFIG[category];
@@ -230,9 +236,9 @@ export class UploadsService {
     const assetId = crypto.randomUUID();
     const category: 'avatar' | 'cover' | 'logo' | 'product' =
       dto?.category === 'logo' ||
-      dto?.category === 'cover' ||
-      dto?.category === 'avatar' ||
-      dto?.category === 'product'
+        dto?.category === 'cover' ||
+        dto?.category === 'avatar' ||
+        dto?.category === 'product'
         ? dto.category
         : 'product';
     const cfg = CATEGORY_UPLOAD_CONFIG[category];
@@ -373,6 +379,10 @@ export class UploadsService {
 
       if (!existing) {
         throw new NotFoundException('Asset not found');
+      }
+
+      if (existing.ownerId !== actor.userId && !actor.isAdmin) {
+        throw new ForbiddenException('You do not have permission to delete this asset.');
       }
 
       const publicId =

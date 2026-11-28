@@ -23,6 +23,7 @@ export interface ShippingAddressData {
 export const orders = pgTable('orders', {
   id: varchar('id', { length: 64 }).primaryKey(),
   orderNumber: varchar('order_number', { length: 32 }).notNull().unique(),
+  orderType: varchar('order_type', { length: 32 }).notNull().default('standard'), // 'standard' | 'admin_issued'
   userId: text('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),

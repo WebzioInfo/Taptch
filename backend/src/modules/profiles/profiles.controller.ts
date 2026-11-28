@@ -12,12 +12,46 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { Throttle, SkipThrottle } from '@nestjs/throttler';
+import { z } from 'zod';
 import { AuthGuard } from '../../common/guards/auth.guard';
 import { Public } from '../../common/decorators/public.decorator';
 import { CurrentActor } from '../../common/decorators/current-user.decorator';
+import { parseWithZod } from '../../common/validation/zod-validate';
 import { ProfilesService } from './profiles.service';
 import { LeadsService } from '../leads/leads.service';
 import type { ActorContext } from '../../common/types';
+
+const profileMutationSchema = z.object({
+  profileType: z.enum(['personal', 'business']).optional(),
+  displayName: z.string().trim().min(1).max(128).optional(),
+  slug: z.string().trim().min(2).max(64).optional(),
+  headline: z.string().max(255).nullable().optional(),
+  bio: z.string().max(5000).nullable().optional(),
+  avatarUrl: z.string().max(2000).nullable().optional(),
+  coverUrl: z.string().max(2000).nullable().optional(),
+  phone: z.string().max(64).nullable().optional(),
+  phoneNumber: z.string().max(64).nullable().optional(),
+  whatsapp: z.string().max(64).nullable().optional(),
+  whatsappNumber: z.string().max(64).nullable().optional(),
+  whatsappDirectNumber: z.string().max(64).nullable().optional(),
+  email: z.string().max(255).nullable().optional(),
+  website: z.string().max(500).nullable().optional(),
+  address: z.string().max(1000).nullable().optional(),
+  location: z.string().max(255).nullable().optional(),
+  templateId: z.string().max(64).optional(),
+  themeId: z.string().max(64).optional(),
+  themeConfig: z.record(z.unknown()).nullable().optional(),
+  customThemeColors: z.record(z.unknown()).nullable().optional(),
+  customFields: z.record(z.unknown()).optional(),
+  socialLinks: z.array(z.record(z.unknown())).optional(),
+  businesses: z.array(z.record(z.unknown())).optional(),
+  catalogue: z.array(z.record(z.unknown())).optional(),
+});
+
+const updateSectionsSchema = z.object({
+  sections: z.array(z.record(z.unknown())),
+});
 
 @ApiTags('Profiles')
 @Controller('api/v1/profiles')
@@ -26,7 +60,7 @@ export class ProfilesController {
   constructor(
     private profilesService: ProfilesService,
     private leadsService: LeadsService,
-  ) {}
+  ) { }
 
   @Get()
   @ApiBearerAuth()
@@ -43,6 +77,7 @@ export class ProfilesController {
   }
 
   @Public()
+  @SkipThrottle()
   @Get('by-slug/:slug')
   @ApiOperation({ summary: 'Public profile lookup with snapshot' })
   async getPublicProfile(
@@ -72,7 +107,8 @@ export class ProfilesController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create new profile draft' })
   async createProfile(@CurrentActor() actor: ActorContext, @Body() body: any) {
-    return this.profilesService.create(actor, body);
+    const validated = parseWithZod(profileMutationSchema, body, 'Profile create');
+    return this.profilesService.create(actor, validated);
   }
 
   @Patch(':id')
@@ -83,7 +119,8 @@ export class ProfilesController {
     @Param('id') id: string,
     @Body() body: any,
   ) {
-    return this.profilesService.update(actor, id, body);
+    const validated = parseWithZod(profileMutationSchema, body, 'Profile update');
+    return this.profilesService.update(actor, id, validated);
   }
 
   @Post(':id/publish')
@@ -97,6 +134,7 @@ export class ProfilesController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Post(':id/exchange')
   @ApiOperation({ summary: 'Submit contact exchange on public profile' })
   async exchangeContact(@Param('id') id: string, @Body() body: any) {
@@ -111,7 +149,8 @@ export class ProfilesController {
     @Param('id') id: string,
     @Body() body: { sections: any[] },
   ) {
-    return this.profilesService.updateSections(actor, id, body?.sections || []);
+    const validated = parseWithZod(updateSectionsSchema, body, 'Profile sections');
+    return this.profilesService.updateSections(actor, id, validated.sections);
   }
 
   @Delete(':id')

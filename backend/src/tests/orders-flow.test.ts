@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import * as crypto from 'crypto';
 import { OrdersService, type CreateOrderDto } from '../modules/orders/orders.service';
 import type { ActorContext } from '../common/types';
 
@@ -271,11 +272,17 @@ describe('OrdersService — Complete Ordering, Preservation & Payment Verificati
 
       ordersService = new OrdersService(mockDbService);
 
+      process.env.RAZORPAY_KEY_SECRET = 'test_rzp_secret_123';
+      const validSignature = crypto
+        .createHmac('sha256', 'test_rzp_secret_123')
+        .update('order_test_123|pay_test_456')
+        .digest('hex');
+
       const result = await ordersService.verifyPayment('ord_rzp_123', mockActor, {
         paymentMethod: 'razorpay',
         razorpay_order_id: 'order_test_123',
         razorpay_payment_id: 'pay_test_456',
-        razorpay_signature: 'sig_test_789',
+        razorpay_signature: validSignature,
       });
 
       expect(result).toBeDefined();
@@ -285,6 +292,8 @@ describe('OrdersService — Complete Ordering, Preservation & Payment Verificati
     });
 
     it('handles UPI simulator SUCCESS status and confirms order', async () => {
+      process.env.NODE_ENV = 'test';
+      process.env.ALLOW_UPI_TEST_SIMULATOR = 'true';
       const mockOrder = {
         id: 'ord_upi_123',
         userId: mockActor.userId,

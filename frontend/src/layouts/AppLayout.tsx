@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { ApiClient } from '../services/api';
 import { BrandLogo } from '../components/brand';
 import { useSession, performCompleteLogout } from '../lib/auth/client';
 import { ProtectedRoute } from '../components/auth/ProtectedRoute';
@@ -14,8 +15,95 @@ import {
   ShieldCheck,
   Headphones,
   ShoppingBag,
+  Users,
+  ClipboardList,
+  Layers,
+  LayoutTemplate,
+  BarChart3,
+  IdCard,
+  Bell,
 } from 'lucide-react';
 import { PwaInstallPrompt } from '../components/pwa/PwaInstallPrompt';
+
+export interface SidebarItem {
+  to: string;
+  label: string;
+  mobileLabel?: string;
+  icon: React.ComponentType<{ className?: string }>;
+  allowedRoles?: string[];
+}
+
+export const USER_NAV_ITEMS: SidebarItem[] = [
+  { to: '/dashboard', label: 'Profiles', mobileLabel: 'Profiles', icon: LayoutDashboard },
+  { to: '/dashboard/nfc-shop', label: 'Purchase NFC Cards', mobileLabel: 'Shop', icon: ShoppingBag },
+  { to: '/dashboard/my-nfc-cards', label: 'My NFC Cards', mobileLabel: 'My Cards', icon: CreditCard },
+  { to: '/orders', label: 'Orders', mobileLabel: 'Orders', icon: Package },
+];
+
+export const ADMIN_SIDEBAR_ROLES = ['super_admin', 'admin', 'support_admin'];
+
+export const ADMIN_NAV_ITEMS: SidebarItem[] = [
+  {
+    to: '/admin',
+    label: 'Overview',
+    icon: BarChart3,
+    allowedRoles: ['super_admin', 'admin', 'support_admin'],
+  },
+  {
+    to: '/admin/profiles',
+    label: 'Profiles',
+    icon: IdCard,
+    allowedRoles: ['super_admin', 'admin', 'support_admin'],
+  },
+  {
+    to: '/admin/cards',
+    label: 'NFC Cards',
+    icon: CreditCard,
+    allowedRoles: ['super_admin', 'admin', 'support_admin'],
+  },
+  {
+    to: '/admin/orders',
+    label: 'Orders',
+    icon: ClipboardList,
+    allowedRoles: ['super_admin', 'admin', 'support_admin'],
+  },
+  {
+    to: '/admin/products',
+    label: 'Products',
+    icon: ShoppingBag,
+    allowedRoles: ['super_admin', 'admin', 'support_admin'],
+  },
+  {
+    to: '/admin/users',
+    label: 'Users',
+    icon: Users,
+    allowedRoles: ['super_admin', 'admin', 'support_admin'],
+  },
+  {
+    to: '/admin/plans',
+    label: 'Plans and Subscriptions',
+    icon: Layers,
+    allowedRoles: ['super_admin', 'admin', 'support_admin'],
+  },
+  {
+    to: '/admin/templates',
+    label: 'Templates',
+    icon: LayoutTemplate,
+    allowedRoles: ['super_admin', 'admin', 'support_admin'],
+  },
+  {
+    to: '/admin/tickets',
+    label: 'Support Tickets',
+    icon: Headphones,
+    allowedRoles: ['super_admin', 'admin', 'support_admin'],
+  },
+  {
+    to: '/admin/roles',
+    label: 'Roles and Permissions',
+    icon: ShieldCheck,
+    allowedRoles: ['super_admin', 'admin'],
+  },
+];
 
 export function AppLayout() {
   const location = useLocation();
@@ -23,29 +111,54 @@ export function AppLayout() {
   const queryClient = useQueryClient();
   const { data: session } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+
+  const userRole = session?.user?.systemRole || 'user';
+  const isAdminRole = ADMIN_SIDEBAR_ROLES.includes(userRole);
+
+  const { data: notifications = [], refetch: refetchNotifications } = useQuery<
+    Array<{
+      id: string;
+      title: string;
+      message: string;
+      isRead: boolean;
+      createdAt: string;
+    }>
+  >({
+    queryKey: ['user-notifications'],
+    queryFn: () => ApiClient.get('/api/v1/notifications'),
+    enabled: Boolean(session?.user?.id) && !isAdminRole,
+    refetchOnWindowFocus: true,
+    refetchInterval: 30_000,
+  });
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
+
+  const markNotificationRead = async (id: string) => {
+    try {
+      await ApiClient.patch(`/api/v1/notifications/${encodeURIComponent(id)}/read`, {});
+      refetchNotifications();
+    } catch {
+      // ignore
+    }
+  };
 
   const handleLogout = () => {
     performCompleteLogout(queryClient, navigate, '/');
   };
 
-  const navItems = [
-    { to: '/dashboard', label: 'Profiles', mobileLabel: 'Profiles', icon: LayoutDashboard },
-    { to: '/dashboard/nfc-shop', label: 'Purchase NFC Cards', mobileLabel: 'Shop', icon: ShoppingBag },
-    { to: '/dashboard/my-nfc-cards', label: 'My NFC Cards', mobileLabel: 'My Cards', icon: CreditCard },
-    { to: '/orders', label: 'Orders', mobileLabel: 'Orders', icon: Package },
-  ];
+  const visibleNavItems = isAdminRole
+    ? ADMIN_NAV_ITEMS.filter((item) => !item.allowedRoles || item.allowedRoles.includes(userRole))
+    : USER_NAV_ITEMS;
 
   const isNavItemActive = (to: string) => {
     if (to === '/dashboard') {
       return location.pathname === '/dashboard' || location.pathname === '/settings';
     }
+    if (to === '/admin') {
+      return location.pathname === '/admin' || location.pathname === '/admin/dashboard';
+    }
     return location.pathname === to || location.pathname.startsWith(`${to}/`);
   };
-
-  const isAdminUser =
-    session?.user?.systemRole === 'super_admin' || session?.user?.systemRole === 'admin';
-  const isSupportUser =
-    session?.user?.systemRole === 'support_admin' || isAdminUser;
 
   const userInitials = (session?.user?.name || 'U')
     .split(' ')
@@ -54,177 +167,203 @@ export function AppLayout() {
     .join('')
     .toUpperCase();
 
+  const renderNavLink = (item: SidebarItem, onClick?: () => void) => {
+    const Icon = item.icon;
+    const isActive = isNavItemActive(item.to);
+    return (
+      <Link
+        key={item.to}
+        to={item.to}
+        onClick={onClick}
+        className={`relative flex items-center gap-3 px-3 min-h-[44px] py-2 rounded-[8px] text-sm transition-colors ${isActive
+          ? 'bg-[var(--accent-tint)] text-[var(--accent-text)] font-semibold'
+          : 'text-[#3A3A36] font-medium hover:text-[var(--ink)] hover:bg-[var(--bg-raised)]'
+          }`}
+      >
+        {isActive && (
+          <div className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r bg-[var(--accent)]" />
+        )}
+        <Icon className="w-4 h-4 shrink-0" />
+        <span className="truncate">{item.label}</span>
+      </Link>
+    );
+  };
+
+  const homeHref = isAdminRole ? '/admin' : '/dashboard';
+
   return (
     <ProtectedRoute>
       <div
         data-theme="light"
-        className="min-h-screen flex flex-col md:flex-row bg-[#F8F9FB] text-[#171717] font-body selection:bg-orange-100 selection:text-orange-900 overflow-x-hidden"
+        className="min-h-screen flex flex-col lg:flex-row bg-[var(--bg-page)] text-[var(--ink)] font-body selection:bg-orange-100 selection:text-orange-900 overflow-x-hidden"
       >
-        {/* Mobile Top Header */}
-        <header className="md:hidden flex items-center justify-between px-4 h-14 bg-white border-b border-[#E8E8E8] sticky top-0 z-40 shrink-0">
-          <BrandLogo variant="symbol" size="sm" asLink href="/dashboard" />
-          <div className="flex items-center">
+        {/* Mobile/Tablet Top Header (< lg) */}
+        <header className="lg:hidden flex items-center justify-between px-4 h-14 bg-[var(--bg-surface)] border-b border-[var(--border)] sticky top-0 z-40 shrink-0">
+          <div className="flex items-center gap-2.5">
             <button
               type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-[#666666] hover:text-[#171717] rounded-lg transition-colors"
+              onClick={() => setMobileMenuOpen(true)}
+              className="min-w-[44px] min-h-[44px] -ml-2 flex items-center justify-center text-[#3A3A36] hover:text-[var(--ink)] rounded-lg transition-colors"
               aria-label="Toggle Navigation Menu"
               aria-expanded={mobileMenuOpen}
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              <Menu className="w-5 h-5" />
             </button>
+            <BrandLogo variant="symbol" size="sm" asLink href={homeHref} />
+            {isAdminRole && (
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--accent-text)] bg-[var(--accent-tint)] px-2 py-0.5 rounded-md">
+                ADMIN
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {!isAdminRole && (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setNotifOpen((v) => !v)}
+                  aria-label="Notifications"
+                  className="relative min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg text-[#3A3A36] hover:bg-[var(--bg-raised)]"
+                >
+                  <Bell className="w-4 h-4" />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#FF6A00]" />
+                  )}
+                </button>
+                {notifOpen && (
+                  <div className="absolute right-0 mt-2 w-80 max-w-[90vw] rounded-xl bg-white border border-[var(--border)] shadow-xl z-50 p-3 space-y-2">
+                    <div className="flex items-center justify-between border-b border-[var(--border)] pb-2">
+                      <span className="text-xs font-bold text-[var(--ink)]">Notifications</span>
+                      {unreadCount > 0 && (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            await ApiClient.patch('/api/v1/notifications/read-all', {});
+                            refetchNotifications();
+                          }}
+                          className="text-[11px] font-semibold text-[#FF6A00] hover:underline"
+                        >
+                          Mark all read
+                        </button>
+                      )}
+                    </div>
+                    {notifications.length === 0 ? (
+                      <p className="text-xs text-[var(--ink-muted)] py-3 text-center">
+                        No notifications yet.
+                      </p>
+                    ) : (
+                      <div className="max-h-64 overflow-y-auto divide-y divide-[var(--border)]">
+                        {notifications.map((n) => (
+                          <button
+                            key={n.id}
+                            type="button"
+                            onClick={() => markNotificationRead(n.id)}
+                            className={`w-full text-left py-2 px-1.5 rounded hover:bg-[var(--bg-raised)] ${n.isRead ? 'opacity-65' : ''}`}
+                          >
+                            <div className="text-xs font-semibold text-[var(--ink)]">{n.title}</div>
+                            <div className="text-[11px] text-[var(--ink-muted)] mt-0.5">
+                              {n.message}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+            <span className="text-xs font-medium text-[var(--ink-muted)] hidden sm:inline truncate max-w-[160px]">
+              {session?.user?.name}
+            </span>
           </div>
         </header>
 
-        {/* Mobile Drawer (When Open) */}
+        {/* Slide-in Drawer (< lg) */}
         {mobileMenuOpen && (
-          <div className="md:hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm pt-4 px-4 pb-6 flex flex-col justify-between">
-            <div className="bg-white rounded-2xl border border-[#E8E8E8] shadow-xl p-4 space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-[#E8E8E8]">
-                <BrandLogo variant="horizontal" size="sm" asLink href="/dashboard" />
-                <button
-                  type="button"
-                  onClick={() => setMobileMenuOpen(false)}
-                  aria-label="Close Navigation Menu"
-                  className="p-2 text-[#666666] hover:text-[#171717] rounded-lg transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+          <div className="lg:hidden fixed inset-0 z-50 flex">
+            <div
+              className="fixed inset-0 bg-black/40 backdrop-blur-xs"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            <aside className="relative w-72 max-w-[85vw] bg-[var(--bg-surface)] h-full border-r border-[var(--border)] shadow-2xl flex flex-col justify-between p-4 z-10 overflow-y-auto">
+              <div>
+                <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">
+                  <BrandLogo variant="horizontal" size="sm" asLink href={homeHref} />
+                  <button
+                    type="button"
+                    onClick={() => setMobileMenuOpen(false)}
+                    aria-label="Close Navigation Menu"
+                    className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[#3A3A36] hover:text-[var(--ink)] rounded-lg transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {isAdminRole && (
+                  <div className="px-3 pt-4 pb-1 text-[11px] font-bold uppercase tracking-wider text-[var(--ink-subtle)]">
+                    ADMIN CONSOLE
+                  </div>
+                )}
+
+                <nav className="mt-2 space-y-1" aria-label="Mobile drawer navigation">
+                  {visibleNavItems.map((item) =>
+                    renderNavLink(item, () => setMobileMenuOpen(false)),
+                  )}
+                </nav>
               </div>
-              <nav className="space-y-1" aria-label="Mobile drawer navigation">
-                {navItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = isNavItemActive(item.to);
-                  return (
-                    <Link
-                      key={item.to}
-                      to={item.to}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={`relative flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                        isActive
-                          ? 'bg-[#FFF3E9] text-[#FF6A00] font-semibold'
-                          : 'text-[#666666] hover:text-[#171717] hover:bg-[#F8F9FB]'
-                      }`}
-                    >
-                      {isActive && (
-                        <div className="absolute left-0 top-2 bottom-2 w-1 rounded-r bg-[#FF6A00]" />
-                      )}
-                      <Icon className="w-4 h-4 shrink-0" />
-                      <span className="truncate">{item.label}</span>
-                    </Link>
-                  );
-                })}
 
-                {isAdminUser && (
-                  <Link
-                    to="/admin"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-amber-700 hover:bg-amber-50 hover:text-amber-800 transition-colors"
-                  >
-                    <ShieldCheck className="w-4 h-4 shrink-0" />
-                    <span className="truncate">Admin Governance</span>
-                  </Link>
-                )}
-
-                {isSupportUser && (
-                  <Link
-                    to="/support"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-blue-700 hover:bg-blue-50 hover:text-blue-800 transition-colors"
-                  >
-                    <Headphones className="w-4 h-4 shrink-0" />
-                    <span className="truncate">Support Operations</span>
-                  </Link>
-                )}
-              </nav>
-
-              <div className="border-t border-[#E8E8E8] pt-3 flex items-center justify-between gap-2">
+              <div className="border-t border-[var(--border)] pt-3 mt-4 flex items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-[#171717] truncate">
+                  <p className="text-sm font-semibold text-[var(--ink)] truncate">
                     {session?.user?.name || 'My Account'}
                   </p>
-                  <p className="text-xs text-[#929292] truncate">
+                  <p className="text-xs text-[var(--ink-muted)] truncate">
                     {session?.user?.email}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-50 text-rose-600 border border-rose-200 text-xs font-semibold hover:bg-rose-100 transition-colors shrink-0"
+                  className="min-h-[44px] flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--danger)] text-white text-xs font-semibold hover:opacity-90 transition-opacity shrink-0"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>Exit</span>
                 </button>
               </div>
-            </div>
+            </aside>
           </div>
         )}
 
-        {/* Desktop Sidebar */}
-        <aside className="hidden md:flex w-64 border-r border-[#E8E8E8] bg-white flex-col justify-between p-4 flex-shrink-0">
-          <div>
-            <div className="py-3 px-2">
-              <BrandLogo variant="horizontal" size="md" asLink href="/dashboard" />
+        {/* Desktop Sidebar (>= lg) */}
+        <aside className="hidden lg:flex w-64 border-r border-[var(--border)] bg-[var(--bg-surface)] flex-col justify-between p-4 flex-shrink-0">
+          <div className="overflow-y-auto pr-0.5">
+            <div className="py-3 px-2 flex items-center justify-between gap-2">
+              <BrandLogo variant="horizontal" size="md" asLink href={homeHref} />
             </div>
 
-            <nav className="mt-6 space-y-1" aria-label="Sidebar navigation">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = isNavItemActive(item.to);
-                return (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                      isActive
-                        ? 'bg-[#FFF3E9] text-[#FF6A00] font-semibold'
-                        : 'text-[#666666] hover:text-[#171717] hover:bg-[#F8F9FB]'
-                    }`}
-                  >
-                    {isActive && (
-                      <div className="absolute left-0 top-2 bottom-2 w-1 rounded-r bg-[#FF6A00]" />
-                    )}
-                    <Icon className="w-4 h-4 shrink-0" />
-                    <span className="truncate">{item.label}</span>
-                  </Link>
-                );
-              })}
+            {isAdminRole && (
+              <div className="px-3 pt-4 pb-1 text-[11px] font-bold uppercase tracking-wider text-[var(--ink-subtle)]">
+                ADMIN CONSOLE
+              </div>
+            )}
 
-              {/* Role-Specific Governance & Support */}
-              {isAdminUser && (
-                <Link
-                  to="/admin"
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-amber-700 hover:bg-amber-50 hover:text-amber-800 transition-colors"
-                >
-                  <ShieldCheck className="w-4 h-4 shrink-0" />
-                  <span className="truncate">Admin Governance</span>
-                </Link>
-              )}
-
-              {isSupportUser && (
-                <Link
-                  to="/support"
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-blue-700 hover:bg-blue-50 hover:text-blue-800 transition-colors"
-                >
-                  <Headphones className="w-4 h-4 shrink-0" />
-                  <span className="truncate">Support Operations</span>
-                </Link>
-              )}
+            <nav className="mt-2 space-y-1" aria-label="Sidebar navigation">
+              {visibleNavItems.map((item) => renderNavLink(item))}
             </nav>
           </div>
 
           {/* Desktop User Footer */}
-          <div className="border-t border-[#E8E8E8] pt-4">
+          <div className="border-t border-[var(--border)] pt-4 mt-4 shrink-0">
             <div className="flex items-center justify-between px-2">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-full bg-[#FFF3E9] border border-orange-200 text-[#FF6A00] flex items-center justify-center font-bold text-xs shrink-0">
+                <div className="w-8 h-8 rounded-full bg-[var(--accent-tint)] border border-[var(--accent-border)] text-[var(--accent-text)] flex items-center justify-center font-bold text-xs shrink-0">
                   {userInitials}
                 </div>
                 <div className="truncate">
-                  <p className="text-xs font-semibold text-[#171717] truncate">
+                  <p className="text-xs font-semibold text-[var(--ink)] truncate">
                     {session?.user?.name || 'My Account'}
                   </p>
-                  <p className="font-mono text-[10px] text-[#929292] truncate">
+                  <p className="font-mono text-[10px] text-[var(--ink-muted)] truncate">
                     {session?.user?.email}
                   </p>
                 </div>
@@ -232,7 +371,7 @@ export function AppLayout() {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="p-1.5 text-[#666666] hover:text-rose-600 hover:bg-rose-50 transition-colors rounded-lg"
+                className="min-w-[36px] min-h-[36px] flex items-center justify-center text-[#3A3A36] hover:text-[var(--danger-text)] hover:bg-[var(--danger-bg)] transition-colors rounded-lg"
                 title="Sign Out"
                 aria-label="Sign Out"
               >
@@ -242,10 +381,11 @@ export function AppLayout() {
           </div>
         </aside>
 
-        {/* Main Content Area */}
+        {/* Main Content Area — Full width right of sidebar */}
         <main
           data-scroll-container="true"
-          className="flex-1 overflow-y-auto pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0 bg-[#F8F9FB] text-[#171717]"
+          className={`flex-1 min-w-0 overflow-y-auto bg-[var(--bg-page)] text-[var(--ink)] ${isAdminRole ? 'pb-8 lg:pb-0' : 'pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0'
+            }`}
         >
           <Outlet />
         </main>
@@ -253,30 +393,31 @@ export function AppLayout() {
         {/* PWA Smart Install Prompt */}
         <PwaInstallPrompt />
 
-        {/* Mobile Bottom Navigation Bar — 4 equal columns, single-line labels, safe-area inset */}
-        <nav
-          aria-label="Mobile bottom navigation"
-          className="md:hidden fixed bottom-0 left-0 right-0 z-40 w-full bg-white/95 backdrop-blur-md border-t border-[#E8E8E8] grid grid-cols-4 pb-[env(safe-area-inset-bottom)]"
-        >
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = isNavItemActive(item.to);
-            return (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={`flex flex-col items-center justify-center h-14 px-1 min-w-0 text-[11px] leading-none gap-1 whitespace-nowrap transition-colors ${
-                  isActive
-                    ? 'text-[#FF6A00] font-semibold'
-                    : 'text-[#666666] font-medium hover:text-[#171717]'
-                }`}
-              >
-                <Icon className="w-5 h-5 shrink-0" />
-                <span className="truncate max-w-full">{item.mobileLabel}</span>
-              </Link>
-            );
-          })}
-        </nav>
+        {/* Mobile Bottom Navigation Bar — Normal Users Only */}
+        {!isAdminRole && (
+          <nav
+            aria-label="Mobile bottom navigation"
+            className="lg:hidden fixed bottom-0 left-0 right-0 z-40 w-full bg-[var(--bg-surface)]/95 backdrop-blur-md border-t border-[var(--border)] grid grid-cols-4 pb-[env(safe-area-inset-bottom)]"
+          >
+            {USER_NAV_ITEMS.map((item) => {
+              const Icon = item.icon;
+              const isActive = isNavItemActive(item.to);
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={`flex flex-col items-center justify-center h-14 px-1 min-w-0 text-[11px] leading-none gap-1 whitespace-nowrap transition-colors ${isActive
+                    ? 'text-[var(--accent-text)] font-semibold'
+                    : 'text-[#3A3A36] font-medium hover:text-[var(--ink)]'
+                    }`}
+                >
+                  <Icon className="w-5 h-5 shrink-0" />
+                  <span className="truncate max-w-full">{item.mobileLabel}</span>
+                </Link>
+              );
+            })}
+          </nav>
+        )}
       </div>
     </ProtectedRoute>
   );

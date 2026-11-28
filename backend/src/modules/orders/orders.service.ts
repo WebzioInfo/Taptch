@@ -1,7 +1,15 @@
-import { Injectable, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  ForbiddenException,
+  ServiceUnavailableException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
+import { buildCardUrl, serializePurchasedCardForUser } from '../cards/card-serializer';
 import * as schema from '../../database/schema';
-import { eq, and, desc, asc, sql } from 'drizzle-orm';
+import { eq, and, desc, asc, or, sql } from 'drizzle-orm';
 import type { ActorContext } from '../../common/types';
 import * as crypto from 'crypto';
 
@@ -104,7 +112,12 @@ export class OrdersService {
           items,
           attachedProfile,
           payment: paymentRecords[0] || null,
-          purchasedCards,
+          purchasedCards: purchasedCards.map((pc: any) =>
+            serializePurchasedCardForUser(pc, {
+              order: { id: ord.id, orderNumber: ord.orderNumber },
+              permanentNfcUrl: pc.nfcUrl || null,
+            }),
+          ),
         });
       }
 
@@ -200,7 +213,13 @@ export class OrdersService {
             .limit(1);
           linkedProfile = prof || null;
         }
-        enrichedPurchasedCards.push({ ...pc, profile: linkedProfile });
+        enrichedPurchasedCards.push(
+          serializePurchasedCardForUser(pc, {
+            order: { id: order.id, orderNumber: order.orderNumber },
+            profile: linkedProfile,
+            permanentNfcUrl: pc.nfcUrl || null,
+          }),
+        );
       }
 
       return {
@@ -449,10 +468,10 @@ export class OrdersService {
             (data.cardMaterial === 'metal'
               ? 'Metal NFC Card'
               : data.cardMaterial === 'wood'
-              ? 'Wood NFC Card'
-              : data.cardMaterial === 'matte'
-              ? 'Matte NFC Card'
-              : 'PVC NFC Card'),
+                ? 'Wood NFC Card'
+                : data.cardMaterial === 'matte'
+                  ? 'Matte NFC Card'
+                  : 'PVC NFC Card'),
           unitPrice,
           quantity,
           total: subtotal,
@@ -534,6 +553,16 @@ export class OrdersService {
     });
   }
 
+  private generateCardCode(): string {
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    let out = '';
+    const bytes = crypto.randomBytes(10);
+    for (let i = 0; i < 10; i++) {
+      out += chars[bytes[i] % chars.length];
+    }
+    return out;
+  }
+
   private async allocatePurchasedCards(tx: any, order: any, orderItem: any) {
     if (!order || !orderItem) return;
     const qty = Math.max(1, orderItem.quantity || order.quantity || 1);
@@ -541,44 +570,98 @@ export class OrdersService {
     const resolvedProfileId = orderItem.profileId || order.profileId || null;
 
     for (let unit = 1; unit <= qty; unit++) {
-      const redirectToken = crypto.randomBytes(6).toString('hex');
-      await tx
-        .insert(schema.purchasedCards)
-        .values({
-          id: crypto.randomUUID(),
-          orderId: order.id,
-          orderItemId: orderItem.id,
-          unitIndex: unit,
-          userId: order.userId,
-          organizationId: null,
-          productId: orderItem.productId,
-          productName: orderItem.productName,
-          variantName: orderItem.variantName,
-          material: order.material || 'pvc',
-          colorName: orderItem.variantName || null,
-          designId: orderItem.designId || null,
-          previewFrontUrl: orderItem.previewFrontUrl || orderItem.designPreviewUrl || null,
-          previewBackUrl: orderItem.previewBackUrl || orderItem.backPreviewUrl || null,
-          redirectToken,
-          destinationType: hasProfile ? 'profile' : null,
-          customDestinationUrl: null,
-          profileId: resolvedProfileId,
-          profileAssignmentStatus: hasProfile ? 'PROFILE_ATTACHED' : 'AWAITING_PROFILE',
-        })
-        .onConflictDoNothing();
+      let allocated = false;
+      const MAX_ATTEMPTS = 5;
+
+      for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+        // Minimum 128 bits of cryptographically secure randomness (32 hex chars)
+        const redirectToken = crypto.randomBytes(16).toString('hex');
+        const cardCode = this.generateCardCode();
+
+        const [existingPhysical, existingPurchased] = await Promise.all([
+          tx
+            .select({ id: schema.cards.id })
+            .from(schema.cards)
+            .where(eq(schema.cards.redirectToken, redirectToken))
+            .limit(1),
+          tx
+            .select({ id: schema.purchasedCards.id })
+            .from(schema.purchasedCards)
+            .where(
+              or(
+                eq(schema.purchasedCards.redirectToken, redirectToken),
+                eq(schema.purchasedCards.cardCode, cardCode),
+              ),
+            )
+            .limit(1),
+        ]);
+
+        if (existingPhysical?.length > 0 || existingPurchased?.length > 0) {
+          continue;
+        }
+
+        try {
+          await tx
+            .insert(schema.purchasedCards)
+            .values({
+              id: crypto.randomUUID(),
+              orderId: order.id,
+              orderItemId: orderItem.id,
+              unitIndex: unit,
+              userId: order.userId,
+              organizationId: null,
+              productId: orderItem.productId,
+              productName: orderItem.productName,
+              variantName: orderItem.variantName,
+              material: order.material || 'pvc',
+              colorName: orderItem.variantName || null,
+              designId: orderItem.designId || null,
+              previewFrontUrl: orderItem.previewFrontUrl || orderItem.designPreviewUrl || null,
+              previewBackUrl: orderItem.previewBackUrl || orderItem.backPreviewUrl || null,
+              cardCode,
+              urlId: cardCode,
+              redirectToken,
+              nfcUrl: buildCardUrl(cardCode),
+              destinationType: hasProfile ? 'profile' : null,
+              customDestinationUrl: null,
+              profileId: resolvedProfileId,
+              status: hasProfile ? 'ASSIGNED' : 'UNASSIGNED',
+              profileAssignmentStatus: hasProfile ? 'PROFILE_ATTACHED' : 'AWAITING_PROFILE',
+            });
+          allocated = true;
+          break;
+        } catch (err: any) {
+          // Retry only on unique constraint violation (23505)
+          if (err?.code === '23505') {
+            continue;
+          }
+          throw err;
+        }
+      }
+
+      if (!allocated) {
+        throw new InternalServerErrorException(
+          `Failed to allocate a unique NFC token for unit ${unit} of order ${order.id}.`,
+        );
+      }
     }
   }
 
   /**
-   * Verify online payment (Razorpay HMAC signature verification & UPI test simulation)
+   * Verify online payment (Razorpay HMAC signature verification & dev-only UPI simulator)
    */
   async verifyPayment(orderId: string, actor: ActorContext, data: VerifyPaymentDto) {
     return this.dbService.withActor(actor, async (tx) => {
-      const [order] = await tx
+      // Acquire row-level lock (SELECT ... FOR UPDATE) when supported by the DB driver
+      const orderQuery: any = tx
         .select()
         .from(schema.orders)
-        .where(eq(schema.orders.id, orderId))
-        .limit(1);
+        .where(eq(schema.orders.id, orderId));
+      const lockedRows =
+        typeof orderQuery.for === 'function'
+          ? await orderQuery.for('update').limit(1)
+          : await orderQuery.limit(1);
+      const [order] = lockedRows;
 
       if (!order) {
         throw new NotFoundException(`Order ${orderId} not found.`);
@@ -588,18 +671,21 @@ export class OrdersService {
         throw new ForbiddenException('Unauthorized to verify this order.');
       }
 
-      // Idempotency guard: if already PAID, ensure card allocations exist and return without duplicating
+      if (order.orderStatus === 'CANCELLED') {
+        throw new BadRequestException('Cannot verify payment for a cancelled order.');
+      }
+
+      if (order.paymentStatus === 'REFUNDED') {
+        throw new BadRequestException('Cannot verify payment for a refunded order.');
+      }
+
+      // Idempotency guard: if already PAID, return without duplicating payments or history
       if (order.paymentStatus === 'PAID') {
-        const items = await tx
-          .select()
-          .from(schema.orderItems)
-          .where(eq(schema.orderItems.orderId, order.id));
-        if (Array.isArray(items)) {
-          for (const it of items) {
-            await this.allocatePurchasedCards(tx, order, it);
-          }
-        }
         return order;
+      }
+
+      if (!order.totalAmount || Number(order.totalAmount) <= 0) {
+        throw new BadRequestException('Order total amount is invalid for payment verification.');
       }
 
       const isRazorpay = data.paymentMethod === 'razorpay';
@@ -608,21 +694,31 @@ export class OrdersService {
       if (isRazorpay) {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = data;
 
-        if (!razorpay_payment_id) {
-          throw new BadRequestException('Razorpay payment ID is required.');
+        if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+          throw new BadRequestException(
+            'Razorpay order ID, payment ID, and signature are required.',
+          );
         }
 
-        // Test mode & production HMAC verification
-        const keySecret = process.env.RAZORPAY_KEY_SECRET;
-        if (keySecret && razorpay_order_id && razorpay_signature) {
-          const expectedSig = crypto
-            .createHmac('sha256', keySecret)
-            .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-            .digest('hex');
+        const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
+        if (!keySecret) {
+          throw new ServiceUnavailableException(
+            'Razorpay payment verification is not configured on the server.',
+          );
+        }
 
-          if (expectedSig !== razorpay_signature) {
-            throw new BadRequestException('Invalid Razorpay payment signature.');
-          }
+        const expectedSig = crypto
+          .createHmac('sha256', keySecret)
+          .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+          .digest('hex');
+
+        const expectedBuf = Buffer.from(expectedSig, 'utf8');
+        const actualBuf = Buffer.from(razorpay_signature, 'utf8');
+        if (
+          expectedBuf.length !== actualBuf.length ||
+          !crypto.timingSafeEqual(expectedBuf, actualBuf)
+        ) {
+          throw new BadRequestException('Invalid Razorpay payment signature.');
         }
 
         // Update Order to Confirmed and Paid
@@ -637,13 +733,14 @@ export class OrdersService {
           .where(eq(schema.orders.id, orderId))
           .returning();
 
-        // Update Payment Record
+        // Update existing Payment Record (prevent duplicate payment rows)
         await tx
           .update(schema.payments)
           .set({
             status: 'PAID',
+            gatewayOrderId: razorpay_order_id,
             gatewayPaymentId: razorpay_payment_id,
-            gatewaySignature: razorpay_signature || null,
+            gatewaySignature: razorpay_signature,
             updatedAt: new Date(),
           })
           .where(eq(schema.payments.orderId, orderId));
@@ -672,6 +769,16 @@ export class OrdersService {
       }
 
       if (isUpi) {
+        const isDevSimulatorAllowed =
+          process.env.NODE_ENV !== 'production' &&
+          process.env.ALLOW_UPI_TEST_SIMULATOR === 'true';
+
+        if (!isDevSimulatorAllowed) {
+          throw new BadRequestException(
+            'UPI test payment verification is disabled in this environment.',
+          );
+        }
+
         const isSuccess = data.simulationStatus === 'SUCCESS';
         const upiRef = data.upiRef || `UPI-${Date.now()}`;
 
@@ -773,9 +880,16 @@ export class OrdersService {
         throw new ForbiddenException('Unauthorized to cancel this order.');
       }
 
+      if (order.orderStatus === 'CANCELLED') {
+        throw new BadRequestException('Order is already cancelled.');
+      }
+
       if (
         order.orderStatus === 'CARD_PRODUCTION' ||
+        order.orderStatus === 'CARD_READY' ||
         order.orderStatus === 'DISPATCHED' ||
+        order.orderStatus === 'IN_TRANSIT' ||
+        order.orderStatus === 'OUT_FOR_DELIVERY' ||
         order.orderStatus === 'DELIVERED'
       ) {
         throw new BadRequestException('Order cannot be cancelled once manufacturing has commenced.');
@@ -790,6 +904,17 @@ export class OrdersService {
         .where(eq(schema.orders.id, orderId))
         .returning();
 
+      // Safely revoke pre-fulfillment purchased cards without deleting historical records
+      await tx
+        .update(schema.purchasedCards)
+        .set({
+          profileId: null,
+          destinationType: null,
+          profileAssignmentStatus: 'REVOKED',
+          updatedAt: new Date(),
+        })
+        .where(eq(schema.purchasedCards.orderId, orderId));
+
       await tx.insert(schema.orderStatusHistory).values({
         id: crypto.randomUUID(),
         orderId,
@@ -800,6 +925,116 @@ export class OrdersService {
       });
 
       return cancelledOrder;
+    });
+  }
+
+  /**
+   * Backend-controlled payment simulator for development/testing.
+   * Disabled in production unless ALLOW_PAYMENT_SIMULATOR === 'true'.
+   */
+  async simulatePayment(
+    orderId: string,
+    actor: ActorContext,
+    outcome: 'success' | 'failed' | 'cancelled' | 'pending',
+  ) {
+    if (
+      process.env.NODE_ENV === 'production' &&
+      process.env.ALLOW_PAYMENT_SIMULATOR !== 'true'
+    ) {
+      throw new ForbiddenException('Payment simulator is disabled in production.');
+    }
+
+    const ALLOWED_OUTCOMES = new Set(['success', 'failed', 'cancelled', 'pending']);
+    if (!ALLOWED_OUTCOMES.has(outcome)) {
+      throw new BadRequestException(`Invalid simulation outcome: ${outcome}`);
+    }
+
+    return this.dbService.withActor(actor, async (tx) => {
+      const orderQuery: any = tx
+        .select()
+        .from(schema.orders)
+        .where(eq(schema.orders.id, orderId));
+      const [order] =
+        typeof orderQuery.for === 'function'
+          ? await orderQuery.for('update').limit(1)
+          : await orderQuery.limit(1);
+
+      if (!order) {
+        throw new NotFoundException(`Order ${orderId} not found.`);
+      }
+      if (order.userId !== actor.userId && actor.role !== 'admin' && actor.role !== 'super_admin') {
+        throw new ForbiddenException('Unauthorized to simulate payment for this order.');
+      }
+      if (order.orderStatus === 'CANCELLED') {
+        throw new BadRequestException('Cannot simulate payment for a cancelled order.');
+      }
+      if (order.paymentStatus === 'REFUNDED') {
+        throw new BadRequestException('Cannot simulate payment for a refunded order.');
+      }
+      if (order.paymentStatus === 'PAID') {
+        return {
+          simulated: true,
+          testMode: true,
+          outcome: 'success',
+          order,
+        };
+      }
+
+      const simPaymentId = `SIM_TEST_${crypto.randomUUID().slice(0, 12)}`;
+      const simOrderId = `SIM_ORD_${crypto.randomUUID().slice(0, 12)}`;
+
+      const nextPaymentStatus =
+        outcome === 'success'
+          ? 'PAID'
+          : outcome === 'failed'
+            ? 'FAILED'
+            : 'PENDING';
+
+      const nextOrderStatus =
+        outcome === 'success'
+          ? 'ORDER_CONFIRMED'
+          : outcome === 'cancelled'
+            ? 'CANCELLED'
+            : 'PAYMENT_PENDING';
+
+      const [updatedOrder] = await tx
+        .update(schema.orders)
+        .set({
+          paymentStatus: nextPaymentStatus as any,
+          orderStatus: nextOrderStatus,
+          paymentReference: simPaymentId,
+          updatedAt: new Date(),
+        })
+        .where(eq(schema.orders.id, orderId))
+        .returning();
+
+      await tx
+        .update(schema.payments)
+        .set({
+          status: nextPaymentStatus as any,
+          gatewayOrderId: simOrderId,
+          gatewayPaymentId: simPaymentId,
+          gatewaySignature: 'SIMULATED_TEST_SIGNATURE',
+          updatedAt: new Date(),
+        })
+        .where(eq(schema.payments.orderId, orderId));
+
+      await tx.insert(schema.orderStatusHistory).values({
+        id: crypto.randomUUID(),
+        orderId,
+        status: nextOrderStatus,
+        title: `[TEST/SIMULATED] Payment ${outcome.toUpperCase()}`,
+        description: `Simulated payment outcome=${outcome} (Ref: ${simPaymentId}). Not a real financial transaction.`,
+        updatedBy: actor.userId,
+      });
+
+      return {
+        simulated: true,
+        testMode: true,
+        outcome,
+        paymentReference: simPaymentId,
+        order: updatedOrder,
+      };
     });
   }
 }

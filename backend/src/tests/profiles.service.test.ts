@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import * as schema from '../database/schema';
 import { ProfilesService } from '../modules/profiles/profiles.service';
 import type { ActorContext } from '../common/types';
 import { BadRequestException, ConflictException, ForbiddenException } from '@nestjs/common';
@@ -433,18 +434,16 @@ describe('Taptch Digital Profiles Engine — ProfilesService', () => {
         return fn(tx);
       });
 
-      let whereCall = 0;
-      mockDbService.db.where.mockImplementation(() => {
-        whereCall += 1;
-        // findBySlug queries: 1) profiles, 2) sections, 3) businesses, 4) catalogue
-        const mod = whereCall % 4;
-        const rows = mod === 3 ? [...storedBusinesses] : [];
-        const arr: any = rows;
-        arr.limit = mockDbService.db.limit;
-        arr.orderBy = mockDbService.db.orderBy;
-        arr.returning = mockDbService.db.returning;
-        return arr;
-      });
+      mockDbService.db.from = vi.fn((table: any) => ({
+        where: () => {
+          const rows = table === schema.profileBusinesses ? [...storedBusinesses] : [];
+          const arr: any = rows;
+          arr.limit = mockDbService.db.limit;
+          arr.orderBy = mockDbService.db.orderBy;
+          arr.returning = mockDbService.db.returning;
+          return arr;
+        },
+      }));
       mockDbService.db.orderBy.mockResolvedValue([]);
       mockDbService.db.limit.mockResolvedValue([{ ...dbProfile }]);
       mockDbService.db.returning.mockResolvedValue([{ ...dbProfile, status: 'PUBLISHED' }]);
@@ -588,6 +587,7 @@ describe('Taptch Digital Profiles Engine — ProfilesService', () => {
             },
           },
         ])
+        .mockResolvedValueOnce([{ status: 'active' }])
         .mockResolvedValueOnce([
           {
             id: 'prof_user_b',
@@ -607,13 +607,14 @@ describe('Taptch Digital Profiles Engine — ProfilesService', () => {
               themeId: 'corporate-business',
             },
           },
-        ]);
+        ])
+      .mockResolvedValueOnce([{ status: 'active' }]);
 
-      const snapA = await service.findBySlug('user-a');
-      const snapB = await service.findBySlug('user-b');
-      expect(snapA.templateId).toBe('cinematic-noir');
-      expect(snapB.templateId).toBe('corporate-business');
-      expect(snapB.templateId).not.toBe('cinematic-noir');
-    });
+    const snapA = await service.findBySlug('user-a');
+    const snapB = await service.findBySlug('user-b');
+    expect(snapA.templateId).toBe('cinematic-noir');
+    expect(snapB.templateId).toBe('corporate-business');
+    expect(snapB.templateId).not.toBe('cinematic-noir');
   });
+});
 });

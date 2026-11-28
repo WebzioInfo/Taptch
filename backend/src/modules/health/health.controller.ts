@@ -1,11 +1,13 @@
 import { Controller, Get, Res, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 import { Public } from '../../common/decorators/public.decorator';
 import { DatabaseService } from '../../database/database.service';
 import { RedisService } from '../../database/redis.service';
 import { Response } from 'express';
 
 @ApiTags('Health & Diagnostics')
+@SkipThrottle()
 @Controller('api')
 export class HealthController {
   constructor(

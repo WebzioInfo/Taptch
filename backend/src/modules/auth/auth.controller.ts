@@ -1,5 +1,6 @@
 import { Controller, Post, Get, Body, Req, Res, BadRequestException, UnauthorizedException, Logger } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { Public } from '../../common/decorators/public.decorator';
 import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
@@ -54,6 +55,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Post('sign-in/email')
   @ApiOperation({ summary: 'Email & Password Sign In' })
   async signIn(@Body() body: any, @Res({ passthrough: true }) res: Response) {
@@ -68,6 +70,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Post('sign-up/email')
   @ApiOperation({ summary: 'Email Registration' })
   async signUp(@Body() body: any, @Res({ passthrough: true }) res: Response) {
@@ -235,6 +238,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Post('oauth/exchange-code')
   @ApiOperation({ summary: 'Exchange single-use auth code for user session (Zero Token Leakage)' })
   async exchangeCode(
@@ -271,6 +275,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Post('oauth/google/verify-token')
   @ApiOperation({ summary: 'Verify Google One Tap / GIS ID token' })
   async verifyGoogleToken(

@@ -25,6 +25,8 @@ describe('Post-Purchase Profile Setup & Card Allocations (Tests A-E)', () => {
   let ordersService: OrdersService;
 
   beforeAll(async () => {
+    process.env.NODE_ENV = 'test';
+    process.env.ALLOW_UPI_TEST_SIMULATOR = 'true';
     const pglite = new PGlite();
     db = drizzle(pglite, { schema });
 

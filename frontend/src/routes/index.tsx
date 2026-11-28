@@ -26,8 +26,54 @@ const LeadsPage = lazy(() => import('../pages/LeadsPage').then((m) => ({ default
 const TemplatesPage = lazy(() => import('../pages/TemplatesPage').then((m) => ({ default: m.TemplatesPage })));
 const PricingPage = lazy(() => import('../pages/PricingPage').then((m) => ({ default: m.PricingPage })));
 const BuilderPage = lazy(() => import('../pages/BuilderPage').then((m) => ({ default: m.BuilderPage })));
-const AdminPage = lazy(() => import('../pages/AdminPage').then((m) => ({ default: m.AdminPage })));
-const SupportPage = lazy(() => import('../pages/SupportPage').then((m) => ({ default: m.SupportPage })));
+const AdminDashboardPage = lazy(() =>
+  import('../pages/admin/AdminDashboardPage').then((m) => ({
+    default: m.AdminDashboardPage,
+  })),
+);
+const AdminProfilesPage = lazy(() =>
+  import('../pages/admin/AdminProfilesPage').then((m) => ({
+    default: m.AdminProfilesPage,
+  })),
+);
+const AdminProductsPage = lazy(() =>
+  import('../pages/admin/AdminProductsPage').then((m) => ({
+    default: m.AdminProductsPage,
+  })),
+);
+const AdminUsersPage = lazy(() =>
+  import('../pages/admin/AdminUsersPage').then((m) => ({
+    default: m.AdminUsersPage,
+  })),
+);
+const AdminOrdersPage = lazy(() =>
+  import('../pages/admin/AdminOrdersPage').then((m) => ({
+    default: m.AdminOrdersPage,
+  })),
+);
+const AdminCardsPage = lazy(() =>
+  import('../pages/admin/AdminCardsPage').then((m) => ({
+    default: m.AdminCardsPage,
+  })),
+);
+const AdminPlansPage = lazy(() =>
+  import('../pages/admin/AdminPlansPage').then((m) => ({
+    default: m.AdminPlansPage,
+  })),
+);
+const AdminTemplatesPage = lazy(() =>
+  import('../pages/admin/AdminTemplatesPage').then((m) => ({
+    default: m.AdminTemplatesPage,
+  })),
+);
+const AdminTicketsPage = lazy(() =>
+  import('../pages/admin/AdminTicketsPage').then((m) => ({
+    default: m.AdminTicketsPage,
+  })),
+);
+const AdminRolesPage = lazy(() =>
+  import('../pages/admin/AdminRolesPage').then((m) => ({ default: m.AdminRolesPage })),
+);
 const DesignStudioPage = lazy(() =>
   import('../pages/DesignStudioPage').then((m) => ({ default: m.DesignStudioPage })),
 );
@@ -55,14 +101,14 @@ const PostPurchaseProfileSetupPage = lazy(() =>
 function RouteSuspenseFallback() {
   return (
     <div
-      className="min-h-screen bg-[#F8F9FB] flex items-center justify-center p-4"
+      className="min-h-screen bg-[var(--bg-page)] flex items-center justify-center p-4"
       aria-busy="true"
       aria-label="Loading"
     >
       <div className="flex items-center gap-2" role="status">
-        <span className="w-2.5 h-2.5 rounded-full bg-[#FF6A00] animate-bounce [animation-delay:-0.3s]" />
-        <span className="w-2.5 h-2.5 rounded-full bg-[#FF6A00] animate-bounce [animation-delay:-0.15s]" />
-        <span className="w-2.5 h-2.5 rounded-full bg-[#FF6A00] animate-bounce" />
+        <span className="w-2.5 h-2.5 rounded-full bg-[var(--accent)] animate-bounce [animation-delay:-0.3s]" />
+        <span className="w-2.5 h-2.5 rounded-full bg-[var(--accent)] animate-bounce [animation-delay:-0.15s]" />
+        <span className="w-2.5 h-2.5 rounded-full bg-[var(--accent)] animate-bounce" />
       </div>
     </div>
   );
@@ -110,15 +156,14 @@ export const router = createBrowserRouter([
       { path: '/reset-password', element: <LoginPage /> },
       { path: '/staff/login', element: <Navigate to="/login?redirect=/staff/dashboard" replace /> },
 
-      // Admin & Operations
+      // Legacy Admin/Support Redirects
       { path: '/portal-x', element: <Navigate to="/admin" replace /> },
       { path: '/portal-x/*', element: <Navigate to="/admin" replace /> },
-      { path: '/admin', element: <AdminPage /> },
-      { path: '/support', element: <SupportPage /> },
-      { path: '/staff/dashboard', element: <Navigate to="/support" replace /> },
-      { path: '/staff/*', element: <Navigate to="/support" replace /> },
+      { path: '/support', element: <Navigate to="/admin/tickets" replace /> },
+      { path: '/staff/dashboard', element: <Navigate to="/admin/tickets" replace /> },
+      { path: '/staff/*', element: <Navigate to="/admin/tickets" replace /> },
 
-      // App Dashboard (Protected)
+      // Unified App Shell (User + Role-Gated Admin Routes)
       {
         element: <AppLayout />,
         children: [
@@ -130,6 +175,34 @@ export const router = createBrowserRouter([
           { path: '/leads', element: <LeadsPage /> },
           { path: '/qr', element: <Navigate to="/dashboard" replace /> },
           { path: '/settings', element: <DashboardPage /> },
+
+          // Admin Routes (super_admin, admin, support_admin)
+          {
+            element: (
+              <ProtectedRoute
+                allowedRoles={['super_admin', 'admin', 'support_admin']}
+                redirectTo="/"
+              />
+            ),
+            children: [
+              { path: '/admin', element: <AdminDashboardPage /> },
+              { path: '/admin/dashboard', element: <Navigate to="/admin" replace /> },
+              { path: '/admin/profiles', element: <AdminProfilesPage /> },
+              { path: '/admin/cards', element: <AdminCardsPage /> },
+              { path: '/admin/orders', element: <AdminOrdersPage /> },
+              { path: '/admin/products', element: <AdminProductsPage /> },
+              { path: '/admin/users', element: <AdminUsersPage /> },
+              { path: '/admin/plans', element: <AdminPlansPage /> },
+              { path: '/admin/templates', element: <AdminTemplatesPage /> },
+              { path: '/admin/tickets', element: <AdminTicketsPage /> },
+            ],
+          },
+
+          // Roles & Permissions (super_admin and admin only)
+          {
+            element: <ProtectedRoute allowedRoles={['super_admin', 'admin']} redirectTo="/" />,
+            children: [{ path: '/admin/roles', element: <AdminRolesPage /> }],
+          },
         ],
       },
 
@@ -152,14 +225,14 @@ export const router = createBrowserRouter([
       { path: '/studio', element: <DesignStudioPage /> },
       { path: '/studio/:productId', element: <DesignStudioPage /> },
 
-      // Canonical Production NFC Public Resolution & Backward-Compatible /nfc/:token
-      { path: '/b/:uniqueKey', element: <NfcResolvePage expectedProfileType="business" /> },
-      { path: '/p/:uniqueKey', element: <NfcResolvePage expectedProfileType="personal" /> },
+      // Public Profile Routes (/p/:slug for personal, /b/:slug for business)
+      { path: '/p/:slug', element: <PublicProfilePage /> },
+      { path: '/b/:slug', element: <PublicProfilePage /> },
       { path: '/nfc/:token', element: <NfcResolvePage /> },
       { path: '/claim/:token', element: <RegisterPage /> },
 
-      // Root Dynamic Public Identity
-      { path: '/:slug', element: <PublicProfilePage /> },
+      // Root NFC Card Resolution (/:cardId — must be last before fallback)
+      { path: '/:cardId', element: <NfcResolvePage /> },
 
       // Fallback
       { path: '*', element: <Navigate to="/" replace /> },

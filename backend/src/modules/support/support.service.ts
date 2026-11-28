@@ -1,13 +1,14 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
+import { activeProfiles } from '../../database/scopes';
 import * as schema from '../../database/schema';
-import { eq, desc, or, ilike, sql } from 'drizzle-orm';
+import { eq, desc, or, ilike, sql, and } from 'drizzle-orm';
 import type { ActorContext } from '../../common/types';
 import * as crypto from 'crypto';
 
 @Injectable()
 export class SupportService {
-  constructor(private dbService: DatabaseService) {}
+  constructor(private dbService: DatabaseService) { }
 
   async getDashboardStats(actor: ActorContext) {
     this.assertSupportAccess(actor);
@@ -17,7 +18,8 @@ export class SupportService {
       .from(schema.users);
     const [profileCount] = await this.dbService.db
       .select({ count: sql<number>`count(*)` })
-      .from(schema.profiles);
+      .from(schema.profiles)
+      .where(activeProfiles());
     const [orderCount] = await this.dbService.db
       .select({ count: sql<number>`count(*)` })
       .from(schema.orders);
@@ -95,6 +97,7 @@ export class SupportService {
         updatedAt: schema.profiles.updatedAt,
       })
       .from(schema.profiles)
+      .where(activeProfiles())
       .orderBy(desc(schema.profiles.updatedAt))
       .limit(50);
   }
@@ -110,7 +113,7 @@ export class SupportService {
     const [profile] = await this.dbService.db
       .select()
       .from(schema.profiles)
-      .where(eq(schema.profiles.id, profileId))
+      .where(and(eq(schema.profiles.id, profileId), activeProfiles()))
       .limit(1);
 
     if (!profile) {
@@ -164,6 +167,72 @@ export class SupportService {
       .leftJoin(schema.users, eq(schema.auditLogs.actorId, schema.users.id))
       .orderBy(desc(schema.auditLogs.createdAt))
       .limit(50);
+  }
+
+  async createUserTicket(
+    actor: ActorContext,
+    input: {
+      subject: string;
+      category?: string;
+      priority?: string;
+      message: string;
+    },
+  ) {
+    const ticketId = crypto.randomUUID();
+    const ticketNumber = `TKT-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
+
+    const [ticket] = await this.dbService.db
+      .insert(schema.supportTickets)
+      .values({
+        id: ticketId,
+        ticketNumber,
+        userId: actor.userId,
+        subject: input.subject.trim(),
+        category: input.category || 'card',
+        priority: input.priority || 'high',
+        status: 'open',
+      })
+      .returning();
+
+    await this.dbService.db.insert(schema.supportTicketMessages).values({
+      id: crypto.randomUUID(),
+      ticketId,
+      senderId: actor.userId,
+      senderRole: actor.role || 'user',
+      message: input.message.trim(),
+    });
+
+    return { ticket };
+  }
+
+  async getNotificationsForActor(actor: ActorContext) {
+    return this.dbService.db
+      .select()
+      .from(schema.userNotifications)
+      .where(eq(schema.userNotifications.userId, actor.userId))
+      .orderBy(desc(schema.userNotifications.createdAt))
+      .limit(30);
+  }
+
+  async markNotificationRead(actor: ActorContext, notificationId: string) {
+    await this.dbService.db
+      .update(schema.userNotifications)
+      .set({ isRead: true })
+      .where(
+        and(
+          eq(schema.userNotifications.id, notificationId),
+          eq(schema.userNotifications.userId, actor.userId),
+        ),
+      );
+    return { success: true };
+  }
+
+  async markAllNotificationsRead(actor: ActorContext) {
+    await this.dbService.db
+      .update(schema.userNotifications)
+      .set({ isRead: true })
+      .where(eq(schema.userNotifications.userId, actor.userId));
+    return { success: true };
   }
 
   private assertSupportAccess(actor: ActorContext) {

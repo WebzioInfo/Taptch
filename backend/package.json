@@ -10,6 +10,7 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm run build",
     "test": "vitest run",
     "migrate:uploads": "ts-node -r tsconfig-paths/register src/scripts/migrate-local-uploads-to-cloudinary.ts"
   },

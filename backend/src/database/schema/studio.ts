@@ -24,6 +24,8 @@ export const cardProducts = pgTable('card_products', {
   material: varchar('material', { length: 32 }).notNull().default('pvc'),
   colorName: varchar('color_name', { length: 64 }).notNull().default('Black'),
   color: varchar('color', { length: 32 }).notNull().default('#000000'),
+  finish: varchar('finish', { length: 64 }).default('solid-matte'),
+  stockStatus: varchar('stock_status', { length: 32 }).notNull().default('IN_STOCK'), // 'IN_STOCK' | 'OUT_OF_STOCK'
   themeConfig: jsonb('theme_config').$type<{
     background: string;
     primaryText: string;
@@ -217,14 +219,19 @@ export const purchaseJourneys = pgTable('purchase_journeys', {
  * Decouples card purchase from digital profile setup so each card has an independent
  * profileAssignmentStatus (AWAITING_PROFILE -> PROFILE_SETUP_IN_PROGRESS -> PROFILE_ATTACHED -> ACTIVATION_PENDING -> ACTIVE).
  */
+export interface CardFeatureFlags {
+  leadCapture: boolean;
+  vcardDownload: boolean;
+  whatsappButton: boolean;
+  analytics: boolean;
+  passwordProtection: boolean;
+  linkExpiryDate: string | null;
+}
+
 export const purchasedCards = pgTable('purchased_cards', {
   id: varchar('id', { length: 64 }).primaryKey(),
-  orderId: varchar('order_id', { length: 64 })
-    .notNull()
-    .references(() => orders.id, { onDelete: 'cascade' }),
-  orderItemId: varchar('order_item_id', { length: 64 })
-    .notNull()
-    .references(() => orderItems.id, { onDelete: 'cascade' }),
+  orderId: varchar('order_id', { length: 64 }).references(() => orders.id, { onDelete: 'cascade' }),
+  orderItemId: varchar('order_item_id', { length: 64 }).references(() => orderItems.id, { onDelete: 'cascade' }),
   unitIndex: integer('unit_index').notNull().default(1),
   userId: text('user_id')
     .notNull()
@@ -236,6 +243,17 @@ export const purchasedCards = pgTable('purchased_cards', {
   material: varchar('material', { length: 32 }).notNull().default('pvc'),
   colorName: varchar('color_name', { length: 64 }),
   color: varchar('color', { length: 32 }),
+  cardCode: varchar('card_code', { length: 32 }),
+  status: varchar('status', { length: 32 }).notNull().default('UNASSIGNED'), // 'UNASSIGNED' | 'ASSIGNED' | 'ACTIVE' | 'SUSPENDED' | 'LOST'
+  statusChangedAt: timestamp('status_changed_at'),
+  statusChangedBy: text('status_changed_by').references(() => users.id, { onDelete: 'set null' }),
+  statusReason: text('status_reason'),
+  issuedBy: text('issued_by').references(() => users.id, { onDelete: 'set null' }),
+  issuedAt: timestamp('issued_at'),
+  note: text('note'),
+  tapCount: integer('tap_count').notNull().default(0),
+  lastTappedAt: timestamp('last_tapped_at'),
+  assignedAt: timestamp('assigned_at'),
   designId: varchar('design_id', { length: 64 }).references(() => cardDesigns.id, {
     onDelete: 'set null',
   }),
@@ -245,8 +263,7 @@ export const purchasedCards = pgTable('purchased_cards', {
     onDelete: 'set null',
   }),
   redirectToken: varchar('redirect_token', { length: 32 }),
-  destinationType: varchar('destination_type', { length: 32 }), // 'profile' | 'custom_url' | null
-  customDestinationUrl: text('custom_destination_url'),
+  destinationType: varchar('destination_type', { length: 32 }), // 'profile' | null
   profileAssignmentStatus: varchar('profile_assignment_status', { length: 32 })
     .notNull()
     .default('AWAITING_PROFILE'),

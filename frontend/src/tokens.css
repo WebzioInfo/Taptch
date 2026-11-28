@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Taptch Design Tokens — Universal Premium Light + Orange Theme
+   Taptch Design Tokens — Unified Concrete & Safety Orange Theme
    Single Source of Truth
    ========================================================================== */
 
@@ -7,34 +7,45 @@
 [data-theme="light"],
 [data-theme="dark"] {
   /* Primary Design Palette */
-  --bg-page: #F8F9FB;
+  --bg-page: #E9E9E6;
   --bg-surface: #FFFFFF;
-  --bg-raised: #FFFFFF;
-  --bg-muted: #F8F9FB;
-  --bg-accent-light: #FFF3E9;
+  --bg-raised: #F4F4F1;
+  --bg-muted: #F4F4F1;
+  --bg-accent-light: #FFF1E6;
 
-  /* Typography Colors */
-  --ink: #171717;
-  --ink-muted: #666666;
-  --ink-subtle: #929292;
+  /* Typography Colors (WCAG AA compliant on white/surface) */
+  --ink: #161616;
+  --ink-muted: #5B5B57;
+  --ink-subtle: #767672;
+  --ink-nav: #3A3A36;
 
   /* Border Colors */
-  --border: #E8E8E8;
-  --border-strong: #D5D5D5;
+  --border: #E3E3DF;
+  --border-strong: #D4D4CF;
 
   /* Accent Colors */
   --accent: #FF6A00;
-  --accent-hover: #E85D00;
+  --accent-hover: #E65F00;
+  --accent-pressed: #CC5500;
   --accent-ink: #FFFFFF;
-  --accent-text: #FF6A00;
-  --accent-tint: #FFF3E9;
+  --accent-text: #CC5500;
+  --accent-tint: #FFF1E6;
   --accent-border: rgba(255, 106, 0, 0.35);
 
   /* Semantic Feedback Colors */
-  --success: #16A36A;
-  --warning: #E5A000;
-  --danger: #DC4545;
-  --info: #2563EB;
+  --success: #166534;
+  --success-bg: #DCFCE7;
+  --success-border: #BBF7D0;
+  --warning: #92400E;
+  --warning-bg: #FEF3C7;
+  --warning-border: #FDE68A;
+  --danger: #D92D20;
+  --danger-text: #991B1B;
+  --danger-bg: #FEE2E2;
+  --danger-border: #FECACA;
+  --neutral-text: #3A3A36;
+  --neutral-bg: #F4F4F1;
+  --neutral-border: #E3E3DF;
 
   /* Radius System */
   --radius-sm: 6px;

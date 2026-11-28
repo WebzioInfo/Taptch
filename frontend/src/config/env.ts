@@ -30,24 +30,33 @@ function resolveAppUrl(): string {
   return 'http://localhost:5173';
 }
 
+function resolveNfcPublicBaseUrl(isProd: boolean): string {
+  const envNfcUrl = import.meta.env.VITE_NFC_PUBLIC_BASE_URL as string;
+  if (envNfcUrl && envNfcUrl.trim() !== '') {
+    return envNfcUrl.trim().replace(/\/+$/, '');
+  }
+
+  if (isProd) {
+    return 'https://taptch.com';
+  }
+
+  return resolveAppUrl();
+}
+
+const isProduction =
+  (import.meta.env.VITE_APP_ENV as string) === 'production' ||
+  (typeof window !== 'undefined' &&
+    (window.location.hostname.endsWith('taptch.com') || window.location.hostname.endsWith('webziotech.in')));
+
 export const env = {
   appName: (import.meta.env.VITE_APP_NAME as string) || 'Taptch',
   appEnv:
     (import.meta.env.VITE_APP_ENV as string) ||
-    (typeof window !== 'undefined' &&
-    (window.location.hostname.endsWith('taptch.com') || window.location.hostname.endsWith('webziotech.in'))
-      ? 'production'
-      : 'development'),
+    (isProduction ? 'production' : 'development'),
   apiUrl: resolveApiUrl(),
-  appUrl: resolveAppUrl(),
-  nfcPublicBaseUrl:
-    ((import.meta.env.VITE_NFC_PUBLIC_BASE_URL as string) || 'https://taptch.com')
-      .trim()
-      .replace(/\/+$/, ''),
-  supabaseUrl: (import.meta.env.VITE_SUPABASE_URL as string) || '',
-  supabaseAnonKey: (import.meta.env.VITE_SUPABASE_ANON_KEY as string) || '',
-  isProduction:
-    (import.meta.env.VITE_APP_ENV as string) === 'production' ||
-    (typeof window !== 'undefined' &&
-      (window.location.hostname.endsWith('taptch.com') || window.location.hostname.endsWith('webziotech.in'))),
+    appUrl: resolveAppUrl(),
+  nfcPublicBaseUrl: resolveNfcPublicBaseUrl(isProduction),
+    supabaseUrl: (import.meta.env.VITE_SUPABASE_URL as string) || '',
+      supabaseAnonKey: (import.meta.env.VITE_SUPABASE_ANON_KEY as string) || '',
+  isProduction,
 };
